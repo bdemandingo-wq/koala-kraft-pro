@@ -157,6 +157,7 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate }: AddBooking
   // Card on file - now using Stripe Elements
   const [chargingCard, setChargingCard] = useState(false);
   const [savedCardInfo, setSavedCardInfo] = useState<{ last4: string; brand: string; paymentMethodId?: string } | null>(null);
+  const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
   // Calculate price
   const calculatedPrice = useMemo(() => {
     if (!selectedService || !squareFootage) return 0;
@@ -263,6 +264,7 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate }: AddBooking
     setPrivateBookingNote('');
     setPrivateCustomerNote('');
     setNoteForProvider('');
+    setPaymentIntentId(null);
   };
 
   const handleSendPaymentLink = async () => {
@@ -351,6 +353,8 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate }: AddBooking
           variant: "destructive" 
         });
       } else if (data.success) {
+        // Store the payment intent ID to save with the booking
+        setPaymentIntentId(data.paymentIntentId);
         toast({ 
           title: "Hold Placed Successfully", 
           description: data.message || `Hold of $${finalPrice.toFixed(2)} placed on card. Will be charged after service.`
@@ -432,7 +436,8 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate }: AddBooking
         duration: estimatedDuration,
         total_amount: finalPrice,
         status,
-        payment_status: paymentMethod === 'cash' ? 'pending' : 'pending',
+        payment_status: paymentMethod === 'cash' ? 'pending' : (paymentIntentId ? 'partial' : 'pending'),
+        payment_intent_id: paymentIntentId || undefined,
         notes: notesParts,
         address: customerAddress || undefined,
         city: customerCity || undefined,
