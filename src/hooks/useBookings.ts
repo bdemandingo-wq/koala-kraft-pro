@@ -226,26 +226,11 @@ export function useCreateCustomer() {
 
   return useMutation({
     mutationFn: async (data: NewCustomerData) => {
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-
-      if (userError) {
-        console.error('Error getting current user:', userError);
-        throw userError;
-      }
-
-      if (!user) {
-        throw new Error('You must be signed in to create a customer');
-      }
-
+      // Admin/Staff create customers - no user_id needed for the customer record
+      // The customer's user_id is optional and only set if the customer has their own account
       const { data: customer, error } = await supabase
         .from('customers')
-        .insert({
-          ...data,
-          user_id: user.id,
-        })
+        .insert(data)
         .select()
         .single();
 
