@@ -123,10 +123,6 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate }: AddBooking
   const [couponCode, setCouponCode] = useState('');
   const [discountAmount, setDiscountAmount] = useState('');
   
-  // Reminders
-  const [alertBeforeCharge, setAlertBeforeCharge] = useState(false);
-  const [emailReminderAdmin, setEmailReminderAdmin] = useState(false);
-  
   // Payment
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'cash' | 'send_link'>('card');
   
@@ -134,7 +130,7 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate }: AddBooking
   const [autoAcceptsJob, setAutoAcceptsJob] = useState(true);
   const [excludeCancellationFee, setExcludeCancellationFee] = useState(false);
   const [excludeCancellationAfter1st, setExcludeCancellationAfter1st] = useState(false);
-  const [excludeCustomerNotification, setExcludeCustomerNotification] = useState(false);
+  
   const [excludeProviderNotification, setExcludeProviderNotification] = useState(false);
   const [hideChecklist, setHideChecklist] = useState(false);
   
@@ -262,13 +258,11 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate }: AddBooking
     setDiscountType('code');
     setCouponCode('');
     setDiscountAmount('');
-    setAlertBeforeCharge(false);
-    setEmailReminderAdmin(false);
     setPaymentMethod('card');
     setAutoAcceptsJob(true);
     setExcludeCancellationFee(false);
     setExcludeCancellationAfter1st(false);
-    setExcludeCustomerNotification(false);
+    
     setExcludeProviderNotification(false);
     setHideChecklist(false);
     setPrivateBookingNote('');
@@ -626,9 +620,6 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate }: AddBooking
               {/* Service Type */}
               <section>
                 <h3 className="text-lg font-semibold mb-2">Service Type</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Please check out our <a href="#" className="text-primary hover:underline">SERVICE CHECKLIST</a> prior to booking.
-                </p>
                 <p className="text-sm mb-4">
                   Keep in mind that your FIRST CLEAN will be a <strong>deep clean</strong>.
                 </p>
@@ -650,23 +641,6 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate }: AddBooking
                 </div>
               </section>
 
-              {/* Frequency */}
-              <section>
-                <h3 className="text-lg font-semibold mb-4">Frequency</h3>
-                <div className="flex flex-wrap gap-2">
-                  {frequencyOptions.map((option) => (
-                    <Button
-                      key={option.id}
-                      type="button"
-                      variant={frequency === option.id ? "default" : "outline"}
-                      onClick={() => setFrequency(option.id)}
-                      className="rounded-full"
-                    >
-                      {option.label}
-                    </Button>
-                  ))}
-                </div>
-              </section>
 
               {/* Service Details */}
               <section>
@@ -804,84 +778,6 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate }: AddBooking
                 </div>
               </section>
 
-              {/* Service Date & Time */}
-              <section>
-                <h3 className="text-lg font-semibold mb-2">Service Date & Time</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Please choose a date and time for your cleaning appointment.
-                </p>
-                
-                <div className="space-y-4">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="specific-provider" />
-                      <Label htmlFor="specific-provider">Specific Provider/Team</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="waiting-list" />
-                      <Label htmlFor="waiting-list">Waiting List</Label>
-                    </div>
-                  </div>
-                  
-                  <RadioGroup 
-                    value={scheduleType} 
-                    onValueChange={(v) => setScheduleType(v as 'schedule' | 'manual')}
-                    className="flex gap-4"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="schedule" id="from-schedule" />
-                      <Label htmlFor="from-schedule">From Schedule</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="manual" id="manual" />
-                      <Label htmlFor="manual">Manual</Label>
-                    </div>
-                  </RadioGroup>
-                  
-                  <div className="grid grid-cols-3 gap-4 max-w-xl">
-                    <div className="space-y-2">
-                      <Label>Select Date</Label>
-                      <div className="relative">
-                        <Input
-                          type="date"
-                          value={scheduledDate}
-                          onChange={(e) => setScheduledDate(e.target.value)}
-                          required
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Time</Label>
-                      <Input
-                        type="time"
-                        value={scheduledTime}
-                        onChange={(e) => setScheduledTime(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Assign Staff</Label>
-                      <Select value={selectedStaffId} onValueChange={setSelectedStaffId}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select staff" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {staff.map((member) => (
-                            <SelectItem key={member.id} value={member.id}>
-                              {member.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="add-bonus" />
-                    <Label htmlFor="add-bonus">Want to add bonus?</Label>
-                  </div>
-                </div>
-              </section>
 
               {/* Key Information & Job Notes */}
               <section>
@@ -985,29 +881,6 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate }: AddBooking
                 </Tabs>
               </section>
 
-              {/* Reminder */}
-              <section>
-                <h3 className="text-lg font-semibold mb-4">Reminder</h3>
-                
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="alert-charge" 
-                      checked={alertBeforeCharge}
-                      onCheckedChange={(c) => setAlertBeforeCharge(!!c)}
-                    />
-                    <Label htmlFor="alert-charge">Alert before charge now</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="email-admin" 
-                      checked={emailReminderAdmin}
-                      onCheckedChange={(c) => setEmailReminderAdmin(!!c)}
-                    />
-                    <Label htmlFor="email-admin">Email reminder to admin</Label>
-                  </div>
-                </div>
-              </section>
 
               {/* Payment Information */}
               <section>
@@ -1288,19 +1161,11 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate }: AddBooking
               </div>
               <div className="flex items-center space-x-2">
                 <Checkbox 
-                  id="exclude-customer-notif" 
-                  checked={excludeCustomerNotification}
-                  onCheckedChange={(c) => setExcludeCustomerNotification(!!c)}
-                />
-                <Label htmlFor="exclude-customer-notif" className="text-sm">Exclude customer notification</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox 
                   id="exclude-provider-notif" 
                   checked={excludeProviderNotification}
                   onCheckedChange={(c) => setExcludeProviderNotification(!!c)}
                 />
-                <Label htmlFor="exclude-provider-notif" className="text-sm">Exclude provider notification</Label>
+                <Label htmlFor="exclude-provider-notif" className="text-sm">Don't notify provider of booking changes</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Checkbox 
