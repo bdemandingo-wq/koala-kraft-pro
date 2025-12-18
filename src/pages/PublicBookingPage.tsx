@@ -20,6 +20,7 @@ import {
   Phone,
   DollarSign,
   Ruler,
+  Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
@@ -30,6 +31,8 @@ import {
   getPriceForService,
   type CleaningServiceType 
 } from '@/data/pricingData';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const timeSlots = [
   '08:00', '09:00', '10:00', '11:00', '12:00',
@@ -43,6 +46,8 @@ export default function PublicBookingPage() {
   const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [confirmationNumber, setConfirmationNumber] = useState<string>('');
   const [customerInfo, setCustomerInfo] = useState({
     name: '',
     email: '',
@@ -76,8 +81,56 @@ export default function PublicBookingPage() {
     return total;
   };
 
-  const handleNext = () => {
-    if (step < 4) setStep(step + 1);
+  const handleNext = async () => {
+    if (step === 3) {
+      // Submit booking and send confirmation email
+      setIsSubmitting(true);
+      const newConfirmationNumber = `BK-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+      setConfirmationNumber(newConfirmationNumber);
+      
+      try {
+        const extraNames = selectedExtras.map(id => extras.find(e => e.id === id)?.name).filter(Boolean) as string[];
+        
+        const { error } = await supabase.functions.invoke('send-booking-email', {
+          body: {
+            customerName: customerInfo.name,
+            customerEmail: customerInfo.email,
+            customerPhone: customerInfo.phone,
+            serviceName: service?.name || '',
+            homeSize: selectedSqFtIndex !== null ? squareFootageRanges[selectedSqFtIndex].label : '',
+            appointmentDate: selectedDate?.toLocaleDateString('en-US', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            }),
+            appointmentTime: selectedTime,
+            address: customerInfo.address,
+            city: customerInfo.city,
+            state: customerInfo.state,
+            zipCode: customerInfo.zipCode,
+            extras: extraNames,
+            totalPrice: calculateTotal(),
+            confirmationNumber: newConfirmationNumber,
+          },
+        });
+        
+        if (error) {
+          console.error('Email error:', error);
+          toast.error('Booking confirmed but email failed to send');
+        } else {
+          toast.success('Booking confirmed! Check your email for confirmation.');
+        }
+      } catch (err) {
+        console.error('Failed to send email:', err);
+        toast.error('Booking confirmed but email failed to send');
+      } finally {
+        setIsSubmitting(false);
+        setStep(4);
+      }
+    } else if (step < 4) {
+      setStep(step + 1);
+    }
   };
 
   const handleBack = () => {
@@ -580,7 +633,7 @@ export default function PublicBookingPage() {
                   </div>
                   <div className="pt-4 border-t">
                     <Badge className="bg-success/20 text-success border-success/30">
-                      Confirmation #BK-{Math.random().toString(36).substr(2, 9).toUpperCase()}
+                      Confirmation #{confirmationNumber}
                     </Badge>
                   </div>
                 </CardContent>
@@ -598,9 +651,18 @@ export default function PublicBookingPage() {
             )}
             {step === 1 && <div />}
             {step < 4 && (
-              <Button onClick={handleNext} disabled={!canProceed()} className="gap-2 ml-auto">
-                {step === 3 ? 'Confirm Booking' : 'Continue'}
-                <ArrowRight className="w-4 h-4" />
+              <Button onClick={handleNext} disabled={!canProceed() || isSubmitting} className="gap-2 ml-auto">
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Confirming...
+                  </>
+                ) : (
+                  <>
+                    {step === 3 ? 'Confirm Booking' : 'Continue'}
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
               </Button>
             )}
             {step === 4 && (
