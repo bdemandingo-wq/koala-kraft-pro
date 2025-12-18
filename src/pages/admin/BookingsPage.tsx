@@ -100,8 +100,8 @@ export default function BookingsPage() {
           <TableBody>
             {filteredBookings.slice(0, 20).map((booking) => (
               <TableRow key={booking.id} className="hover:bg-muted/30">
-                <TableCell className="font-mono text-sm">
-                  #{booking.id.slice(-8)}
+                <TableCell className="font-mono text-sm font-semibold">
+                  #{booking.bookingNumber}
                 </TableCell>
                 <TableCell>
                   <div>

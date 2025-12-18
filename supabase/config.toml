@@ -2,3 +2,6 @@ project_id = "slwfkaqczvwvvvavkgpr"
 
 [functions.send-booking-email]
 verify_jwt = false
+
+[functions.send-cleaner-notification]
+verify_jwt = false
