@@ -98,12 +98,25 @@ export const cleaningServices: CleaningService[] = [
 ];
 
 export const extras = [
-  { id: 'oven', name: 'Inside Oven', price: 50, note: 'Included in deep clean' },
-  { id: 'pet_hair', name: 'Extra Pet Hair Shed', price: 100, note: '' },
-  { id: 'blinds', name: 'Wet Wipe Window Blinds', price: 10, note: 'Per blind' },
-  { id: 'fridge', name: 'Clean Inside Fridge', price: 75, note: 'Included in Move in/out' },
-  { id: 'dishwasher', name: 'Inside Dishwasher', price: 50, note: '' },
+  { id: 'heavy_duty', name: 'Heavy Duty', price: 75, note: 'Extra dirty areas', icon: 'Sparkles' },
+  { id: 'cabinets', name: 'Inside Cabinets', price: 50, note: '', icon: 'LayoutGrid' },
+  { id: 'blinds', name: 'Wet Wipe Window Blinds', price: 10, note: 'Per blind', icon: 'Blinds' },
+  { id: 'fridge', name: 'Inside Fridge', price: 75, note: 'Included in Move in/out', icon: 'Refrigerator' },
+  { id: 'dishes', name: 'Dishes', price: 25, note: '', icon: 'UtensilsCrossed' },
+  { id: 'oven', name: 'Inside Oven', price: 50, note: 'Included in deep clean', icon: 'Flame' },
+  { id: 'pet_hair', name: 'Extra Pet Hair', price: 100, note: '', icon: 'Dog' },
+  { id: 'laundry', name: 'Laundry', price: 35, note: 'Per load', icon: 'Shirt' },
 ];
+
+export const frequencyOptions = [
+  { id: 'one_time', label: 'One-time' },
+  { id: 'weekly', label: 'Weekly' },
+  { id: 'biweekly', label: 'Every other week' },
+  { id: 'monthly', label: 'Monthly' },
+];
+
+export const bedroomOptions = ['0', '1', '2', '3', '4', '5', '6+'];
+export const bathroomOptions = ['1', '1.5', '2', '2.5', '3', '3.5', '4', '4.5', '5+'];
 
 export function getPriceForService(serviceId: CleaningServiceType, sqFtIndex: number): number {
   const service = cleaningServices.find(s => s.id === serviceId);

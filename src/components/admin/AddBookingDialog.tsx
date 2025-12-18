@@ -1,14 +1,16 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from '@/components/ui/dialog';
 import {
   Select,
@@ -17,9 +19,41 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2 } from 'lucide-react';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { 
+  Loader2, 
+  Plus, 
+  Minus, 
+  Sparkles, 
+  LayoutGrid, 
+  Blinds, 
+  Refrigerator, 
+  UtensilsCrossed, 
+  Flame, 
+  Dog, 
+  Shirt,
+  Send,
+  Calendar
+} from 'lucide-react';
 import { useCreateBooking, useCreateCustomer, useServices, useStaff, useCustomers } from '@/hooks/useBookings';
-import { cleaningServices, squareFootageRanges, getSqFtIndexFromValue, getPriceForService, CleaningServiceType } from '@/data/pricingData';
+import { 
+  cleaningServices, 
+  squareFootageRanges, 
+  getSqFtIndexFromValue, 
+  getPriceForService, 
+  CleaningServiceType,
+  extras,
+  frequencyOptions,
+  bedroomOptions,
+  bathroomOptions
+} from '@/data/pricingData';
+import { cn } from '@/lib/utils';
+import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AddBookingDialogProps {
   open: boolean;
@@ -27,7 +61,19 @@ interface AddBookingDialogProps {
   defaultDate?: Date;
 }
 
+const extraIcons: Record<string, React.ReactNode> = {
+  heavy_duty: <Sparkles className="w-6 h-6" />,
+  cabinets: <LayoutGrid className="w-6 h-6" />,
+  blinds: <Blinds className="w-6 h-6" />,
+  fridge: <Refrigerator className="w-6 h-6" />,
+  dishes: <UtensilsCrossed className="w-6 h-6" />,
+  oven: <Flame className="w-6 h-6" />,
+  pet_hair: <Dog className="w-6 h-6" />,
+  laundry: <Shirt className="w-6 h-6" />,
+};
+
 export function AddBookingDialog({ open, onOpenChange, defaultDate }: AddBookingDialogProps) {
+  // Customer Type
   const [customerType, setCustomerType] = useState<'new' | 'existing'>('new');
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
   
@@ -41,27 +87,136 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate }: AddBooking
   const [state, setState] = useState('');
   const [zipCode, setZipCode] = useState('');
   
-  // Booking fields
+  // Service fields
   const [selectedService, setSelectedService] = useState<CleaningServiceType | ''>('');
+  const [frequency, setFrequency] = useState('one_time');
+  const [bedrooms, setBedrooms] = useState('0');
+  const [bathrooms, setBathrooms] = useState('1');
   const [squareFootage, setSquareFootage] = useState('');
+  const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
+  
+  // Booking adjustments
+  const [adjustServiceTotal, setAdjustServiceTotal] = useState(false);
+  const [adjustPrice, setAdjustPrice] = useState(false);
+  const [adjustTime, setAdjustTime] = useState(false);
+  const [customPrice, setCustomPrice] = useState('');
+  const [customDuration, setCustomDuration] = useState('');
+  
+  // Schedule
+  const [scheduleType, setScheduleType] = useState<'schedule' | 'manual'>('manual');
   const [selectedStaffId, setSelectedStaffId] = useState('');
   const [scheduledDate, setScheduledDate] = useState(
     defaultDate ? defaultDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
   );
   const [scheduledTime, setScheduledTime] = useState('09:00');
-  const [notes, setNotes] = useState('');
+  
+  // Key information
+  const [accessMethod, setAccessMethod] = useState('someone_home');
+  const [keepKeyWithProvider, setKeepKeyWithProvider] = useState(false);
+  const [customerNoteForProvider, setCustomerNoteForProvider] = useState('');
+  const [specialNotes, setSpecialNotes] = useState('');
+  
+  // Coupon/Gift Cards
+  const [discountTab, setDiscountTab] = useState('coupon');
+  const [discountType, setDiscountType] = useState('code');
+  const [couponCode, setCouponCode] = useState('');
+  const [discountAmount, setDiscountAmount] = useState('');
+  
+  // Reminders
+  const [alertBeforeCharge, setAlertBeforeCharge] = useState(false);
+  const [emailReminderAdmin, setEmailReminderAdmin] = useState(false);
+  
+  // Payment
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'cash' | 'send_link'>('card');
+  
+  // Sidebar options
+  const [autoAcceptsJob, setAutoAcceptsJob] = useState(true);
+  const [excludeCancellationFee, setExcludeCancellationFee] = useState(false);
+  const [excludeCancellationAfter1st, setExcludeCancellationAfter1st] = useState(false);
+  const [excludeCustomerNotification, setExcludeCustomerNotification] = useState(false);
+  const [excludeProviderNotification, setExcludeProviderNotification] = useState(false);
+  const [hideChecklist, setHideChecklist] = useState(false);
+  
+  // Collapsible notes
+  const [privateBookingNote, setPrivateBookingNote] = useState('');
+  const [privateCustomerNote, setPrivateCustomerNote] = useState('');
+  const [noteForProvider, setNoteForProvider] = useState('');
+  const [bookingNoteOpen, setBookingNoteOpen] = useState(false);
+  const [customerNoteOpen, setCustomerNoteOpen] = useState(false);
+  const [providerNoteOpen, setProviderNoteOpen] = useState(false);
 
   const { data: existingCustomers = [] } = useCustomers();
   const { data: dbServices = [] } = useServices();
   const { data: staff = [] } = useStaff();
   const createBooking = useCreateBooking();
   const createCustomer = useCreateCustomer();
+  
+  const [sendingPaymentLink, setSendingPaymentLink] = useState(false);
 
-  // Calculate price based on service and square footage
-  const calculatePrice = () => {
+  // Calculate price
+  const calculatedPrice = useMemo(() => {
     if (!selectedService || !squareFootage) return 0;
+    
+    let serviceType = selectedService;
+    // Map frequency to service type for pricing
+    if (frequency === 'weekly' && selectedService !== 'move_in_out' && selectedService !== 'construction') {
+      serviceType = 'weekly_clean';
+    } else if (frequency === 'biweekly' && selectedService !== 'move_in_out' && selectedService !== 'construction') {
+      serviceType = 'biweekly_clean';
+    } else if (frequency === 'monthly' && selectedService !== 'move_in_out' && selectedService !== 'construction') {
+      serviceType = 'monthly_clean';
+    }
+    
     const sqFtIndex = getSqFtIndexFromValue(parseInt(squareFootage));
-    return getPriceForService(selectedService as CleaningServiceType, sqFtIndex);
+    let basePrice = getPriceForService(serviceType as CleaningServiceType, sqFtIndex);
+    
+    // Add extras
+    const extrasTotal = selectedExtras.reduce((sum, extraId) => {
+      const extra = extras.find(e => e.id === extraId);
+      return sum + (extra?.price || 0);
+    }, 0);
+    
+    return basePrice + extrasTotal;
+  }, [selectedService, squareFootage, frequency, selectedExtras]);
+
+  const finalPrice = adjustPrice && customPrice ? parseFloat(customPrice) : calculatedPrice;
+  
+  const estimatedDuration = useMemo(() => {
+    if (adjustTime && customDuration) return parseInt(customDuration);
+    
+    // Base duration calculation
+    let duration = 120; // 2 hours base
+    const sqFt = parseInt(squareFootage) || 1000;
+    
+    if (sqFt > 2000) duration += 30;
+    if (sqFt > 3000) duration += 30;
+    if (sqFt > 4000) duration += 30;
+    
+    if (selectedService === 'deep_clean' || selectedService === 'move_in_out') {
+      duration += 60;
+    }
+    if (selectedService === 'construction') {
+      duration += 120;
+    }
+    
+    // Add time for extras
+    duration += selectedExtras.length * 15;
+    
+    return duration;
+  }, [squareFootage, selectedService, selectedExtras, adjustTime, customDuration]);
+
+  const formatDuration = (minutes: number) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return `${hours} Hr ${mins} Min`;
+  };
+
+  const toggleExtra = (extraId: string) => {
+    setSelectedExtras(prev => 
+      prev.includes(extraId) 
+        ? prev.filter(id => id !== extraId)
+        : [...prev, extraId]
+    );
   };
 
   const resetForm = () => {
@@ -76,14 +231,77 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate }: AddBooking
     setState('');
     setZipCode('');
     setSelectedService('');
+    setFrequency('one_time');
+    setBedrooms('0');
+    setBathrooms('1');
     setSquareFootage('');
+    setSelectedExtras([]);
+    setAdjustServiceTotal(false);
+    setAdjustPrice(false);
+    setAdjustTime(false);
+    setCustomPrice('');
+    setCustomDuration('');
+    setScheduleType('manual');
     setSelectedStaffId('');
     setScheduledDate(new Date().toISOString().split('T')[0]);
     setScheduledTime('09:00');
-    setNotes('');
+    setAccessMethod('someone_home');
+    setKeepKeyWithProvider(false);
+    setCustomerNoteForProvider('');
+    setSpecialNotes('');
+    setDiscountTab('coupon');
+    setDiscountType('code');
+    setCouponCode('');
+    setDiscountAmount('');
+    setAlertBeforeCharge(false);
+    setEmailReminderAdmin(false);
+    setPaymentMethod('card');
+    setAutoAcceptsJob(true);
+    setExcludeCancellationFee(false);
+    setExcludeCancellationAfter1st(false);
+    setExcludeCustomerNotification(false);
+    setExcludeProviderNotification(false);
+    setHideChecklist(false);
+    setPrivateBookingNote('');
+    setPrivateCustomerNote('');
+    setNoteForProvider('');
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSendPaymentLink = async () => {
+    const customerEmail = customerType === 'existing' 
+      ? existingCustomers.find(c => c.id === selectedCustomerId)?.email 
+      : email;
+    
+    if (!customerEmail) {
+      toast({ title: "Error", description: "Customer email is required to send payment link", variant: "destructive" });
+      return;
+    }
+    
+    setSendingPaymentLink(true);
+    try {
+      const { error } = await supabase.functions.invoke('send-payment-link', {
+        body: {
+          email: customerEmail,
+          customerName: customerType === 'existing' 
+            ? `${existingCustomers.find(c => c.id === selectedCustomerId)?.first_name} ${existingCustomers.find(c => c.id === selectedCustomerId)?.last_name}`
+            : `${firstName} ${lastName}`,
+          amount: finalPrice,
+          serviceName: cleaningServices.find(s => s.id === selectedService)?.name || 'Cleaning Service',
+        }
+      });
+      
+      if (error) throw error;
+      
+      toast({ title: "Success", description: "Payment link sent to customer's email" });
+    } catch (error) {
+      console.error('Failed to send payment link:', error);
+      toast({ title: "Error", description: "Failed to send payment link", variant: "destructive" });
+    } finally {
+      setSendingPaymentLink(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent, saveType: 'booking' | 'draft' | 'quote' = 'booking') => {
     e.preventDefault();
     
     try {
@@ -93,7 +311,6 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate }: AddBooking
       let customerState = state;
       let customerZip = zipCode;
 
-      // If new customer, create them first
       if (customerType === 'new') {
         const newCustomer = await createCustomer.mutateAsync({
           first_name: firstName,
@@ -107,7 +324,6 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate }: AddBooking
         });
         customerId = newCustomer.id;
       } else {
-        // Use existing customer's address
         const existingCustomer = existingCustomers.find(c => c.id === selectedCustomerId);
         if (existingCustomer) {
           customerAddress = existingCustomer.address || address;
@@ -117,259 +333,826 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate }: AddBooking
         }
       }
 
-      // Find matching service in database or use first one
       const serviceData = cleaningServices.find(s => s.id === selectedService);
       const dbService = dbServices.find(s => s.name.toLowerCase().includes(selectedService.replace('_', ' '))) || dbServices[0];
 
       const scheduledAt = new Date(`${scheduledDate}T${scheduledTime}:00`).toISOString();
-      const totalAmount = calculatePrice();
+      
+      // Build comprehensive notes
+      const notesParts = [
+        serviceData?.name,
+        `${squareFootage} sq ft`,
+        `${bedrooms} bed / ${bathrooms} bath`,
+        frequency !== 'one_time' ? `Frequency: ${frequencyOptions.find(f => f.id === frequency)?.label}` : '',
+        selectedExtras.length > 0 ? `Extras: ${selectedExtras.map(e => extras.find(ex => ex.id === e)?.name).join(', ')}` : '',
+        accessMethod === 'someone_home' ? 'Someone will be at home' : accessMethod === 'hide_keys' ? 'Keys hidden' : '',
+        keepKeyWithProvider ? 'Keep key with provider' : '',
+        customerNoteForProvider,
+        specialNotes,
+        privateBookingNote ? `[Private] ${privateBookingNote}` : '',
+        noteForProvider ? `[For Provider] ${noteForProvider}` : '',
+      ].filter(Boolean).join('. ');
+
+      const status = saveType === 'draft' ? 'pending' : saveType === 'quote' ? 'pending' : (autoAcceptsJob ? 'confirmed' : 'pending');
 
       await createBooking.mutateAsync({
         customer_id: customerId || undefined,
         service_id: dbService?.id,
         staff_id: selectedStaffId || undefined,
         scheduled_at: scheduledAt,
-        duration: serviceData?.id.includes('deep') || serviceData?.id.includes('move') ? 180 : 120,
-        total_amount: totalAmount,
-        status: 'pending',
-        payment_status: 'pending',
-        notes: notes ? `${serviceData?.name} - ${squareFootage} sq ft. ${notes}` : `${serviceData?.name} - ${squareFootage} sq ft`,
+        duration: estimatedDuration,
+        total_amount: finalPrice,
+        status,
+        payment_status: paymentMethod === 'cash' ? 'pending' : 'pending',
+        notes: notesParts,
         address: customerAddress || undefined,
         city: customerCity || undefined,
         state: customerState || undefined,
         zip_code: customerZip || undefined,
       });
 
+      toast({ 
+        title: "Success", 
+        description: saveType === 'draft' ? "Booking saved as draft" : saveType === 'quote' ? "Quote created" : "Booking created successfully" 
+      });
+      
       resetForm();
       onOpenChange(false);
     } catch (error) {
       console.error('Failed to create booking:', error);
+      toast({ title: "Error", description: "Failed to create booking", variant: "destructive" });
     }
   };
 
   const isSubmitting = createBooking.isPending || createCustomer.isPending;
-  const price = calculatePrice();
+  
+  const serviceInfo = cleaningServices.find(s => s.id === selectedService);
+  const sqFtLabel = squareFootageRanges.find(r => r.maxSqFt === parseInt(squareFootage))?.label || '';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Add New Booking</DialogTitle>
-        </DialogHeader>
-        
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Customer Section */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Customer</h3>
+      <DialogContent className="max-w-6xl max-h-[95vh] overflow-hidden p-0">
+        <div className="flex h-[90vh]">
+          {/* Main Form */}
+          <div className="flex-1 overflow-y-auto p-6">
+            <DialogHeader className="mb-6">
+              <DialogTitle className="text-xl font-semibold">New Booking</DialogTitle>
+            </DialogHeader>
             
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant={customerType === 'new' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setCustomerType('new')}
-              >
-                New Customer
-              </Button>
-              <Button
-                type="button"
-                variant={customerType === 'existing' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setCustomerType('existing')}
-              >
-                Existing Customer
-              </Button>
-            </div>
+            <form onSubmit={(e) => handleSubmit(e, 'booking')} className="space-y-8">
+              {/* Location Section */}
+              <section>
+                <h3 className="text-lg font-semibold mb-4">Where Will The Service Be Taking Place?</h3>
+                <div className="space-y-2">
+                  <Label>Enter Zip Code For Pricing</Label>
+                  <Input
+                    value={zipCode}
+                    onChange={(e) => setZipCode(e.target.value)}
+                    placeholder="Zip Code"
+                    className="max-w-xs"
+                  />
+                </div>
+              </section>
 
-            {customerType === 'existing' ? (
-              <Select value={selectedCustomerId} onValueChange={setSelectedCustomerId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a customer" />
-                </SelectTrigger>
-                <SelectContent>
-                  {existingCustomers.map((customer) => (
-                    <SelectItem key={customer.id} value={customer.id}>
-                      {customer.first_name} {customer.last_name} - {customer.email}
-                    </SelectItem>
+              {/* Customer Details */}
+              <section>
+                <h3 className="text-lg font-semibold mb-4">Customer Details</h3>
+                
+                <RadioGroup 
+                  value={customerType} 
+                  onValueChange={(v) => setCustomerType(v as 'new' | 'existing')}
+                  className="flex gap-4 mb-4"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="new" id="new-customer" />
+                    <Label htmlFor="new-customer">New customer</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="existing" id="existing-customer" />
+                    <Label htmlFor="existing-customer">Existing customer</Label>
+                  </div>
+                </RadioGroup>
+
+                {customerType === 'existing' ? (
+                  <Select value={selectedCustomerId} onValueChange={setSelectedCustomerId}>
+                    <SelectTrigger className="max-w-md">
+                      <SelectValue placeholder="Select a customer" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {existingCustomers.map((customer) => (
+                        <SelectItem key={customer.id} value={customer.id}>
+                          {customer.first_name} {customer.last_name} - {customer.email}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <div className="grid grid-cols-2 gap-4 max-w-2xl">
+                    <div className="space-y-2">
+                      <Label>First name</Label>
+                      <Input
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        placeholder="Ex: James"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Last name</Label>
+                      <Input
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        placeholder="Ex: Lee"
+                        required
+                      />
+                    </div>
+                    <div className="col-span-2 space-y-2">
+                      <Label>Email address</Label>
+                      <Input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Ex: example@xyz.com"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Phone</Label>
+                      <Input
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="Phone number"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Address</Label>
+                      <Input
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
+                        placeholder="Street address"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>City</Label>
+                      <Input
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-2">
+                        <Label>State</Label>
+                        <Input
+                          value={state}
+                          onChange={(e) => setState(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </section>
+
+              {/* Service Type */}
+              <section>
+                <h3 className="text-lg font-semibold mb-2">Service Type</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Please check out our <a href="#" className="text-primary hover:underline">SERVICE CHECKLIST</a> prior to booking.
+                </p>
+                <p className="text-sm mb-4">
+                  Keep in mind that your FIRST CLEAN will be a <strong>deep clean</strong>.
+                </p>
+                
+                <div className="space-y-2">
+                  <Label>Services</Label>
+                  <Select value={selectedService} onValueChange={(v) => setSelectedService(v as CleaningServiceType)}>
+                    <SelectTrigger className="max-w-md">
+                      <SelectValue placeholder="Select service" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {cleaningServices.map((service) => (
+                        <SelectItem key={service.id} value={service.id}>
+                          {service.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </section>
+
+              {/* Frequency */}
+              <section>
+                <h3 className="text-lg font-semibold mb-4">Frequency</h3>
+                <div className="flex flex-wrap gap-2">
+                  {frequencyOptions.map((option) => (
+                    <Button
+                      key={option.id}
+                      type="button"
+                      variant={frequency === option.id ? "default" : "outline"}
+                      onClick={() => setFrequency(option.id)}
+                      className="rounded-full"
+                    >
+                      {option.label}
+                    </Button>
                   ))}
-                </SelectContent>
-              </Select>
-            ) : (
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>First Name *</Label>
-                  <Input
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    required
-                  />
                 </div>
-                <div className="space-y-2">
-                  <Label>Last Name *</Label>
-                  <Input
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Email *</Label>
-                  <Input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Phone</Label>
-                  <Input
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                  />
-                </div>
-                <div className="col-span-2 space-y-2">
-                  <Label>Address</Label>
-                  <Input
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    placeholder="Street address"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>City</Label>
-                  <Input
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-2">
+              </section>
+
+              {/* Service Details */}
+              <section>
+                <h3 className="text-lg font-semibold mb-2">Service</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  More than 4000 Square Feet? Please call <a href="tel:8137356859" className="text-primary hover:underline">(813) 735 6859</a> or <a href="mailto:info@example.com" className="text-primary hover:underline">EMAIL</a> us for a custom quote.
+                </p>
+                
+                <div className="grid grid-cols-3 gap-4 max-w-2xl">
                   <div className="space-y-2">
-                    <Label>State</Label>
-                    <Input
-                      value={state}
-                      onChange={(e) => setState(e.target.value)}
-                    />
+                    <Label>Bedrooms</Label>
+                    <Select value={bedrooms} onValueChange={setBedrooms}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {bedroomOptions.map((opt) => (
+                          <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>ZIP</Label>
-                    <Input
-                      value={zipCode}
-                      onChange={(e) => setZipCode(e.target.value)}
-                    />
+                    <Label>Bathrooms</Label>
+                    <Select value={bathrooms} onValueChange={setBathrooms}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {bathroomOptions.map((opt) => (
+                          <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Sq Ft</Label>
+                    <Select value={squareFootage} onValueChange={setSquareFootage}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select size" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {squareFootageRanges.map((range) => (
+                          <SelectItem key={range.maxSqFt} value={range.maxSqFt.toString()}>
+                            {range.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
-              </div>
-            )}
+              </section>
+
+              {/* Select Extras */}
+              <section>
+                <h3 className="text-lg font-semibold mb-2">Select Extras</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  If you have extras, you can set them up here and charge a price for them or not. You can turn this description off or modify it at anytime.
+                </p>
+                
+                <div className="flex flex-wrap gap-4">
+                  {extras.map((extra) => (
+                    <button
+                      key={extra.id}
+                      type="button"
+                      onClick={() => toggleExtra(extra.id)}
+                      className={cn(
+                        "flex flex-col items-center p-4 rounded-lg border-2 transition-all min-w-[100px]",
+                        selectedExtras.includes(extra.id)
+                          ? "border-primary bg-primary/10"
+                          : "border-border hover:border-primary/50"
+                      )}
+                    >
+                      <div className="text-muted-foreground mb-2">
+                        {extraIcons[extra.id]}
+                      </div>
+                      <span className="text-sm font-medium text-center">{extra.name}</span>
+                      {extra.note && (
+                        <span className="text-xs text-muted-foreground mt-1">{extra.note}</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              {/* Booking Adjustments */}
+              <section>
+                <h3 className="text-lg font-semibold mb-4">Booking Adjustments</h3>
+                
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="adjust-total" 
+                      checked={adjustServiceTotal}
+                      onCheckedChange={(c) => setAdjustServiceTotal(!!c)}
+                    />
+                    <Label htmlFor="adjust-total">Do you want to adjust service total?</Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="adjust-price" 
+                      checked={adjustPrice}
+                      onCheckedChange={(c) => setAdjustPrice(!!c)}
+                    />
+                    <Label htmlFor="adjust-price">Do you want to adjust price?</Label>
+                  </div>
+                  {adjustPrice && (
+                    <Input 
+                      type="number"
+                      value={customPrice}
+                      onChange={(e) => setCustomPrice(e.target.value)}
+                      placeholder="Enter custom price"
+                      className="max-w-xs ml-6"
+                    />
+                  )}
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="adjust-time" 
+                      checked={adjustTime}
+                      onCheckedChange={(c) => setAdjustTime(!!c)}
+                    />
+                    <Label htmlFor="adjust-time">Do you want to adjust time?</Label>
+                  </div>
+                  {adjustTime && (
+                    <Input 
+                      type="number"
+                      value={customDuration}
+                      onChange={(e) => setCustomDuration(e.target.value)}
+                      placeholder="Duration in minutes"
+                      className="max-w-xs ml-6"
+                    />
+                  )}
+                </div>
+              </section>
+
+              {/* Service Date & Time */}
+              <section>
+                <h3 className="text-lg font-semibold mb-2">Service Date & Time</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Please choose a date and time for your cleaning appointment.
+                </p>
+                
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="specific-provider" />
+                      <Label htmlFor="specific-provider">Specific Provider/Team</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="waiting-list" />
+                      <Label htmlFor="waiting-list">Waiting List</Label>
+                    </div>
+                  </div>
+                  
+                  <RadioGroup 
+                    value={scheduleType} 
+                    onValueChange={(v) => setScheduleType(v as 'schedule' | 'manual')}
+                    className="flex gap-4"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="schedule" id="from-schedule" />
+                      <Label htmlFor="from-schedule">From Schedule</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="manual" id="manual" />
+                      <Label htmlFor="manual">Manual</Label>
+                    </div>
+                  </RadioGroup>
+                  
+                  <div className="grid grid-cols-3 gap-4 max-w-xl">
+                    <div className="space-y-2">
+                      <Label>Select Date</Label>
+                      <div className="relative">
+                        <Input
+                          type="date"
+                          value={scheduledDate}
+                          onChange={(e) => setScheduledDate(e.target.value)}
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Time</Label>
+                      <Input
+                        type="time"
+                        value={scheduledTime}
+                        onChange={(e) => setScheduledTime(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Assign Staff</Label>
+                      <Select value={selectedStaffId} onValueChange={setSelectedStaffId}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select staff" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {staff.map((member) => (
+                            <SelectItem key={member.id} value={member.id}>
+                              {member.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="add-bonus" />
+                    <Label htmlFor="add-bonus">Want to add bonus?</Label>
+                  </div>
+                </div>
+              </section>
+
+              {/* Key Information & Job Notes */}
+              <section>
+                <h3 className="text-lg font-semibold mb-2">Key Information & Job Notes</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  You can turn this description off or modify it at anytime.
+                </p>
+                
+                <RadioGroup 
+                  value={accessMethod} 
+                  onValueChange={setAccessMethod}
+                  className="flex flex-wrap gap-4 mb-4"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="someone_home" id="someone-home" />
+                    <Label htmlFor="someone-home">Someone Will Be At Home</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="hide_keys" id="hide-keys" />
+                    <Label htmlFor="hide-keys">I Will Hide The Keys</Label>
+                  </div>
+                </RadioGroup>
+                
+                <div className="flex items-center space-x-2 mb-4">
+                  <Checkbox 
+                    id="keep-key" 
+                    checked={keepKeyWithProvider}
+                    onCheckedChange={(c) => setKeepKeyWithProvider(!!c)}
+                  />
+                  <Label htmlFor="keep-key">Keep Key With Provider</Label>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Customer Note For Provider</Label>
+                  <Textarea
+                    value={customerNoteForProvider}
+                    onChange={(e) => setCustomerNoteForProvider(e.target.value)}
+                    placeholder="Special Notes And Instructions"
+                    rows={3}
+                  />
+                </div>
+              </section>
+
+              {/* Special Notes */}
+              <section>
+                <h3 className="text-lg font-semibold mb-2">Special Notes Or Instructions</h3>
+                <Label className="mb-2">Would You Like To Add Any Notes?</Label>
+                <Textarea
+                  value={specialNotes}
+                  onChange={(e) => setSpecialNotes(e.target.value)}
+                  placeholder="Special Notes Or Instructions"
+                  rows={3}
+                />
+              </section>
+
+              {/* Coupon/Gift Cards */}
+              <section>
+                <Tabs value={discountTab} onValueChange={setDiscountTab} className="max-w-xl">
+                  <TabsList>
+                    <TabsTrigger value="coupon">Coupon Code</TabsTrigger>
+                    <TabsTrigger value="gift">Gift Cards</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="coupon" className="space-y-4 mt-4">
+                    <RadioGroup 
+                      value={discountType} 
+                      onValueChange={setDiscountType}
+                      className="flex gap-4"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="code" id="coupon-code" />
+                        <Label htmlFor="coupon-code">Coupon Code</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="amount" id="amount" />
+                        <Label htmlFor="amount">Amount</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="percent" id="percent" />
+                        <Label htmlFor="percent">% Amount</Label>
+                      </div>
+                    </RadioGroup>
+                    
+                    <div className="flex gap-2">
+                      <Input
+                        value={discountType === 'code' ? couponCode : discountAmount}
+                        onChange={(e) => discountType === 'code' ? setCouponCode(e.target.value) : setDiscountAmount(e.target.value)}
+                        placeholder={discountType === 'code' ? "Enter Coupon Code" : "Enter amount"}
+                        className="flex-1"
+                      />
+                      <Button type="button" variant="secondary">Apply</Button>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="gift" className="mt-4">
+                    <div className="flex gap-2">
+                      <Input placeholder="Enter gift card code" className="flex-1" />
+                      <Button type="button" variant="secondary">Apply</Button>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </section>
+
+              {/* Reminder */}
+              <section>
+                <h3 className="text-lg font-semibold mb-4">Reminder</h3>
+                
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="alert-charge" 
+                      checked={alertBeforeCharge}
+                      onCheckedChange={(c) => setAlertBeforeCharge(!!c)}
+                    />
+                    <Label htmlFor="alert-charge">Alert before charge now</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="email-admin" 
+                      checked={emailReminderAdmin}
+                      onCheckedChange={(c) => setEmailReminderAdmin(!!c)}
+                    />
+                    <Label htmlFor="email-admin">Email reminder to admin</Label>
+                  </div>
+                </div>
+              </section>
+
+              {/* Payment Information */}
+              <section>
+                <h3 className="text-lg font-semibold mb-2">Payment Information</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Cards will not be charged until AFTER the appointment is complete.
+                </p>
+                
+                <RadioGroup 
+                  value={paymentMethod} 
+                  onValueChange={(v) => setPaymentMethod(v as 'card' | 'cash' | 'send_link')}
+                  className="flex flex-wrap gap-4 mb-4"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="card" id="credit-card" />
+                    <Label htmlFor="credit-card">New Credit Card</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="cash" id="cash" />
+                    <Label htmlFor="cash">Cash/Check</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="send_link" id="send-link" />
+                    <Label htmlFor="send-link">Send Payment Link</Label>
+                  </div>
+                </RadioGroup>
+                
+                {paymentMethod === 'card' && (
+                  <div className="p-4 border rounded-lg max-w-md">
+                    <p className="text-sm text-muted-foreground">
+                      Card payment integration coming soon. For now, you can send a payment link to the customer.
+                    </p>
+                  </div>
+                )}
+                
+                {paymentMethod === 'send_link' && (
+                  <div className="space-y-4 max-w-md">
+                    <p className="text-sm text-muted-foreground">
+                      An email will be sent to the customer with a secure link to enter their payment details.
+                    </p>
+                    <Button 
+                      type="button" 
+                      variant="outline"
+                      onClick={handleSendPaymentLink}
+                      disabled={sendingPaymentLink || !email && !selectedCustomerId}
+                    >
+                      {sendingPaymentLink ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Send className="w-4 h-4 mr-2" />
+                      )}
+                      Send Payment Link Now
+                    </Button>
+                  </div>
+                )}
+              </section>
+            </form>
           </div>
 
-          {/* Service Section */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Service</h3>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Service Type *</Label>
-                <Select value={selectedService} onValueChange={(v) => setSelectedService(v as CleaningServiceType)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select service" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {cleaningServices.map((service) => (
-                      <SelectItem key={service.id} value={service.id}>
-                        {service.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+          {/* Sidebar */}
+          <div className="w-80 border-l bg-muted/30 p-6 overflow-y-auto">
+            {/* Booking Summary */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold">Booking Summary</h3>
+                <Button variant="ghost" size="icon">
+                  <Minus className="w-4 h-4" />
+                </Button>
               </div>
-              <div className="space-y-2">
-                <Label>Square Footage *</Label>
-                <Select value={squareFootage} onValueChange={setSquareFootage}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select size" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {squareFootageRanges.map((range) => (
-                      <SelectItem key={range.maxSqFt} value={range.maxSqFt.toString()}>
-                        {range.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Industry</span>
+                  <span className="font-medium">Home Cleaning</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Service</span>
+                  <span className="font-medium">{serviceInfo?.name || '-'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Frequency</span>
+                  <span className="font-medium">{frequencyOptions.find(f => f.id === frequency)?.label || '-'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Bedrooms</span>
+                  <span className="font-medium">{bedrooms}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Bathrooms</span>
+                  <span className="font-medium">{bathrooms}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Sq Ft</span>
+                  <span className="font-medium">{sqFtLabel || '-'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Length</span>
+                  <span className="font-medium">{formatDuration(estimatedDuration)}</span>
+                </div>
               </div>
             </div>
 
-            {selectedService && squareFootage && (
-              <div className="p-4 bg-primary/10 rounded-lg">
-                <p className="text-sm text-muted-foreground">Calculated Price</p>
-                <p className="text-3xl font-bold text-primary">${price}</p>
+            {/* Payment Summary */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold">Payment Summary</h3>
+                <Button variant="ghost" size="icon">
+                  <Minus className="w-4 h-4" />
+                </Button>
               </div>
-            )}
-          </div>
-
-          {/* Schedule Section */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Schedule</h3>
-            
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label>Date *</Label>
-                <Input
-                  type="date"
-                  value={scheduledDate}
-                  onChange={(e) => setScheduledDate(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Time *</Label>
-                <Input
-                  type="time"
-                  value={scheduledTime}
-                  onChange={(e) => setScheduledTime(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Assign Staff</Label>
-                <Select value={selectedStaffId} onValueChange={setSelectedStaffId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select staff" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {staff.map((member) => (
-                      <SelectItem key={member.id} value={member.id}>
-                        {member.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Service Total</span>
+                  <span className="font-medium">${calculatedPrice.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Discounted Total</span>
+                  <span className="font-medium">${finalPrice.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between border-t pt-2 mt-2">
+                  <span className="font-semibold">TOTAL</span>
+                  <span className="font-bold text-lg">${finalPrice.toFixed(2)}</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Notes */}
-          <div className="space-y-2">
-            <Label>Notes</Label>
-            <Textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Any special instructions..."
-              rows={3}
-            />
-          </div>
+            {/* Collapsible Notes */}
+            <div className="space-y-2 mb-6">
+              <Collapsible open={bookingNoteOpen} onOpenChange={setBookingNoteOpen}>
+                <CollapsibleTrigger className="flex items-center justify-between w-full p-3 rounded-lg border hover:bg-muted/50">
+                  <span className="font-medium">Private Booking Note</span>
+                  <Plus className="w-4 h-4" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pt-2">
+                  <Textarea 
+                    value={privateBookingNote}
+                    onChange={(e) => setPrivateBookingNote(e.target.value)}
+                    placeholder="Add private booking note..."
+                    rows={2}
+                  />
+                </CollapsibleContent>
+              </Collapsible>
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting || !selectedService || !squareFootage}>
-              {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Create Booking
-            </Button>
-          </DialogFooter>
-        </form>
+              <Collapsible open={customerNoteOpen} onOpenChange={setCustomerNoteOpen}>
+                <CollapsibleTrigger className="flex items-center justify-between w-full p-3 rounded-lg border hover:bg-muted/50">
+                  <span className="font-medium">Private Customer Note</span>
+                  <Plus className="w-4 h-4" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pt-2">
+                  <Textarea 
+                    value={privateCustomerNote}
+                    onChange={(e) => setPrivateCustomerNote(e.target.value)}
+                    placeholder="Add private customer note..."
+                    rows={2}
+                  />
+                </CollapsibleContent>
+              </Collapsible>
+
+              <Collapsible open={providerNoteOpen} onOpenChange={setProviderNoteOpen}>
+                <CollapsibleTrigger className="flex items-center justify-between w-full p-3 rounded-lg border hover:bg-muted/50">
+                  <span className="font-medium">Note For Service Provider</span>
+                  <Plus className="w-4 h-4" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pt-2">
+                  <Textarea 
+                    value={noteForProvider}
+                    onChange={(e) => setNoteForProvider(e.target.value)}
+                    placeholder="Add note for provider..."
+                    rows={2}
+                  />
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
+
+            {/* Booking Options */}
+            <div className="space-y-3 mb-6">
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="auto-accept" 
+                  checked={autoAcceptsJob}
+                  onCheckedChange={(c) => setAutoAcceptsJob(!!c)}
+                />
+                <Label htmlFor="auto-accept" className="text-sm">Automatically accepts job</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="exclude-cancel" 
+                  checked={excludeCancellationFee}
+                  onCheckedChange={(c) => setExcludeCancellationFee(!!c)}
+                />
+                <Label htmlFor="exclude-cancel" className="text-sm">Exclude cancellation fee</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="exclude-cancel-1st" 
+                  checked={excludeCancellationAfter1st}
+                  onCheckedChange={(c) => setExcludeCancellationAfter1st(!!c)}
+                />
+                <Label htmlFor="exclude-cancel-1st" className="text-sm">Exclude cancellation after 1st appt fee</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="exclude-customer-notif" 
+                  checked={excludeCustomerNotification}
+                  onCheckedChange={(c) => setExcludeCustomerNotification(!!c)}
+                />
+                <Label htmlFor="exclude-customer-notif" className="text-sm">Exclude customer notification</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="exclude-provider-notif" 
+                  checked={excludeProviderNotification}
+                  onCheckedChange={(c) => setExcludeProviderNotification(!!c)}
+                />
+                <Label htmlFor="exclude-provider-notif" className="text-sm">Exclude provider notification</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="hide-checklist" 
+                  checked={hideChecklist}
+                  onCheckedChange={(c) => setHideChecklist(!!c)}
+                />
+                <Label htmlFor="hide-checklist" className="text-sm">Hide checklist</Label>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="space-y-2">
+              <Button 
+                className="w-full bg-emerald-500 hover:bg-emerald-600" 
+                onClick={(e) => handleSubmit(e, 'booking')}
+                disabled={isSubmitting || !selectedService || !squareFootage}
+              >
+                {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Save Booking
+              </Button>
+              <Button 
+                variant="secondary" 
+                className="w-full bg-teal-500 hover:bg-teal-600 text-white"
+                onClick={(e) => handleSubmit(e, 'draft')}
+                disabled={isSubmitting}
+              >
+                Save As Draft
+              </Button>
+              <Button 
+                variant="outline" 
+                className="w-full border-orange-400 text-orange-500 hover:bg-orange-50"
+                onClick={(e) => handleSubmit(e, 'quote')}
+                disabled={isSubmitting}
+              >
+                Save As Quote
+              </Button>
+            </div>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
