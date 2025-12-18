@@ -6,6 +6,8 @@ import {
   Clock,
   MapPin,
   User,
+  Mail,
+  Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -18,6 +20,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTHS = [
@@ -36,6 +40,7 @@ export function SchedulerCalendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [viewMode, setViewMode] = useState<'month' | 'week'>('month');
+  const [sendingEmail, setSendingEmail] = useState(false);
 
   const { year, month, days } = useMemo(() => {
     const year = currentDate.getFullYear();
@@ -82,6 +87,43 @@ export function SchedulerCalendar() {
   const getServiceColor = (serviceId: string) => {
     const service = mockServices.find(s => s.id === serviceId);
     return service?.color || '#6b7280';
+  };
+
+  const sendCleanerNotification = async (booking: Booking) => {
+    setSendingEmail(true);
+    try {
+      const staff = mockStaff.find(s => s.id === booking.staffId);
+      if (!staff) {
+        toast.error('Staff member not found');
+        return;
+      }
+
+      const { error } = await supabase.functions.invoke('send-cleaner-notification', {
+        body: {
+          cleanerName: staff.name,
+          cleanerEmail: staff.email,
+          customerName: booking.customerName,
+          customerPhone: booking.customerPhone,
+          serviceName: booking.service,
+          appointmentDate: booking.date,
+          appointmentTime: booking.time,
+          address: booking.address || 'Address not provided',
+          bookingNumber: booking.bookingNumber,
+        },
+      });
+
+      if (error) {
+        console.error('Email error:', error);
+        toast.error('Failed to send notification');
+      } else {
+        toast.success(`Notification sent to ${staff.name}`);
+      }
+    } catch (err) {
+      console.error('Failed to send notification:', err);
+      toast.error('Failed to send notification');
+    } finally {
+      setSendingEmail(false);
+    }
   };
 
   return (
@@ -249,7 +291,19 @@ export function SchedulerCalendar() {
               <div className="flex items-center justify-between pt-4 border-t">
                 <span className="text-2xl font-bold">${selectedBooking.price}</span>
                 <div className="flex gap-2">
-                  <Button variant="outline">Edit</Button>
+                  <Button 
+                    variant="outline" 
+                    className="gap-2"
+                    onClick={() => sendCleanerNotification(selectedBooking)}
+                    disabled={sendingEmail}
+                  >
+                    {sendingEmail ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Mail className="w-4 h-4" />
+                    )}
+                    Notify Cleaner
+                  </Button>
                   <Button>Confirm</Button>
                 </div>
               </div>

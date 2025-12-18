@@ -159,6 +159,8 @@ const generateBookings = (): Booking[] => {
   const statuses: Booking['status'][] = ['pending', 'confirmed', 'completed', 'cancelled'];
   const times = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
   
+  let bookingCounter = 1;
+  
   // Generate bookings for the current week and next week
   const today = new Date();
   for (let i = -3; i < 14; i++) {
@@ -187,6 +189,7 @@ const generateBookings = (): Booking[] => {
       
       bookings.push({
         id: `booking-${dateStr}-${j}`,
+        bookingNumber: bookingCounter++,
         customerName: customer.name,
         customerEmail: customer.email,
         customerPhone: customer.phone,
