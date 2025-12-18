@@ -75,24 +75,16 @@ export default function BookingsPage() {
   };
 
   const handleCapturePayment = async (booking: BookingWithDetails) => {
-    if (!booking.customer?.email) {
-      toast({ title: "Error", description: "Customer email not found", variant: "destructive" });
+    const paymentIntentId = (booking as any).payment_intent_id;
+    
+    if (!paymentIntentId) {
+      toast({ title: "Error", description: "No payment hold found for this booking", variant: "destructive" });
       return;
     }
 
     setCapturingPayment(booking.id);
     
     try {
-      // First, we need to find any pending payment intents for this customer
-      // For now, we'll prompt the admin to enter the payment intent ID
-      // In a real implementation, you'd store the payment intent ID with the booking
-      const paymentIntentId = prompt("Enter the Payment Intent ID to capture:");
-      
-      if (!paymentIntentId) {
-        setCapturingPayment(null);
-        return;
-      }
-
       const { data, error } = await supabase.functions.invoke('capture-payment', {
         body: {
           paymentIntentId,
@@ -133,21 +125,16 @@ export default function BookingsPage() {
   };
 
   const handleCancelHold = async (booking: BookingWithDetails) => {
-    if (!booking.customer?.email) {
-      toast({ title: "Error", description: "Customer email not found", variant: "destructive" });
+    const paymentIntentId = (booking as any).payment_intent_id;
+    
+    if (!paymentIntentId) {
+      toast({ title: "Error", description: "No payment hold found for this booking", variant: "destructive" });
       return;
     }
 
     setCancelingHold(booking.id);
     
     try {
-      const paymentIntentId = prompt("Enter the Payment Intent ID to cancel/release:");
-      
-      if (!paymentIntentId) {
-        setCancelingHold(null);
-        return;
-      }
-
       const { data, error } = await supabase.functions.invoke('cancel-hold', {
         body: {
           paymentIntentId,
@@ -333,26 +320,26 @@ export default function BookingsPage() {
                         <DropdownMenuItem 
                           className="gap-2"
                           onClick={() => handleCapturePayment(booking)}
-                          disabled={capturingPayment === booking.id || booking.payment_status === 'paid'}
+                          disabled={capturingPayment === booking.id || booking.payment_status === 'paid' || !(booking as any).payment_intent_id}
                         >
                           {capturingPayment === booking.id ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
                           ) : (
                             <CreditCard className="w-4 h-4" />
                           )}
-                          {booking.payment_status === 'paid' ? 'Payment Captured' : 'Capture Payment'}
+                          {booking.payment_status === 'paid' ? 'Payment Captured' : (!(booking as any).payment_intent_id ? 'No Hold' : 'Capture Payment')}
                         </DropdownMenuItem>
                         <DropdownMenuItem 
                           className="gap-2 text-warning"
                           onClick={() => handleCancelHold(booking)}
-                          disabled={cancelingHold === booking.id || booking.payment_status === 'paid' || booking.payment_status === 'refunded'}
+                          disabled={cancelingHold === booking.id || booking.payment_status === 'paid' || booking.payment_status === 'refunded' || !(booking as any).payment_intent_id}
                         >
                           {cancelingHold === booking.id ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
                           ) : (
                             <XCircle className="w-4 h-4" />
                           )}
-                          {booking.payment_status === 'refunded' ? 'Hold Released' : 'Release Hold'}
+                          {booking.payment_status === 'refunded' ? 'Hold Released' : (!(booking as any).payment_intent_id ? 'No Hold' : 'Release Hold')}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem 

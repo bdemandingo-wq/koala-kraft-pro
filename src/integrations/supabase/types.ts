@@ -25,6 +25,7 @@ export type Database = {
           duration: number
           id: string
           notes: string | null
+          payment_intent_id: string | null
           payment_status: Database["public"]["Enums"]["payment_status"]
           scheduled_at: string
           service_id: string | null
@@ -45,6 +46,7 @@ export type Database = {
           duration: number
           id?: string
           notes?: string | null
+          payment_intent_id?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
           scheduled_at: string
           service_id?: string | null
@@ -65,6 +67,7 @@ export type Database = {
           duration?: number
           id?: string
           notes?: string | null
+          payment_intent_id?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
           scheduled_at?: string
           service_id?: string | null
