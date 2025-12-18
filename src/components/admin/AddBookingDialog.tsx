@@ -718,6 +718,8 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate }: AddBooking
                       </SelectTrigger>
                       <SelectContent>
                         {[
+                          { value: '07:00', label: '7:00 AM' },
+                          { value: '07:30', label: '7:30 AM' },
                           { value: '08:00', label: '8:00 AM' },
                           { value: '08:30', label: '8:30 AM' },
                           { value: '09:00', label: '9:00 AM' },
