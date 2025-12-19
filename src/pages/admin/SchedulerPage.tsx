@@ -14,10 +14,22 @@ import {
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
+type StatusFilter = 'all' | 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled';
+
+const filterLabels: Record<StatusFilter, string> = {
+  all: 'All Bookings',
+  pending: 'Pending',
+  confirmed: 'Confirmed',
+  in_progress: 'In Progress',
+  completed: 'Completed',
+  cancelled: 'Cancelled',
+};
+
 export default function SchedulerPage() {
   const { data: staff = [] } = useStaff();
   const { data: bookings = [] } = useBookings();
   const [exporting, setExporting] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
 
   const handleExport = async (type: 'csv' | 'json') => {
     setExporting(true);
@@ -75,16 +87,29 @@ export default function SchedulerPage() {
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="gap-2">
                 <Filter className="w-4 h-4" />
-                Filter
+                {filterLabels[statusFilter]}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem>All Bookings</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setStatusFilter('all')}>
+                All Bookings
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Pending</DropdownMenuItem>
-              <DropdownMenuItem>Confirmed</DropdownMenuItem>
-              <DropdownMenuItem>Completed</DropdownMenuItem>
-              <DropdownMenuItem>Cancelled</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setStatusFilter('pending')}>
+                Pending
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setStatusFilter('confirmed')}>
+                Confirmed
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setStatusFilter('in_progress')}>
+                In Progress
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setStatusFilter('completed')}>
+                Completed
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setStatusFilter('cancelled')}>
+                Cancelled
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           
@@ -127,7 +152,7 @@ export default function SchedulerPage() {
         </div>
       )}
 
-      <SchedulerCalendar />
+      <SchedulerCalendar statusFilter={statusFilter} />
     </AdminLayout>
   );
 }

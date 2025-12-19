@@ -77,8 +77,8 @@ export const cleaningServices: CleaningService[] = [
     name: 'Airbnb/Short-Term Rental',
     description: 'Recurring turnover cleans for vacation rentals (3-7 cleans/month discount)',
     color: '#ec4899',
-    minimumPrice: 95,
-    prices: [95, 115, 135, 155, 175, 195, 220, 250, 285, 320, 355, 390, 425, 460, 495, 530, 565],
+    minimumPrice: 140,
+    prices: [140, 160, 180, 200, 220, 240, 265, 295, 330, 365, 400, 435, 470, 505, 540, 575, 610],
   },
 ];
 
