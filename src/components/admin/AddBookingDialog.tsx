@@ -116,6 +116,11 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate, booking, onD
   const [squareFootage, setSquareFootage] = useState('');
   const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
 
+  // Cleaner payment state
+  const [cleanerWage, setCleanerWage] = useState<string>('');
+  const [cleanerWageType, setCleanerWageType] = useState<string>('hourly');
+  const [cleanerOverrideHours, setCleanerOverrideHours] = useState<string>('');
+
   // Card state
   const [cardInfo, setCardInfo] = useState<CardInfo | null>(null);
   const [loadingCard, setLoadingCard] = useState(false);
@@ -181,6 +186,11 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate, booking, onD
       setBathrooms(booking.bathrooms || '1');
       setSquareFootage(booking.square_footage || '');
       setSelectedExtras(booking.extras || []);
+      // Cleaner payment fields
+      const bookingAny = booking as any;
+      setCleanerWage(bookingAny.cleaner_wage ? String(bookingAny.cleaner_wage) : '');
+      setCleanerWageType(bookingAny.cleaner_wage_type || 'hourly');
+      setCleanerOverrideHours(bookingAny.cleaner_override_hours ? String(bookingAny.cleaner_override_hours) : '');
     } else if (!booking && open) {
       // Reset for new booking but keep defaultDate
       if (defaultDate) {
@@ -430,6 +440,9 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate, booking, onD
       square_footage: squareFootage || null,
       extras: selectedExtras,
       is_draft: isDraft,
+      cleaner_wage: cleanerWage ? parseFloat(cleanerWage) : null,
+      cleaner_wage_type: cleanerWageType,
+      cleaner_override_hours: cleanerOverrideHours ? parseFloat(cleanerOverrideHours) : null,
     };
   };
 
@@ -598,6 +611,9 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate, booking, onD
     setSelectedExtras([]);
     setCardInfo(null);
     setChargeError(null);
+    setCleanerWage('');
+    setCleanerWageType('hourly');
+    setCleanerOverrideHours('');
   };
 
   const toggleExtra = (extraId: string) => {
@@ -898,6 +914,69 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate, booking, onD
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+
+                {/* Cleaner Payment Section */}
+                <Separator className="my-4" />
+                <div className="space-y-3">
+                  <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Cleaner Payment</Label>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs font-medium text-muted-foreground">Wage</Label>
+                      <Input
+                        type="number"
+                        value={cleanerWage}
+                        onChange={(e) => setCleanerWage(e.target.value)}
+                        placeholder="25"
+                        className="mt-1.5 h-10 bg-secondary/30 border-border/50"
+                        inputMode="decimal"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs font-medium text-muted-foreground">Type</Label>
+                      <Select value={cleanerWageType} onValueChange={setCleanerWageType}>
+                        <SelectTrigger className="mt-1.5 h-10 bg-secondary/30 border-border/50">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-popover border-border">
+                          <SelectItem value="hourly">/hr (Hourly)</SelectItem>
+                          <SelectItem value="flat">$ (Flat Fee)</SelectItem>
+                          <SelectItem value="percentage">% (Percentage)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {cleanerWageType === 'hourly' && (
+                    <div>
+                      <Label className="text-xs font-medium text-muted-foreground">Override Hours</Label>
+                      <Input
+                        type="number"
+                        value={cleanerOverrideHours}
+                        onChange={(e) => setCleanerOverrideHours(e.target.value)}
+                        placeholder={`Default: ${((selectedService?.duration || 60) / 60).toFixed(1)} hrs`}
+                        className="mt-1.5 h-10 bg-secondary/30 border-border/50"
+                        inputMode="decimal"
+                      />
+                    </div>
+                  )}
+
+                  {cleanerWage && (
+                    <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                      <p className="text-xs text-emerald-700 dark:text-emerald-300">Estimated Cleaner Pay</p>
+                      <p className="text-lg font-bold text-emerald-700 dark:text-emerald-300">
+                        ${(() => {
+                          const wage = parseFloat(cleanerWage);
+                          if (isNaN(wage)) return '0.00';
+                          if (cleanerWageType === 'flat') return wage.toFixed(2);
+                          if (cleanerWageType === 'percentage') return ((totalAmount * wage) / 100).toFixed(2);
+                          const hours = parseFloat(cleanerOverrideHours) || ((selectedService?.duration || 60) / 60);
+                          return (wage * hours).toFixed(2);
+                        })()}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
