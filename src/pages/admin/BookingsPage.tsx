@@ -27,10 +27,10 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
-import { useBookings, useUpdateBooking, BookingWithDetails } from '@/hooks/useBookings';
+import { useBookings, useUpdateBooking, useDeleteBooking, BookingWithDetails } from '@/hooks/useBookings';
 import { format } from 'date-fns';
 import { AddBookingDialog } from '@/components/admin/AddBookingDialog';
-import { BookingDetailsDialog, EditBookingDialog } from '@/components/admin/BookingDialogs';
+import { BookingDetailsDialog } from '@/components/admin/BookingDialogs';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -66,13 +66,14 @@ export default function BookingsPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [activeBooking, setActiveBooking] = useState<BookingWithDetails | null>(null);
+  const [editingBooking, setEditingBooking] = useState<BookingWithDetails | null>(null);
   const [capturingPayment, setCapturingPayment] = useState<string | null>(null);
   const [cancelingHold, setCancelingHold] = useState<string | null>(null);
 
   const { data: bookings = [], isLoading, error } = useBookings();
   const updateBooking = useUpdateBooking();
+  const deleteBooking = useDeleteBooking();
 
   const filteredBookings = bookings.filter((booking) => {
     const customerName = booking.customer 
@@ -90,10 +91,16 @@ export default function BookingsPage() {
   });
 
   const handleStatusChange = async (bookingId: string, newStatus: string) => {
-    await updateBooking.mutateAsync({ 
-      id: bookingId, 
-      status: newStatus as BookingWithDetails['status']
+    await updateBooking.mutateAsync({
+      id: bookingId,
+      status: newStatus as BookingWithDetails['status'],
     });
+  };
+
+  const handleDelete = async (booking: BookingWithDetails) => {
+    const ok = window.confirm(`Delete booking #${booking.booking_number}? This cannot be undone.`);
+    if (!ok) return;
+    await deleteBooking.mutateAsync(booking.id);
   };
 
   const handleCapturePayment = async (booking: BookingWithDetails) => {
@@ -210,7 +217,13 @@ export default function BookingsPage() {
       title="Bookings"
       subtitle={`${filteredBookings.length} total bookings`}
       actions={
-        <Button className="gap-2" onClick={() => setAddDialogOpen(true)}>
+        <Button
+          className="gap-2"
+          onClick={() => {
+            setEditingBooking(null);
+            setAddDialogOpen(true);
+          }}
+        >
           <Plus className="w-4 h-4" />
           Add Booking
         </Button>
@@ -328,7 +341,7 @@ export default function BookingsPage() {
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
                           className="gap-2"
-                          onSelect={() => {
+                          onClick={() => {
                             setActiveBooking(booking);
                             setViewDialogOpen(true);
                           }}
@@ -337,30 +350,25 @@ export default function BookingsPage() {
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           className="gap-2"
-                          onSelect={() => {
-                            setActiveBooking(booking);
-                            setEditDialogOpen(true);
+                          onClick={() => {
+                            setEditingBooking(booking);
+                            setAddDialogOpen(true);
                           }}
                         >
                           <Edit className="w-4 h-4" /> Edit
                         </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="gap-2"
-                          onSelect={() => handleStatusChange(booking.id, 'confirmed')}
-                        >
-                          Confirm
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="gap-2"
-                          onSelect={() => handleStatusChange(booking.id, 'completed')}
-                        >
+                        <DropdownMenuItem className="gap-2" onClick={() => handleStatusChange(booking.id, 'completed')}>
                           Mark Complete
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           className="gap-2"
-                          onSelect={() => handleCapturePayment(booking)}
-                          disabled={capturingPayment === booking.id || booking.payment_status === 'paid' || !(booking as any).payment_intent_id}
+                          onClick={() => handleCapturePayment(booking)}
+                          disabled={
+                            capturingPayment === booking.id ||
+                            booking.payment_status === 'paid' ||
+                            !(booking as any).payment_intent_id
+                          }
                         >
                           {capturingPayment === booking.id ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
@@ -375,8 +383,13 @@ export default function BookingsPage() {
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           className="gap-2 text-warning"
-                          onSelect={() => handleCancelHold(booking)}
-                          disabled={cancelingHold === booking.id || booking.payment_status === 'paid' || booking.payment_status === 'refunded' || !(booking as any).payment_intent_id}
+                          onClick={() => handleCancelHold(booking)}
+                          disabled={
+                            cancelingHold === booking.id ||
+                            booking.payment_status === 'paid' ||
+                            booking.payment_status === 'refunded' ||
+                            !(booking as any).payment_intent_id
+                          }
                         >
                           {cancelingHold === booking.id ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
@@ -390,11 +403,8 @@ export default function BookingsPage() {
                               : 'Release Hold'}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          className="gap-2 text-destructive"
-                          onSelect={() => handleStatusChange(booking.id, 'cancelled')}
-                        >
-                          <Trash2 className="w-4 h-4" /> Cancel
+                        <DropdownMenuItem className="gap-2 text-destructive" onClick={() => handleDelete(booking)}>
+                          <Trash2 className="w-4 h-4" /> Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -406,21 +416,19 @@ export default function BookingsPage() {
         )}
       </div>
 
-      <AddBookingDialog open={addDialogOpen} onOpenChange={setAddDialogOpen} />
+      <AddBookingDialog
+        open={addDialogOpen}
+        onOpenChange={(open) => {
+          setAddDialogOpen(open);
+          if (!open) setEditingBooking(null);
+        }}
+        booking={editingBooking}
+      />
 
       <BookingDetailsDialog
         open={viewDialogOpen}
         onOpenChange={(open) => {
           setViewDialogOpen(open);
-          if (!open) setActiveBooking(null);
-        }}
-        booking={activeBooking}
-      />
-
-      <EditBookingDialog
-        open={editDialogOpen}
-        onOpenChange={(open) => {
-          setEditDialogOpen(open);
           if (!open) setActiveBooking(null);
         }}
         booking={activeBooking}
