@@ -9,6 +9,7 @@ import {
   Mail,
   Loader2,
   Search,
+  Edit,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -66,6 +67,7 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange }: Scheduler
   const [viewMode, setViewMode] = useState<'month' | 'week'>('month');
   const [sendingEmail, setSendingEmail] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [editingBooking, setEditingBooking] = useState<BookingWithDetails | null>(null);
   const [localSearchTerm, setLocalSearchTerm] = useState('');
   const [searchResultsOpen, setSearchResultsOpen] = useState(false);
 
@@ -182,7 +184,7 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange }: Scheduler
         ? `${booking.customer.first_name} ${booking.customer.last_name}`
         : 'Unknown Customer';
 
-      const { error } = await supabase.functions.invoke('send-cleaner-notification', {
+      const { data, error } = await supabase.functions.invoke('send-cleaner-notification', {
         body: {
           cleanerName: booking.staff.name,
           cleanerEmail: booking.staff.email,
@@ -198,13 +200,16 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange }: Scheduler
 
       if (error) {
         console.error('Email error:', error);
-        toast.error('Failed to send notification');
+        toast.error('Failed to send notification: ' + (error.message || 'Unknown error'));
+      } else if (data?.error) {
+        console.error('Email error:', data.error);
+        toast.error('Failed to send notification: ' + data.error);
       } else {
         toast.success(`Notification sent to ${booking.staff.name}`);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to send notification:', err);
-      toast.error('Failed to send notification');
+      toast.error('Failed to send notification: ' + (err.message || 'Unknown error'));
     } finally {
       setSendingEmail(false);
     }
@@ -218,6 +223,13 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange }: Scheduler
     setSearchResultsOpen(value.length > 0);
   };
 
+  const handleEditBooking = () => {
+    if (selectedBooking) {
+      setEditingBooking(selectedBooking);
+      setSelectedBooking(null);
+    }
+  };
+
   const getHeaderTitle = () => {
     if (viewMode === 'week') {
       const weekStart = startOfWeek(currentDate);
@@ -225,6 +237,16 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange }: Scheduler
       return `${format(weekStart, 'MMM d')} - ${format(weekEnd, 'MMM d, yyyy')}`;
     }
     return `${MONTHS[month]} ${year}`;
+  };
+
+  const getFullAddress = (booking: BookingWithDetails) => {
+    const parts = [
+      booking.address,
+      booking.city,
+      booking.state,
+      booking.zip_code
+    ].filter(Boolean);
+    return parts.length > 0 ? parts.join(', ') : null;
   };
 
   return (
@@ -460,15 +482,10 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange }: Scheduler
                   </div>
                 </div>
                 
-                {selectedBooking.address && (
+                {getFullAddress(selectedBooking) && (
                   <div className="flex items-center gap-3 text-sm">
                     <MapPin className="w-4 h-4 text-muted-foreground" />
-                    <p>
-                      {selectedBooking.address}
-                      {selectedBooking.city && `, ${selectedBooking.city}`}
-                      {selectedBooking.state && `, ${selectedBooking.state}`}
-                      {selectedBooking.zip_code && ` ${selectedBooking.zip_code}`}
-                    </p>
+                    <p>{getFullAddress(selectedBooking)}</p>
                   </div>
                 )}
 
@@ -496,6 +513,14 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange }: Scheduler
                   <Button 
                     variant="outline" 
                     className="gap-2"
+                    onClick={handleEditBooking}
+                  >
+                    <Edit className="w-4 h-4" />
+                    Edit
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="gap-2"
                     onClick={() => sendCleanerNotification(selectedBooking)}
                     disabled={sendingEmail || !selectedBooking.staff}
                   >
@@ -513,7 +538,16 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange }: Scheduler
         </DialogContent>
       </Dialog>
 
-      <AddBookingDialog open={addDialogOpen} onOpenChange={setAddDialogOpen} />
+      <AddBookingDialog 
+        open={addDialogOpen || !!editingBooking} 
+        onOpenChange={(open) => {
+          if (!open) {
+            setAddDialogOpen(false);
+            setEditingBooking(null);
+          }
+        }}
+        booking={editingBooking}
+      />
     </div>
   );
 }
