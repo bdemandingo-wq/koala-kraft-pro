@@ -22,6 +22,10 @@ export type Database = {
           bedrooms: string | null
           booking_number: number
           city: string | null
+          cleaner_actual_payment: number | null
+          cleaner_override_hours: number | null
+          cleaner_wage: number | null
+          cleaner_wage_type: string | null
           created_at: string
           customer_id: string | null
           deposit_paid: number | null
@@ -50,6 +54,10 @@ export type Database = {
           bedrooms?: string | null
           booking_number?: number
           city?: string | null
+          cleaner_actual_payment?: number | null
+          cleaner_override_hours?: number | null
+          cleaner_wage?: number | null
+          cleaner_wage_type?: string | null
           created_at?: string
           customer_id?: string | null
           deposit_paid?: number | null
@@ -78,6 +86,10 @@ export type Database = {
           bedrooms?: string | null
           booking_number?: number
           city?: string | null
+          cleaner_actual_payment?: number | null
+          cleaner_override_hours?: number | null
+          cleaner_wage?: number | null
+          cleaner_wage_type?: string | null
           created_at?: string
           customer_id?: string | null
           deposit_paid?: number | null

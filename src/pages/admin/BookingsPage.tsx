@@ -52,7 +52,7 @@ import {
 import { useBookings, useUpdateBooking, useDeleteBooking, BookingWithDetails } from '@/hooks/useBookings';
 import { format, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
 import { AddBookingDialog } from '@/components/admin/AddBookingDialog';
-import { BookingDetailsDialog } from '@/components/admin/BookingDialogs';
+import { BookingDetailsDialog, AdjustPaymentDialog } from '@/components/admin/BookingDialogs';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { DateRange } from 'react-day-picker';
@@ -99,6 +99,7 @@ export default function BookingsPage() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [adjustPaymentOpen, setAdjustPaymentOpen] = useState(false);
   const [activeBooking, setActiveBooking] = useState<BookingWithDetails | null>(null);
   const [editingBooking, setEditingBooking] = useState<BookingWithDetails | null>(null);
   const [capturingPayment, setCapturingPayment] = useState<string | null>(null);
@@ -780,9 +781,22 @@ export default function BookingsPage() {
                             <DropdownMenuSeparator />
                             <DropdownMenuItem 
                               className="gap-2 cursor-pointer" 
-                              onClick={() => handleStatusChange(booking.id, 'completed')}
+                              onClick={() => {
+                                handleStatusChange(booking.id, 'completed');
+                                setActiveBooking(booking);
+                                setAdjustPaymentOpen(true);
+                              }}
                             >
-                              Mark Complete
+                              Mark Complete & Adjust Pay
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              className="gap-2 cursor-pointer" 
+                              onClick={() => {
+                                setActiveBooking(booking);
+                                setAdjustPaymentOpen(true);
+                              }}
+                            >
+                              <DollarSign className="w-4 h-4" /> Adjust Cleaner Pay
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
@@ -870,6 +884,12 @@ export default function BookingsPage() {
       <BookingDetailsDialog
         open={viewDialogOpen}
         onOpenChange={setViewDialogOpen}
+        booking={activeBooking}
+      />
+
+      <AdjustPaymentDialog
+        open={adjustPaymentOpen}
+        onOpenChange={setAdjustPaymentOpen}
         booking={activeBooking}
       />
     </AdminLayout>
