@@ -35,9 +35,7 @@ function CardFormInner({ email, customerName, onCardSaved, onError }: CardFormPr
   const [loading, setLoading] = useState(false);
   const [cardComplete, setCardComplete] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleSaveCard = async () => {
     if (!stripe || !elements) {
       return;
     }
@@ -55,7 +53,7 @@ function CardFormInner({ email, customerName, onCardSaved, onError }: CardFormPr
         body: {
           email,
           customerName,
-        }
+        },
       });
 
       if (setupError || !setupData?.clientSecret) {
@@ -63,18 +61,15 @@ function CardFormInner({ email, customerName, onCardSaved, onError }: CardFormPr
       }
 
       // Confirm the SetupIntent with the card details
-      const { error: confirmError, setupIntent } = await stripe.confirmCardSetup(
-        setupData.clientSecret,
-        {
-          payment_method: {
-            card: cardElement,
-            billing_details: {
-              name: customerName,
-              email: email,
-            },
+      const { error: confirmError, setupIntent } = await stripe.confirmCardSetup(setupData.clientSecret, {
+        payment_method: {
+          card: cardElement,
+          billing_details: {
+            name: customerName,
+            email: email,
           },
-        }
-      );
+        },
+      });
 
       if (confirmError) {
         throw new Error(confirmError.message);
@@ -85,7 +80,7 @@ function CardFormInner({ email, customerName, onCardSaved, onError }: CardFormPr
         const { data: cardData, error: cardError } = await supabase.functions.invoke('get-payment-method-details', {
           body: {
             paymentMethodId: setupIntent.payment_method,
-          }
+          },
         });
 
         if (cardError) {
@@ -98,9 +93,9 @@ function CardFormInner({ email, customerName, onCardSaved, onError }: CardFormPr
           paymentMethodId: setupIntent.payment_method as string,
         });
 
-        toast({ 
-          title: "Success", 
-          description: `Card saved (${cardData.brand} ending in ${cardData.last4})` 
+        toast({
+          title: 'Success',
+          description: `Card saved (${cardData.brand} ending in ${cardData.last4})`,
         });
 
         // Clear the card element
@@ -109,7 +104,7 @@ function CardFormInner({ email, customerName, onCardSaved, onError }: CardFormPr
     } catch (error: any) {
       console.error('Failed to save card:', error);
       const errorMessage = error.message || 'Failed to save card';
-      toast({ title: "Error", description: errorMessage, variant: "destructive" });
+      toast({ title: 'Error', description: errorMessage, variant: 'destructive' });
       onError?.(errorMessage);
     } finally {
       setLoading(false);
@@ -117,18 +112,16 @@ function CardFormInner({ email, customerName, onCardSaved, onError }: CardFormPr
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="space-y-4">
       <div className="p-3 border rounded-md bg-background">
-        <CardElement 
-          options={CARD_ELEMENT_OPTIONS}
-          onChange={(e) => setCardComplete(e.complete)}
-        />
+        <CardElement options={CARD_ELEMENT_OPTIONS} onChange={(e) => setCardComplete(e.complete)} />
       </div>
-      <Button 
-        type="submit" 
+      <Button
+        type="button"
         variant="outline"
         disabled={loading || !stripe || !cardComplete}
         className="w-full"
+        onClick={handleSaveCard}
       >
         {loading ? (
           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -137,7 +130,7 @@ function CardFormInner({ email, customerName, onCardSaved, onError }: CardFormPr
         )}
         Save Card on File
       </Button>
-    </form>
+    </div>
   );
 }
 
