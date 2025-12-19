@@ -18,13 +18,39 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { useCustomers } from '@/hooks/useBookings';
+import { useCustomers, useDeleteCustomer } from '@/hooks/useBookings';
 import { AddCustomerDialog } from '@/components/admin/AddCustomerDialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 export default function CustomersPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [customerToDelete, setCustomerToDelete] = useState<{ id: string; name: string } | null>(null);
   const { data: customers = [], isLoading } = useCustomers();
+  const deleteCustomer = useDeleteCustomer();
+
+  const handleDeleteClick = (customer: { id: string; first_name: string; last_name: string }) => {
+    setCustomerToDelete({ id: customer.id, name: `${customer.first_name} ${customer.last_name}` });
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (customerToDelete) {
+      await deleteCustomer.mutateAsync(customerToDelete.id);
+      setDeleteDialogOpen(false);
+      setCustomerToDelete(null);
+    }
+  };
 
   const filteredCustomers = customers.filter((customer) =>
     `${customer.first_name} ${customer.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -142,7 +168,10 @@ export default function CustomersPage() {
                         <DropdownMenuItem className="gap-2">
                           <Edit className="w-4 h-4" /> Edit
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="gap-2 text-destructive">
+                        <DropdownMenuItem 
+                          className="gap-2 text-destructive"
+                          onClick={() => handleDeleteClick(customer)}
+                        >
                           <Trash2 className="w-4 h-4" /> Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -156,6 +185,26 @@ export default function CustomersPage() {
       </div>
 
       <AddCustomerDialog open={addDialogOpen} onOpenChange={setAddDialogOpen} />
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Customer</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {customerToDelete?.name}? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 }
