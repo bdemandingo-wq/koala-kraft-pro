@@ -280,34 +280,64 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate, booking }: A
   };
 
   const handleSendPaymentLink = async () => {
-    const customerEmail = customerType === 'existing' 
-      ? existingCustomers.find(c => c.id === selectedCustomerId)?.email 
-      : email;
-    
+    const customerEmail =
+      customerType === 'existing'
+        ? existingCustomers.find((c) => c.id === selectedCustomerId)?.email
+        : email;
+
     if (!customerEmail) {
-      toast({ title: "Error", description: "Customer email is required to send payment link", variant: "destructive" });
+      toast({
+        title: 'Error',
+        description: 'Customer email is required to send payment link',
+        variant: 'destructive',
+      });
       return;
     }
-    
+
     setSendingPaymentLink(true);
     try {
-      const { error } = await supabase.functions.invoke('send-payment-link', {
+      const { data, error } = await supabase.functions.invoke('send-payment-link', {
         body: {
           email: customerEmail,
-          customerName: customerType === 'existing' 
-            ? `${existingCustomers.find(c => c.id === selectedCustomerId)?.first_name} ${existingCustomers.find(c => c.id === selectedCustomerId)?.last_name}`
-            : `${firstName} ${lastName}`,
+          customerName:
+            customerType === 'existing'
+              ? `${existingCustomers.find((c) => c.id === selectedCustomerId)?.first_name} ${existingCustomers.find((c) => c.id === selectedCustomerId)?.last_name}`
+              : `${firstName} ${lastName}`,
           amount: finalPrice,
-          serviceName: cleaningServices.find(s => s.id === selectedService)?.name || 'Cleaning Service',
-        }
+          serviceName:
+            cleaningServices.find((s) => s.id === selectedService)?.name ||
+            'Cleaning Service',
+          bookingId: booking?.id,
+        },
       });
-      
+
       if (error) throw error;
-      
-      toast({ title: "Success", description: "Payment link sent to customer's email" });
-    } catch (error) {
+      if (!data?.success) throw new Error(data?.error || 'Failed to send payment link');
+
+      // Extra safety: if email delivery is delayed/blocked, still surface the URL to the admin.
+      if (data?.paymentUrl) {
+        try {
+          await navigator.clipboard.writeText(String(data.paymentUrl));
+          toast({
+            title: 'Payment link sent',
+            description: 'Email queued. The payment URL was copied to your clipboard.',
+          });
+        } catch {
+          toast({
+            title: 'Payment link sent',
+            description: 'Email queued. (Could not copy URL automatically.)',
+          });
+        }
+      } else {
+        toast({ title: 'Payment link sent', description: 'Email queued successfully.' });
+      }
+    } catch (error: any) {
       console.error('Failed to send payment link:', error);
-      toast({ title: "Error", description: "Failed to send payment link", variant: "destructive" });
+      toast({
+        title: 'Error',
+        description: error?.message || 'Failed to send payment link',
+        variant: 'destructive',
+      });
     } finally {
       setSendingPaymentLink(false);
     }
