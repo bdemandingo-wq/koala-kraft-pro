@@ -291,22 +291,39 @@ export default function BookingsPage() {
         }
       });
 
-      // Check if the hold is already canceled - treat as success
+      // Handle error responses - check if hold was already canceled
+      if (error) {
+        // Parse error message - it might indicate already canceled
+        const errorMessage = error.message || '';
+        if (errorMessage.includes('canceled') || errorMessage.includes('status: canceled')) {
+          toast({ 
+            title: "Already Released", 
+            description: "This hold was already released previously." 
+          });
+          
+          // Update payment status to refunded since hold is already canceled
+          await updateBooking.mutateAsync({ 
+            id: booking.id, 
+            payment_status: 'refunded' as any
+          });
+          return;
+        }
+        throw error;
+      }
+
+      // Check data for already canceled status
       if (data?.status === 'canceled' || data?.error?.includes('canceled')) {
         toast({ 
           title: "Already Released", 
           description: "This hold was already released previously." 
         });
         
-        // Update payment status to refunded since hold is already canceled
         await updateBooking.mutateAsync({ 
           id: booking.id, 
           payment_status: 'refunded' as any
         });
         return;
       }
-
-      if (error) throw error;
 
       if (data.success) {
         toast({ 
