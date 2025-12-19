@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,35 +27,43 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { 
-  Loader2, 
-  Plus, 
-  Minus, 
-  Sparkles, 
-  LayoutGrid, 
-  Blinds, 
-  Refrigerator, 
-  UtensilsCrossed, 
-  Flame, 
-  Dog, 
+import {
+  Loader2,
+  Plus,
+  Minus,
+  Sparkles,
+  LayoutGrid,
+  Blinds,
+  Refrigerator,
+  UtensilsCrossed,
+  Flame,
+  Dog,
   Shirt,
   Send,
   Calendar,
   CreditCard,
-  Check
+  Check,
 } from 'lucide-react';
 import { StripeCardForm } from '@/components/stripe/StripeCardForm';
-import { useCreateBooking, useCreateCustomer, useServices, useStaff, useCustomers } from '@/hooks/useBookings';
-import { 
-  cleaningServices, 
-  squareFootageRanges, 
-  getSqFtIndexFromValue, 
-  getPriceForService, 
+import {
+  BookingWithDetails,
+  useCreateBooking,
+  useCreateCustomer,
+  useServices,
+  useStaff,
+  useCustomers,
+  useUpdateBooking,
+} from '@/hooks/useBookings';
+import {
+  cleaningServices,
+  squareFootageRanges,
+  getSqFtIndexFromValue,
+  getPriceForService,
   CleaningServiceType,
   extras,
   frequencyOptions,
   bedroomOptions,
-  bathroomOptions
+  bathroomOptions,
 } from '@/data/pricingData';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
@@ -65,6 +73,7 @@ interface AddBookingDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   defaultDate?: Date;
+  booking?: BookingWithDetails | null;
 }
 
 const extraIcons: Record<string, React.ReactNode> = {
@@ -77,8 +86,8 @@ const extraIcons: Record<string, React.ReactNode> = {
   dishes: <UtensilsCrossed className="w-6 h-6" />,
 };
 
-export function AddBookingDialog({ open, onOpenChange, defaultDate }: AddBookingDialogProps) {
-  // Customer Type
+export function AddBookingDialog({ open, onOpenChange, defaultDate, booking }: AddBookingDialogProps) {
+  const isEdit = !!booking;
   const [customerType, setCustomerType] = useState<'new' | 'existing'>('new');
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
   
@@ -150,6 +159,7 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate }: AddBooking
   const { data: dbServices = [] } = useServices();
   const { data: staff = [] } = useStaff();
   const createBooking = useCreateBooking();
+  const updateBooking = useUpdateBooking();
   const createCustomer = useCreateCustomer();
   
   const [sendingPaymentLink, setSendingPaymentLink] = useState(false);
@@ -221,6 +231,8 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate }: AddBooking
   };
 
   const resetForm = () => {
+    // If we are editing, keep the dialog state clean for next open
+    // (BookingsPage clears `booking` prop on close.)
     setCustomerType('new');
     setSelectedCustomerId('');
     setFirstName('');
@@ -374,9 +386,34 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate }: AddBooking
     }
   };
 
+  useEffect(() => {
+    if (!open || !booking) return;
+
+    // Prefill the same booking form for editing
+    setCustomerType('existing');
+    setSelectedCustomerId(booking.customer?.id || '');
+
+    if (booking.staff?.id) setSelectedStaffId(booking.staff.id);
+
+    const d = new Date(booking.scheduled_at);
+    setScheduledDate(format(d, 'yyyy-MM-dd'));
+    setScheduledTime(format(d, 'HH:mm'));
+
+    // Best-effort map service name back to pricing service type
+    const serviceName = booking.service?.name?.toLowerCase() || '';
+    const matched = cleaningServices.find((s) => serviceName.includes(s.name.toLowerCase()));
+    if (matched) setSelectedService(matched.id as any);
+
+    setAdjustPrice(true);
+    setCustomPrice(String(booking.total_amount ?? ''));
+
+    // Put existing notes into Special Notes so they stay visible/editable
+    setSpecialNotes(booking.notes || '');
+  }, [open, booking]);
+
   const handleSubmit = async (e: React.FormEvent, saveType: 'booking' | 'draft' | 'quote' = 'booking') => {
     e.preventDefault();
-    
+
     try {
       let customerId = selectedCustomerId;
       let customerAddress = address;
@@ -384,49 +421,89 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate }: AddBooking
       let customerState = state;
       let customerZip = zipCode;
 
-      if (customerType === 'new') {
-        const newCustomer = await createCustomer.mutateAsync({
-          first_name: firstName,
-          last_name: lastName,
-          email,
-          phone: phone || undefined,
-          address: address || undefined,
-          city: city || undefined,
-          state: state || undefined,
-          zip_code: zipCode || undefined,
-        });
-        customerId = newCustomer.id;
-      } else {
-        const existingCustomer = existingCustomers.find(c => c.id === selectedCustomerId);
-        if (existingCustomer) {
-          customerAddress = existingCustomer.address || address;
-          customerCity = existingCustomer.city || city;
-          customerState = existingCustomer.state || state;
-          customerZip = existingCustomer.zip_code || zipCode;
+      // In edit mode, we only allow selecting an existing customer
+      if (!isEdit) {
+        if (customerType === 'new') {
+          const newCustomer = await createCustomer.mutateAsync({
+            first_name: firstName,
+            last_name: lastName,
+            email,
+            phone: phone || undefined,
+            address: address || undefined,
+            city: city || undefined,
+            state: state || undefined,
+            zip_code: zipCode || undefined,
+          });
+          customerId = newCustomer.id;
+        } else {
+          const existingCustomer = existingCustomers.find((c) => c.id === selectedCustomerId);
+          if (existingCustomer) {
+            customerAddress = existingCustomer.address || address;
+            customerCity = existingCustomer.city || city;
+            customerState = existingCustomer.state || state;
+            customerZip = existingCustomer.zip_code || zipCode;
+          }
         }
       }
 
-      const serviceData = cleaningServices.find(s => s.id === selectedService);
-      const dbService = dbServices.find(s => s.name.toLowerCase().includes(selectedService.replace('_', ' '))) || dbServices[0];
+      const serviceData = cleaningServices.find((s) => s.id === selectedService);
+      const dbService =
+        dbServices.find((s) =>
+          s.name.toLowerCase().includes(String(selectedService).replace('_', ' ')),
+        ) || dbServices[0];
 
       const scheduledAt = new Date(`${scheduledDate}T${scheduledTime}:00`).toISOString();
-      
+
       // Build comprehensive notes
       const notesParts = [
         serviceData?.name,
         `${squareFootage} sq ft`,
         `${bedrooms} bed / ${bathrooms} bath`,
-        frequency !== 'one_time' ? `Frequency: ${frequencyOptions.find(f => f.id === frequency)?.label}` : '',
-        selectedExtras.length > 0 ? `Extras: ${selectedExtras.map(e => extras.find(ex => ex.id === e)?.name).join(', ')}` : '',
+        frequency !== 'one_time' ? `Frequency: ${frequencyOptions.find((f) => f.id === frequency)?.label}` : '',
+        selectedExtras.length > 0 ? `Extras: ${selectedExtras.map((ex) => extras.find((e2) => e2.id === ex)?.name).join(', ')}` : '',
         accessMethod === 'someone_home' ? 'Someone will be at home' : accessMethod === 'hide_keys' ? 'Keys hidden' : '',
         keepKeyWithProvider ? 'Keep key with provider' : '',
         customerNoteForProvider,
         specialNotes,
         privateBookingNote ? `[Private] ${privateBookingNote}` : '',
         noteForProvider ? `[For Provider] ${noteForProvider}` : '',
-      ].filter(Boolean).join('. ');
+      ]
+        .filter(Boolean)
+        .join('. ');
 
-      const status = saveType === 'draft' ? 'pending' : saveType === 'quote' ? 'pending' : (autoAcceptsJob ? 'confirmed' : 'pending');
+      if (isEdit && booking) {
+        await updateBooking.mutateAsync({
+          id: booking.id,
+          customer_id: customerId || booking.customer?.id || undefined,
+          service_id: dbService?.id || booking.service?.id || undefined,
+          staff_id: selectedStaffId || undefined,
+          scheduled_at: scheduledAt,
+          duration: estimatedDuration || booking.duration,
+          total_amount: finalPrice || booking.total_amount,
+          notes: notesParts,
+          address: customerAddress || undefined,
+          city: customerCity || undefined,
+          state: customerState || undefined,
+          zip_code: customerZip || undefined,
+          // Preserve existing payment state for edits
+          payment_status: booking.payment_status,
+          payment_intent_id: booking.payment_intent_id || undefined,
+        } as any);
+
+        toast({ title: 'Saved', description: 'Booking updated successfully' });
+        resetForm();
+        onOpenChange(false);
+        return;
+      }
+
+      const status =
+        saveType === 'draft'
+          ? 'pending'
+          : saveType === 'quote'
+            ? 'pending'
+            : autoAcceptsJob
+              ? 'confirmed'
+              : 'pending';
 
       await createBooking.mutateAsync({
         customer_id: customerId || undefined,
@@ -436,7 +513,7 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate }: AddBooking
         duration: estimatedDuration,
         total_amount: finalPrice,
         status,
-        payment_status: paymentMethod === 'cash' ? 'pending' : (paymentIntentId ? 'partial' : 'pending'),
+        payment_status: paymentMethod === 'cash' ? 'pending' : paymentIntentId ? 'partial' : 'pending',
         payment_intent_id: paymentIntentId || undefined,
         notes: notesParts,
         address: customerAddress || undefined,
@@ -445,20 +522,25 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate }: AddBooking
         zip_code: customerZip || undefined,
       });
 
-      toast({ 
-        title: "Success", 
-        description: saveType === 'draft' ? "Booking saved as draft" : saveType === 'quote' ? "Quote created" : "Booking created successfully" 
+      toast({
+        title: 'Success',
+        description:
+          saveType === 'draft'
+            ? 'Booking saved as draft'
+            : saveType === 'quote'
+              ? 'Quote created'
+              : 'Booking created successfully',
       });
-      
+
       resetForm();
       onOpenChange(false);
     } catch (error) {
-      console.error('Failed to create booking:', error);
-      toast({ title: "Error", description: "Failed to create booking", variant: "destructive" });
+      console.error('Failed to save booking:', error);
+      toast({ title: 'Error', description: 'Failed to save booking', variant: 'destructive' });
     }
   };
 
-  const isSubmitting = createBooking.isPending || createCustomer.isPending;
+  const isSubmitting = createBooking.isPending || updateBooking.isPending || createCustomer.isPending;
   
   const serviceInfo = cleaningServices.find(s => s.id === selectedService);
   const sqFtLabel = squareFootageRanges.find(r => r.maxSqFt === parseInt(squareFootage))?.label || '';
@@ -470,7 +552,9 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate }: AddBooking
           {/* Main Form */}
           <div className="flex-1 overflow-y-auto p-6">
             <DialogHeader className="mb-6">
-              <DialogTitle className="text-xl font-semibold">New Booking</DialogTitle>
+              <DialogTitle className="text-xl font-semibold">
+                {isEdit && booking ? `Edit Booking #${booking.booking_number}` : 'New Booking'}
+              </DialogTitle>
             </DialogHeader>
             
             <form onSubmit={(e) => handleSubmit(e, 'booking')} className="space-y-8">
