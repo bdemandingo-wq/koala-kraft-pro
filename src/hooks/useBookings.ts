@@ -264,6 +264,31 @@ export function useCreateCustomer() {
   });
 }
 
+export function useDeleteCustomer() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('customers')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error deleting customer:', error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['customers'] });
+      toast.success('Customer deleted successfully');
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to delete customer: ${error.message}`);
+    },
+  });
+}
+
 export function useServices() {
   return useQuery({
     queryKey: ['services'],
