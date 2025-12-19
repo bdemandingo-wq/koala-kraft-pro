@@ -27,7 +27,8 @@ const CARD_ELEMENT_OPTIONS = {
       color: '#9e2146',
     },
   },
-  disableLink: true, // Disable Stripe Link feature
+  disableLink: true,
+  hidePostalCode: true,
 };
 
 function CardFormInner({ email, customerName, onCardSaved, onError }: CardFormProps) {
