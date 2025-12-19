@@ -40,6 +40,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useCustomers, useServices, useStaff, useCreateBooking, useUpdateBooking, useCreateCustomer, BookingWithDetails } from '@/hooks/useBookings';
 import { StripeCardForm } from '@/components/stripe/StripeCardForm';
 import { AddressAutocomplete } from '@/components/ui/AddressAutocomplete';
+import { CustomerSearchInput } from '@/components/admin/CustomerSearchInput';
 import { 
   squareFootageRanges, 
   extras as extrasData, 
@@ -597,18 +598,12 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate, booking, onD
                   </TabsList>
                   
                   <TabsContent value="existing" className="mt-4">
-                    <Select value={selectedCustomerId} onValueChange={setSelectedCustomerId}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a customer" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {customers.map((customer) => (
-                          <SelectItem key={customer.id} value={customer.id}>
-                            {customer.first_name} {customer.last_name} - {customer.email}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <CustomerSearchInput
+                      customers={customers}
+                      selectedCustomerId={selectedCustomerId}
+                      onSelectCustomer={setSelectedCustomerId}
+                      placeholder="Type to search customers..."
+                    />
                   </TabsContent>
                   
                   <TabsContent value="new" className="mt-4 space-y-3">
