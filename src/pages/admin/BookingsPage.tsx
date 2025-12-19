@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -61,6 +61,15 @@ const statusConfig: Record<string, { bg: string; text: string; dot: string }> = 
   no_show: { bg: 'bg-slate-100', text: 'text-slate-600', dot: 'bg-slate-400' },
 };
 
+const statusLabels: Record<string, string> = {
+  pending: 'pending payment',
+  confirmed: 'uncleaned',
+  in_progress: 'in progress',
+  completed: 'clean completed',
+  cancelled: 'cancelled',
+  no_show: 'no show',
+};
+
 const getPaymentStatusInfo = (booking: BookingWithDetails) => {
   const hasPaymentIntent = !!(booking as any).payment_intent_id;
   
@@ -91,12 +100,35 @@ export default function BookingsPage() {
   const [chargingCard, setChargingCard] = useState<string | null>(null);
   const [selectedBookings, setSelectedBookings] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   const { data: bookings = [], isLoading, error } = useBookings();
   const updateBooking = useUpdateBooking();
   const deleteBooking = useDeleteBooking();
 
-  const filteredBookings = bookings.filter((booking) => {
+  // Sort bookings: upcoming first (chronologically), then past
+  const sortedBookings = useMemo(() => {
+    const now = new Date();
+    return [...bookings].sort((a, b) => {
+      const aDate = new Date(a.scheduled_at);
+      const bDate = new Date(b.scheduled_at);
+      const aIsUpcoming = aDate >= now;
+      const bIsUpcoming = bDate >= now;
+      
+      // Both upcoming: earliest first
+      if (aIsUpcoming && bIsUpcoming) {
+        return aDate.getTime() - bDate.getTime();
+      }
+      // Both past: most recent first
+      if (!aIsUpcoming && !bIsUpcoming) {
+        return bDate.getTime() - aDate.getTime();
+      }
+      // Upcoming before past
+      return aIsUpcoming ? -1 : 1;
+    });
+  }, [bookings]);
+
+  const filteredBookings = sortedBookings.filter((booking) => {
     const customerName = booking.customer 
       ? `${booking.customer.first_name} ${booking.customer.last_name}`.toLowerCase()
       : '';
@@ -332,6 +364,48 @@ export default function BookingsPage() {
     setAddDialogOpen(true);
   };
 
+  const handleExport = async (type: 'csv' | 'json') => {
+    setExporting(true);
+    try {
+      if (type === 'csv') {
+        const headers = ['Booking #', 'Customer', 'Service', 'Date', 'Time', 'Staff', 'Status', 'Payment', 'Amount'];
+        const rows = filteredBookings.map(b => [
+          b.booking_number,
+          b.customer ? `${b.customer.first_name} ${b.customer.last_name}` : 'Unknown',
+          b.service?.name || 'Unknown',
+          format(new Date(b.scheduled_at), 'yyyy-MM-dd'),
+          format(new Date(b.scheduled_at), 'h:mm a'),
+          b.staff?.name || 'Unassigned',
+          statusLabels[b.status] || b.status,
+          getPaymentStatusInfo(b).label,
+          `$${b.total_amount}`
+        ]);
+        
+        const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `bookings-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+      } else {
+        const blob = new Blob([JSON.stringify(filteredBookings, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `bookings-${format(new Date(), 'yyyy-MM-dd')}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+      toast({ title: "Export completed", description: `Exported ${filteredBookings.length} bookings` });
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to export", variant: "destructive" });
+    } finally {
+      setExporting(false);
+    }
+  };
+
   if (error) {
     return (
       <AdminLayout title="Bookings" subtitle="Error loading bookings">
@@ -381,7 +455,7 @@ export default function BookingsPage() {
               <div className="p-2 bg-amber-100 rounded-xl">
                 <Clock className="w-5 h-5 text-amber-600" />
               </div>
-              <span className="text-sm font-medium text-muted-foreground">Pending</span>
+              <span className="text-sm font-medium text-muted-foreground">Pending Payment</span>
             </div>
             <p className="text-3xl font-bold text-foreground">{stats.pending}</p>
           </div>
@@ -394,7 +468,7 @@ export default function BookingsPage() {
               <div className="p-2 bg-blue-100 rounded-xl">
                 <User className="w-5 h-5 text-blue-600" />
               </div>
-              <span className="text-sm font-medium text-muted-foreground">Confirmed</span>
+              <span className="text-sm font-medium text-muted-foreground">Uncleaned</span>
             </div>
             <p className="text-3xl font-bold text-foreground">{stats.confirmed}</p>
           </div>
@@ -407,7 +481,7 @@ export default function BookingsPage() {
               <div className="p-2 bg-emerald-100 rounded-xl">
                 <DollarSign className="w-5 h-5 text-emerald-600" />
               </div>
-              <span className="text-sm font-medium text-muted-foreground">Completed</span>
+              <span className="text-sm font-medium text-muted-foreground">Clean Completed</span>
             </div>
             <p className="text-3xl font-bold text-foreground">{stats.completed}</p>
           </div>
@@ -433,18 +507,30 @@ export default function BookingsPage() {
             </SelectTrigger>
             <SelectContent className="bg-popover border-border rounded-xl">
               <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="confirmed">Confirmed</SelectItem>
+              <SelectItem value="pending">Pending Payment</SelectItem>
+              <SelectItem value="confirmed">Uncleaned</SelectItem>
               <SelectItem value="in_progress">In Progress</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="completed">Clean Completed</SelectItem>
               <SelectItem value="cancelled">Cancelled</SelectItem>
               <SelectItem value="no_show">No Show</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" className="h-11 gap-2 rounded-xl border-border/50 hover:bg-secondary/50">
-            <Download className="w-4 h-4" />
-            Export
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="h-11 gap-2 rounded-xl border-border/50 hover:bg-secondary/50" disabled={exporting}>
+                {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                Export
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => handleExport('csv')}>
+                Export as CSV
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport('json')}>
+                Export as JSON
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           {selectedBookings.size > 0 && (
             <Button 
               variant="destructive" 
@@ -582,10 +668,7 @@ export default function BookingsPage() {
                           statusStyle.bg, statusStyle.text
                         )}>
                           <span className={cn("w-1.5 h-1.5 rounded-full", statusStyle.dot)} />
-                          {booking.status === 'completed' ? 'clean completed' : 
-                           booking.status === 'confirmed' ? 'uncleaned' : 
-                           booking.status === 'pending' ? 'pending payment' :
-                           booking.status.replace('_', ' ')}
+                          {statusLabels[booking.status] || booking.status.replace('_', ' ')}
                         </div>
                       </TableCell>
                       <TableCell>

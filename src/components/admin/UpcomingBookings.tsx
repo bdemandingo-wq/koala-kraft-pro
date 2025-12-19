@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { BookingWithDetails } from '@/hooks/useBookings';
 import { cn } from '@/lib/utils';
-import { Clock, User, ChevronRight, Mail, Loader2 } from 'lucide-react';
+import { Clock, User, ChevronRight, Mail, Loader2, Edit, MapPin } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dialog';
 import { useNavigate } from 'react-router-dom';
 import { EditCustomerDialog } from './EditCustomerDialog';
+import { AddBookingDialog } from './AddBookingDialog';
 
 interface UpcomingBookingsProps {
   bookings: BookingWithDetails[];
@@ -48,6 +49,7 @@ export function UpcomingBookings({ bookings }: UpcomingBookingsProps) {
   const [selectedBooking, setSelectedBooking] = useState<BookingWithDetails | null>(null);
   const [sendingEmail, setSendingEmail] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<BookingWithDetails['customer'] | null>(null);
+  const [editingBooking, setEditingBooking] = useState<BookingWithDetails | null>(null);
 
   const upcomingBookings = useMemo(() => {
     const today = new Date();
@@ -78,7 +80,7 @@ export function UpcomingBookings({ bookings }: UpcomingBookingsProps) {
         ? `${booking.customer.first_name} ${booking.customer.last_name}`
         : 'Unknown Customer';
 
-      const { error } = await supabase.functions.invoke('send-cleaner-notification', {
+      const { data, error } = await supabase.functions.invoke('send-cleaner-notification', {
         body: {
           cleanerName: booking.staff.name,
           cleanerEmail: booking.staff.email,
@@ -94,13 +96,16 @@ export function UpcomingBookings({ bookings }: UpcomingBookingsProps) {
 
       if (error) {
         console.error('Email error:', error);
-        toast.error('Failed to send notification');
+        toast.error('Failed to send notification: ' + (error.message || 'Unknown error'));
+      } else if (data?.error) {
+        console.error('Email error:', data.error);
+        toast.error('Failed to send notification: ' + data.error);
       } else {
         toast.success(`Notification sent to ${booking.staff.name}`);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to send notification:', err);
-      toast.error('Failed to send notification');
+      toast.error('Failed to send notification: ' + (err.message || 'Unknown error'));
     } finally {
       setSendingEmail(false);
     }
@@ -115,6 +120,23 @@ export function UpcomingBookings({ bookings }: UpcomingBookingsProps) {
     if (selectedBooking?.customer) {
       setEditingCustomer(selectedBooking.customer);
     }
+  };
+
+  const handleEditBooking = () => {
+    if (selectedBooking) {
+      setEditingBooking(selectedBooking);
+      setSelectedBooking(null);
+    }
+  };
+
+  const getFullAddress = (booking: BookingWithDetails) => {
+    const parts = [
+      booking.address,
+      booking.city,
+      booking.state,
+      booking.zip_code
+    ].filter(Boolean);
+    return parts.length > 0 ? parts.join(', ') : null;
   };
 
   return (
@@ -240,6 +262,13 @@ export function UpcomingBookings({ bookings }: UpcomingBookingsProps) {
                   </div>
                 </div>
 
+                {getFullAddress(selectedBooking) && (
+                  <div className="flex items-center gap-3 text-sm">
+                    <MapPin className="w-4 h-4 text-muted-foreground" />
+                    <p>{getFullAddress(selectedBooking)}</p>
+                  </div>
+                )}
+
                 {selectedBooking.staff && (
                   <div className="flex items-center gap-3 text-sm">
                     <User className="w-4 h-4 text-muted-foreground" />
@@ -254,6 +283,14 @@ export function UpcomingBookings({ bookings }: UpcomingBookingsProps) {
               <div className="flex items-center justify-between pt-4 border-t">
                 <span className="text-2xl font-bold">${selectedBooking.total_amount}</span>
                 <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    className="gap-2"
+                    onClick={handleEditBooking}
+                  >
+                    <Edit className="w-4 h-4" />
+                    Edit Booking
+                  </Button>
                   <Button 
                     variant="outline" 
                     className="gap-2"
@@ -279,6 +316,13 @@ export function UpcomingBookings({ bookings }: UpcomingBookingsProps) {
         open={!!editingCustomer} 
         onOpenChange={(open) => !open && setEditingCustomer(null)}
         customer={editingCustomer}
+      />
+
+      {/* Edit Booking Dialog */}
+      <AddBookingDialog 
+        open={!!editingBooking} 
+        onOpenChange={(open) => !open && setEditingBooking(null)}
+        booking={editingBooking}
       />
     </>
   );
