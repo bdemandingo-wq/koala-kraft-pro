@@ -59,9 +59,10 @@ const serviceColors = [
 interface SchedulerCalendarProps {
   searchTerm?: string;
   onSearchChange?: (term: string) => void;
+  statusFilter?: 'all' | 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled';
 }
 
-export function SchedulerCalendar({ searchTerm = '', onSearchChange }: SchedulerCalendarProps) {
+export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilter = 'all' }: SchedulerCalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedBooking, setSelectedBooking] = useState<BookingWithDetails | null>(null);
   const [viewMode, setViewMode] = useState<'month' | 'week'>('month');
@@ -95,7 +96,7 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange }: Scheduler
     }).sort((a, b) => new Date(b.scheduled_at).getTime() - new Date(a.scheduled_at).getTime());
   }, [allBookings, activeSearchTerm]);
 
-  // Get bookings for the current view (month or week)
+  // Get bookings for the current view (month or week) with status filter
   const bookings = useMemo(() => {
     let start: Date, end: Date;
     
@@ -109,9 +110,11 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange }: Scheduler
     
     return allBookings.filter(b => {
       const bookingDate = new Date(b.scheduled_at);
-      return bookingDate >= start && bookingDate <= end;
+      const inDateRange = bookingDate >= start && bookingDate <= end;
+      const matchesStatus = statusFilter === 'all' || b.status === statusFilter;
+      return inDateRange && matchesStatus;
     });
-  }, [allBookings, currentDate, viewMode]);
+  }, [allBookings, currentDate, viewMode, statusFilter]);
 
   const { year, month, days } = useMemo(() => {
     const year = currentDate.getFullYear();

@@ -59,7 +59,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
-import { useBookings, useUpdateBooking, useDeleteBooking, BookingWithDetails } from '@/hooks/useBookings';
+import { useBookings, useUpdateBooking, useDeleteBooking, useStaff, BookingWithDetails } from '@/hooks/useBookings';
 import { format, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
 import { AddBookingDialog } from '@/components/admin/AddBookingDialog';
 import { BookingDetailsDialog, AdjustPaymentDialog } from '@/components/admin/BookingDialogs';
@@ -118,6 +118,9 @@ export default function BookingsPage() {
   const [chargingCard, setChargingCard] = useState<string | null>(null);
   const [selectedBookings, setSelectedBookings] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [bulkAssigning, setBulkAssigning] = useState(false);
+  const [bulkAssignDialogOpen, setBulkAssignDialogOpen] = useState(false);
+  const [selectedStaffId, setSelectedStaffId] = useState<string>('');
   const [exporting, setExporting] = useState(false);
   const [chargeConfirmBooking, setChargeConfirmBooking] = useState<BookingWithDetails | null>(null);
   const [captureConfirmBooking, setCaptureConfirmBooking] = useState<BookingWithDetails | null>(null);
@@ -125,6 +128,7 @@ export default function BookingsPage() {
   const [paymentHistoryBooking, setPaymentHistoryBooking] = useState<BookingWithDetails | null>(null);
 
   const { data: bookings = [], isLoading, error } = useBookings();
+  const { data: staffList = [] } = useStaff();
   const updateBooking = useUpdateBooking();
   const deleteBooking = useDeleteBooking();
 
@@ -217,6 +221,29 @@ export default function BookingsPage() {
       toast({ title: "Error", description: "Failed to delete some bookings", variant: "destructive" });
     } finally {
       setBulkDeleting(false);
+    }
+  };
+
+  const handleBulkAssign = async () => {
+    if (selectedBookings.size === 0 || !selectedStaffId) return;
+    
+    setBulkAssigning(true);
+    try {
+      const count = selectedBookings.size;
+      for (const id of selectedBookings) {
+        await updateBooking.mutateAsync({
+          id,
+          staff_id: selectedStaffId,
+        });
+      }
+      setSelectedBookings(new Set());
+      setBulkAssignDialogOpen(false);
+      setSelectedStaffId('');
+      toast({ title: "Assigned", description: `${count} bookings assigned to cleaner successfully` });
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to assign some bookings", variant: "destructive" });
+    } finally {
+      setBulkAssigning(false);
     }
   };
 
@@ -638,15 +665,25 @@ export default function BookingsPage() {
             </DropdownMenuContent>
           </DropdownMenu>
           {selectedBookings.size > 0 && (
-            <Button 
-              variant="destructive" 
-              className="h-11 gap-2 rounded-xl"
-              onClick={handleBulkDelete}
-              disabled={bulkDeleting}
-            >
-              {bulkDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-              Delete ({selectedBookings.size})
-            </Button>
+            <>
+              <Button 
+                variant="outline" 
+                className="h-11 gap-2 rounded-xl"
+                onClick={() => setBulkAssignDialogOpen(true)}
+              >
+                <User className="w-4 h-4" />
+                Assign Cleaner ({selectedBookings.size})
+              </Button>
+              <Button 
+                variant="destructive" 
+                className="h-11 gap-2 rounded-xl"
+                onClick={handleBulkDelete}
+                disabled={bulkDeleting}
+              >
+                {bulkDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                Delete ({selectedBookings.size})
+              </Button>
+            </>
           )}
         </div>
       </div>
@@ -1027,6 +1064,48 @@ export default function BookingsPage() {
         onOpenChange={setPaymentHistoryOpen}
         booking={paymentHistoryBooking}
       />
+
+      {/* Bulk Assign Cleaner Dialog */}
+      <AlertDialog open={bulkAssignDialogOpen} onOpenChange={setBulkAssignDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Assign Cleaner to {selectedBookings.size} Booking{selectedBookings.size > 1 ? 's' : ''}</AlertDialogTitle>
+            <AlertDialogDescription>
+              Select a cleaner to assign to the selected bookings.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="py-4">
+            <Select value={selectedStaffId} onValueChange={setSelectedStaffId}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a cleaner..." />
+              </SelectTrigger>
+              <SelectContent>
+                {staffList.map((staff) => (
+                  <SelectItem key={staff.id} value={staff.id}>
+                    {staff.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setSelectedStaffId('')}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={!selectedStaffId || bulkAssigning}
+              onClick={handleBulkAssign}
+            >
+              {bulkAssigning ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  Assigning...
+                </>
+              ) : (
+                'Assign Cleaner'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 }

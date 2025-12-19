@@ -46,17 +46,17 @@ export default function ReportsPage() {
     });
     const serviceStats = Array.from(serviceMap.values());
 
-    // Staff performance
-    const staffMap = new Map<string, { name: string; bookings: number; revenue: number }>();
+    // Staff performance - use cleaner_actual_payment instead of revenue
+    const staffMap = new Map<string, { name: string; bookings: number; payment: number }>();
     bookings.forEach(booking => {
       if (!booking.staff) return;
       const staffId = booking.staff.id;
-      const existing = staffMap.get(staffId) || { name: booking.staff.name, bookings: 0, revenue: 0 };
+      const existing = staffMap.get(staffId) || { name: booking.staff.name, bookings: 0, payment: 0 };
       existing.bookings += 1;
-      existing.revenue += Number(booking.total_amount || 0);
+      existing.payment += Number((booking as any).cleaner_actual_payment || 0);
       staffMap.set(staffId, existing);
     });
-    const staffStats = Array.from(staffMap.values()).sort((a, b) => b.revenue - a.revenue);
+    const staffStats = Array.from(staffMap.values()).sort((a, b) => b.payment - a.payment);
 
     // Monthly data - last 6 months
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -224,7 +224,7 @@ export default function ReportsPage() {
                 <tr className="text-left border-b border-border">
                   <th className="pb-3 font-medium text-muted-foreground">Staff Member</th>
                   <th className="pb-3 font-medium text-muted-foreground text-right">Bookings</th>
-                  <th className="pb-3 font-medium text-muted-foreground text-right">Revenue</th>
+                  <th className="pb-3 font-medium text-muted-foreground text-right">Payment</th>
                   <th className="pb-3 font-medium text-muted-foreground text-right">Avg/Booking</th>
                 </tr>
               </thead>
@@ -239,10 +239,10 @@ export default function ReportsPage() {
                     </td>
                     <td className="py-3 text-right">{staff.bookings}</td>
                     <td className="py-3 text-right font-semibold text-success">
-                      ${staff.revenue.toLocaleString()}
+                      ${staff.payment.toLocaleString()}
                     </td>
                     <td className="py-3 text-right">
-                      ${staff.bookings > 0 ? (staff.revenue / staff.bookings).toFixed(0) : 0}
+                      ${staff.bookings > 0 ? (staff.payment / staff.bookings).toFixed(0) : 0}
                     </td>
                   </tr>
                 ))}
