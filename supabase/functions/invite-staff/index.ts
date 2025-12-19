@@ -68,6 +68,66 @@ serve(async (req) => {
       });
     }
 
+    // Check if staff record already exists (including inactive ones)
+    const { data: existingStaff } = await supabaseAdmin
+      .from("staff")
+      .select("*")
+      .eq("email", email)
+      .single();
+
+    if (existingStaff) {
+      // Staff exists - reactivate if inactive
+      if (!existingStaff.is_active) {
+        const { error: updateError } = await supabaseAdmin
+          .from("staff")
+          .update({
+            name,
+            phone: phone || null,
+            hourly_rate: hourly_rate || null,
+            is_active: true,
+          })
+          .eq("id", existingStaff.id);
+
+        if (updateError) {
+          console.error("Error reactivating staff:", updateError);
+          return new Response(JSON.stringify({ error: updateError.message }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        // Generate a new password for the reactivated user
+        const tempPassword = crypto.randomUUID().slice(0, 12);
+        
+        // Update the auth user's password if they exist
+        if (existingStaff.user_id) {
+          await supabaseAdmin.auth.admin.updateUserById(existingStaff.user_id, {
+            password: tempPassword,
+          });
+        }
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            staff: { ...existingStaff, is_active: true, name, phone, hourly_rate },
+            tempPassword,
+            message: "Staff member reactivated. They can log in with the new temporary password.",
+            reactivated: true,
+          }),
+          {
+            status: 200,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      } else {
+        // Staff is already active
+        return new Response(JSON.stringify({ error: "A staff member with this email already exists and is active" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     // Generate a temporary password
     const tempPassword = crypto.randomUUID().slice(0, 12);
 
