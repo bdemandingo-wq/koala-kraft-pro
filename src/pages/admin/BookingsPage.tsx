@@ -1,4 +1,14 @@
 import { useState, useMemo } from 'react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -108,6 +118,7 @@ export default function BookingsPage() {
   const [selectedBookings, setSelectedBookings] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [chargeConfirmBooking, setChargeConfirmBooking] = useState<BookingWithDetails | null>(null);
 
   const { data: bookings = [], isLoading, error } = useBookings();
   const updateBooking = useUpdateBooking();
@@ -810,6 +821,20 @@ export default function BookingsPage() {
                             >
                               <Copy className="w-4 h-4" /> Duplicate
                             </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              className="gap-2 cursor-pointer text-emerald-600" 
+                              onClick={async () => {
+                                await updateBooking.mutateAsync({
+                                  id: booking.id,
+                                  payment_status: 'paid' as any
+                                });
+                                toast({ title: "Marked Paid", description: `Booking #${booking.booking_number} marked as paid.` });
+                              }}
+                              disabled={booking.payment_status === 'paid'}
+                            >
+                              <CreditCard className="w-4 h-4" /> 
+                              {booking.payment_status === 'paid' ? 'Already Paid' : 'Mark Paid'}
+                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem 
                               className="gap-2 cursor-pointer" 
@@ -830,24 +855,10 @@ export default function BookingsPage() {
                             >
                               <DollarSign className="w-4 h-4" /> Adjust Cleaner Pay
                             </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              className="gap-2 cursor-pointer text-emerald-600" 
-                              onClick={async () => {
-                                await updateBooking.mutateAsync({
-                                  id: booking.id,
-                                  payment_status: 'paid' as any
-                                });
-                                toast({ title: "Marked Paid", description: `Booking #${booking.booking_number} marked as paid.` });
-                              }}
-                              disabled={booking.payment_status === 'paid'}
-                            >
-                              <CreditCard className="w-4 h-4" /> 
-                              {booking.payment_status === 'paid' ? 'Already Paid' : 'Mark Paid'}
-                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
-                              className="gap-2 cursor-pointer text-emerald-600"
-                              onClick={() => handleChargeCard(booking)}
+                              className="gap-2 cursor-pointer text-amber-600"
+                              onClick={() => setChargeConfirmBooking(booking)}
                               disabled={
                                 chargingCard === booking.id ||
                                 booking.payment_status === 'paid' ||
@@ -938,6 +949,35 @@ export default function BookingsPage() {
         onOpenChange={setAdjustPaymentOpen}
         booking={activeBooking}
       />
+
+      {/* Charge Confirmation Dialog */}
+      <AlertDialog open={!!chargeConfirmBooking} onOpenChange={(open) => !open && setChargeConfirmBooking(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Charge</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to charge <strong>${chargeConfirmBooking?.total_amount?.toFixed(2)}</strong> to{' '}
+              <strong>{chargeConfirmBooking?.customer?.first_name} {chargeConfirmBooking?.customer?.last_name}</strong>'s card?
+              <br /><br />
+              This will immediately charge their saved payment method.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-amber-600 hover:bg-amber-700"
+              onClick={() => {
+                if (chargeConfirmBooking) {
+                  handleChargeCard(chargeConfirmBooking);
+                  setChargeConfirmBooking(null);
+                }
+              }}
+            >
+              Yes, Charge Now
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 }
