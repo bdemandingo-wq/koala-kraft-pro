@@ -31,21 +31,40 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  if (!RESEND_API_KEY) {
+    console.error("Missing RESEND_API_KEY secret");
+    return new Response(JSON.stringify({ error: "Email service is not configured" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  }
+
   try {
-    const booking: BookingEmailRequest = await req.json();
-    
-    console.log("Sending booking confirmation email to:", booking.customerEmail);
+    const booking = (await req.json()) as Partial<BookingEmailRequest>;
+
+    const customerEmail = (booking.customerEmail || "").trim();
+    const customerName = (booking.customerName || "").trim();
+
+    if (!customerEmail) {
+      return new Response(JSON.stringify({ error: "Missing customerEmail" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    console.log("Sending booking confirmation email to:", customerEmail);
 
     const fullAddress = [
       booking.address,
       booking.city,
       booking.state,
-      booking.zipCode
-    ].filter(Boolean).join(", ");
+      booking.zipCode,
+    ]
+      .filter(Boolean)
+      .join(", ");
 
-    const extrasText = booking.extras && booking.extras.length > 0 
-      ? booking.extras.join(", ") 
-      : "None";
+    const safeExtras = Array.isArray(booking.extras) ? booking.extras : [];
+    const extrasText = safeExtras.length > 0 ? safeExtras.join(", ") : "None";
 
     const emailHtml = `
       <!DOCTYPE html>
@@ -73,43 +92,43 @@ const handler = async (req: Request): Promise<Response> => {
             <h1>✨ Booking Confirmed!</h1>
           </div>
           <div class="content">
-            <p>Hi ${booking.customerName},</p>
+            <p>Hi ${customerName || "there"},</p>
             <p>Thank you for booking with Footprint Cleaning! Your appointment has been confirmed.</p>
-            
-            <span class="success-badge">Confirmation: ${booking.confirmationNumber}</span>
-            
+
+            <span class="success-badge">Confirmation: ${booking.confirmationNumber || ""}</span>
+
             <div class="details">
               <div class="detail-row">
                 <span class="detail-label">Service</span>
-                <span class="detail-value">${booking.serviceName}</span>
+                <span class="detail-value">${booking.serviceName || "Cleaning Service"}</span>
               </div>
               <div class="detail-row">
                 <span class="detail-label">Home Size</span>
-                <span class="detail-value">${booking.homeSize}</span>
+                <span class="detail-value">${booking.homeSize || "Not specified"}</span>
               </div>
               <div class="detail-row">
                 <span class="detail-label">Date</span>
-                <span class="detail-value">${booking.appointmentDate}</span>
+                <span class="detail-value">${booking.appointmentDate || ""}</span>
               </div>
               <div class="detail-row">
                 <span class="detail-label">Time</span>
-                <span class="detail-value">${booking.appointmentTime}</span>
+                <span class="detail-value">${booking.appointmentTime || ""}</span>
               </div>
               <div class="detail-row">
                 <span class="detail-label">Address</span>
-                <span class="detail-value">${fullAddress}</span>
+                <span class="detail-value">${fullAddress || booking.address || ""}</span>
               </div>
               <div class="detail-row">
                 <span class="detail-label">Extras</span>
                 <span class="detail-value">${extrasText}</span>
               </div>
             </div>
-            
+
             <div class="total-row">
               <span>Total Price</span>
-              <span style="font-size: 20px; font-weight: bold;">$${booking.totalPrice}</span>
+              <span style="font-size: 20px; font-weight: bold;">$${booking.totalPrice ?? ""}</span>
             </div>
-            
+
             <p style="margin-top: 20px;">If you have any questions, please don't hesitate to contact us.</p>
           </div>
           <div class="footer">
@@ -121,7 +140,6 @@ const handler = async (req: Request): Promise<Response> => {
       </html>
     `;
 
-    // Send email using Resend API directly
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -130,22 +148,27 @@ const handler = async (req: Request): Promise<Response> => {
       },
       body: JSON.stringify({
         from: "Footprint Cleaning <onboarding@resend.dev>",
-        to: [booking.customerEmail],
-        subject: `Booking Confirmed - ${booking.confirmationNumber}`,
+        to: [customerEmail],
+        subject: `Booking Confirmed - ${booking.confirmationNumber || ""}`,
         html: emailHtml,
       }),
     });
 
-    const data = await res.json();
+    let data: any = null;
+    try {
+      data = await res.json();
+    } catch (_e) {
+      data = null;
+    }
 
     if (!res.ok) {
-      console.error("Resend API error:", data);
-      throw new Error(data.message || "Failed to send email");
+      console.error("Resend API error:", { status: res.status, data });
+      throw new Error(data?.message || `Failed to send email (status ${res.status})`);
     }
 
     console.log("Customer email sent successfully:", data);
 
-    return new Response(JSON.stringify({ success: true, emailId: data.id }), {
+    return new Response(JSON.stringify({ success: true, emailId: data?.id }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
@@ -154,13 +177,10 @@ const handler = async (req: Request): Promise<Response> => {
     });
   } catch (error: any) {
     console.error("Error in send-booking-email function:", error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      }
-    );
+    return new Response(JSON.stringify({ error: error?.message || "Unknown error" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
   }
 };
 
