@@ -35,3 +35,12 @@ verify_jwt = false
 
 [functions.send-admin-booking-notification]
 verify_jwt = false
+
+[functions.send-booking-reminder]
+verify_jwt = false
+
+[functions.invite-staff]
+verify_jwt = false
+
+[functions.charge-card-directly]
+verify_jwt = false

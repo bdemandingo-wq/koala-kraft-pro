@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
   TableBody,
@@ -18,7 +19,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { format, startOfMonth, endOfMonth, startOfYear, isWithinInterval } from 'date-fns';
-import { CalendarIcon, Download, AlertTriangle, DollarSign, Users, Clock } from 'lucide-react';
+import { CalendarIcon, Download, AlertTriangle, DollarSign, Users, Clock, Calculator, TrendingUp, Briefcase } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface StaffWithPayroll {
@@ -33,6 +34,22 @@ interface StaffWithPayroll {
   ytdEarnings: number;
   requiresTaxFiling: boolean;
   upcomingBookings: number;
+  completedCleans: number;
+  avgPayPerClean: number;
+}
+
+interface BookingPayrollDetail {
+  id: string;
+  booking_number: number;
+  customer_name: string;
+  scheduled_at: string;
+  duration: number;
+  hours_worked: number;
+  wage_type: string;
+  wage_rate: number;
+  calculated_pay: number;
+  actual_pay: number | null;
+  staff_name: string;
 }
 
 export default function PayrollPage() {
@@ -60,9 +77,14 @@ export default function PayrollPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('bookings')
-        .select('*')
+        .select(`
+          *,
+          customer:customers(*),
+          staff:staff(*)
+        `)
         .gte('scheduled_at', dateRange.from.toISOString())
-        .lte('scheduled_at', dateRange.to.toISOString());
+        .lte('scheduled_at', dateRange.to.toISOString())
+        .order('scheduled_at', { ascending: false });
       if (error) throw error;
       return data;
     },
@@ -83,48 +105,102 @@ export default function PayrollPage() {
     },
   });
 
+  // Calculate wage for a single booking
+  const calculateBookingWage = (booking: any, staffMember: any) => {
+    // If actual payment is set, use it
+    if (booking.cleaner_actual_payment) {
+      return {
+        calculatedPay: Number(booking.cleaner_actual_payment),
+        actualPay: Number(booking.cleaner_actual_payment),
+        wageType: 'actual',
+        wageRate: Number(booking.cleaner_actual_payment),
+        hoursWorked: booking.cleaner_override_hours || (booking.duration / 60),
+      };
+    }
+
+    const wageType = booking.cleaner_wage_type || 'hourly';
+    const wageRate = booking.cleaner_wage || staffMember?.base_wage || staffMember?.hourly_rate || 0;
+    const hoursWorked = booking.cleaner_override_hours || (booking.duration / 60);
+    
+    let calculatedPay = 0;
+    
+    if (wageType === 'flat') {
+      calculatedPay = Number(wageRate);
+    } else if (wageType === 'percentage') {
+      calculatedPay = (Number(booking.total_amount) * Number(wageRate)) / 100;
+    } else {
+      // hourly
+      calculatedPay = Number(wageRate) * hoursWorked;
+    }
+
+    return {
+      calculatedPay: Math.round(calculatedPay * 100) / 100,
+      actualPay: null,
+      wageType,
+      wageRate: Number(wageRate),
+      hoursWorked,
+    };
+  };
+
+  // Detailed booking payroll breakdown
+  const bookingPayrollDetails: BookingPayrollDetail[] = useMemo(() => {
+    return bookings
+      .filter((b: any) => b.status === 'completed' && b.staff_id)
+      .map((b: any) => {
+        const staffMember = staff.find((s) => s.id === b.staff_id);
+        const wageInfo = calculateBookingWage(b, staffMember);
+        
+        return {
+          id: b.id,
+          booking_number: b.booking_number,
+          customer_name: b.customer ? `${b.customer.first_name} ${b.customer.last_name}` : 'Unknown',
+          scheduled_at: b.scheduled_at,
+          duration: b.duration,
+          hours_worked: wageInfo.hoursWorked,
+          wage_type: wageInfo.wageType,
+          wage_rate: wageInfo.wageRate,
+          calculated_pay: wageInfo.calculatedPay,
+          actual_pay: wageInfo.actualPay,
+          staff_name: staffMember?.name || 'Unassigned',
+        };
+      });
+  }, [bookings, staff]);
+
   // Calculate payroll data - include ALL staff, even those without bookings
   const payrollData: StaffWithPayroll[] = useMemo(() => {
     return staff.map((s) => {
       // Filter completed bookings for this staff member in date range
-      const staffBookings = bookings.filter((b) => b.staff_id === s.id && b.status === 'completed');
+      const staffBookings = bookings.filter((b: any) => b.staff_id === s.id && b.status === 'completed');
       
-      // Calculate hours from completed bookings (duration is in minutes)
-      const totalMinutes = staffBookings.reduce((sum, b) => {
-        const hours = b.cleaner_override_hours || (b.duration / 60);
-        return sum + hours * 60;
-      }, 0);
-      const totalHours = totalMinutes / 60;
-
-      // Calculate pay using actual payment if available, otherwise base_wage * hours
-      const totalPay = staffBookings.reduce((sum, b) => {
-        if (b.cleaner_actual_payment) {
-          return sum + Number(b.cleaner_actual_payment);
-        }
-        const hours = b.cleaner_override_hours || (b.duration / 60);
-        const wage = b.cleaner_wage || s.base_wage || s.hourly_rate || 0;
-        return sum + (hours * Number(wage));
-      }, 0);
+      // Calculate totals
+      let totalHours = 0;
+      let totalPay = 0;
+      
+      staffBookings.forEach((b: any) => {
+        const wageInfo = calculateBookingWage(b, s);
+        totalHours += wageInfo.hoursWorked;
+        totalPay += wageInfo.calculatedPay;
+      });
 
       // Calculate YTD earnings from completed bookings
-      const ytdStaffBookings = ytdBookings.filter((b) => b.staff_id === s.id && b.status === 'completed');
-      const ytdEarnings = ytdStaffBookings.reduce((sum, b) => {
-        if (b.cleaner_actual_payment) {
-          return sum + Number(b.cleaner_actual_payment);
-        }
-        const hours = b.cleaner_override_hours || (b.duration / 60);
-        const wage = b.cleaner_wage || s.base_wage || s.hourly_rate || 0;
-        return sum + (hours * Number(wage));
-      }, 0);
+      const ytdStaffBookings = ytdBookings.filter((b: any) => b.staff_id === s.id);
+      let ytdEarnings = 0;
+      ytdStaffBookings.forEach((b: any) => {
+        const wageInfo = calculateBookingWage(b, s);
+        ytdEarnings += wageInfo.calculatedPay;
+      });
 
       // Count upcoming bookings for this staff
-      const upcomingBookings = bookings.filter(b => 
+      const upcomingBookings = bookings.filter((b: any) => 
         b.staff_id === s.id && 
         !['completed', 'cancelled', 'no_show'].includes(b.status)
       ).length;
 
       // Check if 1099 and over $600 threshold
       const requiresTaxFiling = s.tax_classification === '1099' && ytdEarnings >= 600;
+
+      const completedCleans = staffBookings.length;
+      const avgPayPerClean = completedCleans > 0 ? totalPay / completedCleans : 0;
 
       return {
         id: s.id,
@@ -138,6 +214,8 @@ export default function PayrollPage() {
         ytdEarnings: Math.round(ytdEarnings * 100) / 100,
         requiresTaxFiling,
         upcomingBookings,
+        completedCleans,
+        avgPayPerClean: Math.round(avgPayPerClean * 100) / 100,
       };
     });
   }, [staff, bookings, ytdBookings]);
@@ -145,17 +223,21 @@ export default function PayrollPage() {
   // Summary stats
   const totalPayroll = payrollData.reduce((sum, s) => sum + s.totalPay, 0);
   const totalHours = payrollData.reduce((sum, s) => sum + s.totalHours, 0);
+  const totalCleans = payrollData.reduce((sum, s) => sum + s.completedCleans, 0);
   const contractorsNeedingFiling = payrollData.filter((s) => s.requiresTaxFiling).length;
+  const avgPayPerClean = totalCleans > 0 ? totalPayroll / totalCleans : 0;
 
   const exportCSV = () => {
-    const headers = ['Name', 'Email', 'Tax Classification', 'Base Wage', 'Hours Worked', 'Period Pay', 'YTD Earnings'];
+    const headers = ['Name', 'Email', 'Tax Classification', 'Base Wage', 'Hours Worked', 'Cleans Completed', 'Period Pay', 'Avg Pay/Clean', 'YTD Earnings'];
     const rows = payrollData.map((s) => [
       s.name,
       s.email,
       s.tax_classification === 'w2' ? 'W-2 Employee' : '1099 Contractor',
       s.base_wage || s.hourly_rate || 0,
       s.totalHours,
+      s.completedCleans,
       s.totalPay,
+      s.avgPayPerClean,
       s.ytdEarnings,
     ]);
 
@@ -165,6 +247,29 @@ export default function PayrollPage() {
     const a = document.createElement('a');
     a.href = url;
     a.download = `payroll-report-${format(dateRange.from, 'yyyy-MM-dd')}-to-${format(dateRange.to, 'yyyy-MM-dd')}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportDetailedCSV = () => {
+    const headers = ['Date', 'Booking #', 'Staff', 'Customer', 'Hours', 'Wage Type', 'Rate', 'Payment'];
+    const rows = bookingPayrollDetails.map((b) => [
+      format(new Date(b.scheduled_at), 'yyyy-MM-dd'),
+      `#${b.booking_number}`,
+      b.staff_name,
+      b.customer_name,
+      b.hours_worked.toFixed(2),
+      b.wage_type,
+      b.wage_type === 'percentage' ? `${b.wage_rate}%` : `$${b.wage_rate}`,
+      b.calculated_pay.toFixed(2),
+    ]);
+
+    const csv = [headers, ...rows].map((row) => row.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `payroll-details-${format(dateRange.from, 'yyyy-MM-dd')}-to-${format(dateRange.to, 'yyyy-MM-dd')}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -207,7 +312,7 @@ export default function PayrollPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
@@ -238,11 +343,24 @@ export default function PayrollPage() {
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-green-500/10">
-                <Users className="w-5 h-5 text-green-500" />
+                <Briefcase className="w-5 h-5 text-green-500" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Staff Members</p>
-                <p className="text-2xl font-bold">{payrollData.length}</p>
+                <p className="text-sm text-muted-foreground">Cleans Completed</p>
+                <p className="text-2xl font-bold">{totalCleans}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-purple-500/10">
+                <Calculator className="w-5 h-5 text-purple-500" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Avg Pay/Clean</p>
+                <p className="text-2xl font-bold">${avgPayPerClean.toFixed(2)}</p>
               </div>
             </div>
           </CardContent>
@@ -270,13 +388,13 @@ export default function PayrollPage() {
 
       {/* 1099 Alert Banner */}
       {contractorsNeedingFiling > 0 && (
-        <Card className="mb-6 border-amber-200 bg-amber-50">
+        <Card className="mb-6 border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900">
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5" />
               <div>
-                <h3 className="font-semibold text-amber-800">1099 Tax Filing Required</h3>
-                <p className="text-sm text-amber-700 mt-1">
+                <h3 className="font-semibold text-amber-800 dark:text-amber-400">1099 Tax Filing Required</h3>
+                <p className="text-sm text-amber-700 dark:text-amber-500 mt-1">
                   {contractorsNeedingFiling} contractor(s) have earned $600 or more this year and require 1099-NEC filing.
                 </p>
               </div>
@@ -285,69 +403,147 @@ export default function PayrollPage() {
         </Card>
       )}
 
-      {/* Payroll Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Staff Payroll Details</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Tax Status</TableHead>
-                <TableHead>Base Wage</TableHead>
-                <TableHead className="text-right">Hours</TableHead>
-                <TableHead className="text-right">Period Pay</TableHead>
-                <TableHead className="text-right">YTD Earnings</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {payrollData.map((staff) => (
-                <TableRow key={staff.id}>
-                  <TableCell>
-                    <div>
-                      <p className="font-medium">{staff.name}</p>
-                      <p className="text-xs text-muted-foreground">{staff.email}</p>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={staff.tax_classification === 'w2' ? 'default' : 'secondary'}>
-                      {staff.tax_classification === 'w2' ? 'W-2' : '1099'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    ${(staff.base_wage || staff.hourly_rate || 0).toFixed(2)}/hr
-                  </TableCell>
-                  <TableCell className="text-right">{staff.totalHours}</TableCell>
-                  <TableCell className="text-right font-medium">
-                    ${staff.totalPay.toFixed(2)}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    ${staff.ytdEarnings.toFixed(2)}
-                  </TableCell>
-                  <TableCell>
-                    {staff.requiresTaxFiling && (
-                      <Badge variant="outline" className="border-amber-500 text-amber-600">
-                        <AlertTriangle className="w-3 h-3 mr-1" />
-                        1099 Required
-                      </Badge>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-              {payrollData.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    No payroll data for the selected period
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      {/* Tabs for Summary and Details */}
+      <Tabs defaultValue="summary" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="summary">Staff Summary</TabsTrigger>
+          <TabsTrigger value="details">Booking Details</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="summary">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Staff Payroll Summary</CardTitle>
+              <Button variant="outline" size="sm" onClick={exportCSV} className="gap-2">
+                <Download className="w-4 h-4" />
+                Export Summary
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Tax Status</TableHead>
+                    <TableHead>Base Wage</TableHead>
+                    <TableHead className="text-right">Cleans</TableHead>
+                    <TableHead className="text-right">Hours</TableHead>
+                    <TableHead className="text-right">Period Pay</TableHead>
+                    <TableHead className="text-right">Avg/Clean</TableHead>
+                    <TableHead className="text-right">YTD</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {payrollData.map((staff) => (
+                    <TableRow key={staff.id}>
+                      <TableCell>
+                        <div>
+                          <p className="font-medium">{staff.name}</p>
+                          <p className="text-xs text-muted-foreground">{staff.email}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={staff.tax_classification === 'w2' ? 'default' : 'secondary'}>
+                          {staff.tax_classification === 'w2' ? 'W-2' : '1099'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        ${(staff.base_wage || staff.hourly_rate || 0).toFixed(2)}/hr
+                      </TableCell>
+                      <TableCell className="text-right">{staff.completedCleans}</TableCell>
+                      <TableCell className="text-right">{staff.totalHours}</TableCell>
+                      <TableCell className="text-right font-medium text-green-600">
+                        ${staff.totalPay.toFixed(2)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        ${staff.avgPayPerClean.toFixed(2)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        ${staff.ytdEarnings.toFixed(2)}
+                      </TableCell>
+                      <TableCell>
+                        {staff.requiresTaxFiling && (
+                          <Badge variant="outline" className="border-amber-500 text-amber-600">
+                            <AlertTriangle className="w-3 h-3 mr-1" />
+                            1099 Required
+                          </Badge>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {payrollData.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                        No staff members found
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="details">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Booking Payroll Details</CardTitle>
+              <Button variant="outline" size="sm" onClick={exportDetailedCSV} className="gap-2">
+                <Download className="w-4 h-4" />
+                Export Details
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Booking #</TableHead>
+                    <TableHead>Staff</TableHead>
+                    <TableHead>Customer</TableHead>
+                    <TableHead className="text-right">Hours</TableHead>
+                    <TableHead>Wage Type</TableHead>
+                    <TableHead className="text-right">Rate</TableHead>
+                    <TableHead className="text-right">Payment</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {bookingPayrollDetails.map((b) => (
+                    <TableRow key={b.id}>
+                      <TableCell className="whitespace-nowrap">
+                        {format(new Date(b.scheduled_at), 'MMM d, yyyy')}
+                      </TableCell>
+                      <TableCell>#{b.booking_number}</TableCell>
+                      <TableCell className="font-medium">{b.staff_name}</TableCell>
+                      <TableCell>{b.customer_name}</TableCell>
+                      <TableCell className="text-right">{b.hours_worked.toFixed(2)}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="capitalize">
+                          {b.wage_type}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {b.wage_type === 'percentage' ? `${b.wage_rate}%` : `$${b.wage_rate.toFixed(2)}`}
+                      </TableCell>
+                      <TableCell className="text-right font-medium text-green-600">
+                        ${b.calculated_pay.toFixed(2)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {bookingPayrollDetails.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                        No completed bookings with assigned staff for this period
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </AdminLayout>
   );
 }
