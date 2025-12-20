@@ -558,11 +558,18 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate, booking, onD
           if (sendConfirmationEmail && customerEmail) {
             try {
               const scheduledDate = new Date(bookingData.scheduled_at);
-              await supabase.functions.invoke('send-booking-email', {
+              const extraNames = selectedExtras
+                .map((id) => extrasData.find((e) => e.id === id)?.name)
+                .filter(Boolean) as string[];
+
+              const { data, error } = await supabase.functions.invoke('send-booking-email', {
                 body: {
                   customerName: customerName,
                   customerEmail: customerEmail,
-                  customerPhone: customerTab === 'existing' && selectedCustomer ? selectedCustomer.phone : newCustomer.phone,
+                  customerPhone:
+                    customerTab === 'existing' && selectedCustomer
+                      ? selectedCustomer.phone
+                      : newCustomer.phone,
                   serviceName: selectedService?.name || 'Cleaning Service',
                   homeSize: squareFootage || 'Not specified',
                   appointmentDate: format(scheduledDate, 'MMMM d, yyyy'),
@@ -571,14 +578,19 @@ export function AddBookingDialog({ open, onOpenChange, defaultDate, booking, onD
                   city: city,
                   state: state,
                   zipCode: zipCode,
-                  extras: selectedExtras,
+                  extras: extraNames,
                   totalPrice: totalAmount,
                   confirmationNumber: `FPC-${Date.now().toString(36).toUpperCase()}`,
-                }
+                },
               });
+
+              if (error) throw error;
+              if (data?.error) throw new Error(data.error);
+
               toast.success('Confirmation email sent to customer');
-            } catch (emailError) {
+            } catch (emailError: any) {
               console.error('Failed to send customer confirmation:', emailError);
+              toast.error(emailError?.message || 'Failed to send confirmation email');
             }
           }
         }

@@ -1,10 +1,12 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, type ReactNode } from 'react';
 import {
   DndContext,
   DragEndEvent,
   DragOverlay,
   DragStartEvent,
   PointerSensor,
+  useDraggable,
+  useDroppable,
   useSensor,
   useSensors,
   closestCenter,
@@ -78,13 +80,47 @@ interface DraggableBookingProps {
   onClick: () => void;
 }
 
-function DraggableBooking({ booking, index, onClick }: DraggableBookingProps) {
-  const color = serviceColors[index % serviceColors.length];
-  
+interface DroppableDayProps {
+  id: string;
+  disabled?: boolean;
+  className?: string;
+  children?: ReactNode;
+}
+
+function DroppableDay({ id, disabled, className, children }: DroppableDayProps) {
+  const { isOver, setNodeRef } = useDroppable({ id, disabled });
+
   return (
     <div
-      onClick={onClick}
-      className="booking-pill w-full text-left cursor-grab active:cursor-grabbing group"
+      ref={setNodeRef}
+      className={cn(
+        className,
+        isOver && 'ring-2 ring-primary/30 bg-primary/5 ring-inset'
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+function DraggableBooking({ booking, index, onClick }: DraggableBookingProps) {
+  const color = serviceColors[index % serviceColors.length];
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: booking.id,
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      onClick={() => {
+        if (!isDragging) onClick();
+      }}
+      className={cn(
+        'booking-pill w-full text-left cursor-grab active:cursor-grabbing group select-none touch-none',
+        isDragging && 'opacity-50'
+      )}
       style={{
         backgroundColor: `${color}20`,
         color: color,
@@ -480,10 +516,10 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
             days.map((date, index) => {
               const dayBookings = date ? getBookingsForDate(date) : [];
               return (
-                <div
+                <DroppableDay
                   key={index}
                   id={date ? `day-${format(date, 'yyyy-MM-dd')}` : `empty-${index}`}
-                  data-droppable={date ? 'true' : 'false'}
+                  disabled={!date}
                   className={cn(
                     'calendar-day',
                     viewMode === 'week' ? 'min-h-[300px]' : 'min-h-[120px]',
@@ -502,21 +538,16 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
                         {viewMode === 'week' ? format(date, 'MMM d') : date.getDate()}
                       </span>
                       <div className="w-full space-y-1 overflow-hidden">
-                        {dayBookings.slice(0, viewMode === 'week' ? 10 : 3).map((booking, bIndex) => (
-                          <div
-                            key={booking.id}
-                            draggable
-                            onDragStart={(e) => {
-                              e.dataTransfer.setData('bookingId', booking.id);
-                            }}
-                          >
+                        {dayBookings
+                          .slice(0, viewMode === 'week' ? 10 : 3)
+                          .map((booking, bIndex) => (
                             <DraggableBooking
+                              key={booking.id}
                               booking={booking}
                               index={bIndex}
                               onClick={() => setSelectedBooking(booking)}
                             />
-                          </div>
-                        ))}
+                          ))}
                         {dayBookings.length > (viewMode === 'week' ? 10 : 3) && (
                           <span className="text-xs text-muted-foreground pl-2">
                             +{dayBookings.length - (viewMode === 'week' ? 10 : 3)} more
@@ -525,7 +556,7 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
                       </div>
                     </>
                   )}
-                </div>
+                </DroppableDay>
               );
             })
           )}
