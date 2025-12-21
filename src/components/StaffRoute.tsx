@@ -45,7 +45,7 @@ export function StaffRoute({ children }: StaffRouteProps) {
   }
 
   if (!user) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/staff/login" replace />;
   }
 
   if (!isStaff) {

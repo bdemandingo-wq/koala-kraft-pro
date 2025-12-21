@@ -22,6 +22,7 @@ import ReportsPage from "./pages/admin/ReportsPage";
 import SettingsPage from "./pages/admin/SettingsPage";
 import NotificationsPage from "./pages/admin/NotificationsPage";
 import StaffPortal from "./pages/staff/StaffPortal";
+import StaffLoginPage from "./pages/staff/StaffLoginPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,7 +40,8 @@ const App = () => (
               <Route path="/" element={<PublicBookingPage />} />
               <Route path="/auth" element={<AuthPage />} />
 
-              {/* Staff Portal (Protected for staff/admin) */}
+              {/* Staff Portal */}
+              <Route path="/staff/login" element={<StaffLoginPage />} />
               <Route path="/staff" element={<StaffRoute><StaffPortal /></StaffRoute>} />
 
               {/* Admin Routes (Protected) */}
