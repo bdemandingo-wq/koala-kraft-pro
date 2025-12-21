@@ -71,8 +71,8 @@ const handler = async (req: Request): Promise<Response> => {
         },
       ],
       mode: "payment",
-      success_url: "https://tidywisecleaning.com",
-      cancel_url: "https://tidywisecleaning.com",
+      success_url: "https://jointidywise.com",
+      cancel_url: "https://jointidywise.com",
       metadata: {
         bookingId: bookingId || "",
         customerName: customerName,
@@ -84,7 +84,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email with the Stripe payment link
     const emailResponse = await resend.emails.send({
-      from: "Tidywise Cleaning <onboarding@resend.dev>",
+      from: "TidyWise Cleaning <support@jointidywise.com>",
       to: [email],
       subject: "Complete Your Booking Payment",
       html: `

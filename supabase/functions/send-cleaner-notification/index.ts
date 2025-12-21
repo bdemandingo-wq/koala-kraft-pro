@@ -93,7 +93,7 @@ const handler = async (req: Request): Promise<Response> => {
             <p style="margin-top: 20px;">Please arrive on time and contact the customer if you have any issues.</p>
           </div>
           <div class="footer">
-            <p>Footprint Cleaning</p>
+            <p>TidyWise Cleaning</p>
             <p>Thank you for your hard work!</p>
           </div>
         </div>
@@ -109,7 +109,7 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Footprint Cleaning <onboarding@resend.dev>",
+        from: "TidyWise Cleaning <support@jointidywise.com>",
         to: [notification.cleanerEmail],
         subject: `Upcoming Assignment - Booking #${notification.bookingNumber}`,
         html: emailHtml,

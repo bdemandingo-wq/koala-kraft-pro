@@ -56,8 +56,8 @@ const handler = async (req: Request): Promise<Response> => {
       customer: customerId,
       mode: "setup",
       payment_method_types: ["card"],
-      success_url: "https://tidywisecleaning.com/card-saved?success=true",
-      cancel_url: "https://tidywisecleaning.com/card-saved?cancelled=true",
+      success_url: "https://jointidywise.com/card-saved?success=true",
+      cancel_url: "https://jointidywise.com/card-saved?cancelled=true",
       metadata: {
         customerName: customerName,
         purpose: "card_collection",
@@ -68,9 +68,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email with the card collection link
     const emailResponse = await resend.emails.send({
-      from: "Footprint Cleaning <onboarding@resend.dev>",
+      from: "TidyWise Cleaning <support@jointidywise.com>",
       to: [email],
-      subject: "Add Your Payment Card - Footprint Cleaning",
+      subject: "Add Your Payment Card - TidyWise Cleaning",
       html: `
         <!DOCTYPE html>
         <html>
@@ -93,7 +93,7 @@ const handler = async (req: Request): Promise<Response> => {
             </div>
             <div class="content">
               <p>Hi ${customerName},</p>
-              <p>We need your payment card on file to complete your booking with Footprint Cleaning.</p>
+              <p>We need your payment card on file to complete your booking with TidyWise Cleaning.</p>
               
               <div class="info-box">
                 <p><strong>Why do we need this?</strong></p>
@@ -114,7 +114,7 @@ const handler = async (req: Request): Promise<Response> => {
             </div>
             <div class="footer">
               <p>Questions? Reply to this email or call us at (813) 735-6859</p>
-              <p>&copy; 2024 Footprint Cleaning. All rights reserved.</p>
+              <p>&copy; 2024 TidyWise Cleaning. All rights reserved.</p>
             </div>
           </div>
         </body>
