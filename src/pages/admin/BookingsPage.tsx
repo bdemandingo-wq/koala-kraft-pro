@@ -129,6 +129,7 @@ export default function BookingsPage() {
   const [paymentHistoryBooking, setPaymentHistoryBooking] = useState<BookingWithDetails | null>(null);
   const [sendingReminder, setSendingReminder] = useState<string | null>(null);
   const [sendingCleanerNotification, setSendingCleanerNotification] = useState<string | null>(null);
+  const [bulkNotifyingCleaners, setBulkNotifyingCleaners] = useState(false);
 
   const { data: bookings = [], isLoading, error } = useBookings();
   const { data: staffList = [] } = useStaff();
@@ -527,6 +528,64 @@ export default function BookingsPage() {
     }
   };
 
+  const handleBulkNotifyCleaners = async () => {
+    if (selectedBookings.size === 0) return;
+    
+    const selectedBookingsList = filteredBookings.filter(b => selectedBookings.has(b.id));
+    const bookingsWithCleaners = selectedBookingsList.filter(b => b.staff?.email);
+    
+    if (bookingsWithCleaners.length === 0) {
+      toast({ title: "No Cleaners to Notify", description: "None of the selected bookings have assigned cleaners with email addresses.", variant: "destructive" });
+      return;
+    }
+
+    setBulkNotifyingCleaners(true);
+    let successCount = 0;
+    let failCount = 0;
+
+    try {
+      for (const booking of bookingsWithCleaners) {
+        try {
+          const scheduledDate = new Date(booking.scheduled_at);
+          const fullAddress = [booking.address, booking.apt_suite, booking.city, booking.state, booking.zip_code]
+            .filter(Boolean)
+            .join(', ');
+
+          const { error } = await supabase.functions.invoke('send-cleaner-notification', {
+            body: {
+              cleanerName: booking.staff!.name,
+              cleanerEmail: booking.staff!.email,
+              customerName: booking.customer ? `${booking.customer.first_name} ${booking.customer.last_name}` : 'Customer',
+              customerPhone: booking.customer?.phone || 'N/A',
+              serviceName: booking.service?.name || 'Cleaning Service',
+              appointmentDate: format(scheduledDate, 'MMMM d, yyyy'),
+              appointmentTime: format(scheduledDate, 'h:mm a'),
+              address: fullAddress || 'Address not provided',
+              bookingNumber: booking.booking_number,
+            }
+          });
+
+          if (error) throw error;
+          successCount++;
+        } catch (error) {
+          console.error(`Failed to notify cleaner for booking #${booking.booking_number}:`, error);
+          failCount++;
+        }
+      }
+
+      if (successCount > 0) {
+        toast({ 
+          title: "Notifications Sent", 
+          description: `Successfully notified ${successCount} cleaner(s)${failCount > 0 ? `. ${failCount} failed.` : '.'}`
+        });
+      } else {
+        toast({ title: "Error", description: "Failed to send notifications", variant: "destructive" });
+      }
+    } finally {
+      setBulkNotifyingCleaners(false);
+    }
+  };
+
   const handleExport = async (type: 'csv' | 'json') => {
     setExporting(true);
     try {
@@ -745,6 +804,15 @@ export default function BookingsPage() {
               >
                 <User className="w-4 h-4" />
                 Assign Cleaner ({selectedBookings.size})
+              </Button>
+              <Button 
+                variant="outline" 
+                className="h-11 gap-2 rounded-xl text-purple-600 border-purple-200 hover:bg-purple-50"
+                onClick={handleBulkNotifyCleaners}
+                disabled={bulkNotifyingCleaners}
+              >
+                {bulkNotifyingCleaners ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
+                Notify Cleaners ({selectedBookings.size})
               </Button>
               <Button 
                 variant="destructive" 
