@@ -61,7 +61,7 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { useBookings, useUpdateBooking, useDeleteBooking, useStaff, BookingWithDetails } from '@/hooks/useBookings';
-import { format, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
+import { format, isWithinInterval, startOfDay, endOfDay, differenceInDays, differenceInHours } from 'date-fns';
 import { AddBookingDialog } from '@/components/admin/AddBookingDialog';
 import { BookingDetailsDialog, AdjustPaymentDialog } from '@/components/admin/BookingDialogs';
 import { PaymentHistoryLogDialog } from '@/components/admin/PaymentHistoryLogDialog';
@@ -777,6 +777,19 @@ export default function BookingsPage() {
                   const statusStyle = statusConfig[booking.status] || statusConfig.pending;
                   const paymentInfo = getPaymentStatusInfo(booking);
                   
+                  // Reminder indicator logic
+                  const now = new Date();
+                  const scheduledDate = new Date(booking.scheduled_at);
+                  const daysUntil = differenceInDays(scheduledDate, now);
+                  const hoursUntil = differenceInHours(scheduledDate, now);
+                  const isUpcoming = scheduledDate > now;
+                  const needsReminder = isUpcoming && 
+                    ['pending', 'confirmed'].includes(booking.status) &&
+                    daysUntil >= 1 && daysUntil <= 7;
+                  const urgentReminder = isUpcoming && 
+                    ['pending', 'confirmed'].includes(booking.status) &&
+                    hoursUntil > 0 && hoursUntil <= 48;
+                  
                   return (
                     <TableRow 
                       key={booking.id} 
@@ -821,13 +834,36 @@ export default function BookingsPage() {
                         <span className="font-medium">{booking.service?.name || 'Unknown'}</span>
                       </TableCell>
                       <TableCell>
-                        <div className="flex flex-col">
-                          <span className="font-medium text-foreground">
-                            {format(new Date(booking.scheduled_at), 'MMM d, yyyy')}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            {format(new Date(booking.scheduled_at), 'h:mm a')}
-                          </span>
+                        <div className="flex items-center gap-2">
+                          <div className="flex flex-col">
+                            <span className="font-medium text-foreground">
+                              {format(scheduledDate, 'MMM d, yyyy')}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {format(scheduledDate, 'h:mm a')}
+                            </span>
+                          </div>
+                          {(needsReminder || urgentReminder) && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className={cn(
+                                "h-7 w-7 rounded-full",
+                                urgentReminder 
+                                  ? "bg-amber-100 text-amber-600 hover:bg-amber-200" 
+                                  : "bg-blue-50 text-blue-500 hover:bg-blue-100"
+                              )}
+                              onClick={() => handleSendReminder(booking)}
+                              disabled={sendingReminder === booking.id}
+                              title={urgentReminder ? `Urgent: ${hoursUntil}h until clean` : `${daysUntil} days until clean - send reminder`}
+                            >
+                              {sendingReminder === booking.id ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              ) : (
+                                <Mail className="w-3.5 h-3.5" />
+                              )}
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell>

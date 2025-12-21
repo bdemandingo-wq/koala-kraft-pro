@@ -26,7 +26,6 @@ interface BookingEmailRequest {
 }
 
 const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -67,136 +66,161 @@ const handler = async (req: Request): Promise<Response> => {
     const extrasText = safeExtras.length > 0 ? safeExtras.join(", ") : "None";
 
     const emailHtml = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Booking Confirmation</title>
-      </head>
-      <body style="margin: 0; padding: 0; background-color: #f0f4f8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
-        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f0f4f8;">
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booking Confirmation</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f5f5f5;font-family:Arial,Helvetica,sans-serif;color:#333333;line-height:1.6;">
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:#f5f5f5;">
+    <tr>
+      <td style="padding:20px;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="margin:0 auto;background-color:#ffffff;border-radius:8px;overflow:hidden;">
+          
+          <!-- Header -->
           <tr>
-            <td style="padding: 40px 20px;">
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);">
-                
-                <!-- Header with Logo -->
-                <tr>
-                  <td style="background: linear-gradient(135deg, #1e5bb0 0%, #2d7dd2 50%, #3fa34d 100%); padding: 40px 40px 30px 40px; text-align: center;">
-                    <div style="font-size: 48px; font-weight: bold; color: #ffffff; letter-spacing: -2px; margin-bottom: 8px;">
-                      <span style="color: #ffffff;">Tidy</span><span style="color: #8cff8c;">Wise</span>
-                    </div>
-                    <p style="color: rgba(255, 255, 255, 0.9); font-size: 14px; margin: 0; letter-spacing: 2px; text-transform: uppercase;">Professional Cleaning Services</p>
-                  </td>
-                </tr>
-                
-                <!-- Success Banner -->
-                <tr>
-                  <td style="background-color: #3fa34d; padding: 20px; text-align: center;">
-                    <span style="color: #ffffff; font-size: 20px; font-weight: 600;">✨ Booking Confirmed!</span>
-                  </td>
-                </tr>
-                
-                <!-- Main Content -->
-                <tr>
-                  <td style="padding: 40px;">
-                    <p style="font-size: 18px; color: #1a1a2e; margin: 0 0 20px 0;">Hi ${customerName || "there"},</p>
-                    <p style="font-size: 16px; color: #4a4a68; line-height: 1.6; margin: 0 0 30px 0;">
-                      Thank you for choosing TidyWise! Your appointment has been successfully scheduled. We're excited to help make your space sparkle!
-                    </p>
-                    
-                    <!-- Confirmation Badge -->
-                    <div style="background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border-left: 4px solid #3fa34d; padding: 15px 20px; border-radius: 0 8px 8px 0; margin-bottom: 30px;">
-                      <span style="color: #2e7d32; font-weight: 600; font-size: 14px;">CONFIRMATION NUMBER</span>
-                      <div style="color: #1b5e20; font-size: 24px; font-weight: bold; margin-top: 5px;">${booking.confirmationNumber || ""}</div>
-                    </div>
-                    
-                    <!-- Appointment Details Card -->
-                    <div style="background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 12px; padding: 25px; margin-bottom: 25px; border: 1px solid #e2e8f0;">
-                      <h3 style="color: #1e5bb0; font-size: 16px; margin: 0 0 20px 0; text-transform: uppercase; letter-spacing: 1px;">Appointment Details</h3>
-                      
-                      <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-                        <tr>
-                          <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0;">
-                            <span style="color: #64748b; font-size: 14px;">Service</span>
-                          </td>
-                          <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0; text-align: right;">
-                            <span style="color: #1a1a2e; font-weight: 600; font-size: 14px;">${booking.serviceName || "Cleaning Service"}</span>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0;">
-                            <span style="color: #64748b; font-size: 14px;">Home Size</span>
-                          </td>
-                          <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0; text-align: right;">
-                            <span style="color: #1a1a2e; font-weight: 600; font-size: 14px;">${booking.homeSize || "Not specified"}</span>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0;">
-                            <span style="color: #64748b; font-size: 14px;">📅 Date</span>
-                          </td>
-                          <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0; text-align: right;">
-                            <span style="color: #1a1a2e; font-weight: 600; font-size: 14px;">${booking.appointmentDate || ""}</span>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0;">
-                            <span style="color: #64748b; font-size: 14px;">🕐 Time</span>
-                          </td>
-                          <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0; text-align: right;">
-                            <span style="color: #1a1a2e; font-weight: 600; font-size: 14px;">${booking.appointmentTime || ""}</span>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0;">
-                            <span style="color: #64748b; font-size: 14px;">🏠 Address</span>
-                          </td>
-                          <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0; text-align: right;">
-                            <span style="color: #1a1a2e; font-weight: 600; font-size: 14px;">${fullAddress || booking.address || ""}</span>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td style="padding: 12px 0;">
-                            <span style="color: #64748b; font-size: 14px;">✨ Extras</span>
-                          </td>
-                          <td style="padding: 12px 0; text-align: right;">
-                            <span style="color: #1a1a2e; font-weight: 600; font-size: 14px;">${extrasText}</span>
-                          </td>
-                        </tr>
-                      </table>
-                    </div>
-                    
-                    <!-- Total Price -->
-                    <div style="background: linear-gradient(135deg, #1e5bb0 0%, #2d7dd2 100%); border-radius: 12px; padding: 20px; text-align: center;">
-                      <span style="color: rgba(255, 255, 255, 0.8); font-size: 14px; display: block; margin-bottom: 5px;">Total Amount</span>
-                      <span style="color: #ffffff; font-size: 32px; font-weight: bold;">$${booking.totalPrice ?? ""}</span>
-                    </div>
-                    
-                    <p style="font-size: 14px; color: #64748b; line-height: 1.6; margin: 30px 0 0 0; text-align: center;">
-                      Questions? Reply to this email or call us anytime.<br>
-                      We're here to help!
-                    </p>
-                  </td>
-                </tr>
-                
-                <!-- Footer -->
-                <tr>
-                  <td style="background: linear-gradient(135deg, #1a1a2e 0%, #2d2d44 100%); padding: 30px 40px; text-align: center;">
-                    <p style="color: #ffffff; font-size: 16px; font-weight: 600; margin: 0 0 5px 0;">TidyWise Cleaning</p>
-                    <p style="color: #94a3b8; font-size: 13px; margin: 0 0 15px 0;">Making spaces sparkle, one clean at a time</p>
-                    <p style="color: #64748b; font-size: 12px; margin: 0;">
-                      © ${new Date().getFullYear()} TidyWise. All rights reserved.
-                    </p>
-                  </td>
-                </tr>
-                
-              </table>
+            <td style="background-color:#1e5bb0;padding:30px;text-align:center;">
+              <div style="font-size:32px;font-weight:bold;color:#ffffff;">
+                TidyWise
+              </div>
+              <p style="color:#ffffff;font-size:14px;margin:5px 0 0 0;">Professional Cleaning Services</p>
             </td>
           </tr>
+          
+          <!-- Success Banner -->
+          <tr>
+            <td style="background-color:#3fa34d;padding:15px;text-align:center;">
+              <span style="color:#ffffff;font-size:18px;font-weight:600;">✓ Booking Confirmed!</span>
+            </td>
+          </tr>
+          
+          <!-- Main Content -->
+          <tr>
+            <td style="padding:30px;">
+              <p style="font-size:16px;margin:0 0 15px 0;">Hi ${customerName || "there"},</p>
+              
+              <p style="margin:0 0 15px 0;">Thank you very much for booking with us. <strong>You're all set!</strong></p>
+              
+              <p style="margin:0 0 20px 0;">Please double check the date, time, and address to make sure it's correct.</p>
+              
+              <!-- Appointment Details -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:#f9f9f9;border-radius:8px;margin-bottom:20px;">
+                <tr>
+                  <td style="padding:20px;">
+                    <h3 style="margin:0 0 15px 0;color:#1e5bb0;font-size:16px;">APPOINTMENT DETAILS</h3>
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td style="padding:8px 0;border-bottom:1px solid #e0e0e0;color:#666;">Confirmation #</td>
+                        <td style="padding:8px 0;border-bottom:1px solid #e0e0e0;text-align:right;font-weight:600;">${booking.confirmationNumber || ""}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:8px 0;border-bottom:1px solid #e0e0e0;color:#666;">Service</td>
+                        <td style="padding:8px 0;border-bottom:1px solid #e0e0e0;text-align:right;font-weight:600;">${booking.serviceName || "Cleaning Service"}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:8px 0;border-bottom:1px solid #e0e0e0;color:#666;">Date</td>
+                        <td style="padding:8px 0;border-bottom:1px solid #e0e0e0;text-align:right;font-weight:600;">${booking.appointmentDate || ""}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:8px 0;border-bottom:1px solid #e0e0e0;color:#666;">Time</td>
+                        <td style="padding:8px 0;border-bottom:1px solid #e0e0e0;text-align:right;font-weight:600;">${booking.appointmentTime || ""}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:8px 0;border-bottom:1px solid #e0e0e0;color:#666;">Address</td>
+                        <td style="padding:8px 0;border-bottom:1px solid #e0e0e0;text-align:right;font-weight:600;">${fullAddress || booking.address || ""}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:8px 0;border-bottom:1px solid #e0e0e0;color:#666;">Home Size</td>
+                        <td style="padding:8px 0;border-bottom:1px solid #e0e0e0;text-align:right;font-weight:600;">${booking.homeSize || "Not specified"}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:8px 0;border-bottom:1px solid #e0e0e0;color:#666;">Extras</td>
+                        <td style="padding:8px 0;border-bottom:1px solid #e0e0e0;text-align:right;font-weight:600;">${extrasText}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:8px 0;color:#666;">Total</td>
+                        <td style="padding:8px 0;text-align:right;font-weight:bold;font-size:18px;color:#3fa34d;">$${booking.totalPrice ?? ""}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              
+              <p style="margin:0 0 20px 0;background-color:#fff3cd;padding:12px;border-radius:6px;border-left:4px solid #ffc107;">
+                <strong>Note:</strong> Please allow us a 2-hour window to deal with traffic, parking, and other surprises.
+              </p>
+              
+              <!-- Important Reminders -->
+              <h3 style="margin:25px 0 15px 0;color:#1e5bb0;font-size:16px;border-bottom:2px solid #1e5bb0;padding-bottom:8px;">IMPORTANT REMINDERS</h3>
+              <ul style="margin:0 0 20px 0;padding-left:20px;">
+                <li style="margin-bottom:10px;">If you would like to add extras not included in your cleaning, please notify us as quickly as possible.</li>
+                <li style="margin-bottom:10px;">Communicate your expectations with your cleaner when they arrive. Please do a review with the cleaner(s) prior to letting them go. They are paid by the job and will not leave until you are satisfied.</li>
+                <li style="margin-bottom:10px;">Make sure the cleaner(s) has space to clean. Children, pets, and other adults in the way can be hazardous.</li>
+                <li style="margin-bottom:10px;">We recommend minimizing clutter as much as possible. The cleaners will need access to surfaces to clean.</li>
+                <li style="margin-bottom:10px;"><strong>Please be home when the cleaners finish cleaning.</strong> If the client is not home for the final walkthrough, they surrender the right to a reclean.</li>
+              </ul>
+              
+              <!-- Pricing & Adjustments -->
+              <h3 style="margin:25px 0 15px 0;color:#1e5bb0;font-size:16px;border-bottom:2px solid #1e5bb0;padding-bottom:8px;">PRICING &amp; ADJUSTMENTS</h3>
+              <p style="margin:0 0 15px 0;">The price quoted is based on the home being accurately represented at the time of booking.</p>
+              <p style="margin:0 0 20px 0;">At times, it is impossible for us to know if a home will require a more in-depth cleaning until the cleaner arrives on-site. If the cleaner determines a more in-depth cleaning is needed, the cost may be subject to increase. <strong>This will never be done without a conversation and your consent.</strong></p>
+              
+              <!-- Cancellation Policy -->
+              <h3 style="margin:25px 0 15px 0;color:#1e5bb0;font-size:16px;border-bottom:2px solid #1e5bb0;padding-bottom:8px;">CANCELLATION &amp; RESCHEDULING POLICY</h3>
+              <p style="margin:0 0 10px 0;">We enforce a <strong>1 full business day</strong> cancellation or modification rule.</p>
+              <ul style="margin:0 0 20px 0;padding-left:20px;">
+                <li style="margin-bottom:8px;">More than 1 full business day notice → <strong>No fee</strong></li>
+                <li style="margin-bottom:8px;">Less than 1 full business day notice → <strong>$50 rebooking/cancellation fee</strong></li>
+                <li style="margin-bottom:8px;">Less than 24 hours before appointment OR unable to gain access → <strong>100% of appointment cost</strong></li>
+                <li style="margin-bottom:8px;">No running water or electricity on-site → <strong>100% of appointment cost</strong></li>
+              </ul>
+              
+              <!-- Payment Info -->
+              <h3 style="margin:25px 0 15px 0;color:#1e5bb0;font-size:16px;border-bottom:2px solid #1e5bb0;padding-bottom:8px;">PAYMENT INFORMATION</h3>
+              <ul style="margin:0 0 20px 0;padding-left:20px;">
+                <li style="margin-bottom:8px;">We collect your credit card information the day you book with us.</li>
+                <li style="margin-bottom:8px;">Funds will not be withdrawn until <strong>after</strong> your appointment has been completed.</li>
+                <li style="margin-bottom:8px;">A hold will be put on the cost of your appointment 24 hours before your booking to ensure funds are available.</li>
+              </ul>
+              
+              <!-- Satisfaction Policy -->
+              <h3 style="margin:25px 0 15px 0;color:#1e5bb0;font-size:16px;border-bottom:2px solid #1e5bb0;padding-bottom:8px;">SATISFACTION POLICY</h3>
+              <ul style="margin:0 0 20px 0;padding-left:20px;">
+                <li style="margin-bottom:8px;">If you are not happy with the service, you have a <strong>24-hour period</strong> to notify us.</li>
+                <li style="margin-bottom:8px;">The cleaner(s) will return to handle any issues at no additional charge, provided there has been a post-clean walkthrough completed.</li>
+                <li style="margin-bottom:8px;">There are no refunds for any services provided.</li>
+                <li style="margin-bottom:8px;">Cleaners will not move furniture or appliances over 20 lbs for safety and insurance reasons.</li>
+              </ul>
+              
+              <hr style="border:none;border-top:1px solid #e0e0e0;margin:25px 0;">
+              
+              <p style="margin:0 0 10px 0;text-align:center;font-size:14px;color:#666;">
+                Questions? Reply to this email or contact us anytime.
+              </p>
+              <p style="margin:0;text-align:center;font-size:16px;font-weight:bold;color:#1e5bb0;">
+                Thank you for choosing TidyWise!
+              </p>
+            </td>
+          </tr>
+          
+          <!-- Footer -->
+          <tr>
+            <td style="background-color:#333333;padding:20px;text-align:center;">
+              <p style="color:#ffffff;font-size:14px;font-weight:600;margin:0 0 5px 0;">TidyWise Cleaning</p>
+              <p style="color:#999999;font-size:12px;margin:0;">
+                © ${new Date().getFullYear()} TidyWise. All rights reserved.
+              </p>
+            </td>
+          </tr>
+          
         </table>
-      </body>
-      </html>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
     `;
 
     const res = await fetch("https://api.resend.com/emails", {
