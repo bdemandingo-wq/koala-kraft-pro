@@ -26,6 +26,169 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    if (!RESEND_API_KEY) {
+      throw new Error("Missing RESEND_API_KEY");
+    }
+
+    // If invoked from the admin UI, we send an immediate reminder for the provided booking.
+    // If invoked without a body (e.g. scheduled run), we fall back to the time-window batch logic.
+    let payload: any = null;
+    try {
+      const text = await req.text();
+      payload = text ? JSON.parse(text) : null;
+    } catch {
+      payload = null;
+    }
+
+    const isManualSend = !!payload?.customerEmail;
+
+    if (isManualSend) {
+      const scheduledDate = payload?.scheduledAt ? new Date(payload.scheduledAt) : null;
+      const formattedDate = scheduledDate
+        ? scheduledDate.toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })
+        : 'your scheduled date';
+      const formattedTime = scheduledDate
+        ? scheduledDate.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+          })
+        : 'your scheduled time';
+
+      const customerName = payload?.customerName || 'there';
+      const serviceName = payload?.serviceName || 'Cleaning Service';
+      const address = payload?.address || 'Address on file';
+      const totalAmount = typeof payload?.totalAmount === 'number' ? payload.totalAmount : null;
+
+      console.log(
+        `Manual reminder requested for bookingId=${payload?.bookingId ?? 'n/a'} to=${payload.customerEmail}`,
+      );
+
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${RESEND_API_KEY}`,
+        },
+        body: JSON.stringify({
+          from: "TidyWise Cleaning <support@jointidywise.com>",
+          to: [payload.customerEmail],
+          subject: `Reminder: Your ${serviceName} on ${formattedDate}`,
+          html: `
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Appointment Reminder</title>
+            </head>
+            <body style="margin:0;padding:0;background-color:#f0f4f8;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:#f0f4f8;">
+                <tr>
+                  <td style="padding:40px 20px;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="margin:0 auto;background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.1);">
+                      <tr>
+                        <td style="background:linear-gradient(135deg,#1e5bb0 0%,#2d7dd2 50%,#3fa34d 100%);padding:40px 40px 30px 40px;text-align:center;">
+                          <div style="font-size:48px;font-weight:bold;color:#ffffff;letter-spacing:-2px;margin-bottom:8px;">
+                            <span style="color:#ffffff;">Tidy</span><span style="color:#8cff8c;">Wise</span>
+                          </div>
+                          <p style="color:rgba(255,255,255,0.9);font-size:14px;margin:0;letter-spacing:2px;text-transform:uppercase;">Professional Cleaning Services</p>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="background:linear-gradient(135deg,#f59e0b 0%,#fbbf24 100%);padding:20px;text-align:center;">
+                          <span style="color:#ffffff;font-size:20px;font-weight:600;">⏰ Appointment Reminder</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:40px;">
+                          <p style="font-size:18px;color:#1a1a2e;margin:0 0 20px 0;">Hi ${customerName},</p>
+                          <p style="font-size:16px;color:#4a4a68;line-height:1.6;margin:0 0 30px 0;">
+                            This is a reminder for your <strong>${serviceName}</strong> appointment.
+                          </p>
+
+                          <div style="background:linear-gradient(180deg,#f8fafc 0%,#f1f5f9 100%);border-radius:12px;padding:25px;margin-bottom:25px;border:1px solid #e2e8f0;">
+                            <h3 style="color:#1e5bb0;font-size:16px;margin:0 0 20px 0;text-transform:uppercase;letter-spacing:1px;">Appointment Details</h3>
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                              <tr>
+                                <td style="padding:12px 0;border-bottom:1px solid #e2e8f0;"><span style="color:#64748b;font-size:14px;">📅 Date</span></td>
+                                <td style="padding:12px 0;border-bottom:1px solid #e2e8f0;text-align:right;"><span style="color:#1a1a2e;font-weight:600;font-size:14px;">${formattedDate}</span></td>
+                              </tr>
+                              <tr>
+                                <td style="padding:12px 0;border-bottom:1px solid #e2e8f0;"><span style="color:#64748b;font-size:14px;">🕐 Time</span></td>
+                                <td style="padding:12px 0;border-bottom:1px solid #e2e8f0;text-align:right;"><span style="color:#1a1a2e;font-weight:600;font-size:14px;">${formattedTime}</span></td>
+                              </tr>
+                              <tr>
+                                <td style="padding:12px 0;border-bottom:1px solid #e2e8f0;"><span style="color:#64748b;font-size:14px;">🏠 Address</span></td>
+                                <td style="padding:12px 0;border-bottom:1px solid #e2e8f0;text-align:right;"><span style="color:#1a1a2e;font-weight:600;font-size:14px;">${address}</span></td>
+                              </tr>
+                              ${typeof totalAmount === 'number' ? `
+                              <tr>
+                                <td style="padding:12px 0;"><span style="color:#64748b;font-size:14px;">💰 Total</span></td>
+                                <td style="padding:12px 0;text-align:right;"><span style="color:#3fa34d;font-weight:bold;font-size:18px;">$${totalAmount}</span></td>
+                              </tr>
+                              ` : ''}
+                            </table>
+                          </div>
+
+                          <p style="font-size:14px;color:#64748b;line-height:1.6;margin:20px 0 0 0;text-align:center;">
+                            Need to reschedule? Reply to this email or contact us.
+                          </p>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="background:linear-gradient(135deg,#1a1a2e 0%,#2d2d44 100%);padding:30px 40px;text-align:center;">
+                          <p style="color:#ffffff;font-size:16px;font-weight:600;margin:0 0 5px 0;">TidyWise Cleaning</p>
+                          <p style="color:#94a3b8;font-size:13px;margin:0 0 15px 0;">Making spaces sparkle, one clean at a time</p>
+                          <p style="color:#64748b;font-size:12px;margin:0;">© ${new Date().getFullYear()} TidyWise. All rights reserved.</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </body>
+            </html>
+          `,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        console.error("Resend API error:", data);
+        throw new Error(data?.message || "Failed to send reminder email");
+      }
+
+      // Optional: validate booking exists (keeps parity with UI payload), but do not block email send.
+      if (payload?.bookingId) {
+        const { error: bookingError } = await supabase
+          .from('bookings')
+          .select('id')
+          .eq('id', payload.bookingId)
+          .maybeSingle();
+        if (bookingError) {
+          console.warn('Manual reminder: booking lookup failed:', bookingError);
+        }
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: "Sent 1 reminder",
+          reminders: [payload?.bookingId ?? "manual"],
+        }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        },
+      );
+    }
+
     const now = new Date();
     const sentReminders: string[] = [];
 
