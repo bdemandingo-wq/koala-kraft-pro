@@ -23,6 +23,7 @@ import SettingsPage from "./pages/admin/SettingsPage";
 import NotificationsPage from "./pages/admin/NotificationsPage";
 import StaffPortal from "./pages/staff/StaffPortal";
 import StaffLoginPage from "./pages/staff/StaffLoginPage";
+import StaffResetPasswordPage from "./pages/staff/StaffResetPasswordPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,6 +43,7 @@ const App = () => (
 
               {/* Staff Portal */}
               <Route path="/staff/login" element={<StaffLoginPage />} />
+              <Route path="/staff/reset-password" element={<StaffResetPasswordPage />} />
               <Route path="/staff" element={<StaffRoute><StaffPortal /></StaffRoute>} />
 
               {/* Admin Routes (Protected) */}
