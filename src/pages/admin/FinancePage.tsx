@@ -127,17 +127,17 @@ export default function FinancePage() {
     });
   }, [bookings]);
 
-  // Calculate P&L metrics - include all bookings (not just paid) for visibility
+  // Calculate P&L metrics - exclude cancelled bookings
   const metrics = useMemo(() => {
-    // Include paid and partial payments for stats
-    const paidTransactions = transactions.filter(t => t.payment_status === 'paid' || t.payment_status === 'partial');
-    const allTransactions = transactions;
+    // Exclude cancelled bookings from all calculations
+    const activeTransactions = transactions.filter(t => t.status !== 'cancelled');
+    const paidTransactions = activeTransactions.filter(t => t.payment_status === 'paid' || t.payment_status === 'partial');
     
-    // Total sales from all bookings in range (regardless of payment status)
-    const totalSales = allTransactions.reduce((sum, t) => sum + t.gross_amount, 0);
-    const totalFees = allTransactions.reduce((sum, t) => sum + t.processing_fee, 0);
-    const totalCleanerPay = allTransactions.reduce((sum, t) => sum + t.cleaner_pay, 0);
-    const refundedTransactions = transactions.filter(t => t.payment_status === 'refunded');
+    // Total sales from active bookings in range (excludes cancelled)
+    const totalSales = activeTransactions.reduce((sum, t) => sum + t.gross_amount, 0);
+    const totalFees = activeTransactions.reduce((sum, t) => sum + t.processing_fee, 0);
+    const totalCleanerPay = activeTransactions.reduce((sum, t) => sum + t.cleaner_pay, 0);
+    const refundedTransactions = activeTransactions.filter(t => t.payment_status === 'refunded');
     const totalRefunds = refundedTransactions.reduce((sum, t) => sum + t.gross_amount, 0);
     
     // Calculate expenses by category
@@ -163,7 +163,7 @@ export default function FinancePage() {
       totalRefunds: Math.round(totalRefunds * 100) / 100,
       netProfit: Math.round(netProfit * 100) / 100,
       profitMargin: Math.round(profitMargin * 10) / 10,
-      transactionCount: allTransactions.length,
+      transactionCount: activeTransactions.length,
     };
   }, [transactions, expenses]);
 
