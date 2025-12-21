@@ -953,8 +953,19 @@ export default function BookingsPage() {
                                 setActiveBooking(booking);
                                 setAdjustPaymentOpen(true);
                               }}
+                              disabled={booking.status === 'completed'}
                             >
                               Mark Complete & Adjust Pay
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              className="gap-2 cursor-pointer text-amber-600" 
+                              onClick={async () => {
+                                await handleStatusChange(booking.id, 'confirmed');
+                                toast({ title: "Marked Uncleaned", description: `Booking #${booking.booking_number} marked as uncleaned.` });
+                              }}
+                              disabled={booking.status === 'confirmed'}
+                            >
+                              <XCircle className="w-4 h-4" /> Mark Uncleaned
                             </DropdownMenuItem>
                             <DropdownMenuItem 
                               className="gap-2 cursor-pointer" 
