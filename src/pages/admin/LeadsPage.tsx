@@ -51,6 +51,7 @@ interface Lead {
   zip_code: string | null;
   service_interest: string | null;
   message: string | null;
+  notes: string | null;
   source: string;
   status: string;
   created_at: string;
@@ -83,7 +84,7 @@ export default function LeadsPage() {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: { name: string; email: string; phone?: string; address?: string; city?: string; state?: string; zip_code?: string; service_interest?: string; message?: string; source: string; status: string }) => {
+    mutationFn: async (data: { name: string; email: string; phone?: string; address?: string; city?: string; state?: string; zip_code?: string; service_interest?: string; message?: string; notes?: string; source: string; status: string }) => {
       const { error } = await supabase.from('leads').insert([data]);
       if (error) throw error;
     },
@@ -161,7 +162,7 @@ export default function LeadsPage() {
   };
 
   const exportLeadsExcel = () => {
-    const headers = ['Name', 'Email', 'Phone', 'Address', 'City', 'State', 'Zip', 'Service Interest', 'Source', 'Status', 'Created'];
+    const headers = ['Name', 'Email', 'Phone', 'Address', 'City', 'State', 'Zip', 'Service Interest', 'Source', 'Status', 'Notes', 'Message', 'Created'];
     const rows = filteredLeads.map(lead => [
       lead.name,
       lead.email,
@@ -173,6 +174,8 @@ export default function LeadsPage() {
       lead.service_interest || '',
       lead.source,
       lead.status,
+      lead.notes || '',
+      lead.message || '',
       format(new Date(lead.created_at), 'yyyy-MM-dd'),
     ]);
 
@@ -254,6 +257,7 @@ export default function LeadsPage() {
                 <TableHead>Interest</TableHead>
                 <TableHead>Source</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Notes</TableHead>
                 <TableHead>Created</TableHead>
                 <TableHead className="w-[80px]">Actions</TableHead>
               </TableRow>
@@ -261,13 +265,13 @@ export default function LeadsPage() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                     Loading...
                   </TableCell>
                 </TableRow>
               ) : filteredLeads.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                     No leads found
                   </TableCell>
                 </TableRow>
@@ -307,6 +311,15 @@ export default function LeadsPage() {
                           ))}
                         </SelectContent>
                       </Select>
+                    </TableCell>
+                    <TableCell className="max-w-[200px]">
+                      {lead.notes ? (
+                        <span className="text-sm text-muted-foreground line-clamp-2" title={lead.notes}>
+                          {lead.notes}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground/50 text-sm italic">No notes</span>
+                      )}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {format(new Date(lead.created_at), 'MMM d, yyyy')}
@@ -386,7 +399,7 @@ function LeadDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   lead: Lead | null;
-  onSave: (data: { name: string; email: string; phone?: string; address?: string; city?: string; state?: string; zip_code?: string; service_interest?: string; message?: string; source: string; status: string }) => void;
+  onSave: (data: { name: string; email: string; phone?: string; address?: string; city?: string; state?: string; zip_code?: string; service_interest?: string; message?: string; notes?: string; source: string; status: string }) => void;
 }) {
   const [formData, setFormData] = useState({
     name: lead?.name || '',
@@ -398,6 +411,7 @@ function LeadDialog({
     zip_code: lead?.zip_code || '',
     service_interest: lead?.service_interest || '',
     message: lead?.message || '',
+    notes: lead?.notes || '',
     source: lead?.source || 'website',
     status: lead?.status || 'new',
   });
@@ -484,7 +498,17 @@ function LeadDialog({
             <Textarea
               value={formData.message}
               onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+              rows={2}
+              placeholder="Initial inquiry message..."
+            />
+          </div>
+          <div className="col-span-2">
+            <Label>Call Notes</Label>
+            <Textarea
+              value={formData.notes}
+              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               rows={3}
+              placeholder="How did the call go? Satisfaction, review status, recurring interest..."
             />
           </div>
         </div>
