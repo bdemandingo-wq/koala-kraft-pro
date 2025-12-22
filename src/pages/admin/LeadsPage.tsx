@@ -83,7 +83,7 @@ export default function LeadsPage() {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: Partial<Lead>) => {
+    mutationFn: async (data: { name: string; email: string; phone?: string; address?: string; city?: string; state?: string; zip_code?: string; service_interest?: string; message?: string; source: string; status: string }) => {
       const { error } = await supabase.from('leads').insert([data]);
       if (error) throw error;
     },
@@ -352,7 +352,7 @@ function LeadDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   lead: Lead | null;
-  onSave: (data: Partial<Lead>) => void;
+  onSave: (data: { name: string; email: string; phone?: string; address?: string; city?: string; state?: string; zip_code?: string; service_interest?: string; message?: string; source: string; status: string }) => void;
 }) {
   const [formData, setFormData] = useState({
     name: lead?.name || '',

@@ -12,10 +12,13 @@ import {
   Home,
   DollarSign,
   Receipt,
-  HardHat,
   Package,
   Menu,
-  X,
+  Repeat,
+  Target,
+  FileText,
+  MessageSquare,
+  MapPin,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
@@ -35,12 +38,16 @@ const navigation = [
   { name: 'Dashboard', href: '/admin', icon: Home },
   { name: 'Scheduler', href: '/admin/scheduler', icon: Calendar },
   { name: 'Bookings', href: '/admin/bookings', icon: ClipboardList },
+  { name: 'Recurring', href: '/admin/recurring', icon: Repeat },
   { name: 'Customers', href: '/admin/customers', icon: Users },
+  { name: 'Leads', href: '/admin/leads', icon: Target },
+  { name: 'Quotes', href: '/admin/quotes', icon: FileText },
   { name: 'Services', href: '/admin/services', icon: Briefcase },
   { name: 'Staff', href: '/admin/staff', icon: UserCircle },
+  { name: 'Team Chat', href: '/admin/team-chat', icon: MessageSquare },
+  { name: 'Inventory', href: '/admin/inventory', icon: Package },
   { name: 'Payroll', href: '/admin/payroll', icon: DollarSign },
   { name: 'Finance', href: '/admin/finance', icon: Receipt },
-  { name: 'Expenses', href: '/admin/expenses', icon: Package },
   { name: 'Reports', href: '/admin/reports', icon: BarChart3 },
 ];
 

@@ -68,7 +68,7 @@ export default function InventoryPage() {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: Partial<InventoryItem>) => {
+    mutationFn: async (data: { name: string; description?: string; category: string; quantity: number; min_quantity: number; unit: string; cost_per_unit: number; supplier?: string }) => {
       const { error } = await supabase.from('inventory_items').insert([data]);
       if (error) throw error;
     },
@@ -327,7 +327,7 @@ function InventoryDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   item: InventoryItem | null;
-  onSave: (data: Partial<InventoryItem>) => void;
+  onSave: (data: { name: string; description?: string; category: string; quantity: number; min_quantity: number; unit: string; cost_per_unit: number; supplier?: string }) => void;
 }) {
   const [formData, setFormData] = useState({
     name: item?.name || '',
