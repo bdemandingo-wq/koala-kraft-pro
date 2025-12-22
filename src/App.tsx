@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/hooks/useAuth";
+import { TestModeProvider } from "@/contexts/TestModeContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { StaffRoute } from "@/components/StaffRoute";
 import PublicBookingPage from "./pages/PublicBookingPage";
@@ -32,39 +33,41 @@ const App = () => (
   <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/" element={<PublicBookingPage />} />
-              <Route path="/auth" element={<AuthPage />} />
+        <TestModeProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/" element={<PublicBookingPage />} />
+                <Route path="/auth" element={<AuthPage />} />
 
-              {/* Staff Portal */}
-              <Route path="/staff/login" element={<StaffLoginPage />} />
-              <Route path="/staff/reset-password" element={<StaffResetPasswordPage />} />
-              <Route path="/staff" element={<StaffRoute><StaffPortal /></StaffRoute>} />
+                {/* Staff Portal */}
+                <Route path="/staff/login" element={<StaffLoginPage />} />
+                <Route path="/staff/reset-password" element={<StaffResetPasswordPage />} />
+                <Route path="/staff" element={<StaffRoute><StaffPortal /></StaffRoute>} />
 
-              {/* Admin Routes (Protected) */}
-              <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-              <Route path="/admin/scheduler" element={<ProtectedRoute><SchedulerPage /></ProtectedRoute>} />
-              <Route path="/admin/bookings" element={<ProtectedRoute><BookingsPage /></ProtectedRoute>} />
-              <Route path="/admin/customers" element={<ProtectedRoute><CustomersPage /></ProtectedRoute>} />
-              <Route path="/admin/services" element={<ProtectedRoute><ServicesPage /></ProtectedRoute>} />
-              <Route path="/admin/staff" element={<ProtectedRoute><StaffPage /></ProtectedRoute>} />
-              <Route path="/admin/payroll" element={<ProtectedRoute><PayrollPage /></ProtectedRoute>} />
-              <Route path="/admin/finance" element={<ProtectedRoute><FinancePage /></ProtectedRoute>} />
-              <Route path="/admin/expenses" element={<ProtectedRoute><ExpensesPage /></ProtectedRoute>} />
-              <Route path="/admin/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
-              <Route path="/admin/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
-              <Route path="/admin/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+                {/* Admin Routes (Protected) */}
+                <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+                <Route path="/admin/scheduler" element={<ProtectedRoute><SchedulerPage /></ProtectedRoute>} />
+                <Route path="/admin/bookings" element={<ProtectedRoute><BookingsPage /></ProtectedRoute>} />
+                <Route path="/admin/customers" element={<ProtectedRoute><CustomersPage /></ProtectedRoute>} />
+                <Route path="/admin/services" element={<ProtectedRoute><ServicesPage /></ProtectedRoute>} />
+                <Route path="/admin/staff" element={<ProtectedRoute><StaffPage /></ProtectedRoute>} />
+                <Route path="/admin/payroll" element={<ProtectedRoute><PayrollPage /></ProtectedRoute>} />
+                <Route path="/admin/finance" element={<ProtectedRoute><FinancePage /></ProtectedRoute>} />
+                <Route path="/admin/expenses" element={<ProtectedRoute><ExpensesPage /></ProtectedRoute>} />
+                <Route path="/admin/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
+                <Route path="/admin/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+                <Route path="/admin/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
 
-              {/* Catch-all */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
+                {/* Catch-all */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </TestModeProvider>
       </AuthProvider>
     </QueryClientProvider>
   </ThemeProvider>

@@ -203,13 +203,15 @@ export default function FinancePage() {
   };
 
   const exportAnnualIncome = () => {
-    const headers = ['Period', 'Total Sales', 'Processing Fees', 'Net Revenue', 'Cleaner Pay', 'Net Profit', 'Profit Margin %'];
+    const headers = ['Period', 'Total Sales', 'Processing Fees', 'Net Revenue', 'Cleaner Pay', 'Expenses', 'Refunds', 'Net Profit', 'Profit Margin %'];
     const rows = [[
       `${format(dateRange.from, 'MMM d, yyyy')} - ${format(dateRange.to, 'MMM d, yyyy')}`,
       metrics.totalSales.toFixed(2),
       metrics.totalFees.toFixed(2),
       metrics.netRevenue.toFixed(2),
       metrics.totalCleanerPay.toFixed(2),
+      metrics.totalExpenses.toFixed(2),
+      metrics.totalRefunds.toFixed(2),
       metrics.netProfit.toFixed(2),
       metrics.profitMargin.toFixed(1),
     ]];

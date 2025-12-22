@@ -1,9 +1,11 @@
 import { ReactNode, useState } from 'react';
-import { Search, Plus } from 'lucide-react';
+import { Search, Plus, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AddBookingDialog } from '@/components/admin/AddBookingDialog';
 import { ThemeToggle } from '@/components/admin/ThemeToggle';
+import { useTestMode } from '@/contexts/TestModeContext';
+import { Badge } from '@/components/ui/badge';
 
 interface AdminHeaderProps {
   title: string;
@@ -13,15 +15,23 @@ interface AdminHeaderProps {
 
 export function AdminHeader({ title, subtitle, actions }: AdminHeaderProps) {
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
+  const { isTestMode, toggleTestMode } = useTestMode();
 
   return (
     <>
       <header className="sticky top-0 z-30 h-16 bg-background/80 backdrop-blur-sm border-b border-border">
         <div className="flex items-center justify-between h-full px-6">
-          <div>
-            <h1 className="text-xl font-semibold text-foreground">{title}</h1>
-            {subtitle && (
-              <p className="text-sm text-muted-foreground">{subtitle}</p>
+          <div className="flex items-center gap-3">
+            <div>
+              <h1 className="text-xl font-semibold text-foreground">{title}</h1>
+              {subtitle && (
+                <p className="text-sm text-muted-foreground">{subtitle}</p>
+              )}
+            </div>
+            {isTestMode && (
+              <Badge variant="outline" className="bg-yellow-100 text-yellow-700 border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-700">
+                Demo Mode
+              </Badge>
             )}
           </div>
 
@@ -37,6 +47,17 @@ export function AdminHeader({ title, subtitle, actions }: AdminHeaderProps) {
 
             {/* Actions */}
             {actions}
+
+            {/* Test Mode Toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTestMode}
+              title={isTestMode ? 'Disable Demo Mode' : 'Enable Demo Mode'}
+              className={isTestMode ? 'text-yellow-600' : ''}
+            >
+              {isTestMode ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </Button>
 
             {/* Theme Toggle */}
             <ThemeToggle />
