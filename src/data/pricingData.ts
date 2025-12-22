@@ -28,6 +28,8 @@ export type CleaningServiceType =
   | 'weekly_clean' 
   | 'move_in_out' 
   | 'construction'
+  | 'post_construction'
+  | 'commercial'
   | 'airbnb';
 
 export interface CleaningService {
@@ -79,6 +81,22 @@ export const cleaningServices: CleaningService[] = [
     color: '#ec4899',
     minimumPrice: 140,
     prices: [140, 160, 180, 200, 220, 240, 265, 295, 330, 365, 400, 435, 470, 505, 540, 575, 610],
+  },
+  {
+    id: 'post_construction',
+    name: 'Post Construction Clean',
+    description: 'Heavy-duty cleaning after construction or renovation projects',
+    color: '#f59e0b',
+    minimumPrice: 400,
+    prices: [450, 502, 555, 607, 660, 712, 795, 877, 960, 1042, 1125, 1207, 1290, 1372, 1455, 1537, 1620],
+  },
+  {
+    id: 'commercial',
+    name: 'Commercial Cleaning',
+    description: 'Professional cleaning for commercial spaces, offices, and businesses',
+    color: '#6366f1',
+    minimumPrice: 350,
+    prices: [350, 400, 450, 500, 550, 600, 675, 750, 825, 900, 975, 1050, 1125, 1200, 1275, 1350, 1425],
   },
 ];
 
