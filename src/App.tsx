@@ -22,6 +22,11 @@ import ExpensesPage from "./pages/admin/ExpensesPage";
 import ReportsPage from "./pages/admin/ReportsPage";
 import SettingsPage from "./pages/admin/SettingsPage";
 import NotificationsPage from "./pages/admin/NotificationsPage";
+import RecurringBookingsPage from "./pages/admin/RecurringBookingsPage";
+import LeadsPage from "./pages/admin/LeadsPage";
+import InventoryPage from "./pages/admin/InventoryPage";
+import QuotesPage from "./pages/admin/QuotesPage";
+import TeamChatPage from "./pages/admin/TeamChatPage";
 import StaffPortal from "./pages/staff/StaffPortal";
 import StaffLoginPage from "./pages/staff/StaffLoginPage";
 import StaffResetPasswordPage from "./pages/staff/StaffResetPasswordPage";
@@ -61,6 +66,11 @@ const App = () => (
                 <Route path="/admin/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
                 <Route path="/admin/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
                 <Route path="/admin/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+                <Route path="/admin/recurring" element={<ProtectedRoute><RecurringBookingsPage /></ProtectedRoute>} />
+                <Route path="/admin/leads" element={<ProtectedRoute><LeadsPage /></ProtectedRoute>} />
+                <Route path="/admin/inventory" element={<ProtectedRoute><InventoryPage /></ProtectedRoute>} />
+                <Route path="/admin/quotes" element={<ProtectedRoute><QuotesPage /></ProtectedRoute>} />
+                <Route path="/admin/team-chat" element={<ProtectedRoute><TeamChatPage /></ProtectedRoute>} />
 
                 {/* Catch-all */}
                 <Route path="*" element={<NotFound />} />
