@@ -18,6 +18,7 @@ import { CleanerProfile } from '@/components/staff/CleanerProfile';
 import { CleanerCalendar } from '@/components/staff/CleanerCalendar';
 import { NotificationBell } from '@/components/staff/NotificationBell';
 import { CleanerReviews } from '@/components/staff/CleanerReviews';
+import { BookingChecklist } from '@/components/staff/BookingChecklist';
 
 interface Booking {
   id: string;

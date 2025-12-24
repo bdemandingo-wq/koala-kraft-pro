@@ -19,6 +19,9 @@ import {
   FileText,
   MessageSquare,
   MapPin,
+  Gift,
+  Mail,
+  CheckSquare,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
@@ -41,11 +44,14 @@ const navigation = [
   { name: 'Recurring', href: '/admin/recurring', icon: Repeat },
   { name: 'Customers', href: '/admin/customers', icon: Users },
   { name: 'Leads', href: '/admin/leads', icon: Target },
+  { name: 'Referrals', href: '/admin/referrals', icon: Gift },
   { name: 'Invoices', href: '/admin/invoices', icon: FileText },
   { name: 'Operations', href: '/admin/operations', icon: MapPin },
   { name: 'Feedback', href: '/admin/feedback', icon: MessageSquare },
   { name: 'Services', href: '/admin/services', icon: Briefcase },
   { name: 'Staff', href: '/admin/staff', icon: UserCircle },
+  { name: 'Checklists', href: '/admin/checklists', icon: CheckSquare },
+  { name: 'Campaigns', href: '/admin/campaigns', icon: Mail },
   { name: 'Inventory', href: '/admin/inventory', icon: Package },
   { name: 'Payroll', href: '/admin/payroll', icon: DollarSign },
   { name: 'Finance', href: '/admin/finance', icon: Receipt },

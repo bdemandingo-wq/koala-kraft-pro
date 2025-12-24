@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { format } from 'date-fns';
-import { Calendar, MapPin, Clock, User, Phone, Navigation, DollarSign, TrendingUp } from 'lucide-react';
+import { Calendar, MapPin, Clock, User, Phone, Navigation, DollarSign, TrendingUp, ClipboardCheck } from 'lucide-react';
 import { BookingPhotoUpload } from './BookingPhotoUpload';
+import { BookingChecklist } from './BookingChecklist';
 
 interface StaffInfo {
   hourly_rate: number | null;
@@ -42,6 +45,7 @@ interface Props {
 }
 
 export function MyJobCard({ booking, staffInfo, onUpdateStatus, isUpdating }: Props) {
+  const [checklistOpen, setChecklistOpen] = useState(false);
   // Calculate potential earnings based on staff pay type (same logic as AvailableJobCard)
   const calculatePotentialEarnings = (): { amount: number; type: string } => {
     // If booking has specific cleaner wage set
@@ -195,6 +199,26 @@ export function MyJobCard({ booking, staffInfo, onUpdateStatus, isUpdating }: Pr
                 Directions
               </a>
             </Button>
+          )}
+          {staffInfo.id && (booking.status === 'in_progress' || booking.status === 'confirmed') && (
+            <Dialog open={checklistOpen} onOpenChange={setChecklistOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <ClipboardCheck className="w-4 h-4" />
+                  Checklist
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Job #{booking.booking_number} Checklist</DialogTitle>
+                </DialogHeader>
+                <BookingChecklist
+                  bookingId={booking.id}
+                  staffId={staffInfo.id}
+                  onComplete={() => setChecklistOpen(false)}
+                />
+              </DialogContent>
+            </Dialog>
           )}
           {staffInfo.id && booking.status === 'in_progress' && (
             <BookingPhotoUpload 
