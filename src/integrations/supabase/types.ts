@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      booking_photos: {
+        Row: {
+          booking_id: string
+          caption: string | null
+          created_at: string | null
+          id: string
+          photo_type: string | null
+          photo_url: string
+          staff_id: string | null
+        }
+        Insert: {
+          booking_id: string
+          caption?: string | null
+          created_at?: string | null
+          id?: string
+          photo_type?: string | null
+          photo_url: string
+          staff_id?: string | null
+        }
+        Update: {
+          booking_id?: string
+          caption?: string | null
+          created_at?: string | null
+          id?: string
+          photo_type?: string | null
+          photo_url?: string
+          staff_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_photos_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_photos_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookings: {
         Row: {
           address: string | null
@@ -175,6 +220,7 @@ export type Database = {
           confirmation_email_subject: string | null
           created_at: string
           currency: string | null
+          google_review_url: string | null
           id: string
           logo_url: string | null
           max_advance_booking_days: number | null
@@ -207,6 +253,7 @@ export type Database = {
           confirmation_email_subject?: string | null
           created_at?: string
           currency?: string | null
+          google_review_url?: string | null
           id?: string
           logo_url?: string | null
           max_advance_booking_days?: number | null
@@ -239,6 +286,7 @@ export type Database = {
           confirmation_email_subject?: string | null
           created_at?: string
           currency?: string | null
+          google_review_url?: string | null
           id?: string
           logo_url?: string | null
           max_advance_booking_days?: number | null
@@ -339,6 +387,44 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      customer_loyalty: {
+        Row: {
+          created_at: string | null
+          customer_id: string | null
+          id: string
+          lifetime_points: number | null
+          points: number | null
+          tier: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          customer_id?: string | null
+          id?: string
+          lifetime_points?: number | null
+          points?: number | null
+          tier?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          customer_id?: string | null
+          id?: string
+          lifetime_points?: number | null
+          points?: number | null
+          tier?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_loyalty_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: true
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       customers: {
         Row: {
@@ -581,6 +667,51 @@ export type Database = {
           zip_code?: string | null
         }
         Relationships: []
+      }
+      loyalty_transactions: {
+        Row: {
+          booking_id: string | null
+          created_at: string | null
+          customer_id: string | null
+          description: string | null
+          id: string
+          points: number
+          transaction_type: string
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string | null
+          customer_id?: string | null
+          description?: string | null
+          id?: string
+          points: number
+          transaction_type: string
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string | null
+          customer_id?: string | null
+          description?: string | null
+          id?: string
+          points?: number
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loyalty_transactions_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loyalty_transactions_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       operations_tracker: {
         Row: {
@@ -868,6 +999,7 @@ export type Database = {
           review_link_token: string | null
           review_text: string | null
           sent_at: string | null
+          staff_id: string | null
           status: string | null
         }
         Insert: {
@@ -883,6 +1015,7 @@ export type Database = {
           review_link_token?: string | null
           review_text?: string | null
           sent_at?: string | null
+          staff_id?: string | null
           status?: string | null
         }
         Update: {
@@ -898,6 +1031,7 @@ export type Database = {
           review_link_token?: string | null
           review_text?: string | null
           sent_at?: string | null
+          staff_id?: string | null
           status?: string | null
         }
         Relationships: [
@@ -913,6 +1047,13 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_requests_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
             referencedColumns: ["id"]
           },
         ]
