@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { LogOut, Briefcase, CalendarCheck, Clock, DollarSign, Bell, History, Sparkles, Calendar, User } from 'lucide-react';
+import { LogOut, Briefcase, CalendarCheck, Clock, DollarSign, Bell, History, Sparkles, Calendar, User, Star } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { MyJobCard } from '@/components/staff/MyJobCard';
 import { AvailableJobCard } from '@/components/staff/AvailableJobCard';
@@ -17,6 +17,7 @@ import { JobHistoryCard } from '@/components/staff/JobHistoryCard';
 import { CleanerProfile } from '@/components/staff/CleanerProfile';
 import { CleanerCalendar } from '@/components/staff/CleanerCalendar';
 import { NotificationBell } from '@/components/staff/NotificationBell';
+import { CleanerReviews } from '@/components/staff/CleanerReviews';
 
 interface Booking {
   id: string;
@@ -381,6 +382,10 @@ export default function StaffPortal() {
               <DollarSign className="w-4 h-4 hidden sm:inline" />
               Earnings
             </TabsTrigger>
+            <TabsTrigger value="reviews" className="gap-2">
+              <Star className="w-4 h-4 hidden sm:inline" />
+              Reviews
+            </TabsTrigger>
             <TabsTrigger value="profile" className="gap-2">
               <User className="w-4 h-4 hidden sm:inline" />
               Profile
@@ -503,6 +508,15 @@ export default function StaffPortal() {
               <CleanerCalendar staffId={staffInfo.id} />
             ) : (
               <p className="text-muted-foreground">Loading calendar...</p>
+            )}
+          </TabsContent>
+
+          {/* Reviews Tab */}
+          <TabsContent value="reviews" className="space-y-4">
+            {staffInfo?.id ? (
+              <CleanerReviews staffId={staffInfo.id} />
+            ) : (
+              <p className="text-muted-foreground">Loading reviews...</p>
             )}
           </TabsContent>
 

@@ -49,8 +49,25 @@ const handler = async (req: Request): Promise<Response> => {
     const token = crypto.randomUUID();
     
     // Get project URL for review page link
-    const projectUrl = Deno.env.get("SUPABASE_URL")?.replace("supabase.co", "lovableproject.com")?.replace(".supabase.co", "") || "";
     const reviewPageUrl = `https://b5fbe592-e63a-4ccf-8d0f-0393049d0881.lovableproject.com/review/${token}`;
+
+    // Get staff_id from booking to associate review with cleaner
+    const { data: bookingData } = await supabase
+      .from("bookings")
+      .select("staff_id")
+      .eq("id", bookingId)
+      .single();
+
+    // Get default Google review URL from business settings if not provided
+    let finalGoogleUrl = googleReviewUrl;
+    if (!finalGoogleUrl) {
+      const { data: settings } = await supabase
+        .from("business_settings")
+        .select("google_review_url")
+        .limit(1)
+        .single();
+      finalGoogleUrl = settings?.google_review_url || null;
+    }
 
     // Create review request record
     const { error: insertError } = await supabase
@@ -58,10 +75,11 @@ const handler = async (req: Request): Promise<Response> => {
       .insert({
         booking_id: bookingId,
         customer_id: customerId,
+        staff_id: bookingData?.staff_id || null,
         status: "sent",
         sent_at: new Date().toISOString(),
         review_link_token: token,
-        google_review_url: googleReviewUrl || null,
+        google_review_url: finalGoogleUrl,
       });
 
     if (insertError) {
