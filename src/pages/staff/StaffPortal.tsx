@@ -15,6 +15,7 @@ import { CleanerEarnings } from '@/components/staff/CleanerEarnings';
 import { JobHistoryCard } from '@/components/staff/JobHistoryCard';
 import { CleanerProfile } from '@/components/staff/CleanerProfile';
 import { CleanerCalendar } from '@/components/staff/CleanerCalendar';
+import { NotificationBell } from '@/components/staff/NotificationBell';
 
 interface Booking {
   id: string;
@@ -287,9 +288,19 @@ export default function StaffPortal() {
           </div>
           <div className="flex items-center gap-3">
             {staffInfo && (
-              <Badge variant="outline" className="hidden sm:flex">
-                {staffInfo.tax_classification === 'w2' ? 'W-2 Employee' : '1099 Contractor'}
-              </Badge>
+              <>
+                <NotificationBell 
+                  staffId={staffInfo.id} 
+                  onViewJob={() => {
+                    // Switch to available tab when clicking a job notification
+                    const availableTab = document.querySelector('[value="available"]') as HTMLButtonElement;
+                    if (availableTab) availableTab.click();
+                  }}
+                />
+                <Badge variant="outline" className="hidden sm:flex">
+                  {staffInfo.tax_classification === 'w2' ? 'W-2 Employee' : '1099 Contractor'}
+                </Badge>
+              </>
             )}
             <Button variant="outline" size="sm" onClick={handleSignOut} className="gap-2">
               <LogOut className="w-4 h-4" />

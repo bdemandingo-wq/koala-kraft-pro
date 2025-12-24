@@ -256,6 +256,54 @@ export type Database = {
         }
         Relationships: []
       }
+      cleaner_notifications: {
+        Row: {
+          booking_id: string | null
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string
+          staff_id: string
+          title: string
+          type: string
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message: string
+          staff_id: string
+          title: string
+          type?: string
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          staff_id?: string
+          title?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cleaner_notifications_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cleaner_notifications_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_feedback: {
         Row: {
           created_at: string
