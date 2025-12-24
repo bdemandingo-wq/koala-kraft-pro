@@ -226,19 +226,32 @@ export default function StaffPortal() {
     mutationFn: async (bookingId: string) => {
       if (!staffInfo?.id) throw new Error('Staff ID not found');
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('bookings')
         .update({ staff_id: staffInfo.id })
-        .eq('id', bookingId);
+        .eq('id', bookingId)
+        .is('staff_id', null) // Only claim if still unassigned
+        .select();
 
       if (error) throw error;
+      if (!data || data.length === 0) {
+        throw new Error('Job was already claimed by someone else');
+      }
+      return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['staff-bookings'] });
+      // Invalidate both assigned and unassigned queries to refresh the UI
+      queryClient.invalidateQueries({ queryKey: ['staff-bookings', 'assigned'] });
+      queryClient.invalidateQueries({ queryKey: ['staff-bookings', 'unassigned'] });
       toast.success('Job claimed successfully!');
     },
-    onError: (error) => {
-      toast.error('Failed to claim job');
+    onError: (error: Error) => {
+      if (error.message === 'Job was already claimed by someone else') {
+        toast.error('This job was already claimed by another cleaner');
+        queryClient.invalidateQueries({ queryKey: ['staff-bookings', 'unassigned'] });
+      } else {
+        toast.error('Failed to claim job');
+      }
       console.error(error);
     },
   });
