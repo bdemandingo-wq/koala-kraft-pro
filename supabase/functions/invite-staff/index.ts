@@ -13,7 +13,7 @@ interface InviteStaffRequest {
   hourly_rate?: number;
   percentage_rate?: number;
   tax_classification?: 'w2' | '1099';
-  redirectUrl?: string;
+  password?: string; // Admin-set password
 }
 
 serve(async (req) => {
@@ -62,10 +62,17 @@ serve(async (req) => {
       });
     }
 
-    const { email, name, phone, hourly_rate, percentage_rate, tax_classification, redirectUrl }: InviteStaffRequest = await req.json();
+    const { email, name, phone, hourly_rate, percentage_rate, tax_classification, password }: InviteStaffRequest = await req.json();
 
     if (!email || !name) {
       return new Response(JSON.stringify({ error: "Email and name are required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (!password || password.length < 6) {
+      return new Response(JSON.stringify({ error: "Password is required and must be at least 6 characters" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -101,21 +108,14 @@ serve(async (req) => {
           });
         }
 
-        // Generate a password reset link for the reactivated user
-        let resetLink = null;
+        // Update the user's password if they have a user_id
         if (existingStaff.user_id) {
-          const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-            type: 'recovery',
-            email,
-            options: {
-              redirectTo: redirectUrl || `${Deno.env.get("SUPABASE_URL")?.replace('.supabase.co', '.lovable.app')}/staff/reset-password`,
-            },
-          });
-
-          if (linkError) {
-            console.error("Error generating recovery link:", linkError);
-          } else {
-            resetLink = linkData.properties?.action_link;
+          const { error: passwordError } = await supabaseAdmin.auth.admin.updateUserById(
+            existingStaff.user_id,
+            { password }
+          );
+          if (passwordError) {
+            console.error("Error updating password:", passwordError);
           }
         }
 
@@ -123,8 +123,7 @@ serve(async (req) => {
           JSON.stringify({
             success: true,
             staff: { ...existingStaff, is_active: true, name, phone, hourly_rate },
-            resetLink,
-            message: "Staff member reactivated. Share the password reset link so they can set their password.",
+            message: "Staff member reactivated with new password.",
             reactivated: true,
           }),
           {
@@ -141,13 +140,10 @@ serve(async (req) => {
       }
     }
 
-    // Generate a random temporary password (required for user creation, but user will reset it)
-    const tempPassword = crypto.randomUUID();
-
-    // Create auth user with a random password (user will set their own via reset link)
+    // Create auth user with admin-provided password
     const { data: authData, error: createUserError } = await supabaseAdmin.auth.admin.createUser({
       email,
-      password: tempPassword,
+      password,
       email_confirm: true,
       user_metadata: { full_name: name },
     });
@@ -200,29 +196,11 @@ serve(async (req) => {
       console.error("Error assigning role:", roleError);
     }
 
-    // Generate password reset link so staff can set their own password
-    const { data: linkData, error: resetError } = await supabaseAdmin.auth.admin.generateLink({
-      type: 'recovery',
-      email,
-      options: {
-        redirectTo: redirectUrl || `${Deno.env.get("SUPABASE_URL")?.replace('.supabase.co', '.lovable.app')}/staff/reset-password`,
-      },
-    });
-
-    let resetLink = null;
-    if (resetError) {
-      console.error("Error generating recovery link:", resetError);
-    } else {
-      resetLink = linkData.properties?.action_link;
-      console.log("Generated reset link for new staff:", resetLink);
-    }
-
     return new Response(
       JSON.stringify({
         success: true,
         staff: staffData,
-        resetLink,
-        message: "Staff member created. Share the password setup link so they can set their password.",
+        message: "Staff member created successfully. Share the login credentials with them.",
       }),
       {
         status: 200,
