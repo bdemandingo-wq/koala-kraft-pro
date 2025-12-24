@@ -27,6 +27,7 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as DatePicker } from '@/components/ui/calendar';
 import { CalendarIcon } from 'lucide-react';
+import { Label } from '@/components/ui/label';
 
 // Default service colors
 const defaultColors = [
@@ -166,6 +167,42 @@ export default function ReportsPage() {
     <AdminLayout
       title="Reports"
       subtitle="Analytics and performance metrics"
+      actions={
+        <div className="flex items-center gap-2">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <CalendarIcon className="w-4 h-4" />
+                {format(dateRange.from, 'MMM d, yyyy')} - {format(dateRange.to, 'MMM d, yyyy')}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <div className="p-4 space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-xs text-muted-foreground">From</Label>
+                    <DatePicker
+                      mode="single"
+                      selected={dateRange.from}
+                      onSelect={(date) => date && setDateRange(prev => ({ ...prev, from: date }))}
+                      className="rounded-md border"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">To</Label>
+                    <DatePicker
+                      mode="single"
+                      selected={dateRange.to}
+                      onSelect={(date) => date && setDateRange(prev => ({ ...prev, to: date }))}
+                      className="rounded-md border"
+                    />
+                  </div>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+      }
     >
       {/* Summary Stats - Uniform Card Size */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">

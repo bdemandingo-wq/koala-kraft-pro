@@ -63,12 +63,15 @@ export default function OperationsTrackerPage() {
 
   const createMutation = useMutation({
     mutationFn: async (data: Omit<OperationsEntry, 'id'>) => {
-      const { error } = await supabase.from('operations_tracker').insert([data]);
+      // Use upsert to handle duplicate dates - update if exists, insert if not
+      const { error } = await supabase
+        .from('operations_tracker')
+        .upsert([data], { onConflict: 'track_date' });
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['operations-tracker'] });
-      toast.success('Entry added');
+      toast.success('Entry saved');
       setDialogOpen(false);
     },
     onError: (error: any) => toast.error(error.message),

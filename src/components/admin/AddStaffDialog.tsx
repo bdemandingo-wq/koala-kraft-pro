@@ -19,7 +19,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
-import { Copy, Check, Mail } from 'lucide-react';
+import { Copy, Check, Eye, EyeOff } from 'lucide-react';
 
 interface AddStaffDialogProps {
   open: boolean;
@@ -30,13 +30,15 @@ export function AddStaffDialog({ open, onOpenChange }: AddStaffDialogProps) {
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const [showCredentials, setShowCredentials] = useState(false);
-  const [credentials, setCredentials] = useState<{ email: string; resetLink: string } | null>(null);
+  const [credentials, setCredentials] = useState<{ email: string; password: string } | null>(null);
   const [copied, setCopied] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
+    password: '',
     hourly_rate: '',
     percentage_rate: '',
     tax_classification: 'w2' as 'w2' | '1099',
@@ -54,15 +56,21 @@ export function AddStaffDialog({ open, onOpenChange }: AddStaffDialogProps) {
         return;
       }
 
+      if (!formData.password || formData.password.length < 6) {
+        toast.error('Password must be at least 6 characters');
+        setIsLoading(false);
+        return;
+      }
+
       const response = await supabase.functions.invoke('invite-staff', {
         body: {
           email: formData.email,
           name: formData.name,
           phone: formData.phone || undefined,
+          password: formData.password,
           hourly_rate: formData.hourly_rate ? parseFloat(formData.hourly_rate) : undefined,
           percentage_rate: formData.percentage_rate ? parseFloat(formData.percentage_rate) : undefined,
           tax_classification: formData.tax_classification,
-          redirectUrl: `${window.location.origin}/staff/reset-password`,
         },
       });
 
@@ -76,20 +84,16 @@ export function AddStaffDialog({ open, onOpenChange }: AddStaffDialogProps) {
         throw new Error(data.error);
       }
 
-      // Show credentials with reset link
-      if (data.resetLink) {
-        setCredentials({
-          email: formData.email,
-          resetLink: data.resetLink,
-        });
-        setShowCredentials(true);
-      }
+      // Show credentials
+      setCredentials({
+        email: formData.email,
+        password: formData.password,
+      });
+      setShowCredentials(true);
       
       queryClient.invalidateQueries({ queryKey: ['staff'] });
       toast.success('Staff member created successfully');
       
-      // Reset form
-      setFormData({ name: '', email: '', phone: '', hourly_rate: '', percentage_rate: '', tax_classification: 'w2' });
     } catch (error) {
       console.error('Error creating staff:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to create staff member');
@@ -99,9 +103,8 @@ export function AddStaffDialog({ open, onOpenChange }: AddStaffDialogProps) {
   };
 
   const handleClose = () => {
-    // Only reset credentials if user explicitly closes the dialog
     if (!showCredentials) {
-      setFormData({ name: '', email: '', phone: '', hourly_rate: '', percentage_rate: '', tax_classification: 'w2' });
+      setFormData({ name: '', email: '', phone: '', password: '', hourly_rate: '', percentage_rate: '', tax_classification: 'w2' });
     }
     onOpenChange(false);
   };
@@ -110,13 +113,14 @@ export function AddStaffDialog({ open, onOpenChange }: AddStaffDialogProps) {
     setShowCredentials(false);
     setCredentials(null);
     setCopied(false);
-    setFormData({ name: '', email: '', phone: '', hourly_rate: '', percentage_rate: '', tax_classification: 'w2' });
+    setFormData({ name: '', email: '', phone: '', password: '', hourly_rate: '', percentage_rate: '', tax_classification: 'w2' });
     onOpenChange(false);
   };
 
-  const copyLink = () => {
+  const copyCredentials = () => {
     if (credentials) {
-      navigator.clipboard.writeText(credentials.resetLink);
+      const text = `Email: ${credentials.email}\nPassword: ${credentials.password}`;
+      navigator.clipboard.writeText(text);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
@@ -130,37 +134,31 @@ export function AddStaffDialog({ open, onOpenChange }: AddStaffDialogProps) {
             <DialogTitle>Staff Member Created</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-              <p className="text-sm text-green-800 font-medium flex items-center gap-2">
-                <Mail className="w-4 h-4" />
-                Send this link to {credentials.email}
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3 dark:bg-green-950 dark:border-green-800">
+              <p className="text-sm text-green-800 dark:text-green-200 font-medium">
+                Share these login credentials with the staff member
               </p>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Share this password setup link with the new staff member. They'll use it to create their password and access the staff portal.
-            </p>
             <div className="bg-muted p-4 rounded-lg space-y-3">
               <div>
                 <Label className="text-xs text-muted-foreground">Email</Label>
                 <p className="font-mono text-sm">{credentials.email}</p>
               </div>
               <div>
-                <Label className="text-xs text-muted-foreground">Password Setup Link</Label>
-                <p className="font-mono text-xs break-all bg-background p-2 rounded border mt-1">
-                  {credentials.resetLink}
-                </p>
+                <Label className="text-xs text-muted-foreground">Password</Label>
+                <p className="font-mono text-sm">{credentials.password}</p>
               </div>
             </div>
             <Button
               variant="outline"
               className="w-full gap-2"
-              onClick={copyLink}
+              onClick={copyCredentials}
             >
               {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-              {copied ? 'Copied!' : 'Copy Setup Link'}
+              {copied ? 'Copied!' : 'Copy Credentials'}
             </Button>
             <p className="text-xs text-muted-foreground text-center">
-              The link will expire after use. Staff can request a new link from the login page if needed.
+              Staff can log in at the staff portal with these credentials.
             </p>
           </div>
           <DialogFooter>
@@ -199,6 +197,31 @@ export function AddStaffDialog({ open, onOpenChange }: AddStaffDialogProps) {
               placeholder="john@example.com"
               required
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="password">Password *</Label>
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                placeholder="Enter password (min 6 characters)"
+                required
+                minLength={6}
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">This will be the staff member's login password</p>
           </div>
 
           <div className="space-y-2">
