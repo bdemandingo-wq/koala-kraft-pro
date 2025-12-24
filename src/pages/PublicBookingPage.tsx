@@ -21,6 +21,8 @@ import {
   DollarSign,
   Ruler,
   Loader2,
+  Star,
+  Gift,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
@@ -558,7 +560,7 @@ export default function PublicBookingPage() {
 
           {/* Step 4: Confirmation */}
           {step === 4 && (
-            <div className="animate-fade-in">
+            <div className="animate-fade-in space-y-6">
               <div className="text-center mb-8">
                 <div className="w-16 h-16 rounded-full bg-success/20 flex items-center justify-center mx-auto mb-4">
                   <Check className="w-8 h-8 text-success" />
@@ -568,6 +570,40 @@ export default function PublicBookingPage() {
                   Your appointment has been scheduled. You'll receive a confirmation email shortly.
                 </p>
               </div>
+
+              {/* Loyalty Points Earned Card */}
+              <Card className="bg-gradient-to-br from-primary/10 via-accent/10 to-primary/5 border-primary/20">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                        <Star className="w-7 h-7 text-primary-foreground fill-primary-foreground" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">You earned</p>
+                        <p className="text-3xl font-bold text-primary">
+                          +{Math.floor(calculateTotal())} <span className="text-lg font-medium">points</span>
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Gift className="w-4 h-4" />
+                        <span className="text-sm">Loyalty Rewards</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        1 point per $1 spent
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-4 pt-4 border-t border-primary/20">
+                    <p className="text-sm text-muted-foreground">
+                      Check your email for your full loyalty progress and tier benefits!
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
               <Card>
                 <CardHeader>
                   <CardTitle>Booking Summary</CardTitle>
