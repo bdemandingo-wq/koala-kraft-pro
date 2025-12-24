@@ -1,4 +1,5 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
@@ -8,36 +9,101 @@ const corsHeaders = {
 };
 
 interface NotifyCleanersRequest {
-  staffEmails: string[];
+  staffEmails?: string[];
   jobDetails: {
+    booking_id: string;
     booking_number: number;
     service_name: string;
     scheduled_date: string;
     scheduled_time: string;
     address: string;
     duration: number;
-    potential_earnings: number;
+    total_amount: number;
   };
   companyName: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
     const { staffEmails, jobDetails, companyName }: NotifyCleanersRequest = await req.json();
 
-    if (!staffEmails || staffEmails.length === 0) {
+    console.log("Notifying cleaners about new job:", jobDetails);
+
+    // Get all active staff members with their rates
+    const { data: staffMembers, error: staffError } = await supabase
+      .from("staff")
+      .select("id, name, email, hourly_rate, percentage_rate")
+      .eq("is_active", true);
+
+    if (staffError) {
+      console.error("Error fetching staff:", staffError);
+      throw staffError;
+    }
+
+    if (!staffMembers || staffMembers.length === 0) {
+      console.log("No active staff members to notify");
       return new Response(
-        JSON.stringify({ error: "No staff emails provided" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ success: true, message: "No staff to notify" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const emailHtml = `
+    console.log(`Found ${staffMembers.length} active staff members`);
+
+    // Create in-app notifications for all staff
+    const notifications = staffMembers.map((staff) => {
+      // Calculate potential earnings for this staff member
+      let potentialPay = 0;
+      if (staff.percentage_rate && staff.percentage_rate > 0) {
+        potentialPay = (jobDetails.total_amount * staff.percentage_rate) / 100;
+      } else if (staff.hourly_rate && staff.hourly_rate > 0) {
+        potentialPay = staff.hourly_rate * 5; // Default 5 hours
+      }
+
+      return {
+        staff_id: staff.id,
+        booking_id: jobDetails.booking_id,
+        title: "New Job Available!",
+        message: `${jobDetails.service_name} on ${jobDetails.scheduled_date} at ${jobDetails.scheduled_time}. Location: ${jobDetails.address}. Potential pay: $${potentialPay.toFixed(2)}`,
+        type: "new_job",
+      };
+    });
+
+    const { error: notifError } = await supabase
+      .from("cleaner_notifications")
+      .insert(notifications);
+
+    if (notifError) {
+      console.error("Error creating notifications:", notifError);
+      throw notifError;
+    }
+
+    console.log(`Created ${notifications.length} in-app notifications`);
+
+    // Send email notifications if Resend is configured
+    let emailsSent = 0;
+    let emailsFailed = 0;
+
+    if (RESEND_API_KEY) {
+      const emailPromises = staffMembers
+        .filter(staff => staff.email)
+        .map(async (staff) => {
+          let potentialPay = 0;
+          if (staff.percentage_rate && staff.percentage_rate > 0) {
+            potentialPay = (jobDetails.total_amount * staff.percentage_rate) / 100;
+          } else if (staff.hourly_rate && staff.hourly_rate > 0) {
+            potentialPay = staff.hourly_rate * 5;
+          }
+
+          const emailHtml = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -54,7 +120,7 @@ const handler = async (req: Request): Promise<Response> => {
     <div style="padding: 30px;">
       <div style="background: #f0fdf4; border: 2px solid #86efac; border-radius: 12px; padding: 20px; margin-bottom: 24px; text-align: center;">
         <p style="margin: 0 0 8px; color: #166534; font-size: 14px; font-weight: 600;">POTENTIAL EARNINGS</p>
-        <p style="margin: 0; color: #166534; font-size: 36px; font-weight: bold;">$${jobDetails.potential_earnings.toFixed(2)}</p>
+        <p style="margin: 0; color: #166534; font-size: 36px; font-weight: bold;">$${potentialPay.toFixed(2)}</p>
       </div>
 
       <h2 style="margin: 0 0 16px; color: #111827; font-size: 18px;">Job Details</h2>
@@ -88,7 +154,6 @@ const handler = async (req: Request): Promise<Response> => {
 
       <div style="margin-top: 30px; text-align: center;">
         <p style="color: #6b7280; font-size: 14px; margin-bottom: 16px;">First come, first served! Log in to the Staff Portal to claim this job.</p>
-        <a href="#" style="display: inline-block; background: #10b981; color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">Claim This Job</a>
       </div>
     </div>
 
@@ -100,38 +165,52 @@ const handler = async (req: Request): Promise<Response> => {
     </div>
   </div>
 </body>
-</html>
-    `;
+</html>`;
 
-    // Send to all cleaners
-    const emailPromises = staffEmails.map(email => 
-      fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${RESEND_API_KEY}`,
-        },
-        body: JSON.stringify({
-          from: `${companyName} <onboarding@resend.dev>`,
-          to: [email],
-          subject: `🎉 New Job Available - $${jobDetails.potential_earnings.toFixed(2)} Potential Earnings`,
-          html: emailHtml,
-        }),
-      })
-    );
+          try {
+            const response = await fetch("https://api.resend.com/emails", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${RESEND_API_KEY}`,
+              },
+              body: JSON.stringify({
+                from: `${companyName} <onboarding@resend.dev>`,
+                to: [staff.email],
+                subject: `🎉 New Job Available - $${potentialPay.toFixed(2)} Potential Earnings`,
+                html: emailHtml,
+              }),
+            });
 
-    const results = await Promise.allSettled(emailPromises);
-    const successful = results.filter(r => r.status === 'fulfilled').length;
-    const failed = results.filter(r => r.status === 'rejected').length;
+            if (response.ok) {
+              console.log(`Email sent to ${staff.email}`);
+              return { success: true };
+            } else {
+              console.error(`Failed to send email to ${staff.email}`);
+              return { success: false };
+            }
+          } catch (error) {
+            console.error(`Error sending email to ${staff.email}:`, error);
+            return { success: false };
+          }
+        });
 
-    console.log(`Notifications sent: ${successful} successful, ${failed} failed`);
+      const results = await Promise.all(emailPromises);
+      emailsSent = results.filter(r => r.success).length;
+      emailsFailed = results.filter(r => !r.success).length;
+
+      console.log(`Emails sent: ${emailsSent}, failed: ${emailsFailed}`);
+    } else {
+      console.log("Resend API key not configured, skipping email notifications");
+    }
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        sent: successful,
-        failed: failed,
-        message: `Notified ${successful} cleaner(s)` 
+        notifications: notifications.length,
+        emailsSent,
+        emailsFailed,
+        message: `Notified ${staffMembers.length} cleaner(s)` 
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
