@@ -364,6 +364,11 @@ export default function StaffPortal() {
                   <MyJobCard
                     key={booking.id}
                     booking={booking}
+                    staffInfo={{
+                      hourly_rate: staffInfo?.hourly_rate || null,
+                      base_wage: staffInfo?.base_wage || null,
+                      percentage_rate: staffInfo?.percentage_rate || null,
+                    }}
                     onUpdateStatus={(id, status) => updateStatus.mutate({ bookingId: id, status })}
                     isUpdating={updateStatus.isPending}
                   />

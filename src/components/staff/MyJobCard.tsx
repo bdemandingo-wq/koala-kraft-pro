@@ -2,7 +2,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
-import { Calendar, MapPin, Clock, User, Phone, Navigation, DollarSign } from 'lucide-react';
+import { Calendar, MapPin, Clock, User, Phone, Navigation, DollarSign, TrendingUp } from 'lucide-react';
+
+interface StaffInfo {
+  hourly_rate: number | null;
+  base_wage: number | null;
+  percentage_rate: number | null;
+}
 
 interface Booking {
   id: string;
@@ -14,6 +20,8 @@ interface Booking {
   city: string | null;
   state: string | null;
   total_amount: number;
+  cleaner_wage: number | null;
+  cleaner_wage_type: string | null;
   cleaner_actual_payment: number | null;
   customer: {
     first_name: string;
@@ -27,11 +35,57 @@ interface Booking {
 
 interface Props {
   booking: Booking;
+  staffInfo: StaffInfo;
   onUpdateStatus?: (bookingId: string, status: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'no_show') => void;
   isUpdating?: boolean;
 }
 
-export function MyJobCard({ booking, onUpdateStatus, isUpdating }: Props) {
+export function MyJobCard({ booking, staffInfo, onUpdateStatus, isUpdating }: Props) {
+  // Calculate potential earnings based on staff pay type (same logic as AvailableJobCard)
+  const calculatePotentialEarnings = (): { amount: number; type: string } => {
+    // If booking has specific cleaner wage set
+    if (booking.cleaner_wage && booking.cleaner_wage_type) {
+      if (booking.cleaner_wage_type === 'percentage') {
+        return {
+          amount: (booking.total_amount * booking.cleaner_wage) / 100,
+          type: `${booking.cleaner_wage}% of job`,
+        };
+      } else {
+        // Default to 5 hours for hourly calculations
+        const hours = 5;
+        return {
+          amount: booking.cleaner_wage * hours,
+          type: `$${booking.cleaner_wage}/hr × ${hours}hrs`,
+        };
+      }
+    }
+
+    // Fall back to staff's default rates - check percentage first
+    if (staffInfo.percentage_rate) {
+      return {
+        amount: (booking.total_amount * staffInfo.percentage_rate) / 100,
+        type: `${staffInfo.percentage_rate}% of job`,
+      };
+    }
+
+    if (staffInfo.hourly_rate) {
+      // Default to 5 hours
+      const hours = 5;
+      return {
+        amount: staffInfo.hourly_rate * hours,
+        type: `$${staffInfo.hourly_rate}/hr × ${hours}hrs`,
+      };
+    }
+
+    // Default estimate if no wage info
+    return {
+      amount: 0,
+      type: 'TBD',
+    };
+  };
+
+  const earnings = calculatePotentialEarnings();
+
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { variant: 'default' | 'secondary' | 'outline' | 'destructive'; label: string }> = {
       pending: { variant: 'secondary', label: 'Pending' },
@@ -64,8 +118,8 @@ export function MyJobCard({ booking, onUpdateStatus, isUpdating }: Props) {
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        {/* Your Earnings */}
-        {booking.cleaner_actual_payment && booking.cleaner_actual_payment > 0 && (
+        {/* Potential/Actual Earnings */}
+        {booking.cleaner_actual_payment && booking.cleaner_actual_payment > 0 ? (
           <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm text-primary">
@@ -76,6 +130,22 @@ export function MyJobCard({ booking, onUpdateStatus, isUpdating }: Props) {
                 ${booking.cleaner_actual_payment.toFixed(2)}
               </span>
             </div>
+          </div>
+        ) : earnings.amount > 0 && (
+          <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm text-blue-700 dark:text-blue-300">
+                <DollarSign className="w-4 h-4" />
+                <span>Potential Pay</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-blue-600" />
+                <span className="font-bold text-lg text-blue-700 dark:text-blue-300">
+                  ${earnings.amount.toFixed(2)}
+                </span>
+              </div>
+            </div>
+            <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">{earnings.type}</p>
           </div>
         )}
 
