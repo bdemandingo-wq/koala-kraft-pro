@@ -147,7 +147,7 @@ export function PaymentStep() {
                 type="number"
                 value={cleanerOverrideHours}
                 onChange={(e) => setCleanerOverrideHours(e.target.value)}
-                placeholder={`Default: ${((selectedService?.duration || 60) / 60).toFixed(1)} hrs`}
+                placeholder="Default: 5.0 hrs"
                 className="mt-2 h-11 bg-secondary/30 border-border/50"
               />
             </div>

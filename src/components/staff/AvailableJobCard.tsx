@@ -52,6 +52,13 @@ export function AvailableJobCard({ booking, staffInfo, onAssign, isAssigning }: 
           amount: (booking.total_amount * booking.cleaner_wage) / 100,
           type: `${booking.cleaner_wage}% of job`,
         };
+      } else if (booking.cleaner_wage_type === 'hourly') {
+        // Default to 5 hours for hourly calculations
+        const hours = 5;
+        return {
+          amount: booking.cleaner_wage * hours,
+          type: `$${booking.cleaner_wage}/hr × ${hours}hrs`,
+        };
       } else {
         const hours = booking.duration / 60;
         return {
@@ -70,10 +77,11 @@ export function AvailableJobCard({ booking, staffInfo, onAssign, isAssigning }: 
     }
 
     if (staffInfo.hourly_rate) {
-      const hours = booking.duration / 60;
+      // Default to 5 hours for hourly calculations
+      const hours = 5;
       return {
         amount: staffInfo.hourly_rate * hours,
-        type: `$${staffInfo.hourly_rate}/hr`,
+        type: `$${staffInfo.hourly_rate}/hr × ${hours}hrs`,
       };
     }
 
