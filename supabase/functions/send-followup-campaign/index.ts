@@ -134,7 +134,7 @@ serve(async (req) => {
             Authorization: `Bearer ${RESEND_API_KEY}`,
           },
           body: JSON.stringify({
-            from: "TidyWise <noreply@tidywise.app>",
+            from: "TidyWise <onboarding@resend.dev>",
             to: [customer.email],
             subject: subject,
             html: `
