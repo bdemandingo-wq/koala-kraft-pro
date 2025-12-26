@@ -200,9 +200,12 @@ export default function SettingsPage() {
 
         if (error) throw error;
       } else {
+        if (!organization?.id) {
+          throw new Error('No organization found');
+        }
         const { data, error } = await supabase
           .from('business_settings')
-          .insert(settingsData)
+          .insert({ ...settingsData, organization_id: organization.id })
           .select()
           .single();
 

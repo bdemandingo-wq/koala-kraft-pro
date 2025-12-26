@@ -31,6 +31,7 @@ import { Plus, Package, AlertTriangle, Trash2, Edit, RefreshCw } from 'lucide-re
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useOrganization } from '@/contexts/OrganizationContext';
 
 interface InventoryItem {
   id: string;
@@ -54,6 +55,7 @@ export default function InventoryPage() {
   const [restockItem, setRestockItem] = useState<InventoryItem | null>(null);
   const [restockAmount, setRestockAmount] = useState('');
   const queryClient = useQueryClient();
+  const { organization } = useOrganization();
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ['inventory'],
@@ -69,7 +71,10 @@ export default function InventoryPage() {
 
   const createMutation = useMutation({
     mutationFn: async (data: { name: string; description?: string; category: string; quantity: number; min_quantity: number; cost_per_unit: number; supplier?: string }) => {
-      const { error } = await supabase.from('inventory_items').insert([data]);
+      if (!organization?.id) {
+        throw new Error('No organization found');
+      }
+      const { error } = await supabase.from('inventory_items').insert([{ ...data, organization_id: organization.id }]);
       if (error) throw error;
     },
     onSuccess: () => {
