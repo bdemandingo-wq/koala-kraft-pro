@@ -25,6 +25,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useOrganization } from '@/contexts/OrganizationContext';
 import { Button } from '@/components/ui/button';
 import {
   Drawer,
@@ -37,23 +38,23 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 const navigation = [
-  { name: 'Dashboard', href: '/admin', icon: Home },
-  { name: 'Scheduler', href: '/admin/scheduler', icon: Calendar },
-  { name: 'Bookings', href: '/admin/bookings', icon: ClipboardList },
-  { name: 'Recurring', href: '/admin/recurring', icon: Repeat },
-  { name: 'Customers', href: '/admin/customers', icon: Users },
-  { name: 'Leads', href: '/admin/leads', icon: Target },
-  { name: 'Invoices', href: '/admin/invoices', icon: FileText },
-  { name: 'Operations', href: '/admin/operations', icon: MapPin },
-  { name: 'Feedback', href: '/admin/feedback', icon: MessageSquare },
-  { name: 'Services', href: '/admin/services', icon: Briefcase },
-  { name: 'Staff', href: '/admin/staff', icon: UserCircle },
-  { name: 'Checklists', href: '/admin/checklists', icon: CheckSquare },
-  { name: 'Campaigns', href: '/admin/campaigns', icon: Mail },
-  { name: 'Inventory', href: '/admin/inventory', icon: Package },
-  { name: 'Payroll', href: '/admin/payroll', icon: DollarSign },
-  { name: 'Finance', href: '/admin/finance', icon: Receipt },
-  { name: 'Reports', href: '/admin/reports', icon: BarChart3 },
+  { name: 'Dashboard', href: '/dashboard', icon: Home },
+  { name: 'Scheduler', href: '/dashboard/scheduler', icon: Calendar },
+  { name: 'Bookings', href: '/dashboard/bookings', icon: ClipboardList },
+  { name: 'Recurring', href: '/dashboard/recurring', icon: Repeat },
+  { name: 'Customers', href: '/dashboard/customers', icon: Users },
+  { name: 'Leads', href: '/dashboard/leads', icon: Target },
+  { name: 'Invoices', href: '/dashboard/invoices', icon: FileText },
+  { name: 'Operations', href: '/dashboard/operations', icon: MapPin },
+  { name: 'Feedback', href: '/dashboard/feedback', icon: MessageSquare },
+  { name: 'Services', href: '/dashboard/services', icon: Briefcase },
+  { name: 'Staff', href: '/dashboard/staff', icon: UserCircle },
+  { name: 'Checklists', href: '/dashboard/checklists', icon: CheckSquare },
+  { name: 'Campaigns', href: '/dashboard/campaigns', icon: Mail },
+  { name: 'Inventory', href: '/dashboard/inventory', icon: Package },
+  { name: 'Payroll', href: '/dashboard/payroll', icon: DollarSign },
+  { name: 'Finance', href: '/dashboard/finance', icon: Receipt },
+  { name: 'Reports', href: '/dashboard/reports', icon: BarChart3 },
 ];
 
 interface AdminSidebarProps {
@@ -65,6 +66,7 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { organization, isOwner } = useOrganization();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -80,6 +82,7 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
     .toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U';
 
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+  const businessName = organization?.name || 'My Business';
 
   const handleNavClick = () => {
     setMobileOpen(false);
@@ -93,7 +96,7 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
           <Calendar className="w-5 h-5 text-primary-foreground" />
         </div>
         {(isOpen || isMobile) && (
-          <span className="text-lg font-bold text-sidebar-foreground">BookingPro</span>
+          <span className="text-lg font-bold text-sidebar-foreground">{businessName}</span>
         )}
       </div>
 
@@ -102,7 +105,7 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
         <div className="space-y-1">
           {navigation.map((item) => {
             const isActive = location.pathname === item.href || 
-              (item.href !== '/admin' && location.pathname.startsWith(item.href));
+              (item.href !== '/dashboard' && location.pathname.startsWith(item.href));
             return (
               <Link
                 key={item.name}
@@ -139,7 +142,7 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
             <>
               <div className="flex-1 text-left">
                 <p className="text-sm font-medium text-sidebar-foreground">{userName}</p>
-                <p className="text-xs text-sidebar-foreground/60">Admin</p>
+                <p className="text-xs text-sidebar-foreground/60">{isOwner ? 'Owner' : 'Team Member'}</p>
               </div>
               <ChevronDown className={cn(
                 "w-4 h-4 text-sidebar-foreground/60 transition-transform",
@@ -153,7 +156,7 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
           <div className="mt-2 py-2 space-y-1 animate-fade-in">
             <button 
               onClick={() => {
-                navigate('/admin/settings');
+                navigate('/dashboard/settings');
                 handleNavClick();
               }}
               className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors"

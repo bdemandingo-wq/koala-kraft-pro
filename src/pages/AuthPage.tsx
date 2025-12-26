@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +11,7 @@ import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 export default function AuthPage() {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -19,34 +21,43 @@ export default function AuthPage() {
     fullName: '',
   });
 
+  // Redirect if already logged in
+  useEffect(() => {
+    const checkOrganization = async () => {
+      if (!user) return;
+
+      // Check if user has an organization
+      const { data: membership } = await supabase
+        .from('org_memberships')
+        .select('organization_id')
+        .eq('user_id', user.id)
+        .limit(1)
+        .single();
+
+      if (membership) {
+        navigate('/dashboard');
+      } else {
+        navigate('/onboarding');
+      }
+    };
+
+    if (!authLoading && user) {
+      checkOrganization();
+    }
+  }, [user, authLoading, navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
       if (isLogin) {
-        const { data: authData, error } = await supabase.auth.signInWithPassword({
+        const { error } = await supabase.auth.signInWithPassword({
           email: formData.email,
           password: formData.password,
         });
         if (error) throw error;
-        
-        // Check if user is admin - staff should not log in here
-        const { data: roleData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', authData.user.id)
-          .eq('role', 'admin')
-          .single();
-        
-        if (!roleData) {
-          // Not an admin - sign them out and show error
-          await supabase.auth.signOut();
-          throw new Error('Access denied. Staff members should use the Staff Portal to log in.');
-        }
-        
         toast.success('Logged in successfully');
-        navigate('/admin');
       } else {
         const { error } = await supabase.auth.signUp({
           email: formData.email,
@@ -55,11 +66,11 @@ export default function AuthPage() {
             data: {
               full_name: formData.fullName,
             },
+            emailRedirectTo: `${window.location.origin}/`,
           },
         });
         if (error) throw error;
-        toast.success('Account created successfully');
-        navigate('/admin');
+        toast.success('Account created successfully! Please check your email to verify.');
       }
     } catch (error: any) {
       toast.error(error.message);
@@ -68,17 +79,25 @@ export default function AuthPage() {
     }
   };
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">
-            {isLogin ? 'Welcome Back' : 'Create Account'}
+            {isLogin ? 'Welcome Back' : 'Start Your Free Trial'}
           </CardTitle>
           <CardDescription>
             {isLogin
-              ? 'Enter your credentials to access your account'
-              : 'Fill in your details to get started'}
+              ? 'Sign in to manage your cleaning business'
+              : 'Create your account and set up your business'}
           </CardDescription>
         </CardHeader>
         <CardContent>
