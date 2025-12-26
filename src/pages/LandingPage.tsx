@@ -106,7 +106,12 @@ export default function LandingPage() {
 
   const handleGetStarted = () => {
     sessionStorage.setItem("selectedIndustry", "Home Cleaning");
-    navigate("/auth", { state: { email, industry: "Home Cleaning" } });
+    navigate("/auth", { state: { email, industry: "Home Cleaning", mode: "signup" } });
+  };
+
+  const handleStartFreeTrial = () => {
+    sessionStorage.setItem("selectedIndustry", "Home Cleaning");
+    navigate("/auth", { state: { mode: "signup" } });
   };
 
   return (
@@ -407,7 +412,7 @@ export default function LandingPage() {
             <Button 
               size="lg" 
               variant="secondary"
-              onClick={() => navigate("/auth")}
+              onClick={handleStartFreeTrial}
               className="h-12 px-8"
             >
               Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
