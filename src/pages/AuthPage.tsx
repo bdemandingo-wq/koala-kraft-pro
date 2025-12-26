@@ -26,13 +26,21 @@ export default function AuthPage() {
     const checkOrganization = async () => {
       if (!user) return;
 
-      // Check if user has an organization
-      const { data: membership } = await supabase
+      // Check if user has an organization membership
+      const { data: membership, error } = await supabase
         .from('org_memberships')
         .select('organization_id')
         .eq('user_id', user.id)
         .limit(1)
-        .single();
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error checking membership:', error);
+        // If there's an error, still try to navigate to dashboard
+        // The ProtectedOrgRoute will handle the redirect if needed
+        navigate('/dashboard');
+        return;
+      }
 
       if (membership) {
         navigate('/dashboard');
