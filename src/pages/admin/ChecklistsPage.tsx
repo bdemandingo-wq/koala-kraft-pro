@@ -254,7 +254,7 @@ export default function ChecklistsPage() {
                       />
                       <Label htmlFor="requires-photo" className="flex items-center gap-2 cursor-pointer">
                         <Camera className="w-4 h-4" />
-                        Requires photo proof
+                        Photo suggested (optional)
                       </Label>
                     </div>
                     <Button type="button" size="sm" onClick={addItemToForm} disabled={!newItem.title.trim()}>
@@ -337,7 +337,7 @@ export default function ChecklistsPage() {
               <Camera className="h-5 w-5 text-info" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Photo Required Items</p>
+              <p className="text-sm text-muted-foreground">Photo Suggested Items</p>
               <p className="text-2xl font-bold">
                 {templates.reduce((sum, t) => sum + t.items.filter((i: any) => i.requires_photo).length, 0)}
               </p>
@@ -381,7 +381,7 @@ export default function ChecklistsPage() {
                         </div>
                         <p className="text-sm text-muted-foreground">
                           {template.items.length} items
-                          {service && ` • ${service.name}`}
+                          {service ? ` • Assigned to: ${service.name}` : ' • Default (all services)'}
                         </p>
                       </div>
                     </div>
