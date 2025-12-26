@@ -413,7 +413,7 @@ export default function LandingPage() {
             <Button 
               size="lg" 
               variant="outline"
-              className="h-12 px-8 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10"
+              className="h-12 px-8 bg-primary-foreground text-primary border-primary-foreground hover:bg-primary-foreground/90"
               onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
             >
               Learn More
