@@ -47,6 +47,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { useOrganization } from '@/contexts/OrganizationContext';
 
 interface Expense {
   id: string;
@@ -74,6 +75,7 @@ const EXPENSE_CATEGORIES = [
 
 export default function ExpensesPage() {
   const queryClient = useQueryClient();
+  const { organization } = useOrganization();
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editExpense, setEditExpense] = useState<Expense | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
@@ -102,12 +104,16 @@ export default function ExpensesPage() {
   // Create expense
   const createMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
+      if (!organization?.id) {
+        throw new Error('No organization found');
+      }
       const { error } = await supabase.from('expenses').insert({
         category: data.category,
         description: data.description,
         amount: parseFloat(data.amount),
         vendor: data.vendor || null,
         expense_date: format(data.expense_date, 'yyyy-MM-dd'),
+        organization_id: organization.id,
       });
       if (error) throw error;
     },

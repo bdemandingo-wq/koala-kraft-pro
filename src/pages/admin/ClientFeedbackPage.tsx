@@ -28,6 +28,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format, parseISO } from 'date-fns';
 import { useTestMode } from '@/contexts/TestModeContext';
+import { useOrganization } from '@/contexts/OrganizationContext';
 
 interface FeedbackEntry {
   id: string;
@@ -45,6 +46,7 @@ export default function ClientFeedbackPage() {
   const [filterResolved, setFilterResolved] = useState<string>('all');
   const queryClient = useQueryClient();
   const { isTestMode, maskName } = useTestMode();
+  const { organization } = useOrganization();
 
   const { data: entries = [], isLoading } = useQuery({
     queryKey: ['client-feedback'],
@@ -60,7 +62,10 @@ export default function ClientFeedbackPage() {
 
   const createMutation = useMutation({
     mutationFn: async (data: { customer_name: string; feedback_date: string; is_resolved: boolean; followup_needed: boolean; issue_description: string | null; resolution: string | null }) => {
-      const { error } = await supabase.from('client_feedback').insert([data]);
+      if (!organization?.id) {
+        throw new Error('No organization found');
+      }
+      const { error } = await supabase.from('client_feedback').insert([{ ...data, organization_id: organization.id }]);
       if (error) throw error;
     },
     onSuccess: () => {

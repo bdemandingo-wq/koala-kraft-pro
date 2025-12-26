@@ -40,6 +40,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { useTestMode } from '@/contexts/TestModeContext';
+import { useOrganization } from '@/contexts/OrganizationContext';
 
 interface Lead {
   id: string;
@@ -84,6 +85,7 @@ export default function LeadsPage() {
   const [showFunnel, setShowFunnel] = useState(false);
   const queryClient = useQueryClient();
   const { isTestMode, maskName, maskEmail, maskPhone } = useTestMode();
+  const { organization } = useOrganization();
 
   const { data: leads = [], isLoading } = useQuery({
     queryKey: ['leads'],
@@ -99,7 +101,10 @@ export default function LeadsPage() {
 
   const createMutation = useMutation({
     mutationFn: async (data: { name: string; email: string; phone?: string; address?: string; city?: string; state?: string; zip_code?: string; service_interest?: string; message?: string; notes?: string; source: string; status: string }) => {
-      const { error } = await supabase.from('leads').insert([data]);
+      if (!organization?.id) {
+        throw new Error('No organization found');
+      }
+      const { error } = await supabase.from('leads').insert([{ ...data, organization_id: organization.id }]);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -137,6 +142,11 @@ export default function LeadsPage() {
   });
 
   const convertToCustomer = async (lead: Lead) => {
+    if (!organization?.id) {
+      toast.error('No organization found');
+      return;
+    }
+    
     const nameParts = lead.name.split(' ');
     const firstName = nameParts[0] || '';
     const lastName = nameParts.slice(1).join(' ') || '';
@@ -150,6 +160,7 @@ export default function LeadsPage() {
       city: lead.city,
       state: lead.state,
       zip_code: lead.zip_code,
+      organization_id: organization.id,
     });
 
     if (customerError) {

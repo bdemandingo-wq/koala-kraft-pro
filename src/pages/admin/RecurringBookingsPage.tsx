@@ -34,6 +34,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format, addDays, addWeeks, addMonths } from 'date-fns';
 import { useCustomers, useServices, useStaff } from '@/hooks/useBookings';
+import { useOrganization } from '@/contexts/OrganizationContext';
 
 interface RecurringBooking {
   id: string;
@@ -70,6 +71,7 @@ export default function RecurringBookingsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingBooking, setEditingBooking] = useState<RecurringBooking | null>(null);
   const queryClient = useQueryClient();
+  const { organization } = useOrganization();
   
   const { data: customers = [] } = useCustomers();
   const { data: services = [] } = useServices();
@@ -94,7 +96,10 @@ export default function RecurringBookingsPage() {
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
-      const { error } = await supabase.from('recurring_bookings').insert(data);
+      if (!organization?.id) {
+        throw new Error('No organization found');
+      }
+      const { error } = await supabase.from('recurring_bookings').insert({ ...data, organization_id: organization.id });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -144,6 +149,11 @@ export default function RecurringBookingsPage() {
   });
 
   const generateNextBooking = async (recurring: RecurringBooking) => {
+    if (!organization?.id) {
+      toast.error('No organization found');
+      return;
+    }
+    
     const customer = customers.find(c => c.id === recurring.customer_id);
     if (!customer) {
       toast.error('Customer not found');
@@ -192,6 +202,7 @@ export default function RecurringBookingsPage() {
       status: 'pending',
       payment_status: 'pending',
       frequency: recurring.frequency,
+      organization_id: organization.id,
     });
 
     if (error) {

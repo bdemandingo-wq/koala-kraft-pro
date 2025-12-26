@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useOrganization } from '@/contexts/OrganizationContext';
 import { 
   ClipboardCheck, 
   Plus, 
@@ -129,6 +130,7 @@ function SortableChecklistItem({ item, index, onRemove }: SortableItemProps) {
 
 export default function ChecklistsPage() {
   const queryClient = useQueryClient();
+  const { organization } = useOrganization();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<string | null>(null);
   const [expandedTemplate, setExpandedTemplate] = useState<string | null>(null);
@@ -196,12 +198,16 @@ export default function ChecklistsPage() {
   // Create template
   const createTemplate = useMutation({
     mutationFn: async (data: TemplateFormData) => {
+      if (!organization?.id) {
+        throw new Error('No organization found');
+      }
       const { data: template, error } = await supabase
         .from('checklist_templates')
         .insert({
           name: data.name,
           description: data.description,
-          service_id: data.service_id || null
+          service_id: data.service_id || null,
+          organization_id: organization.id,
         })
         .select()
         .single();
