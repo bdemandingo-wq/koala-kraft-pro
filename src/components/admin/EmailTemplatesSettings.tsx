@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Mail, MessageSquare, Save, Loader2, Info } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Mail, MessageSquare, Save, Loader2, Info, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface EmailTemplatesSettingsProps {
@@ -17,18 +18,101 @@ interface EmailTemplatesSettingsProps {
   onUpdate: (field: string, value: string) => void;
   onSave: () => void;
   saving: boolean;
+  companyName?: string;
+  logoUrl?: string;
+  primaryColor?: string;
+  accentColor?: string;
 }
 
 const availableVariables = [
-  { key: '{{customer_name}}', desc: 'Customer full name' },
-  { key: '{{booking_number}}', desc: 'Booking reference number' },
-  { key: '{{service_name}}', desc: 'Service type name' },
-  { key: '{{scheduled_date}}', desc: 'Appointment date' },
-  { key: '{{scheduled_time}}', desc: 'Appointment time' },
-  { key: '{{address}}', desc: 'Service address' },
-  { key: '{{total_amount}}', desc: 'Total booking amount' },
-  { key: '{{company_name}}', desc: 'Your business name' },
+  { key: '{{customer_name}}', desc: 'Customer full name', sample: 'John Smith' },
+  { key: '{{booking_number}}', desc: 'Booking reference number', sample: '12345' },
+  { key: '{{service_name}}', desc: 'Service type name', sample: 'Deep Cleaning' },
+  { key: '{{scheduled_date}}', desc: 'Appointment date', sample: 'January 15, 2025' },
+  { key: '{{scheduled_time}}', desc: 'Appointment time', sample: '10:00 AM' },
+  { key: '{{address}}', desc: 'Service address', sample: '123 Main Street, Anytown' },
+  { key: '{{total_amount}}', desc: 'Total booking amount', sample: '150.00' },
+  { key: '{{company_name}}', desc: 'Your business name', sample: 'Your Company' },
 ];
+
+const replaceVariables = (text: string, companyName: string) => {
+  let result = text;
+  availableVariables.forEach(v => {
+    const sampleValue = v.key === '{{company_name}}' ? (companyName || v.sample) : v.sample;
+    result = result.replace(new RegExp(v.key.replace(/[{}]/g, '\\$&'), 'g'), sampleValue);
+  });
+  return result;
+};
+
+function EmailPreviewDialog({ 
+  subject, 
+  body, 
+  companyName, 
+  logoUrl, 
+  primaryColor, 
+  accentColor 
+}: { 
+  subject: string; 
+  body: string; 
+  companyName: string; 
+  logoUrl?: string; 
+  primaryColor?: string; 
+  accentColor?: string; 
+}) {
+  const previewSubject = replaceVariables(subject, companyName);
+  const previewBody = replaceVariables(body, companyName);
+  const bgColor = primaryColor || '#3b82f6';
+  const accent = accentColor || '#14b8a6';
+  
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm" className="gap-2">
+          <Eye className="w-4 h-4" />
+          Preview Email
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Email Preview</DialogTitle>
+        </DialogHeader>
+        <div className="border rounded-lg overflow-hidden bg-white">
+          {/* Email Header */}
+          <div style={{ backgroundColor: bgColor }} className="p-6 text-center">
+            {logoUrl ? (
+              <img src={logoUrl} alt="Logo" className="h-12 mx-auto mb-2" />
+            ) : (
+              <div className="text-white text-xl font-bold">{companyName || 'Your Company'}</div>
+            )}
+          </div>
+          
+          {/* Subject Line Preview */}
+          <div className="p-4 bg-muted/50 border-b">
+            <p className="text-xs text-muted-foreground mb-1">Subject:</p>
+            <p className="font-semibold text-foreground">{previewSubject}</p>
+          </div>
+          
+          {/* Email Body */}
+          <div className="p-6">
+            <div className="whitespace-pre-wrap text-sm text-foreground leading-relaxed">
+              {previewBody}
+            </div>
+          </div>
+          
+          {/* Email Footer */}
+          <div style={{ backgroundColor: bgColor }} className="p-4 text-center">
+            <p className="text-white/90 text-sm">
+              © {new Date().getFullYear()} {companyName || 'Your Company'}. All rights reserved.
+            </p>
+          </div>
+        </div>
+        <p className="text-xs text-muted-foreground text-center mt-2">
+          This is a preview with sample data. Actual emails will contain real booking information.
+        </p>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export function EmailTemplatesSettings({
   confirmationEmailSubject,
@@ -38,6 +122,10 @@ export function EmailTemplatesSettings({
   onUpdate,
   onSave,
   saving,
+  companyName = 'Your Company',
+  logoUrl,
+  primaryColor,
+  accentColor,
 }: EmailTemplatesSettingsProps) {
   const [activeTemplate, setActiveTemplate] = useState('confirmation');
 
@@ -86,6 +174,16 @@ export function EmailTemplatesSettings({
           </TabsList>
 
           <TabsContent value="confirmation" className="space-y-4 mt-4">
+            <div className="flex justify-end">
+              <EmailPreviewDialog 
+                subject={confirmationEmailSubject} 
+                body={confirmationEmailBody} 
+                companyName={companyName}
+                logoUrl={logoUrl}
+                primaryColor={primaryColor}
+                accentColor={accentColor}
+              />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="confirmationSubject">Subject Line</Label>
               <Input
@@ -108,6 +206,16 @@ export function EmailTemplatesSettings({
           </TabsContent>
 
           <TabsContent value="reminder" className="space-y-4 mt-4">
+            <div className="flex justify-end">
+              <EmailPreviewDialog 
+                subject={reminderEmailSubject} 
+                body={reminderEmailBody} 
+                companyName={companyName}
+                logoUrl={logoUrl}
+                primaryColor={primaryColor}
+                accentColor={accentColor}
+              />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="reminderSubject">Subject Line</Label>
               <Input

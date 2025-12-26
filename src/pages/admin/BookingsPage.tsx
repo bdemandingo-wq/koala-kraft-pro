@@ -112,7 +112,7 @@ const getPaymentStatusInfo = (booking: BookingWithDetails) => {
 };
 
 export default function BookingsPage() {
-  const [activeTab, setActiveTab] = useState('bookings');
+  const [activeTab, setActiveTab] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
@@ -168,6 +168,12 @@ export default function BookingsPage() {
     });
   }, [bookings]);
 
+  // Filter for drafts (pending status with is_draft flag or pending payment)
+  const draftBookings = sortedBookings.filter((booking) => 
+    (booking as any).is_draft === true || 
+    (booking.status === 'pending' && booking.payment_status === 'pending')
+  );
+
   const filteredBookings = sortedBookings.filter((booking) => {
     const customerName = booking.customer 
       ? `${booking.customer.first_name} ${booking.customer.last_name}`.toLowerCase()
@@ -189,8 +195,13 @@ export default function BookingsPage() {
       const end = dateRange.to ? endOfDay(dateRange.to) : endOfDay(dateRange.from);
       matchesDate = isWithinInterval(bookingDate, { start, end });
     }
+
+    // Tab filter
+    const isDraft = (booking as any).is_draft === true || 
+      (booking.status === 'pending' && booking.payment_status === 'pending');
+    const matchesTab = activeTab === 'all' || (activeTab === 'drafts' && isDraft);
     
-    return matchesSearch && matchesStatus && matchesDate;
+    return matchesSearch && matchesStatus && matchesDate && matchesTab;
   });
 
   // Stats - pending payment based on payment_status, uncleaned based on status
@@ -774,9 +785,18 @@ export default function BookingsPage() {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="bg-secondary/50">
-          <TabsTrigger value="bookings" className="gap-2">
+          <TabsTrigger value="all" className="gap-2">
             <Calendar className="w-4 h-4" />
             All Bookings
+          </TabsTrigger>
+          <TabsTrigger value="drafts" className="gap-2">
+            <Clock className="w-4 h-4" />
+            Drafts
+            {draftBookings.length > 0 && (
+              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                {draftBookings.length}
+              </Badge>
+            )}
           </TabsTrigger>
           <TabsTrigger value="cleaner-wages" className="gap-2">
             <Settings2 className="w-4 h-4" />
@@ -784,8 +804,8 @@ export default function BookingsPage() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="bookings" className="space-y-6">
-          {/* Stats Cards */}
+        <TabsContent value="all" className="space-y-6">
+        {/* Stats Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-fade-in">
             <div className="group relative bg-gradient-to-br from-card to-secondary/30 rounded-2xl p-5 border border-border/50 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -1350,6 +1370,61 @@ export default function BookingsPage() {
           </div>
         )}
       </div>
+        </TabsContent>
+
+        <TabsContent value="drafts" className="space-y-6">
+          <div className="bg-card rounded-xl border border-border/50 shadow-sm p-6">
+            <h3 className="text-lg font-semibold mb-4">Draft Bookings</h3>
+            <p className="text-muted-foreground mb-4">
+              These are bookings saved as drafts with pending payment status. Complete the booking or payment to move them to active bookings.
+            </p>
+            {draftBookings.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No draft bookings found.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {draftBookings.map((booking) => (
+                  <div key={booking.id} className="flex items-center justify-between p-4 bg-secondary/30 rounded-lg border border-border/50">
+                    <div>
+                      <p className="font-medium">
+                        #{booking.booking_number} - {booking.customer?.first_name} {booking.customer?.last_name}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {booking.service?.name} • {format(new Date(booking.scheduled_at), 'MMM d, yyyy h:mm a')}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="bg-amber-50 text-amber-700">
+                        ${booking.total_amount?.toFixed(2)} unpaid
+                      </Badge>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setActiveBooking(booking);
+                          setViewDialogOpen(true);
+                        }}
+                      >
+                        <Eye className="w-4 h-4 mr-1" />
+                        View
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          setEditingBooking(booking);
+                          setAddDialogOpen(true);
+                        }}
+                      >
+                        <Edit className="w-4 h-4 mr-1" />
+                        Edit
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </TabsContent>
 
         <TabsContent value="cleaner-wages">
