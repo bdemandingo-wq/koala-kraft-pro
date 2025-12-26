@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useOrganization } from '@/contexts/OrganizationContext';
 
 export interface BookingWithDetails {
   id: string;
@@ -136,12 +137,17 @@ export function useBookingsByDateRange(startDate: Date, endDate: Date) {
 
 export function useCreateBooking() {
   const queryClient = useQueryClient();
+  const { organization } = useOrganization();
 
   return useMutation({
     mutationFn: async (data: CreateBookingData) => {
+      if (!organization?.id) {
+        throw new Error('No organization found');
+      }
+
       const { data: booking, error } = await supabase
         .from('bookings')
-        .insert(data)
+        .insert({ ...data, organization_id: organization.id })
         .select()
         .single();
 
@@ -237,14 +243,17 @@ export function useCustomers() {
 
 export function useCreateCustomer() {
   const queryClient = useQueryClient();
+  const { organization } = useOrganization();
 
   return useMutation({
     mutationFn: async (data: NewCustomerData) => {
-      // Admin/Staff create customers - no user_id needed for the customer record
-      // The customer's user_id is optional and only set if the customer has their own account
+      if (!organization?.id) {
+        throw new Error('No organization found');
+      }
+
       const { data: customer, error } = await supabase
         .from('customers')
-        .insert(data)
+        .insert({ ...data, organization_id: organization.id })
         .select()
         .single();
 
