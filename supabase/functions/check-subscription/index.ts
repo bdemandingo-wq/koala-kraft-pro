@@ -47,6 +47,22 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
+    // Bypass subscription check for owner account
+    const FREE_ACCOUNTS = ["support@tidywisecleaning.com"];
+    if (FREE_ACCOUNTS.includes(user.email.toLowerCase())) {
+      logStep("Free account detected - bypassing subscription check", { email: user.email });
+      return new Response(JSON.stringify({
+        subscribed: true,
+        trial_active: false,
+        product_id: "owner_free",
+        subscription_end: null,
+        trial_end: null
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     
