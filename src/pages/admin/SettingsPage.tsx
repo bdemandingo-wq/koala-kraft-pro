@@ -641,6 +641,10 @@ export default function SettingsPage() {
             onUpdate={(field, value) => updateField(field as keyof BusinessSettings, value)}
             onSave={saveSettings}
             saving={saving}
+            companyName={settings.company_name}
+            logoUrl={settings.logo_url}
+            primaryColor={settings.primary_color}
+            accentColor={settings.accent_color}
           />
         </TabsContent>
 
