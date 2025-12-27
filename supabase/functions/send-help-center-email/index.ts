@@ -39,10 +39,8 @@ const handler = async (req: Request): Promise<Response> => {
         "Authorization": `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "TidyWise Help Center <onboarding@resend.dev>",
-        to: ["agencyfootprintllc@gmail.com"],
-        reply_to: email,
-        
+        from: "TidyWise <onboarding@resend.dev>",
+        to: ["support@tidywisecleaning.com"],
         subject: subject,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
