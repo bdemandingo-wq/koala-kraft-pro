@@ -108,15 +108,18 @@ export default function SettingsPage() {
   const [updatingPassword, setUpdatingPassword] = useState(false);
 
   useEffect(() => {
+    if (!organization?.id) return;
     fetchSettings();
-  }, []);
+  }, [organization?.id]);
 
   const fetchSettings = async () => {
     try {
+      if (!organization?.id) return;
+
       const { data, error } = await supabase
         .from('business_settings')
         .select('*')
-        .limit(1)
+        .eq('organization_id', organization.id)
         .maybeSingle();
 
       if (error) throw error;
