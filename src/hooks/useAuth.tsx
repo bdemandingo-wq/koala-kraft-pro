@@ -33,7 +33,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkSubscription = async () => {
     try {
-      const { data, error } = await supabase.functions.invoke("check-subscription");
+      // Get current session to ensure we have a valid token
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      if (!currentSession?.access_token) {
+        console.log("No valid session for subscription check");
+        return;
+      }
+      
+      const { data, error } = await supabase.functions.invoke("check-subscription", {
+        headers: {
+          Authorization: `Bearer ${currentSession.access_token}`
+        }
+      });
       if (error) throw error;
       setSubscription(data);
       
