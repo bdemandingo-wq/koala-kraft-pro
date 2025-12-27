@@ -37,7 +37,8 @@ const handler = async (req: Request): Promise<Response> => {
       .from("business_settings")
       .select("resend_api_key, company_email")
       .eq("organization_id", organization_id)
-      .single();
+      .limit(1)
+      .maybeSingle();
 
     if (settingsError || !settings) {
       console.error("Error fetching business settings:", settingsError);
