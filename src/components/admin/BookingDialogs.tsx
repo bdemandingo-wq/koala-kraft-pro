@@ -291,10 +291,10 @@ export function EditBookingDialog({
         notes: notes || null,
         total_amount: Number.isFinite(parsedAmount) ? parsedAmount : booking.total_amount,
         cleaner_wage: cleanerWage ? parseFloat(cleanerWage) : null,
-        cleaner_wage_type: cleanerWageType,
+        cleaner_wage_type: cleanerWageType || null,
         cleaner_override_hours: cleanerOverrideHours ? parseFloat(cleanerOverrideHours) : null,
         cleaner_actual_payment: cleanerActualPayment ? parseFloat(cleanerActualPayment) : null,
-      } as any);
+      });
 
       toast({ title: "Saved", description: "Booking updated" });
       onOpenChange(false);
@@ -515,7 +515,7 @@ export function AdjustPaymentDialog({
       await updateBooking.mutateAsync({
         id: booking.id,
         cleaner_actual_payment: actualPayment ? parseFloat(actualPayment) : null,
-      } as any);
+      });
 
       toast({ title: "Saved", description: "Payment adjusted successfully" });
       onOpenChange(false);
