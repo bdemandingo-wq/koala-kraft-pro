@@ -53,7 +53,7 @@ export interface BookingWithDetails {
 export interface CreateBookingData {
   customer_id?: string;
   service_id?: string;
-  staff_id?: string;
+  staff_id?: string | null;
   scheduled_at: string;
   duration: number;
   total_amount: number;
@@ -61,7 +61,7 @@ export interface CreateBookingData {
   status?: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
   payment_status?: 'pending' | 'partial' | 'paid' | 'refunded';
   payment_intent_id?: string;
-  notes?: string;
+  notes?: string | null;
   address?: string;
   city?: string;
   state?: string;
@@ -73,6 +73,40 @@ export interface CreateBookingData {
   square_footage?: string;
   extras?: Json;
   is_draft?: boolean;
+  cleaner_wage?: number | null;
+  cleaner_wage_type?: string | null;
+  cleaner_override_hours?: number | null;
+  cleaner_actual_payment?: number | null;
+}
+
+export interface UpdateBookingData {
+  id: string;
+  customer_id?: string;
+  service_id?: string;
+  staff_id?: string | null;
+  scheduled_at?: string;
+  duration?: number;
+  total_amount?: number;
+  deposit_paid?: number | null;
+  status?: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
+  payment_status?: 'pending' | 'partial' | 'paid' | 'refunded';
+  payment_intent_id?: string | null;
+  notes?: string | null;
+  address?: string | null;
+  city?: string | null;
+  state?: string | null;
+  zip_code?: string | null;
+  apt_suite?: string | null;
+  frequency?: string | null;
+  bedrooms?: string | null;
+  bathrooms?: string | null;
+  square_footage?: string | null;
+  extras?: Json | null;
+  is_draft?: boolean;
+  cleaner_wage?: number | null;
+  cleaner_wage_type?: string | null;
+  cleaner_override_hours?: number | null;
+  cleaner_actual_payment?: number | null;
 }
 
 export interface NewCustomerData {
@@ -173,7 +207,7 @@ export function useUpdateBooking() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, ...data }: Partial<CreateBookingData> & { id: string }) => {
+    mutationFn: async ({ id, ...data }: UpdateBookingData) => {
       const { data: booking, error } = await supabase
         .from('bookings')
         .update(data)
