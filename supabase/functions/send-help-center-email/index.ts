@@ -101,51 +101,86 @@ const handler = async (req: Request): Promise<Response> => {
       : "New Support Request";
 
     const fromName = settings.company_name?.trim() || "Support";
-    const from = `${fromName} <${settings.company_email}>`;
+    const primaryFrom = `${fromName} <${settings.company_email}>`;
+    const fallbackFrom = `${fromName} <onboarding@resend.dev>`;
 
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${settings.resend_api_key}`,
-      },
-      body: JSON.stringify({
-        from,
-        to: [settings.company_email],
-        reply_to: email,
-        subject,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h1 style="color: #333; border-bottom: 2px solid #4f46e5; padding-bottom: 10px;">${heading}</h1>
-            
-            <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <p style="margin: 0 0 10px 0;"><strong>From:</strong> ${name}</p>
-              <p style="margin: 0 0 10px 0;"><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
-              <p style="margin: 0;"><strong>Type:</strong> ${isIdea ? "Feature Idea" : "Support Request"}</p>
+    const sendResendEmail = async (from: string) => {
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${settings.resend_api_key}`,
+        },
+        body: JSON.stringify({
+          from,
+          to: [settings.company_email],
+          reply_to: email,
+          subject,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h1 style="color: #333; border-bottom: 2px solid #4f46e5; padding-bottom: 10px;">${heading}</h1>
+              
+              <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <p style="margin: 0 0 10px 0;"><strong>From:</strong> ${name}</p>
+                <p style="margin: 0 0 10px 0;"><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
+                <p style="margin: 0;"><strong>Type:</strong> ${isIdea ? "Feature Idea" : "Support Request"}</p>
+              </div>
+              
+              <h2 style="color: #333; margin-top: 30px;">Message:</h2>
+              <div style="background: #fff; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px;">
+                <p style="white-space: pre-wrap; margin: 0;">${message}</p>
+              </div>
+              
+              <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;" />
+              <p style="color: #6b7280; font-size: 12px;">This email was sent from your Help Center.</p>
             </div>
-            
-            <h2 style="color: #333; margin-top: 30px;">Message:</h2>
-            <div style="background: #fff; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px;">
-              <p style="white-space: pre-wrap; margin: 0;">${message}</p>
-            </div>
-            
-            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;" />
-            <p style="color: #6b7280; font-size: 12px;">This email was sent from your Help Center.</p>
-          </div>
-        `,
-      }),
-    });
+          `,
+        }),
+      });
 
-    const emailResponse = await res.json().catch(() => ({}));
+      const json = await res.json().catch(() => ({}));
+      return { res, json };
+    };
 
+    let { res, json } = await sendResendEmail(primaryFrom);
+
+    // If the domain for settings.company_email isn't verified in Resend, retry with Resend's test sender.
     if (!res.ok) {
-      console.error("Resend API error:", emailResponse);
-      throw new Error(
-        (emailResponse as any)?.message || "Failed to send email"
-      );
+      const messageText = (json as any)?.message;
+      const isDomainNotVerified =
+        typeof messageText === "string" &&
+        messageText.toLowerCase().includes("domain is not verified");
+
+      if (isDomainNotVerified) {
+        console.warn(
+          "Resend domain not verified for sender:",
+          primaryFrom,
+          "Retrying with fallback sender:",
+          fallbackFrom
+        );
+
+        ({ res, json } = await sendResendEmail(fallbackFrom));
+
+        if (res.ok) {
+          return new Response(
+            JSON.stringify({
+              ...json,
+              warning:
+                "Sender domain not verified in Resend. Email was sent using a fallback sender. Verify your domain to remove this warning.",
+            }),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json", ...corsHeaders },
+            }
+          );
+        }
+      }
+
+      console.error("Resend API error:", json);
+      throw new Error((json as any)?.message || "Failed to send email");
     }
 
-    return new Response(JSON.stringify(emailResponse), {
+    return new Response(JSON.stringify(json), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
