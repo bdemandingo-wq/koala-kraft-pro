@@ -47,7 +47,8 @@ const handler = async (req: Request): Promise<Response> => {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     
     // Fetch business settings for sender email and company name
-    let senderEmail = "support@tidywisecleaning.com";
+    // Default to Resend's verified domain for other organizations
+    let senderEmail = "onboarding@resend.dev";
     let companyName = "TidyWise";
     
     const settingsQuery = organizationId 

@@ -2,6 +2,8 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,6 +13,7 @@ const corsHeaders = {
 interface PasswordResetRequest {
   email: string;
   redirectUrl: string;
+  organizationId?: string;
 }
 
 serve(async (req) => {
@@ -28,12 +31,12 @@ serve(async (req) => {
 
   try {
     const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      SUPABASE_URL ?? "",
+      SUPABASE_SERVICE_ROLE_KEY ?? "",
       { auth: { autoRefreshToken: false, persistSession: false } }
     );
 
-    const { email, redirectUrl }: PasswordResetRequest = await req.json();
+    const { email, redirectUrl, organizationId }: PasswordResetRequest = await req.json();
 
     if (!email) {
       return new Response(JSON.stringify({ error: "Email is required" }), {
@@ -43,6 +46,25 @@ serve(async (req) => {
     }
 
     console.log("Processing password reset for:", email);
+
+    // Fetch business settings for sender email and company name
+    // Default to Resend's verified domain for other organizations
+    let senderEmail = "onboarding@resend.dev";
+    let companyName = "TidyWise";
+    
+    const settingsQuery = organizationId 
+      ? supabaseAdmin.from('business_settings').select('company_email, company_name').eq('organization_id', organizationId).maybeSingle()
+      : supabaseAdmin.from('business_settings').select('company_email, company_name').order('updated_at', { ascending: false }).limit(1).maybeSingle();
+    
+    const { data: settings } = await settingsQuery;
+    
+    if (settings?.company_email) {
+      senderEmail = settings.company_email;
+      console.log("Using custom sender email:", senderEmail);
+    }
+    if (settings?.company_name) {
+      companyName = settings.company_name;
+    }
 
     const origin = req.headers.get("origin") ?? "";
     const safeRedirectUrl =
@@ -189,9 +211,9 @@ serve(async (req) => {
       return { ok: res.ok, status: res.status, data };
     };
 
-    // Match the sender domain used by your existing booking confirmations
-    const primaryFrom = "TidyWise Cleaning <support@tidywisecleaning.com>";
-    const fallbackFrom = "TidyWise <onboarding@resend.dev>";
+    // Try with organization's custom domain first, fallback to Resend's verified domain
+    const primaryFrom = `${companyName} <${senderEmail}>`;
+    const fallbackFrom = `${companyName} <onboarding@resend.dev>`;
 
     const primary = await send(primaryFrom);
     if (!primary.ok) {

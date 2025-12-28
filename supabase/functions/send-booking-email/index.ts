@@ -58,7 +58,8 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Sending booking confirmation email to:", customerEmail);
 
     // Fetch business settings to get sender email, company name, logo, and colors
-    let senderEmail = "support@tidywisecleaning.com";
+    // Default to Resend's verified domain for other organizations
+    let senderEmail = "onboarding@resend.dev";
     let companyName = "TidyWise";
     let logoUrl = "";
     let primaryColor = "#1e5bb0";

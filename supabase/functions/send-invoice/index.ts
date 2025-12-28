@@ -1,8 +1,11 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,6 +22,7 @@ interface InvoiceEmailRequest {
   address?: string;
   validUntil?: string;
   notes?: string;
+  organizationId?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -65,6 +69,29 @@ const handler = async (req: Request): Promise<Response> => {
           headers: { "Content-Type": "application/json", ...corsHeaders },
         }
       );
+    }
+
+    // Fetch business settings for sender email and company name
+    // Default to Resend's verified domain for other organizations
+    let senderEmail = "onboarding@resend.dev";
+    let companyName = "TidyWise";
+    
+    if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+      
+      const settingsQuery = data.organizationId 
+        ? supabase.from('business_settings').select('company_email, company_name').eq('organization_id', data.organizationId).maybeSingle()
+        : supabase.from('business_settings').select('company_email, company_name').order('updated_at', { ascending: false }).limit(1).maybeSingle();
+      
+      const { data: settings } = await settingsQuery;
+      
+      if (settings?.company_email) {
+        senderEmail = settings.company_email;
+        console.log("Using custom sender email:", senderEmail);
+      }
+      if (settings?.company_name) {
+        companyName = settings.company_name;
+      }
     }
 
     // Initialize Stripe
@@ -135,7 +162,7 @@ const handler = async (req: Request): Promise<Response> => {
           <tr>
             <td style="background-color:#1e5bb0;padding:30px;text-align:center;">
               <div style="font-size:32px;font-weight:bold;color:#ffffff;">
-                TidyWise
+                ${companyName}
               </div>
               <p style="color:#ffffff;font-size:14px;margin:5px 0 0 0;">Professional Cleaning Services</p>
             </td>
@@ -219,7 +246,7 @@ const handler = async (req: Request): Promise<Response> => {
                 Questions? Reply to this email or contact us anytime.
               </p>
               <p style="margin:0;text-align:center;font-size:16px;font-weight:bold;color:#1e5bb0;">
-                Thank you for choosing TidyWise!
+                Thank you for choosing ${companyName}!
               </p>
             </td>
           </tr>
@@ -227,9 +254,9 @@ const handler = async (req: Request): Promise<Response> => {
           <!-- Footer -->
           <tr>
             <td style="background-color:#333333;padding:20px;text-align:center;">
-              <p style="color:#ffffff;font-size:14px;font-weight:600;margin:0 0 5px 0;">TidyWise Cleaning</p>
+              <p style="color:#ffffff;font-size:14px;font-weight:600;margin:0 0 5px 0;">${companyName}</p>
               <p style="color:#999999;font-size:12px;margin:0;">
-                © ${new Date().getFullYear()} TidyWise. All rights reserved.
+                © ${new Date().getFullYear()} ${companyName}. All rights reserved.
               </p>
             </td>
           </tr>
@@ -251,11 +278,9 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        // Resend requires the "from" domain to be verified.
-        // Use the default Resend sender until tidywisecleaning.com is verified.
-        from: "TidyWise Cleaning <support@tidywisecleaning.com>",
+        from: `${companyName} <${senderEmail}>`,
         to: [customerEmail],
-        subject: `Invoice #${data.invoiceNumber} from TidyWise - Pay Online`,
+        subject: `Invoice #${data.invoiceNumber} from ${companyName} - Pay Online`,
         html: emailHtml,
       }),
     });

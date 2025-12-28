@@ -1,7 +1,10 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -16,10 +19,8 @@ interface BookingNotificationRequest {
   scheduledAt: string;
   totalAmount: number;
   address?: string;
+  organizationId?: string;
 }
-
-// Admin email to receive notifications
-const ADMIN_EMAIL = "support@tidywisecleaning.com";
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
@@ -33,10 +34,36 @@ const handler = async (req: Request): Promise<Response> => {
       serviceName, 
       scheduledAt, 
       totalAmount,
-      address 
+      address,
+      organizationId
     }: BookingNotificationRequest = await req.json();
 
     console.log("Sending admin notification for new booking:", { customerName, serviceName, scheduledAt });
+
+    // Fetch business settings for sender email and company name
+    // Default to Resend's verified domain for other organizations
+    let senderEmail = "onboarding@resend.dev";
+    let adminEmail = "onboarding@resend.dev";
+    let companyName = "TidyWise";
+    
+    if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+      
+      const settingsQuery = organizationId 
+        ? supabase.from('business_settings').select('company_email, company_name').eq('organization_id', organizationId).maybeSingle()
+        : supabase.from('business_settings').select('company_email, company_name').order('updated_at', { ascending: false }).limit(1).maybeSingle();
+      
+      const { data: settings } = await settingsQuery;
+      
+      if (settings?.company_email) {
+        senderEmail = settings.company_email;
+        adminEmail = settings.company_email;
+        console.log("Using custom sender email:", senderEmail);
+      }
+      if (settings?.company_name) {
+        companyName = settings.company_name;
+      }
+    }
 
     const bookingDate = new Date(scheduledAt);
     const formattedDate = bookingDate.toLocaleDateString('en-US', { 
@@ -52,8 +79,8 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     const emailResponse = await resend.emails.send({
-      from: "TidyWise Cleaning <support@tidywisecleaning.com>",
-      to: [ADMIN_EMAIL],
+      from: `${companyName} <${senderEmail}>`,
+      to: [adminEmail],
       subject: `🆕 New Booking: ${customerName} - ${serviceName}`,
       html: `
         <!DOCTYPE html>

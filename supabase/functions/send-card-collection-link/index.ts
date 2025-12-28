@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 
@@ -6,6 +7,9 @@ const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
   apiVersion: "2025-08-27.basil",
 });
+
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -16,6 +20,7 @@ const corsHeaders = {
 interface CardLinkRequest {
   email: string;
   customerName: string;
+  organizationId?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -24,7 +29,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email, customerName }: CardLinkRequest = await req.json();
+    const { email, customerName, organizationId }: CardLinkRequest = await req.json();
 
     console.log("Creating card collection link for:", { email, customerName });
 
@@ -33,6 +38,29 @@ const handler = async (req: Request): Promise<Response> => {
         JSON.stringify({ error: "Email and customer name are required" }),
         { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
+    }
+
+    // Fetch business settings for sender email and company name
+    // Default to Resend's verified domain for other organizations
+    let senderEmail = "onboarding@resend.dev";
+    let companyName = "TidyWise";
+    
+    if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+      
+      const settingsQuery = organizationId 
+        ? supabase.from('business_settings').select('company_email, company_name').eq('organization_id', organizationId).maybeSingle()
+        : supabase.from('business_settings').select('company_email, company_name').order('updated_at', { ascending: false }).limit(1).maybeSingle();
+      
+      const { data: settings } = await settingsQuery;
+      
+      if (settings?.company_email) {
+        senderEmail = settings.company_email;
+        console.log("Using custom sender email:", senderEmail);
+      }
+      if (settings?.company_name) {
+        companyName = settings.company_name;
+      }
     }
 
     // Check if customer exists in Stripe, create if not
@@ -56,8 +84,8 @@ const handler = async (req: Request): Promise<Response> => {
       customer: customerId,
       mode: "setup",
       payment_method_types: ["card"],
-      success_url: "https://jointidywise.com/card-saved?success=true",
-      cancel_url: "https://jointidywise.com/card-saved?cancelled=true",
+      success_url: "https://tidywisecleaning.com/card-saved?success=true",
+      cancel_url: "https://tidywisecleaning.com/card-saved?cancelled=true",
       metadata: {
         customerName: customerName,
         purpose: "card_collection",
@@ -68,9 +96,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email with the card collection link
     const emailResponse = await resend.emails.send({
-      from: "TidyWise Cleaning <support@tidywisecleaning.com>",
+      from: `${companyName} <${senderEmail}>`,
       to: [email],
-      subject: "Add Your Payment Card - TidyWise Cleaning",
+      subject: `Add Your Payment Card - ${companyName}`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -93,7 +121,7 @@ const handler = async (req: Request): Promise<Response> => {
             </div>
             <div class="content">
               <p>Hi ${customerName},</p>
-              <p>We need your payment card on file to complete your booking with TidyWise Cleaning.</p>
+              <p>We need your payment card on file to complete your booking with ${companyName}.</p>
               
               <div class="info-box">
                 <p><strong>Why do we need this?</strong></p>
@@ -113,8 +141,8 @@ const handler = async (req: Request): Promise<Response> => {
               </p>
             </div>
             <div class="footer">
-              <p>Questions? Reply to this email or call us at (813) 735-6859</p>
-              <p>&copy; 2024 TidyWise Cleaning. All rights reserved.</p>
+              <p>Questions? Reply to this email or contact us.</p>
+              <p>&copy; ${new Date().getFullYear()} ${companyName}. All rights reserved.</p>
             </div>
           </div>
         </body>
