@@ -2,6 +2,8 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -21,6 +23,7 @@ interface NotifyCleanersRequest {
     total_amount: number;
   };
   companyName: string;
+  organizationId?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -29,13 +32,30 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
 
-    const { staffEmails, jobDetails, companyName }: NotifyCleanersRequest = await req.json();
+    const { staffEmails, jobDetails, companyName: providedCompanyName, organizationId }: NotifyCleanersRequest = await req.json();
 
     console.log("Notifying cleaners about new job:", jobDetails);
+
+    // Fetch business settings for sender email and company name
+    // Default to Resend's verified domain for other organizations
+    let senderEmail = "onboarding@resend.dev";
+    let companyName = providedCompanyName || "TidyWise";
+    
+    const settingsQuery = organizationId 
+      ? supabase.from('business_settings').select('company_email, company_name').eq('organization_id', organizationId).maybeSingle()
+      : supabase.from('business_settings').select('company_email, company_name').order('updated_at', { ascending: false }).limit(1).maybeSingle();
+    
+    const { data: settings } = await settingsQuery;
+    
+    if (settings?.company_email) {
+      senderEmail = settings.company_email;
+      console.log("Using custom sender email:", senderEmail);
+    }
+    if (settings?.company_name) {
+      companyName = settings.company_name;
+    }
 
     // Get all active staff members with their rates
     const { data: staffMembers, error: staffError } = await supabase
@@ -175,7 +195,7 @@ const handler = async (req: Request): Promise<Response> => {
                 Authorization: `Bearer ${RESEND_API_KEY}`,
               },
               body: JSON.stringify({
-                from: `${companyName} <support@tidywisecleaning.com>`,
+                from: `${companyName} <${senderEmail}>`,
                 to: [staff.email],
                 subject: `🎉 New Job Available - $${potentialPay.toFixed(2)} Potential Earnings`,
                 html: emailHtml,

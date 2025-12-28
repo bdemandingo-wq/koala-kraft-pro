@@ -149,7 +149,8 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Fetch business settings for sender email
-    let senderEmail = "support@tidywisecleaning.com";
+    // Default to Resend's verified domain for other organizations
+    let senderEmail = "onboarding@resend.dev";
     let companyName = "TidyWise";
     let organizationId: string | null = null;
     

@@ -13,6 +13,7 @@ interface Campaign {
   subject: string;
   body: string;
   days_inactive: number;
+  organization_id?: string;
 }
 
 serve(async (req) => {
@@ -43,14 +44,24 @@ serve(async (req) => {
       throw new Error("Campaign not found");
     }
 
-    // Get business settings for company name
-    const { data: settings } = await supabase
-      .from("business_settings")
-      .select("company_name")
-      .limit(1)
-      .maybeSingle();
+    // Get business settings for company name and sender email based on campaign's organization
+    // Default to Resend's verified domain for other organizations
+    let senderEmail = "onboarding@resend.dev";
+    let companyName = "Our Company";
+    
+    const settingsQuery = campaign.organization_id 
+      ? supabase.from("business_settings").select("company_name, company_email").eq("organization_id", campaign.organization_id).maybeSingle()
+      : supabase.from("business_settings").select("company_name, company_email").order("updated_at", { ascending: false }).limit(1).maybeSingle();
+    
+    const { data: settings } = await settingsQuery;
 
-    const companyName = settings?.company_name || "Our Company";
+    if (settings?.company_name) {
+      companyName = settings.company_name;
+    }
+    if (settings?.company_email) {
+      senderEmail = settings.company_email;
+      console.log("Using custom sender email:", senderEmail);
+    }
 
     // Find inactive customers based on campaign type
     let inactiveCustomers: any[] = [];
@@ -134,7 +145,7 @@ serve(async (req) => {
             Authorization: `Bearer ${RESEND_API_KEY}`,
           },
           body: JSON.stringify({
-            from: "TidyWise <support@tidywisecleaning.com>",
+            from: `${companyName} <${senderEmail}>`,
             to: [customer.email],
             subject: subject,
             html: `

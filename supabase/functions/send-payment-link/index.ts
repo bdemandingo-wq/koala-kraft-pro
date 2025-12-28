@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 
@@ -6,6 +7,9 @@ const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
   apiVersion: "2025-08-27.basil",
 });
+
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,6 +23,7 @@ interface PaymentLinkRequest {
   amount: number;
   serviceName: string;
   bookingId?: string;
+  organizationId?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -27,7 +32,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email, customerName, amount, serviceName, bookingId }: PaymentLinkRequest = await req.json();
+    const { email, customerName, amount, serviceName, bookingId, organizationId }: PaymentLinkRequest = await req.json();
 
     console.log("Received payment link request:", { email, customerName, amount, serviceName, bookingId });
 
@@ -36,6 +41,29 @@ const handler = async (req: Request): Promise<Response> => {
         JSON.stringify({ error: "Missing required fields" }),
         { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
+    }
+
+    // Fetch business settings for sender email and company name
+    // Default to Resend's verified domain for other organizations
+    let senderEmail = "onboarding@resend.dev";
+    let companyName = "TidyWise";
+    
+    if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+      
+      const settingsQuery = organizationId 
+        ? supabase.from('business_settings').select('company_email, company_name').eq('organization_id', organizationId).maybeSingle()
+        : supabase.from('business_settings').select('company_email, company_name').order('updated_at', { ascending: false }).limit(1).maybeSingle();
+      
+      const { data: settings } = await settingsQuery;
+      
+      if (settings?.company_email) {
+        senderEmail = settings.company_email;
+        console.log("Using custom sender email:", senderEmail);
+      }
+      if (settings?.company_name) {
+        companyName = settings.company_name;
+      }
     }
 
     // Check if customer exists in Stripe, create if not
@@ -71,8 +99,8 @@ const handler = async (req: Request): Promise<Response> => {
         },
       ],
       mode: "payment",
-      success_url: "https://jointidywise.com",
-      cancel_url: "https://jointidywise.com",
+      success_url: "https://tidywisecleaning.com",
+      cancel_url: "https://tidywisecleaning.com",
       metadata: {
         bookingId: bookingId || "",
         customerName: customerName,
@@ -84,7 +112,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email with the Stripe payment link
     const emailResponse = await resend.emails.send({
-      from: "TidyWise Cleaning <support@tidywisecleaning.com>",
+      from: `${companyName} <${senderEmail}>`,
       to: [email],
       subject: "Complete Your Booking Payment",
       html: `
@@ -110,7 +138,7 @@ const handler = async (req: Request): Promise<Response> => {
             </div>
             <div class="content">
               <p>Hi ${customerName},</p>
-              <p>Thank you for choosing Tidywise Cleaning! Please complete your payment to confirm your booking.</p>
+              <p>Thank you for choosing ${companyName}! Please complete your payment to confirm your booking.</p>
               
               <div class="details">
                 <h3>Booking Details</h3>
@@ -133,8 +161,8 @@ const handler = async (req: Request): Promise<Response> => {
               </p>
             </div>
             <div class="footer">
-              <p>Questions? Reply to this email or call us at (813) 735-6859</p>
-              <p>&copy; 2024 Tidywise Cleaning. All rights reserved.</p>
+              <p>Questions? Reply to this email or contact us.</p>
+              <p>&copy; ${new Date().getFullYear()} ${companyName}. All rights reserved.</p>
             </div>
           </div>
         </body>

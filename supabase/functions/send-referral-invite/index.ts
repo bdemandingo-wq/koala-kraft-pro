@@ -44,13 +44,24 @@ serve(async (req) => {
     }
 
     // Get business settings - filter by organization_id if available on referral
+    // Default to Resend's verified domain for other organizations
+    let senderEmail = "onboarding@resend.dev";
+    let companyName = "TidyWise";
+    
     const settingsQuery = referral.organization_id 
-      ? supabase.from("business_settings").select("company_name").eq("organization_id", referral.organization_id).maybeSingle()
-      : supabase.from("business_settings").select("company_name").order("updated_at", { ascending: false }).limit(1).maybeSingle();
+      ? supabase.from("business_settings").select("company_name, company_email").eq("organization_id", referral.organization_id).maybeSingle()
+      : supabase.from("business_settings").select("company_name, company_email").order("updated_at", { ascending: false }).limit(1).maybeSingle();
     
     const { data: settings } = await settingsQuery;
 
-    const companyName = settings?.company_name || "TidyWise";
+    if (settings?.company_name) {
+      companyName = settings.company_name;
+    }
+    if (settings?.company_email) {
+      senderEmail = settings.company_email;
+      console.log("Using custom sender email:", senderEmail);
+    }
+
     const referrerName = `${referral.referrer.first_name} ${referral.referrer.last_name}`;
     const creditAmount = referral.credit_amount || 25;
 
@@ -64,7 +75,7 @@ serve(async (req) => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: `${companyName} <support@tidywisecleaning.com>`,
+        from: `${companyName} <${senderEmail}>`,
         to: [referral.referred_email],
         subject: `${referrerName} thinks you'd love ${companyName}! Get $${creditAmount} off`,
         html: `
