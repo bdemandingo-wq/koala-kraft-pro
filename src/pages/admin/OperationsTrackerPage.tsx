@@ -21,7 +21,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Phone, Target, DollarSign, Mail, Users, CheckCircle, Plus, Edit, Trash2, Download, TrendingUp, CalendarDays } from 'lucide-react';
+import { Phone, Target, DollarSign, Mail, Users, CheckCircle, Plus, Edit, Trash2, Download, TrendingUp, CalendarDays, Upload } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -222,6 +222,10 @@ export default function OperationsTrackerPage() {
             </PopoverContent>
           </Popover>
           
+          <Button variant="outline" className="gap-2">
+            <Upload className="w-4 h-4" />
+            Import
+          </Button>
           <Button variant="outline" onClick={exportToExcel} className="gap-2">
             <Download className="w-4 h-4" />
             Export
