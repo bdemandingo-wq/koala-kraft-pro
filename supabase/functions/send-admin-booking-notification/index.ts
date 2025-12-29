@@ -96,9 +96,10 @@ const handler = async (req: Request): Promise<Response> => {
       hour12: true 
     });
 
-    const emailResponse = await resend.emails.send({
+    const { data, error: sendError } = await resend.emails.send({
       from: senderFrom,
       to: [adminEmail],
+      reply_to: getReplyTo(emailSettings),
       subject: `🆕 New Booking: ${customerName} - ${serviceName}`,
       html: `
         <!DOCTYPE html>
@@ -176,11 +177,32 @@ const handler = async (req: Request): Promise<Response> => {
       `,
     });
 
-    console.log("[send-admin-booking-notification] Email sent successfully:", emailResponse.data?.id);
+    if (sendError) {
+      console.error("[send-admin-booking-notification] Resend error:", sendError);
+      return new Response(
+        JSON.stringify({
+          error: sendError.message ?? "Failed to send email",
+        }),
+        { status: 502, headers: { "Content-Type": "application/json", ...corsHeaders } },
+      );
+    }
 
-    return new Response(JSON.stringify({ 
-      success: true, 
-      emailId: emailResponse.data?.id 
+    if (!data?.id) {
+      console.error("[send-admin-booking-notification] Missing email id (unknown send failure)");
+      return new Response(
+        JSON.stringify({ error: "Email send failed (no email id returned)" }),
+        { status: 502, headers: { "Content-Type": "application/json", ...corsHeaders } },
+      );
+    }
+
+    console.log("[send-admin-booking-notification] Email sent successfully:", data.id);
+
+    return new Response(JSON.stringify({
+      success: true,
+      emailId: data.id,
+      to: adminEmail,
+      from: senderFrom,
+      replyTo: getReplyTo(emailSettings),
     }), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
