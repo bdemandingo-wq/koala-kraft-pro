@@ -9,6 +9,7 @@ import { toast } from '@/hooks/use-toast';
 interface CardFormProps {
   email: string;
   customerName: string;
+  organizationId: string;
   onCardSaved: (cardInfo: { last4: string; brand: string; paymentMethodId: string }) => void;
   onError?: (error: string) => void;
 }
@@ -31,7 +32,7 @@ const CARD_ELEMENT_OPTIONS = {
   hidePostalCode: true,
 };
 
-function CardFormInner({ email, customerName, onCardSaved, onError }: CardFormProps) {
+function CardFormInner({ email, customerName, organizationId, onCardSaved, onError }: CardFormProps) {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
@@ -55,6 +56,7 @@ function CardFormInner({ email, customerName, onCardSaved, onError }: CardFormPr
         body: {
           email,
           customerName,
+          organizationId,
         },
       });
 
