@@ -54,7 +54,8 @@ import {
   Mail,
   Bell,
   Settings2,
-  Star
+  Star,
+  Upload
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -770,16 +771,22 @@ export default function BookingsPage() {
       title="Bookings"
       subtitle="Manage your appointments"
       actions={
-        <Button
-          className="gap-2 bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity shadow-md"
-          onClick={() => {
-            setEditingBooking(null);
-            setAddDialogOpen(true);
-          }}
-        >
-          <Plus className="w-4 h-4" />
-          New Booking
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" className="gap-2">
+            <Upload className="w-4 h-4" />
+            Import
+          </Button>
+          <Button
+            className="gap-2 bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity shadow-md"
+            onClick={() => {
+              setEditingBooking(null);
+              setAddDialogOpen(true);
+            }}
+          >
+            <Plus className="w-4 h-4" />
+            New Booking
+          </Button>
+        </div>
       }
     >
       {/* Tabs */}

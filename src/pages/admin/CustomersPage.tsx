@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Search, Plus, MoreHorizontal, Mail, Phone, MapPin, Edit, Trash2, CreditCard } from 'lucide-react';
+import { Search, Plus, MoreHorizontal, Mail, Phone, MapPin, Edit, Trash2, CreditCard, Upload } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -75,10 +75,16 @@ export default function CustomersPage() {
       title="Customers"
       subtitle={`${customers.length} total customers`}
       actions={
-        <Button className="gap-2" onClick={() => setAddDialogOpen(true)}>
-          <Plus className="w-4 h-4" />
-          Add Customer
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" className="gap-2">
+            <Upload className="w-4 h-4" />
+            Import
+          </Button>
+          <Button className="gap-2" onClick={() => setAddDialogOpen(true)}>
+            <Plus className="w-4 h-4" />
+            Add Customer
+          </Button>
+        </div>
       }
     >
       {/* Search */}

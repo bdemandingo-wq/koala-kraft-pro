@@ -28,7 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Plus, Mail, Phone, UserPlus, MoreHorizontal, Trash2, Edit, Download, Filter, TrendingDown, ArrowRight } from 'lucide-react';
+import { Plus, Mail, Phone, UserPlus, MoreHorizontal, Trash2, Edit, Download, Filter, TrendingDown, ArrowRight, Upload } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -269,6 +269,10 @@ export default function LeadsPage() {
           >
             <TrendingDown className="w-4 h-4" />
             Funnel Report
+          </Button>
+          <Button variant="outline" className="gap-2">
+            <Upload className="w-4 h-4" />
+            Import
           </Button>
           <Button variant="outline" className="gap-2" onClick={exportLeadsExcel}>
             <Download className="w-4 h-4" />
