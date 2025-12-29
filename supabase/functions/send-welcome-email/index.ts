@@ -23,7 +23,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   if (!RESEND_API_KEY) {
-    console.error("Missing RESEND_API_KEY secret");
+    console.error("[send-welcome-email] Missing RESEND_API_KEY secret");
     return new Response(JSON.stringify({ error: "Email service is not configured" }), {
       status: 500,
       headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -40,9 +40,11 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    console.log("Sending welcome email to:", email);
+    console.log("[send-welcome-email] Sending welcome email to:", email);
 
-    // TidyWise main account uses jointidywise.com
+    // Welcome emails for NEW signups use the main TidyWise account
+    // This is a platform-level email, not organization-specific
+    // (Users create their organization AFTER signup, so no org context exists yet)
     const TIDYWISE_DEFAULT_EMAIL = "support@jointidywise.com";
     const TIDYWISE_DEFAULT_NAME = "TidyWise";
     
@@ -199,23 +201,23 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (!res.ok && data?.name === 'validation_error' && data?.message?.includes('not verified')) {
       const domain = senderEmail.split('@')[1];
-      console.error(`Domain ${domain} is not verified on Resend`);
+      console.error(`[send-welcome-email] Domain ${domain} is not verified on Resend`);
       throw new Error(`Email domain (${domain}) is not verified. Please verify it at https://resend.com/domains`);
     }
 
     if (!res.ok) {
-      console.error("Resend API error:", { status: res.status, data });
+      console.error("[send-welcome-email] Resend API error:", { status: res.status, data });
       throw new Error(data?.message || `Failed to send welcome email (status ${res.status})`);
     }
 
-    console.log("Welcome email sent successfully:", data);
+    console.log("[send-welcome-email] Welcome email sent successfully:", data?.id);
 
     return new Response(JSON.stringify({ success: true, emailId: data?.id }), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   } catch (error: any) {
-    console.error("Error in send-welcome-email:", error);
+    console.error("[send-welcome-email] Error:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { "Content-Type": "application/json", ...corsHeaders },
