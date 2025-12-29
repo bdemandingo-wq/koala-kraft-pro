@@ -57,9 +57,14 @@ export function PaymentStep() {
     ? selectedCustomer.phone 
     : newCustomer.phone;
 
-  const handleSendCardLinkSms = async () => {
+  const handleSendPaymentLinkSms = async () => {
     if (!customerPhone || !customerName) {
       toast.error('Please enter customer phone number and name first');
+      return;
+    }
+
+    if (!totalAmount || totalAmount <= 0) {
+      toast.error('Please set a valid total amount first');
       return;
     }
 
@@ -70,13 +75,14 @@ export function PaymentStep() {
           phone: customerPhone, 
           email: customerEmail,
           customerName, 
-          organizationId: organizationId ?? undefined 
+          organizationId: organizationId ?? undefined,
+          amount: totalAmount
         }
       });
       if (error) throw error;
-      toast.success('Card collection link sent via SMS');
+      toast.success(`Payment link for $${totalAmount.toFixed(2)} sent via SMS`);
     } catch (error: any) {
-      toast.error(error.message || 'Failed to send card link via SMS');
+      toast.error(error.message || 'Failed to send payment link via SMS');
     } finally {
       setSendingLinkSms(false);
     }
@@ -267,16 +273,16 @@ export function PaymentStep() {
               <Button
                 variant="outline"
                 className="h-11 w-full"
-                onClick={handleSendCardLinkSms}
-                disabled={sendingLinkSms || !customerPhone}
-                title={!customerPhone ? "Customer phone required" : "Send card link via SMS"}
+                onClick={handleSendPaymentLinkSms}
+                disabled={sendingLinkSms || !customerPhone || !totalAmount}
+                title={!customerPhone ? "Customer phone required" : !totalAmount ? "Set total amount first" : `Send payment link for $${totalAmount.toFixed(2)}`}
               >
                 {sendingLinkSms ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
                   <Phone className="mr-2 h-4 w-4" />
                 )}
-                Send Card Link via SMS
+                Send Payment Link (${totalAmount?.toFixed(2) || '0.00'})
               </Button>
             </div>
           ) : (
