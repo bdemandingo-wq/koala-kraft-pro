@@ -570,6 +570,7 @@ export type Database = {
           description: string | null
           id: string
           is_active: boolean | null
+          is_default: boolean | null
           name: string
           organization_id: string | null
           service_id: string | null
@@ -580,6 +581,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean | null
+          is_default?: boolean | null
           name: string
           organization_id?: string | null
           service_id?: string | null
@@ -590,6 +592,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean | null
+          is_default?: boolean | null
           name?: string
           organization_id?: string | null
           service_id?: string | null
@@ -859,6 +862,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          is_recommended: boolean | null
           loom_url: string
           organization_id: string | null
           sort_order: number | null
@@ -869,6 +873,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          is_recommended?: boolean | null
           loom_url: string
           organization_id?: string | null
           sort_order?: number | null
@@ -879,6 +884,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          is_recommended?: boolean | null
           loom_url?: string
           organization_id?: string | null
           sort_order?: number | null
