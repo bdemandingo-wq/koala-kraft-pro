@@ -156,6 +156,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "booking_checklists_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_safe"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "booking_checklists_template_id_fkey"
             columns: ["template_id"]
             isOneToOne: false
@@ -205,6 +212,13 @@ export type Database = {
             columns: ["staff_id"]
             isOneToOne: false
             referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_photos_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -358,6 +372,13 @@ export type Database = {
             columns: ["staff_id"]
             isOneToOne: false
             referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -659,6 +680,13 @@ export type Database = {
             columns: ["staff_id"]
             isOneToOne: false
             referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cleaner_notifications_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -1021,6 +1049,13 @@ export type Database = {
             columns: ["assigned_to"]
             isOneToOne: false
             referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "staff_safe"
             referencedColumns: ["id"]
           },
           {
@@ -1587,6 +1622,13 @@ export type Database = {
             referencedRelation: "staff"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "recurring_bookings_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       referrals: {
@@ -1731,6 +1773,13 @@ export type Database = {
             columns: ["staff_id"]
             isOneToOne: false
             referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_requests_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -1935,6 +1984,13 @@ export type Database = {
             referencedRelation: "staff"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "staff_services_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       team_messages: {
@@ -2032,11 +2088,88 @@ export type Database = {
             referencedRelation: "staff"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "working_hours_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
     Views: {
-      [_ in never]: never
+      staff_safe: {
+        Row: {
+          avatar_url: string | null
+          base_wage: number | null
+          bio: string | null
+          created_at: string | null
+          ein: string | null
+          email: string | null
+          hourly_rate: number | null
+          id: string | null
+          is_active: boolean | null
+          name: string | null
+          organization_id: string | null
+          percentage_rate: number | null
+          phone: string | null
+          ssn_last4: string | null
+          tax_classification: string | null
+          tax_document_url: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          base_wage?: never
+          bio?: string | null
+          created_at?: string | null
+          ein?: never
+          email?: string | null
+          hourly_rate?: never
+          id?: string | null
+          is_active?: boolean | null
+          name?: string | null
+          organization_id?: string | null
+          percentage_rate?: never
+          phone?: string | null
+          ssn_last4?: never
+          tax_classification?: never
+          tax_document_url?: never
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          base_wage?: never
+          bio?: string | null
+          created_at?: string | null
+          ein?: never
+          email?: string | null
+          hourly_rate?: never
+          id?: string | null
+          is_active?: boolean | null
+          name?: string | null
+          organization_id?: string | null
+          percentage_rate?: never
+          phone?: string | null
+          ssn_last4?: never
+          tax_classification?: never
+          tax_document_url?: never
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       get_user_organization_id: { Args: never; Returns: string }
