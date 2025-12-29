@@ -1,20 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getOrgEmailSettings, formatEmailFrom } from "../_shared/get-org-email-settings.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
-
-interface Campaign {
-  id: string;
-  name: string;
-  type: string;
-  subject: string;
-  body: string;
-  days_inactive: number;
-  organization_id: string; // REQUIRED for campaign
-}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -46,7 +37,7 @@ serve(async (req) => {
 
     // CRITICAL: Campaign must have organization_id for multi-tenant isolation
     if (!campaign.organization_id) {
-      console.error("Campaign has no organization_id - cannot send emails without organization context");
+      console.error("[send-followup-campaign] Campaign has no organization_id - cannot send emails without organization context");
       return new Response(JSON.stringify({ 
         error: "Campaign is not associated with an organization. Please update the campaign." 
       }), {
@@ -55,33 +46,31 @@ serve(async (req) => {
       });
     }
 
-    console.log("Running campaign for organization:", campaign.organization_id);
+    console.log("[send-followup-campaign] Running campaign for organization:", campaign.organization_id);
 
-    // Get business settings for the SPECIFIC organization only - NO FALLBACK
-    const { data: settings, error: settingsError } = await supabase
+    // Get email settings from organization_email_settings table
+    const emailSettingsResult = await getOrgEmailSettings(campaign.organization_id);
+    if (!emailSettingsResult.success || !emailSettingsResult.settings) {
+      console.error("[send-followup-campaign] Failed to get email settings:", emailSettingsResult.error);
+      return new Response(
+        JSON.stringify({ error: emailSettingsResult.error }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    const emailSettings = emailSettingsResult.settings;
+    const senderFrom = formatEmailFrom(emailSettings);
+
+    // Get business settings for branding
+    const { data: businessSettings } = await supabase
       .from("business_settings")
-      .select("company_name, company_email")
+      .select("company_name")
       .eq("organization_id", campaign.organization_id)
       .maybeSingle();
 
-    if (settingsError) {
-      console.error("Error fetching organization settings:", settingsError);
-    }
-
-    if (!settings || !settings.company_email || !settings.company_name) {
-      console.error("Organization settings not configured for org:", campaign.organization_id);
-      return new Response(JSON.stringify({ 
-        error: "Organization email settings not configured. Please set up your company email and name in Settings." 
-      }), {
-        status: 400,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
-    }
-
-    const companyName = settings.company_name;
-    const senderEmail = settings.company_email;
+    const companyName = businessSettings?.company_name || emailSettings.from_name;
     
-    console.log("Using organization settings - sender:", senderEmail, "company:", companyName);
+    console.log("[send-followup-campaign] Using sender:", senderFrom, "company:", companyName);
 
     // Find inactive customers based on campaign type - filter by organization
     let inactiveCustomers: any[] = [];
@@ -136,15 +125,13 @@ serve(async (req) => {
       }
     }
 
-    console.log(`Found ${inactiveCustomers.length} inactive customers to email for org ${campaign.organization_id}`);
+    console.log(`[send-followup-campaign] Found ${inactiveCustomers.length} inactive customers to email for org ${campaign.organization_id}`);
 
     const emailsSent: string[] = [];
     const emailsFailed: string[] = [];
 
     // Send emails to inactive customers
     for (const customer of inactiveCustomers) {
-      const customerName = `${customer.first_name} ${customer.last_name}`;
-      
       // Replace placeholders in subject and body
       const subject = campaign.subject
         .replace(/\{\{customer_name\}\}/g, customer.first_name)
@@ -167,7 +154,7 @@ serve(async (req) => {
             Authorization: `Bearer ${RESEND_API_KEY}`,
           },
           body: JSON.stringify({
-            from: `${companyName} <${senderEmail}>`,
+            from: senderFrom,
             to: [customer.email],
             subject: subject,
             html: `
@@ -184,11 +171,12 @@ serve(async (req) => {
                 <div style="background: #f8fafc; padding: 30px; border-radius: 0 0 12px 12px;">
                   <p style="font-size: 16px;">${htmlBody}</p>
                   <div style="text-align: center; margin-top: 30px;">
-                    <a href="${supabaseUrl.replace('.supabase.co', '.lovable.app')}/book" 
+                    <a href="https://tidywise.lovable.app/book" 
                        style="display: inline-block; background: #3b82f6; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold;">
                       Book Now
                     </a>
                   </div>
+                  ${emailSettings.email_footer ? `<hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;"><p style="font-size: 12px; color: #9ca3af;">${emailSettings.email_footer}</p>` : ''}
                 </div>
               </body>
               </html>
@@ -209,7 +197,7 @@ serve(async (req) => {
           emailsFailed.push(customer.email);
         }
       } catch (error) {
-        console.error(`Failed to send email to ${customer.email}:`, error);
+        console.error(`[send-followup-campaign] Failed to send email to ${customer.email}:`, error);
         emailsFailed.push(customer.email);
       }
     }
@@ -230,7 +218,7 @@ serve(async (req) => {
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: unknown) {
-    console.error("Error in send-followup-campaign:", error);
+    console.error("[send-followup-campaign] Error:", error);
     const message = error instanceof Error ? error.message : "Unknown error";
     return new Response(
       JSON.stringify({ error: message }),

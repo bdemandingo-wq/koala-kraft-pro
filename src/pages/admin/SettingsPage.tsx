@@ -18,6 +18,7 @@ import { Save, Globe, Bell, Lock, Palette, Loader2, Mail, Star, Upload, Eye, Eye
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { EmailTemplatesSettings } from '@/components/admin/EmailTemplatesSettings';
+import { EmailSettingsCard } from '@/components/admin/EmailSettingsCard';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/contexts/OrganizationContext';
 

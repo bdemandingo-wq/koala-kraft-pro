@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
+import { getOrgEmailSettings, formatEmailFrom, getReplyTo } from "../_shared/get-org-email-settings.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
@@ -40,7 +41,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // CRITICAL: organizationId is REQUIRED for multi-tenant isolation
     if (!organizationId) {
-      console.error("Missing organizationId - cannot send notification without organization context");
+      console.error("[send-admin-booking-notification] Missing organizationId - cannot send notification without organization context");
       return new Response(JSON.stringify({ 
         error: "Missing organizationId - organization context is required" 
       }), {
@@ -49,47 +50,37 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    console.log("Sending admin notification for new booking:", { customerName, serviceName, scheduledAt, organizationId });
+    console.log("[send-admin-booking-notification] Sending notification for org:", organizationId);
 
-    // Fetch business settings for the SPECIFIC organization only
-    let senderEmail = "";
-    let adminEmail = "";
-    let companyName = "";
+    // Get email settings from organization_email_settings table
+    const emailSettingsResult = await getOrgEmailSettings(organizationId);
+    if (!emailSettingsResult.success || !emailSettingsResult.settings) {
+      console.error("[send-admin-booking-notification] Failed to get email settings:", emailSettingsResult.error);
+      return new Response(
+        JSON.stringify({ error: emailSettingsResult.error }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    const emailSettings = emailSettingsResult.settings;
+    const senderFrom = formatEmailFrom(emailSettings);
+    // Admin notifications go to the organization's email
+    const adminEmail = emailSettings.from_email;
+
+    // Get business settings for branding
+    let companyName = emailSettings.from_name;
     
     if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
       const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-      
-      // ONLY query settings for the specific organization - NO FALLBACK
-      const { data: settings, error: settingsError } = await supabase
+      const { data: settings } = await supabase
         .from('business_settings')
-        .select('company_email, company_name')
+        .select('company_name')
         .eq('organization_id', organizationId)
         .maybeSingle();
       
-      if (settingsError) {
-        console.error("Error fetching organization settings:", settingsError);
+      if (settings?.company_name) {
+        companyName = settings.company_name;
       }
-      
-      if (!settings || !settings.company_email || !settings.company_name) {
-        console.error("Organization settings not configured for org:", organizationId);
-        return new Response(JSON.stringify({ 
-          error: "Organization email settings not configured. Please set up your company email and name in Settings." 
-        }), {
-          status: 400,
-          headers: { "Content-Type": "application/json", ...corsHeaders },
-        });
-      }
-      
-      senderEmail = settings.company_email;
-      adminEmail = settings.company_email;
-      companyName = settings.company_name;
-      
-      console.log("Using organization settings - sender:", senderEmail, "company:", companyName);
-    } else {
-      return new Response(JSON.stringify({ error: "Database connection not configured" }), {
-        status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
     }
 
     const bookingDate = new Date(scheduledAt);
@@ -106,7 +97,7 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     const emailResponse = await resend.emails.send({
-      from: `${companyName} <${senderEmail}>`,
+      from: senderFrom,
       to: [adminEmail],
       subject: `🆕 New Booking: ${customerName} - ${serviceName}`,
       html: `
@@ -172,6 +163,8 @@ const handler = async (req: Request): Promise<Response> => {
                 <div class="amount-label">Total Amount</div>
                 <div class="amount-value">$${totalAmount.toFixed(2)}</div>
               </div>
+              
+              ${emailSettings.email_footer ? `<hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;"><p style="font-size: 12px; color: #9ca3af;">${emailSettings.email_footer}</p>` : ''}
             </div>
             <div class="footer">
               <p>This is an automated notification from your booking system.</p>
@@ -183,7 +176,7 @@ const handler = async (req: Request): Promise<Response> => {
       `,
     });
 
-    console.log("Admin notification email sent successfully:", emailResponse);
+    console.log("[send-admin-booking-notification] Email sent successfully:", emailResponse.data?.id);
 
     return new Response(JSON.stringify({ 
       success: true, 
@@ -193,7 +186,7 @@ const handler = async (req: Request): Promise<Response> => {
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   } catch (error: any) {
-    console.error("Error in send-admin-booking-notification function:", error);
+    console.error("[send-admin-booking-notification] Error:", error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
