@@ -1,6 +1,7 @@
 // Pricing data from rate sheet - based on square footage ranges
 
 export const squareFootageRanges = [
+  { label: 'Up to 750 sf', maxSqFt: 750 },
   { label: 'Up to 1000 sf', maxSqFt: 1000 },
   { label: 'Up to 1500 sf', maxSqFt: 1500 },
   { label: 'Up to 2000 sf', maxSqFt: 2000 },
@@ -42,7 +43,7 @@ export const cleaningServices: CleaningService[] = [
     description: 'Thorough first-time deep cleaning including inside oven',
     color: '#3b82f6',
     minimumPrice: 200,
-    prices: [200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700],
+    prices: [175, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700],
   },
   {
     id: 'standard_clean',
@@ -50,7 +51,7 @@ export const cleaningServices: CleaningService[] = [
     description: 'Regular maintenance cleaning for your home',
     color: '#10b981',
     minimumPrice: 150,
-    prices: [150, 190, 230, 270, 310, 350, 390, 430, 470, 510, 550],
+    prices: [125, 150, 190, 230, 270, 310, 350, 390, 430, 470, 510, 550],
   },
   {
     id: 'move_in_out',
@@ -58,7 +59,7 @@ export const cleaningServices: CleaningService[] = [
     description: 'Deep clean + $75 for move-in or move-out, includes fridge cleaning',
     color: '#06b6d4',
     minimumPrice: 275,
-    prices: [275, 325, 375, 425, 475, 525, 575, 625, 675, 725, 775],
+    prices: [250, 275, 325, 375, 425, 475, 525, 575, 625, 675, 725, 775],
   },
   {
     id: 'construction',
@@ -66,7 +67,7 @@ export const cleaningServices: CleaningService[] = [
     description: 'Heavy-duty cleaning after construction or renovation (50% more than Move In/Out)',
     color: '#f97316',
     minimumPrice: 400,
-    prices: [400, 475, 550, 625, 700, 775, 850, 925, 1000, 1075, 1150],
+    prices: [350, 400, 475, 550, 625, 700, 775, 850, 925, 1000, 1075, 1150],
   },
   {
     id: 'airbnb',
@@ -74,7 +75,7 @@ export const cleaningServices: CleaningService[] = [
     description: 'Recurring turnover cleans for vacation rentals (3-7 cleans/month discount)',
     color: '#ec4899',
     minimumPrice: 140,
-    prices: [140, 175, 210, 245, 280, 315, 350, 385, 420, 455, 490],
+    prices: [120, 140, 175, 210, 245, 280, 315, 350, 385, 420, 455, 490],
   },
   {
     id: 'post_construction',
@@ -82,7 +83,7 @@ export const cleaningServices: CleaningService[] = [
     description: 'Heavy-duty cleaning after construction or renovation projects',
     color: '#f59e0b',
     minimumPrice: 400,
-    prices: [400, 475, 550, 625, 700, 775, 850, 925, 1000, 1075, 1150],
+    prices: [350, 400, 475, 550, 625, 700, 775, 850, 925, 1000, 1075, 1150],
   },
   {
     id: 'commercial',
@@ -90,7 +91,7 @@ export const cleaningServices: CleaningService[] = [
     description: 'Professional cleaning for commercial spaces, offices, and businesses',
     color: '#6366f1',
     minimumPrice: 350,
-    prices: [350, 425, 500, 575, 650, 725, 800, 875, 950, 1025, 1100],
+    prices: [300, 350, 425, 500, 575, 650, 725, 800, 875, 950, 1025, 1100],
   },
 ];
 
