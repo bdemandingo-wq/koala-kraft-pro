@@ -144,15 +144,18 @@ export default function LeadsPage() {
   };
 
   const { data: leads = [], isLoading } = useQuery({
-    queryKey: ['leads'],
+    queryKey: ['leads', organization?.id],
     queryFn: async () => {
+      if (!organization?.id) return [];
       const { data, error } = await supabase
         .from('leads')
         .select('*')
+        .eq('organization_id', organization.id)
         .order('created_at', { ascending: false });
       if (error) throw error;
       return data as Lead[];
     },
+    enabled: !!organization?.id,
   });
 
   const createMutation = useMutation({
