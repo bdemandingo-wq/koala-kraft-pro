@@ -256,21 +256,24 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
         }
 
         if (!isDraft) {
-          try {
-            await supabase.functions.invoke('send-admin-booking-notification', {
-              body: {
-                customerName,
-                customerEmail,
-                serviceName: selectedService?.name,
-                scheduledAt: bookingData.scheduled_at,
-                totalAmount,
-                address,
-                organizationId: organizationId ?? undefined,
-              }
-            });
-          } catch (emailError) {
-            console.error('Failed to send admin notification:', emailError);
-          }
+          // Send admin notification (non-blocking, fail silently)
+          supabase.functions.invoke('send-admin-booking-notification', {
+            body: {
+              customerName,
+              customerEmail,
+              serviceName: selectedService?.name,
+              scheduledAt: bookingData.scheduled_at,
+              totalAmount,
+              address,
+              organizationId: organizationId ?? undefined,
+            }
+          }).then(({ error }) => {
+            if (error) {
+              console.log('Admin notification skipped (email settings may not be configured)');
+            }
+          }).catch((err) => {
+            console.log('Admin notification failed:', err);
+          });
 
           if (sendConfirmationEmail && customerEmail) {
             try {
