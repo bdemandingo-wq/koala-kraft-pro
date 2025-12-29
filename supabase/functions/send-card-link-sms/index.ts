@@ -19,7 +19,8 @@ interface CardLinkSmsRequest {
   phone: string;
   email: string;
   customerName: string;
-  organizationId: string; // REQUIRED - no fallback allowed
+  organizationId: string;
+  amount: number; // Amount in dollars
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -28,13 +29,13 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { phone, email, customerName, organizationId }: CardLinkSmsRequest = await req.json();
+    const { phone, email, customerName, organizationId, amount }: CardLinkSmsRequest = await req.json();
 
-    console.log("Creating card collection link SMS for:", { phone, customerName, organizationId });
+    console.log("Creating payment link SMS for:", { phone, customerName, organizationId, amount });
 
-    if (!phone || !customerName) {
+    if (!phone || !customerName || !amount) {
       return new Response(
-        JSON.stringify({ error: "Phone and customer name are required" }),
+        JSON.stringify({ error: "Phone, customer name, and amount are required" }),
         { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }
@@ -151,21 +152,38 @@ const handler = async (req: Request): Promise<Response> => {
       console.log("Created new Stripe customer (phone only):", customerId);
     }
 
-    // Create a Stripe Checkout session in setup mode to collect card details
+    // Convert amount to cents for Stripe
+    const amountInCents = Math.round(amount * 100);
+
+    // Create a Stripe Checkout session in payment mode to charge immediately
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
-      mode: "setup",
+      mode: "payment",
       payment_method_types: ["card"],
-      success_url: "https://tidywisecleaning.com/card-saved?success=true",
-      cancel_url: "https://tidywisecleaning.com/card-saved?cancelled=true",
+      line_items: [
+        {
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: `Cleaning Service for ${customerName}`,
+              description: `Payment for cleaning service from ${companyName}`,
+            },
+            unit_amount: amountInCents,
+          },
+          quantity: 1,
+        },
+      ],
+      success_url: "https://tidywisecleaning.com/payment-success?success=true",
+      cancel_url: "https://tidywisecleaning.com/payment-cancelled",
       metadata: {
         customerName: customerName,
-        purpose: "card_collection",
+        purpose: "cleaning_payment",
         organizationId: organizationId,
+        amount: amount.toString(),
       },
     });
 
-    console.log("Created Stripe checkout session for card collection:", session.id);
+    console.log("Created Stripe payment session:", session.id);
 
     // Format phone number
     let formattedPhone = phone.replace(/\D/g, '');
@@ -175,7 +193,7 @@ const handler = async (req: Request): Promise<Response> => {
     formattedPhone = '+' + formattedPhone;
 
     // Send SMS via OpenPhone
-    const smsMessage = `${companyName}: Please add your card on file for your upcoming cleaning. Click here: ${session.url}`;
+    const smsMessage = `${companyName}: Your cleaning service total is $${amount.toFixed(2)}. Pay securely here: ${session.url}`;
 
     const openPhoneResponse = await fetch('https://api.openphone.com/v1/messages', {
       method: 'POST',
@@ -202,12 +220,12 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const smsResult = await openPhoneResponse.json();
-    console.log("Card collection SMS sent successfully:", smsResult);
+    console.log("Payment link SMS sent successfully:", smsResult);
 
     return new Response(JSON.stringify({ 
       success: true, 
       sessionUrl: session.url,
-      message: "Card collection link sent via SMS successfully"
+      message: "Payment link sent via SMS successfully"
     }), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
