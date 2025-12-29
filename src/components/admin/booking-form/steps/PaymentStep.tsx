@@ -15,7 +15,9 @@ import {
   Send, 
   RefreshCw,
   User,
-  DollarSign
+  DollarSign,
+  Phone,
+  Mail
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -42,12 +44,21 @@ export function PaymentStep() {
     customerName,
     selectedService,
     totalAmount,
+    customerTab,
+    selectedCustomer,
+    newCustomer,
   } = useBookingForm();
 
   const { organizationId } = useOrgId();
 
   const [sendingLink, setSendingLink] = useState(false);
+  const [sendingLinkSms, setSendingLinkSms] = useState(false);
   const [chargeError, setChargeError] = useState<string | null>(null);
+
+  // Get customer phone
+  const customerPhone = customerTab === 'existing' && selectedCustomer 
+    ? selectedCustomer.phone 
+    : newCustomer.phone;
 
   const handleSendCardLink = async () => {
     if (!customerEmail || !customerName) {
@@ -61,11 +72,36 @@ export function PaymentStep() {
         body: { email: customerEmail, customerName, organizationId: organizationId ?? undefined }
       });
       if (error) throw error;
-      toast.success('Card collection link sent to customer');
+      toast.success('Card collection link sent via email');
     } catch (error: any) {
       toast.error(error.message || 'Failed to send card link');
     } finally {
       setSendingLink(false);
+    }
+  };
+
+  const handleSendCardLinkSms = async () => {
+    if (!customerPhone || !customerName) {
+      toast.error('Please enter customer phone number and name first');
+      return;
+    }
+
+    setSendingLinkSms(true);
+    try {
+      const { error } = await supabase.functions.invoke('send-card-link-sms', {
+        body: { 
+          phone: customerPhone, 
+          email: customerEmail,
+          customerName, 
+          organizationId: organizationId ?? undefined 
+        }
+      });
+      if (error) throw error;
+      toast.success('Card collection link sent via SMS');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to send card link via SMS');
+    } finally {
+      setSendingLinkSms(false);
     }
   };
 
@@ -251,19 +287,36 @@ export function PaymentStep() {
                 </div>
               </div>
 
-              <Button
-                variant="outline"
-                className="w-full h-11"
-                onClick={handleSendCardLink}
-                disabled={sendingLink}
-              >
-                {sendingLink ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Send className="mr-2 h-4 w-4" />
-                )}
-                Send Link to Customer
-              </Button>
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  variant="outline"
+                  className="h-11"
+                  onClick={handleSendCardLinkSms}
+                  disabled={sendingLinkSms || !customerPhone}
+                  title={!customerPhone ? "Customer phone required" : "Send card link via SMS"}
+                >
+                  {sendingLinkSms ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Phone className="mr-2 h-4 w-4" />
+                  )}
+                  Send via SMS
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-11"
+                  onClick={handleSendCardLink}
+                  disabled={sendingLink || !customerEmail}
+                  title={!customerEmail ? "Customer email required" : "Send card link via email"}
+                >
+                  {sendingLink ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Mail className="mr-2 h-4 w-4" />
+                  )}
+                  Send via Email
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-8 text-center">
