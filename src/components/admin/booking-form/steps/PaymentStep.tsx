@@ -309,6 +309,7 @@ export function PaymentStep() {
                 <StripeCardForm
                   email={customerEmail}
                   customerName={customerName}
+                  organizationId={organizationId || ''}
                   onCardSaved={handleCardSaved}
                   onError={(error) => setChargeError(error)}
                 />
