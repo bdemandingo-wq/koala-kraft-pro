@@ -30,6 +30,77 @@ interface BookingEmailRequest {
   organizationId: string; // REQUIRED - no fallback allowed
 }
 
+// Helper to send SMS via OpenPhone
+async function sendBookingSMS(
+  supabase: any,
+  organizationId: string,
+  customerPhone: string,
+  customerName: string,
+  appointmentDate: string,
+  appointmentTime: string,
+  serviceName: string,
+  companyName: string
+): Promise<void> {
+  try {
+    // Check if SMS is enabled for this org
+    const { data: smsSettings } = await supabase
+      .from('organization_sms_settings')
+      .select('sms_enabled, sms_booking_confirmation, openphone_api_key, openphone_phone_number_id')
+      .eq('organization_id', organizationId)
+      .maybeSingle();
+
+    if (!smsSettings?.sms_enabled || !smsSettings?.sms_booking_confirmation) {
+      console.log("[send-booking-email] SMS disabled or confirmation SMS disabled for org:", organizationId);
+      return;
+    }
+
+    if (!smsSettings.openphone_api_key || !smsSettings.openphone_phone_number_id) {
+      console.log("[send-booking-email] OpenPhone not configured for org:", organizationId);
+      return;
+    }
+
+    if (!customerPhone) {
+      console.log("[send-booking-email] No customer phone provided, skipping SMS");
+      return;
+    }
+
+    // Format phone number
+    let formattedPhone = customerPhone.replace(/\D/g, '');
+    if (formattedPhone.length === 10) {
+      formattedPhone = `+1${formattedPhone}`;
+    } else if (!formattedPhone.startsWith('+')) {
+      formattedPhone = `+${formattedPhone}`;
+    }
+
+    const message = `Hi ${customerName}! Your ${serviceName} booking with ${companyName} is confirmed for ${appointmentDate} at ${appointmentTime}. We look forward to serving you!`;
+
+    console.log(`[send-booking-email] Sending SMS to ${formattedPhone}`);
+
+    const response = await fetch("https://api.openphone.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Authorization": smsSettings.openphone_api_key,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: smsSettings.openphone_phone_number_id,
+        to: [formattedPhone],
+        content: message,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`[send-booking-email] SMS failed: ${response.status} - ${errorText}`);
+    } else {
+      console.log("[send-booking-email] SMS sent successfully");
+    }
+  } catch (smsError) {
+    console.error("[send-booking-email] SMS error:", smsError);
+    // Don't throw - SMS is secondary to email
+  }
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -347,6 +418,21 @@ const handler = async (req: Request): Promise<Response> => {
     } catch (adminError) {
       console.error("Failed to send admin notification:", adminError);
       // Don't throw - admin notification is secondary
+    }
+
+    // Send SMS confirmation if enabled
+    if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+      await sendBookingSMS(
+        supabase,
+        booking.organizationId,
+        booking.customerPhone || "",
+        customerName,
+        booking.appointmentDate || "",
+        booking.appointmentTime || "",
+        booking.serviceName || "Cleaning",
+        companyName
+      );
     }
 
     return new Response(JSON.stringify({ success: true, emailId: customerData?.id }), {

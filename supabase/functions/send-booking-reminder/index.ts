@@ -378,6 +378,50 @@ const handler = async (req: Request): Promise<Response> => {
 
           sentReminders.push(`${booking.booking_number} (${window.label})`);
           console.log(`Sent ${window.label} reminder for booking #${booking.booking_number}`);
+
+          // Send SMS reminder if enabled
+          try {
+            const { data: smsSettings } = await supabase
+              .from('organization_sms_settings')
+              .select('sms_enabled, sms_appointment_reminder, openphone_api_key, openphone_phone_number_id')
+              .eq('organization_id', organizationId)
+              .maybeSingle();
+
+            if (smsSettings?.sms_enabled && smsSettings?.sms_appointment_reminder && 
+                smsSettings?.openphone_api_key && smsSettings?.openphone_phone_number_id &&
+                booking.customer?.phone) {
+              
+              let formattedPhone = booking.customer.phone.replace(/\D/g, '');
+              if (formattedPhone.length === 10) {
+                formattedPhone = `+1${formattedPhone}`;
+              } else if (!formattedPhone.startsWith('+')) {
+                formattedPhone = `+${formattedPhone}`;
+              }
+
+              const smsMessage = `Reminder: Your ${serviceName} with ${companyName} is in ${window.label}! ${formattedDate} at ${formattedTime}. See you soon!`;
+
+              const smsResponse = await fetch("https://api.openphone.com/v1/messages", {
+                method: "POST",
+                headers: {
+                  "Authorization": smsSettings.openphone_api_key,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  from: smsSettings.openphone_phone_number_id,
+                  to: [formattedPhone],
+                  content: smsMessage,
+                }),
+              });
+
+              if (smsResponse.ok) {
+                console.log(`SMS reminder sent for booking #${booking.booking_number}`);
+              } else {
+                console.error(`SMS reminder failed for booking #${booking.booking_number}`);
+              }
+            }
+          } catch (smsError) {
+            console.error(`SMS reminder error for booking #${booking.booking_number}:`, smsError);
+          }
         } catch (emailError: any) {
           console.error(`Failed to send reminder for booking #${booking.booking_number}:`, emailError);
         }
