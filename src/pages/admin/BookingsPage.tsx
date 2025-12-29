@@ -51,7 +51,7 @@ import {
   Filter,
   CalendarRange,
   X,
-  Mail,
+  Phone,
   Bell,
   Settings2,
   Star
@@ -505,8 +505,8 @@ export default function BookingsPage() {
   };
 
   const handleSendReminder = async (booking: BookingWithDetails) => {
-    if (!booking.customer?.email) {
-      toast({ title: "Error", description: "No customer email found", variant: "destructive" });
+    if (!booking.customer?.phone) {
+      toast({ title: "Error", description: "No customer phone number found", variant: "destructive" });
       return;
     }
 
@@ -516,17 +516,18 @@ export default function BookingsPage() {
       const { error } = await supabase.functions.invoke('send-booking-reminder', {
         body: {
           bookingId: booking.id,
-          customerEmail: booking.customer.email,
+          customerPhone: booking.customer.phone,
           customerName: `${booking.customer.first_name} ${booking.customer.last_name}`,
           serviceName: booking.service?.name || 'Cleaning Service',
           scheduledAt: booking.scheduled_at,
           address: booking.address || '',
           totalAmount: booking.total_amount,
+          organizationId: organization?.id,
         }
       });
 
       if (error) throw error;
-      toast({ title: "Reminder Sent", description: `Email sent to ${booking.customer.email}` });
+      toast({ title: "Reminder Sent", description: `SMS sent to ${booking.customer.phone}` });
     } catch (error: any) {
       console.error('Failed to send reminder:', error);
       toast({ title: "Error", description: error.message || "Failed to send reminder", variant: "destructive" });
@@ -536,8 +537,8 @@ export default function BookingsPage() {
   };
 
   const handleSendCleanerNotification = async (booking: BookingWithDetails) => {
-    if (!booking.staff?.email) {
-      toast({ title: "Error", description: "No cleaner assigned or cleaner has no email", variant: "destructive" });
+    if (!booking.staff?.phone) {
+      toast({ title: "Error", description: "No cleaner assigned or cleaner has no phone number", variant: "destructive" });
       return;
     }
 
@@ -552,7 +553,7 @@ export default function BookingsPage() {
       const { error } = await supabase.functions.invoke('send-cleaner-notification', {
         body: {
           cleanerName: booking.staff.name,
-          cleanerEmail: booking.staff.email,
+          cleanerPhone: booking.staff.phone,
           customerName: booking.customer ? `${booking.customer.first_name} ${booking.customer.last_name}` : 'Customer',
           customerPhone: booking.customer?.phone || 'N/A',
           serviceName: booking.service?.name || 'Cleaning Service',
@@ -560,11 +561,12 @@ export default function BookingsPage() {
           appointmentTime: format(scheduledDate, 'h:mm a'),
           address: fullAddress || 'Address not provided',
           bookingNumber: booking.booking_number,
+          organizationId: organization?.id,
         }
       });
 
       if (error) throw error;
-      toast({ title: "Notification Sent", description: `Email sent to ${booking.staff.name} (${booking.staff.email})` });
+      toast({ title: "Notification Sent", description: `SMS sent to ${booking.staff.name} (${booking.staff.phone})` });
     } catch (error: any) {
       console.error('Failed to send cleaner notification:', error);
       toast({ title: "Error", description: error.message || "Failed to send cleaner notification", variant: "destructive" });
@@ -577,10 +579,10 @@ export default function BookingsPage() {
     if (selectedBookings.size === 0) return;
     
     const selectedBookingsList = filteredBookings.filter(b => selectedBookings.has(b.id));
-    const bookingsWithCleaners = selectedBookingsList.filter(b => b.staff?.email);
+    const bookingsWithCleaners = selectedBookingsList.filter(b => b.staff?.phone);
     
     if (bookingsWithCleaners.length === 0) {
-      toast({ title: "No Cleaners to Notify", description: "None of the selected bookings have assigned cleaners with email addresses.", variant: "destructive" });
+      toast({ title: "No Cleaners to Notify", description: "None of the selected bookings have assigned cleaners with phone numbers.", variant: "destructive" });
       return;
     }
 
@@ -599,7 +601,7 @@ export default function BookingsPage() {
           const { error } = await supabase.functions.invoke('send-cleaner-notification', {
             body: {
               cleanerName: booking.staff!.name,
-              cleanerEmail: booking.staff!.email,
+              cleanerPhone: booking.staff!.phone,
               customerName: booking.customer ? `${booking.customer.first_name} ${booking.customer.last_name}` : 'Customer',
               customerPhone: booking.customer?.phone || 'N/A',
               serviceName: booking.service?.name || 'Cleaning Service',
@@ -607,6 +609,7 @@ export default function BookingsPage() {
               appointmentTime: format(scheduledDate, 'h:mm a'),
               address: fullAddress || 'Address not provided',
               bookingNumber: booking.booking_number,
+              organizationId: organization?.id,
             }
           });
 
@@ -621,7 +624,7 @@ export default function BookingsPage() {
       if (successCount > 0) {
         toast({ 
           title: "Notifications Sent", 
-          description: `Successfully notified ${successCount} cleaner(s)${failCount > 0 ? `. ${failCount} failed.` : '.'}`
+          description: `Successfully notified ${successCount} cleaner(s) via SMS${failCount > 0 ? `. ${failCount} failed.` : '.'}`
         });
       } else {
         toast({ title: "Error", description: "Failed to send notifications", variant: "destructive" });
@@ -987,7 +990,7 @@ export default function BookingsPage() {
                 onClick={handleBulkNotifyCleaners}
                 disabled={bulkNotifyingCleaners}
               >
-                {bulkNotifyingCleaners ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
+                {bulkNotifyingCleaners ? <Loader2 className="w-4 h-4 animate-spin" /> : <Phone className="w-4 h-4" />}
                 Notify Cleaners ({selectedBookings.size})
               </Button>
               <Button 
@@ -1143,7 +1146,7 @@ export default function BookingsPage() {
                               {sendingReminder === booking.id ? (
                                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
                               ) : (
-                                <Mail className="w-3.5 h-3.5" />
+                                <Phone className="w-3.5 h-3.5" />
                               )}
                             </Button>
                           )}
@@ -1262,24 +1265,24 @@ export default function BookingsPage() {
                             <DropdownMenuItem 
                               className="gap-2 cursor-pointer text-blue-600" 
                               onClick={() => handleSendReminder(booking)}
-                              disabled={sendingReminder === booking.id || !booking.customer?.email}
+                              disabled={sendingReminder === booking.id || !booking.customer?.phone}
                             >
                               {sendingReminder === booking.id ? (
                                 <Loader2 className="w-4 h-4 animate-spin" />
                               ) : (
-                                <Mail className="w-4 h-4" />
+                                <Phone className="w-4 h-4" />
                               )}
                               Send Customer Reminder
                             </DropdownMenuItem>
                             <DropdownMenuItem 
                               className="gap-2 cursor-pointer text-purple-600" 
                               onClick={() => handleSendCleanerNotification(booking)}
-                              disabled={sendingCleanerNotification === booking.id || !booking.staff?.email}
+                              disabled={sendingCleanerNotification === booking.id || !booking.staff?.phone}
                             >
                               {sendingCleanerNotification === booking.id ? (
                                 <Loader2 className="w-4 h-4 animate-spin" />
                               ) : (
-                                <Mail className="w-4 h-4" />
+                                <Phone className="w-4 h-4" />
                               )}
                               Notify Cleaner
                             </DropdownMenuItem>
