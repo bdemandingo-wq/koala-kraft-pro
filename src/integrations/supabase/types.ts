@@ -1218,6 +1218,47 @@ export type Database = {
           },
         ]
       }
+      organization_email_settings: {
+        Row: {
+          created_at: string
+          email_footer: string | null
+          from_email: string
+          from_name: string
+          id: string
+          organization_id: string
+          reply_to_email: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email_footer?: string | null
+          from_email: string
+          from_name: string
+          id?: string
+          organization_id: string
+          reply_to_email?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email_footer?: string | null
+          from_email?: string
+          from_name?: string
+          id?: string
+          organization_id?: string
+          reply_to_email?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_email_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           created_at: string
