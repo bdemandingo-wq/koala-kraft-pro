@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { BookingWithDetails } from '@/hooks/useBookings';
 import { cn } from '@/lib/utils';
-import { Clock, User, ChevronRight, Mail, Loader2, Edit, MapPin } from 'lucide-react';
+import { Clock, User, ChevronRight, Phone, Loader2, Edit, MapPin } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import { EditCustomerDialog } from './EditCustomerDialog';
 import { AddBookingDialog } from './AddBookingDialog';
 import { useTestMode } from '@/contexts/TestModeContext';
+import { useOrganization } from '@/contexts/OrganizationContext';
 
 interface UpcomingBookingsProps {
   bookings: BookingWithDetails[];
@@ -52,6 +53,7 @@ export function UpcomingBookings({ bookings }: UpcomingBookingsProps) {
   const [editingCustomer, setEditingCustomer] = useState<BookingWithDetails['customer'] | null>(null);
   const [editingBooking, setEditingBooking] = useState<BookingWithDetails | null>(null);
   const { isTestMode, maskName, maskEmail, maskAddress, maskAmount } = useTestMode();
+  const { organization } = useOrganization();
 
   const upcomingBookings = useMemo(() => {
     const today = new Date();
@@ -76,6 +78,11 @@ export function UpcomingBookings({ bookings }: UpcomingBookingsProps) {
       return;
     }
 
+    if (!booking.staff.phone) {
+      toast.error('Cleaner has no phone number');
+      return;
+    }
+
     setSendingEmail(true);
     try {
       const customerName = booking.customer 
@@ -85,7 +92,7 @@ export function UpcomingBookings({ bookings }: UpcomingBookingsProps) {
       const { data, error } = await supabase.functions.invoke('send-cleaner-notification', {
         body: {
           cleanerName: booking.staff.name,
-          cleanerEmail: booking.staff.email,
+          cleanerPhone: booking.staff.phone,
           customerName,
           customerPhone: booking.customer?.phone || 'Not provided',
           serviceName: booking.service?.name || 'Cleaning Service',
@@ -93,17 +100,18 @@ export function UpcomingBookings({ bookings }: UpcomingBookingsProps) {
           appointmentTime: format(new Date(booking.scheduled_at), 'h:mm a'),
           address: booking.address || 'Address not provided',
           bookingNumber: booking.booking_number,
+          organizationId: organization?.id,
         },
       });
 
       if (error) {
-        console.error('Email error:', error);
+        console.error('SMS error:', error);
         toast.error('Failed to send notification: ' + (error.message || 'Unknown error'));
       } else if (data?.error) {
-        console.error('Email error:', data.error);
+        console.error('SMS error:', data.error);
         toast.error('Failed to send notification: ' + data.error);
       } else {
-        toast.success(`Notification sent to ${booking.staff.name}`);
+        toast.success(`SMS sent to ${booking.staff.name}`);
       }
     } catch (err: any) {
       console.error('Failed to send notification:', err);
@@ -297,12 +305,12 @@ export function UpcomingBookings({ bookings }: UpcomingBookingsProps) {
                     variant="outline" 
                     className="gap-2"
                     onClick={() => sendCleanerNotification(selectedBooking)}
-                    disabled={sendingEmail || !selectedBooking.staff}
+                    disabled={sendingEmail || !selectedBooking.staff?.phone}
                   >
                     {sendingEmail ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
-                      <Mail className="w-4 h-4" />
+                      <Phone className="w-4 h-4" />
                     )}
                     Notify Cleaner
                   </Button>
