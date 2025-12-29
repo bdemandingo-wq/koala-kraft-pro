@@ -74,7 +74,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { DateRange } from 'react-day-picker';
 import { useTestMode } from '@/contexts/TestModeContext';
-import { useOrgId } from '@/hooks/useOrgId';
 
 const statusConfig: Record<string, { bg: string; text: string; dot: string }> = {
   pending: { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500' },
@@ -146,7 +145,6 @@ export default function BookingsPage() {
   const updateBooking = useUpdateBooking();
   const deleteBooking = useDeleteBooking();
   const { isTestMode, maskName, maskEmail, maskAmount, maskAddress } = useTestMode();
-  const { organizationId } = useOrgId();
 
   // Sort bookings: upcoming first (chronologically), then past
   const sortedBookings = useMemo(() => {
@@ -500,7 +498,6 @@ export default function BookingsPage() {
           scheduledAt: booking.scheduled_at,
           address: booking.address || '',
           totalAmount: booking.total_amount,
-          organizationId: organizationId ?? undefined,
         }
       });
 
@@ -539,7 +536,6 @@ export default function BookingsPage() {
           appointmentTime: format(scheduledDate, 'h:mm a'),
           address: fullAddress || 'Address not provided',
           bookingNumber: booking.booking_number,
-          organizationId: organizationId ?? undefined,
         }
       });
 
@@ -587,7 +583,6 @@ export default function BookingsPage() {
               appointmentTime: format(scheduledDate, 'h:mm a'),
               address: fullAddress || 'Address not provided',
               bookingNumber: booking.booking_number,
-              organizationId: organizationId ?? undefined,
             }
           });
 
@@ -666,7 +661,6 @@ export default function BookingsPage() {
             potential_earnings: potentialEarnings,
           },
           companyName: settings?.company_name || 'Your Cleaning Company',
-          organizationId: organizationId ?? undefined,
         }
       });
 
@@ -748,7 +742,6 @@ export default function BookingsPage() {
           customerName: `${booking.customer.first_name} ${booking.customer.last_name}`,
           serviceName: booking.service?.name || 'Cleaning Service',
           googleReviewUrl: null,
-          organizationId: organizationId ?? undefined,
         }
       });
 

@@ -35,7 +35,6 @@ import { toast } from 'sonner';
 import { format, addDays } from 'date-fns';
 import { useCustomers, useServices } from '@/hooks/useBookings';
 import { useTestMode } from '@/contexts/TestModeContext';
-import { useOrgId } from '@/hooks/useOrgId';
 
 interface Quote {
   id: string;
@@ -70,7 +69,6 @@ export default function QuotesPage() {
   const [sendingInvoice, setSendingInvoice] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const { isTestMode, maskName, maskEmail, maskAmount } = useTestMode();
-  const { organizationId } = useOrgId();
 
   const { data: customers = [] } = useCustomers();
   const { data: services = [] } = useServices();
@@ -156,7 +154,6 @@ export default function QuotesPage() {
           address: quote.address,
           validUntil: quote.valid_until ? format(new Date(quote.valid_until), 'MMM d, yyyy') : undefined,
           notes: quote.notes,
-          organizationId: organizationId ?? undefined,
         },
       });
 

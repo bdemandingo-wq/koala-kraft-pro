@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { useStaff, useServices } from '@/hooks/useBookings';
-import { useOrgId } from '@/hooks/useOrgId';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -68,7 +67,6 @@ export default function StaffPage() {
   const { data: services = [] } = useServices();
   const queryClient = useQueryClient();
   const { isTestMode, maskName, maskEmail, maskPhone } = useTestMode();
-  const { organizationId } = useOrgId();
 
   const filteredStaff = staff.filter((s) =>
     s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -105,7 +103,6 @@ export default function StaffPage() {
         body: {
           staffId: member.id,
           redirectUrl: `${window.location.origin}/staff/reset-password`,
-          organizationId: organizationId ?? undefined,
         },
       });
 

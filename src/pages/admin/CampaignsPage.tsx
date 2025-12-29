@@ -17,7 +17,6 @@ import { Mail, Send, Clock, CheckCircle, Users, Plus, Play, Loader2, MailOpen, T
 import { format } from 'date-fns';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { useOrgId } from '@/hooks/useOrgId';
 
 interface Campaign {
   id: string;
@@ -32,7 +31,6 @@ interface Campaign {
 
 export default function CampaignsPage() {
   const queryClient = useQueryClient();
-  const { organizationId } = useOrgId();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isManualEmailDialogOpen, setIsManualEmailDialogOpen] = useState(false);
   const [isPreviewDialogOpen, setIsPreviewDialogOpen] = useState(false);
@@ -128,7 +126,7 @@ export default function CampaignsPage() {
   const runCampaign = useMutation({
     mutationFn: async (campaignId: string) => {
       const { data, error } = await supabase.functions.invoke('send-followup-campaign', {
-        body: { campaignId, organizationId: organizationId ?? undefined }
+        body: { campaignId }
       });
       if (error) throw error;
       return data;
@@ -146,7 +144,7 @@ export default function CampaignsPage() {
   const sendToManualEmails = useMutation({
     mutationFn: async ({ campaignId, emails }: { campaignId: string; emails: string[] }) => {
       const { data, error } = await supabase.functions.invoke('send-followup-campaign', {
-        body: { campaignId, customEmails: emails, organizationId: organizationId ?? undefined }
+        body: { campaignId, customEmails: emails }
       });
       if (error) throw error;
       return data;
