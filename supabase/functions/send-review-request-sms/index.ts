@@ -96,12 +96,14 @@ const handler = async (req: Request): Promise<Response> => {
     // Get the review page URL
     const reviewPageUrl = `https://b5fbe592-e63a-4ccf-8d0f-0393049d0881.lovableproject.com/review/${token}`;
 
-    // Get staff_id from booking to associate review with cleaner
+    // Get staff_id and staff name from booking to associate review with cleaner
     const { data: bookingData } = await supabase
       .from("bookings")
-      .select("staff_id")
+      .select("staff_id, staff:staff_id(name)")
       .eq("id", bookingId)
       .single();
+
+    const cleanerName = (bookingData?.staff as any)?.name || 'your cleaner';
 
     // Create review request record
     const { error: insertError } = await supabase
@@ -128,6 +130,7 @@ const handler = async (req: Request): Promise<Response> => {
     const message = template
       .replace(/{customer_name}/g, customerName)
       .replace(/{company_name}/g, companyName)
+      .replace(/{cleaner_name}/g, cleanerName)
       .replace(/{service_name}/g, serviceName)
       .replace(/{review_link}/g, reviewPageUrl);
 
