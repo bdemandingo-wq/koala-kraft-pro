@@ -562,8 +562,49 @@ export default function SettingsPage() {
               <Separator />
 
               {/* SMS Template Section */}
-              <div className="space-y-2">
-                <Label htmlFor="reviewSmsTemplate">Review Request SMS Template</Label>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="reviewSmsTemplate">Review Request SMS Template</Label>
+                </div>
+                
+                {/* Template Presets */}
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground">Quick Templates:</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => updateField('review_sms_template', 
+                        `Hi {customer_name}, love to hear you had a 5-Star experience! Would you be opposed to $10 off your booking? Just click the link I'm sending now: {review_link} - Leave us a 5-Star review within 30 mins and send me a screenshot. I'll take $10 off your total! - {company_name}`
+                      )}
+                      className="p-3 text-left border rounded-lg hover:bg-muted/50 transition-colors group"
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-lg">💰</span>
+                        <span className="font-medium text-sm">$10 Off Method</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Offer $10 discount for a 5-star review with screenshot proof within 30 mins
+                      </p>
+                    </button>
+                    
+                    <button
+                      type="button"
+                      onClick={() => updateField('review_sms_template', 
+                        `Hi {customer_name}, love to hear you had a 5-Star experience! We're having an office competition - {cleaner_name} is almost in 1st place! It would make their day if you left a 5-Star review: {review_link} - Please mention {cleaner_name} in your review and send us a screenshot! - {company_name}`
+                      )}
+                      className="p-3 text-left border rounded-lg hover:bg-muted/50 transition-colors group"
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-lg">🏆</span>
+                        <span className="font-medium text-sm">Office Competition Method</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Frame as team competition to encourage mentioning cleaner by name
+                      </p>
+                    </button>
+                  </div>
+                </div>
+
                 <textarea
                   id="reviewSmsTemplate"
                   className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -577,6 +618,7 @@ export default function SettingsPage() {
                 <div className="flex flex-wrap gap-2 mt-1">
                   <code className="text-xs bg-muted px-2 py-1 rounded">{'{customer_name}'}</code>
                   <code className="text-xs bg-muted px-2 py-1 rounded">{'{company_name}'}</code>
+                  <code className="text-xs bg-muted px-2 py-1 rounded">{'{cleaner_name}'}</code>
                   <code className="text-xs bg-muted px-2 py-1 rounded">{'{service_name}'}</code>
                   <code className="text-xs bg-muted px-2 py-1 rounded">{'{review_link}'}</code>
                 </div>
