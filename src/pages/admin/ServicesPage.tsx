@@ -56,10 +56,12 @@ const serviceIcons: Record<string, React.ReactNode> = {
 
 function EditablePricingTable({ 
   services, 
-  onUpdatePrice 
+  onUpdatePrice,
+  onDeleteService
 }: { 
   services: CleaningService[];
   onUpdatePrice: (serviceId: string, priceIndex: number, newPrice: number) => void;
+  onDeleteService: (serviceId: string) => void;
 }) {
   const [editingCell, setEditingCell] = useState<{serviceId: string; priceIndex: number} | null>(null);
   const [editValue, setEditValue] = useState("");
@@ -99,11 +101,12 @@ function EditablePricingTable({
                 {range.label}
               </TableHead>
             ))}
+            <TableHead className="text-center w-16">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {services.map((service) => (
-            <TableRow key={service.id}>
+            <TableRow key={service.id} className="group">
               <TableCell className="sticky left-0 bg-background font-medium">
                 <div className="flex items-center gap-2">
                   <div 
@@ -137,11 +140,21 @@ function EditablePricingTable({
                   )}
                 </TableCell>
               ))}
+              <TableCell className="text-center">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 opacity-0 group-hover:opacity-100 text-destructive hover:text-destructive hover:bg-destructive/10"
+                  onClick={() => onDeleteService(service.id)}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
-      <p className="text-xs text-muted-foreground mt-2">Click any price to edit. Changes are saved locally.</p>
+      <p className="text-xs text-muted-foreground mt-2">Click any price to edit. Hover over a row to see the delete button. Changes are saved locally and reflected in the booking form.</p>
     </div>
   );
 }
@@ -456,6 +469,11 @@ export default function ServicesPage() {
     setExtras(prev => [...prev, extra]);
   };
 
+  const handleDeleteService = (serviceId: string) => {
+    setServices(prev => prev.filter(service => service.id !== serviceId));
+    toast.success("Service deleted - this will be reflected in the booking form");
+  };
+
   const handleUpdateBedroomPrice = (index: number, newPrice: number) => {
     setBedroomPricing(prev => prev.map((item, i) => 
       i === index ? { ...item, basePrice: newPrice } : item
@@ -486,6 +504,7 @@ export default function ServicesPage() {
               <EditablePricingTable 
                 services={services} 
                 onUpdatePrice={handleUpdatePrice}
+                onDeleteService={handleDeleteService}
               />
             </CardContent>
           </Card>

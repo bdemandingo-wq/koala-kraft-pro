@@ -18,7 +18,8 @@ import {
   MessageSquare,
   Check,
   Sparkles,
-  AlertCircle
+  AlertCircle,
+  GripVertical
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -33,14 +34,116 @@ import { PropertyStep } from './steps/PropertyStep';
 import { ServiceStep } from './steps/ServiceStep';
 import { ScheduleStep } from './steps/ScheduleStep';
 import { PaymentStep } from './steps/PaymentStep';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  horizontalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
-const STEPS = [
+const DEFAULT_STEPS = [
   { id: 'customer', label: 'Customer', icon: User },
   { id: 'property', label: 'Property', icon: MapPin },
   { id: 'service', label: 'Service', icon: FileText },
   { id: 'schedule', label: 'Schedule', icon: Calendar },
   { id: 'payment', label: 'Payment', icon: CreditCard },
 ];
+
+const iconMap: Record<string, typeof User> = {
+  User, MapPin, FileText, Calendar, CreditCard
+};
+
+interface StepItem {
+  id: string;
+  label: string;
+  icon: typeof User;
+}
+
+interface SortableStepProps {
+  step: StepItem;
+  index: number;
+  currentStep: number;
+  totalSteps: number;
+  onClick: () => void;
+}
+
+function SortableStep({ step, index, currentStep, totalSteps, onClick }: SortableStepProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: step.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  const Icon = step.icon;
+  const isActive = index === currentStep;
+  const isCompleted = index < currentStep;
+
+  return (
+    <div ref={setNodeRef} style={style} className="flex items-center">
+      <div className="flex items-center group">
+        <button
+          {...attributes}
+          {...listeners}
+          className={cn(
+            "p-1 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity",
+            isDragging && "opacity-100"
+          )}
+        >
+          <GripVertical className="w-3 h-3 text-muted-foreground" />
+        </button>
+        <button
+          onClick={onClick}
+          className={cn(
+            "flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-200",
+            isActive && "bg-primary text-primary-foreground shadow-lg",
+            isCompleted && "bg-primary/10 text-primary",
+            !isActive && !isCompleted && "text-muted-foreground hover:bg-secondary/50"
+          )}
+        >
+          <div className={cn(
+            "w-8 h-8 rounded-full flex items-center justify-center transition-all",
+            isActive && "bg-primary-foreground/20",
+            isCompleted && "bg-primary text-primary-foreground",
+            !isActive && !isCompleted && "bg-secondary"
+          )}>
+            {isCompleted ? (
+              <Check className="w-4 h-4" />
+            ) : (
+              <Icon className="w-4 h-4" />
+            )}
+          </div>
+          <span className="hidden md:block text-sm font-medium">{step.label}</span>
+        </button>
+      </div>
+      {index < totalSteps - 1 && (
+        <div className={cn(
+          "w-8 lg:w-12 h-0.5 mx-1",
+          index < currentStep ? "bg-primary" : "bg-border"
+        )} />
+      )}
+    </div>
+  );
+}
 
 interface BookingStepperProps {
   booking?: BookingWithDetails | null;
@@ -52,6 +155,59 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
   const [currentStep, setCurrentStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [savingDraft, setSavingDraft] = useState(false);
+  const [steps, setSteps] = useState<StepItem[]>(DEFAULT_STEPS);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Load step order from localStorage
+  useEffect(() => {
+    const savedOrder = localStorage.getItem('tidywise_booking_steps_order');
+    if (savedOrder) {
+      try {
+        const stepIds: string[] = JSON.parse(savedOrder);
+        const reordered = stepIds
+          .map(id => DEFAULT_STEPS.find(s => s.id === id))
+          .filter((s): s is StepItem => s !== undefined);
+        
+        // Add any missing steps
+        DEFAULT_STEPS.forEach(step => {
+          if (!reordered.find(r => r.id === step.id)) {
+            reordered.push(step);
+          }
+        });
+        
+        setSteps(reordered);
+      } catch (e) {
+        console.error('Error parsing step order:', e);
+      }
+    }
+  }, []);
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setSteps((items) => {
+        const oldIndex = items.findIndex(item => item.id === active.id);
+        const newIndex = items.findIndex(item => item.id === over.id);
+        const newOrder = arrayMove(items, oldIndex, newIndex);
+        
+        // Save to localStorage
+        localStorage.setItem('tidywise_booking_steps_order', JSON.stringify(newOrder.map(s => s.id)));
+        
+        return newOrder;
+      });
+    }
+  };
 
   const { organizationId } = useOrgId();
 
@@ -95,9 +251,9 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
     resetForm,
   } = useBookingForm();
 
-  const validateStep = (step: number): boolean => {
-    switch (step) {
-      case 0: // Customer
+  const validateStep = (stepId: string): boolean => {
+    switch (stepId) {
+      case 'customer':
         if (customerTab === 'existing' && !selectedCustomerId) {
           toast.error('Please select a customer');
           return false;
@@ -107,30 +263,30 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
           return false;
         }
         return true;
-      case 1: // Property
-        return true; // Optional
-      case 2: // Service
+      case 'property':
+        return true;
+      case 'service':
         if (!selectedServiceId) {
           toast.error('Please select a service');
           return false;
         }
         return true;
-      case 3: // Schedule
+      case 'schedule':
         if (!selectedDate || !selectedTime) {
           toast.error('Please select a date and time');
           return false;
         }
         return true;
-      case 4: // Payment
-        return true; // Optional
+      case 'payment':
+        return true;
       default:
         return true;
     }
   };
 
   const handleNext = () => {
-    if (validateStep(currentStep)) {
-      setCurrentStep(prev => Math.min(prev + 1, STEPS.length - 1));
+    if (validateStep(steps[currentStep].id)) {
+      setCurrentStep(prev => Math.min(prev + 1, steps.length - 1));
     }
   };
 
@@ -138,10 +294,9 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
     setCurrentStep(prev => Math.max(prev - 1, 0));
   };
 
-  const goToStep = (step: number) => {
-    // Allow going back to any step, but forward only if current is valid
-    if (step < currentStep || validateStep(currentStep)) {
-      setCurrentStep(step);
+  const goToStep = (stepIndex: number) => {
+    if (stepIndex < currentStep || validateStep(steps[currentStep].id)) {
+      setCurrentStep(stepIndex);
     }
   };
 
@@ -219,9 +374,9 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
   };
 
   const handleSubmit = async (isDraft: boolean = false) => {
-    // Final validation
-    for (let i = 0; i < STEPS.length; i++) {
-      if (!validateStep(i) && !isDraft) {
+    // Final validation - validate all steps
+    for (let i = 0; i < steps.length; i++) {
+      if (!validateStep(steps[i].id) && !isDraft) {
         setCurrentStep(i);
         return;
       }
@@ -256,7 +411,6 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
         }
 
         if (!isDraft) {
-          // Pre-format date/time for admin notification to avoid timezone issues
           const adminScheduledDate = new Date(selectedDate!);
           const [adminTime, adminPeriod] = selectedTime.split(' ');
           const [adminHours, adminMinutes] = adminTime.split(':').map(Number);
@@ -268,7 +422,6 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
           const formattedDateStr = format(adminScheduledDate, 'MMMM d, yyyy');
           const formattedTimeStr = format(adminScheduledDate, 'h:mm a');
 
-          // Send admin SMS notification (non-blocking, fail silently)
           supabase.functions.invoke('send-admin-sms-notification', {
             body: {
               customerName,
@@ -288,12 +441,10 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
             console.log('Admin SMS notification failed:', err);
           });
 
-          // Send confirmation SMS to customer if enabled
           if (sendConfirmationSms) {
             const customerPhone = customerTab === 'existing' && selectedCustomer ? selectedCustomer.phone : newCustomer.phone;
             if (customerPhone) {
               try {
-                // Parse time correctly: convert 12-hour format to 24-hour
                 const [time, period] = selectedTime.split(' ');
                 const [hours, minutes] = time.split(':').map(Number);
                 let hour24 = hours;
@@ -347,12 +498,13 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
   };
 
   const renderStepContent = () => {
-    switch (currentStep) {
-      case 0: return <CustomerStep />;
-      case 1: return <PropertyStep />;
-      case 2: return <ServiceStep />;
-      case 3: return <ScheduleStep />;
-      case 4: return <PaymentStep />;
+    const stepId = steps[currentStep]?.id;
+    switch (stepId) {
+      case 'customer': return <CustomerStep />;
+      case 'property': return <PropertyStep />;
+      case 'service': return <ServiceStep />;
+      case 'schedule': return <ScheduleStep />;
+      case 'payment': return <PaymentStep />;
       default: return null;
     }
   };
@@ -362,46 +514,30 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Step Indicator */}
-        <div className="flex items-center justify-between mb-6 px-1">
-          {STEPS.map((step, index) => {
-            const Icon = step.icon;
-            const isActive = index === currentStep;
-            const isCompleted = index < currentStep;
-            
-            return (
-              <div key={step.id} className="flex items-center">
-                <button
-                  onClick={() => goToStep(index)}
-                  className={cn(
-                    "flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-200",
-                    isActive && "bg-primary text-primary-foreground shadow-lg",
-                    isCompleted && "bg-primary/10 text-primary",
-                    !isActive && !isCompleted && "text-muted-foreground hover:bg-secondary/50"
-                  )}
-                >
-                  <div className={cn(
-                    "w-8 h-8 rounded-full flex items-center justify-center transition-all",
-                    isActive && "bg-primary-foreground/20",
-                    isCompleted && "bg-primary text-primary-foreground",
-                    !isActive && !isCompleted && "bg-secondary"
-                  )}>
-                    {isCompleted ? (
-                      <Check className="w-4 h-4" />
-                    ) : (
-                      <Icon className="w-4 h-4" />
-                    )}
-                  </div>
-                  <span className="hidden md:block text-sm font-medium">{step.label}</span>
-                </button>
-                {index < STEPS.length - 1 && (
-                  <div className={cn(
-                    "w-8 lg:w-12 h-0.5 mx-1",
-                    index < currentStep ? "bg-primary" : "bg-border"
-                  )} />
-                )}
+        <div className="flex items-center justify-between mb-6 px-1 overflow-x-auto">
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={steps.map(s => s.id)}
+              strategy={horizontalListSortingStrategy}
+            >
+              <div className="flex items-center">
+                {steps.map((step, index) => (
+                  <SortableStep
+                    key={step.id}
+                    step={step}
+                    index={index}
+                    currentStep={currentStep}
+                    totalSteps={steps.length}
+                    onClick={() => goToStep(index)}
+                  />
+                ))}
               </div>
-            );
-          })}
+            </SortableContext>
+          </DndContext>
         </div>
 
         {/* Step Content */}
@@ -422,7 +558,7 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
           </Button>
 
           <div className="flex items-center gap-3">
-            {currentStep === STEPS.length - 1 ? (
+            {currentStep === steps.length - 1 ? (
               <>
                 <div className="flex items-center gap-2 mr-4 p-2 bg-secondary/30 rounded-lg">
                   <Checkbox
@@ -491,48 +627,36 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
             <h4 className="font-semibold">Price Summary</h4>
           </div>
 
-          <Separator className="mb-4" />
-
-          <div className="space-y-3">
+          <div className="space-y-3 text-sm">
             {selectedService && (
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between">
                 <span className="text-muted-foreground">{selectedService.name}</span>
-                <span className="font-medium">${(totalAmount > 0 ? totalAmount : calculatedPrice).toFixed(2)}</span>
+                <span className="font-medium">${calculatedPrice.toFixed(2)}</span>
               </div>
             )}
 
-            {totalAmount > 0 && calculatedPrice > 0 && totalAmount !== calculatedPrice && (
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground text-xs">Original price</span>
-                <span className="text-xs text-muted-foreground line-through">${calculatedPrice.toFixed(2)}</span>
+            {extrasTotal > 0 && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Add-ons</span>
+                <span className="font-medium">+${extrasTotal.toFixed(2)}</span>
               </div>
             )}
 
-            {selectedDate && selectedTime && (
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Date</span>
-                <span className="font-medium text-xs text-right">
-                  {format(selectedDate, 'MMM d, yyyy')}<br/>
-                  <span className="text-muted-foreground">{selectedTime}</span>
-                </span>
-              </div>
+            <Separator />
+
+            <div className="flex justify-between text-lg font-bold">
+              <span>Total</span>
+              <span className="text-primary">${totalAmount.toFixed(2)}</span>
+            </div>
+
+            {frequency !== 'one_time' && (
+              <Badge variant="secondary" className="w-full justify-center mt-2">
+                {frequency === 'weekly' && 'Weekly Recurring'}
+                {frequency === 'biweekly' && 'Bi-Weekly Recurring'}
+                {frequency === 'monthly' && 'Monthly Recurring'}
+              </Badge>
             )}
           </div>
-
-          <Separator className="my-4" />
-
-          <div className="flex justify-between items-center">
-            <span className="font-medium">Total</span>
-            <span className="text-2xl font-bold text-primary">
-              ${(totalAmount > 0 ? totalAmount : calculatedPrice).toFixed(2)}
-            </span>
-          </div>
-
-          {booking?.is_draft && (
-            <Badge variant="secondary" className="mt-4 w-full justify-center bg-amber-100 text-amber-700 border-amber-200">
-              Draft Quote
-            </Badge>
-          )}
         </div>
       </div>
     </div>
