@@ -22,6 +22,7 @@ import {
   CreditCard,
   Sparkles,
   HelpCircle,
+  GripVertical,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState, useEffect } from 'react';
@@ -30,8 +31,25 @@ import { useOrganization } from '@/contexts/OrganizationContext';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { supabase } from '@/integrations/supabase/client';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
-const navigation = [
+const defaultNavigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
   { name: 'Scheduler', href: '/dashboard/scheduler', icon: Calendar },
   { name: 'Bookings', href: '/dashboard/bookings', icon: ClipboardList },
@@ -52,9 +70,78 @@ const navigation = [
   { name: 'Help', href: '/dashboard/help', icon: HelpCircle },
 ];
 
+const iconMap: Record<string, typeof Home> = {
+  Home, Calendar, ClipboardList, Repeat, Users, Target, MapPin, MessageSquare,
+  Briefcase, UserCircle, CheckSquare, Package, DollarSign, Receipt, BarChart3,
+  Sparkles, CreditCard, HelpCircle,
+};
+
+interface NavItem {
+  name: string;
+  href: string;
+  icon: typeof Home;
+}
+
 interface AdminSidebarProps {
   isOpen: boolean;
   onToggle: () => void;
+}
+
+interface SortableNavItemProps {
+  item: NavItem;
+  isActive: boolean;
+  isOpen: boolean;
+  isMobile: boolean;
+  onNavClick: () => void;
+}
+
+function SortableNavItem({ item, isActive, isOpen, isMobile, onNavClick }: SortableNavItemProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item.href });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center group"
+    >
+      <button
+        {...attributes}
+        {...listeners}
+        className={cn(
+          "p-1 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity",
+          isDragging && "opacity-100"
+        )}
+      >
+        <GripVertical className="w-4 h-4 text-muted-foreground" />
+      </button>
+      <Link
+        to={item.href}
+        onClick={onNavClick}
+        className={cn(
+          'sidebar-link flex-1',
+          isActive && 'active',
+          !isOpen && !isMobile && 'justify-center px-2'
+        )}
+        title={!isOpen && !isMobile ? item.name : undefined}
+      >
+        <item.icon className="w-5 h-5 flex-shrink-0" />
+        {(isOpen || isMobile) && <span>{item.name}</span>}
+      </Link>
+    </div>
+  );
 }
 
 export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
@@ -65,6 +152,42 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [navigation, setNavigation] = useState<NavItem[]>(defaultNavigation);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Load navigation order from localStorage
+  useEffect(() => {
+    const savedOrder = localStorage.getItem('tidywise_nav_order');
+    if (savedOrder) {
+      try {
+        const hrefOrder: string[] = JSON.parse(savedOrder);
+        const reordered = hrefOrder
+          .map(href => defaultNavigation.find(item => item.href === href))
+          .filter((item): item is NavItem => item !== undefined);
+        
+        // Add any new nav items that weren't in saved order
+        defaultNavigation.forEach(item => {
+          if (!reordered.find(r => r.href === item.href)) {
+            reordered.push(item);
+          }
+        });
+        
+        setNavigation(reordered);
+      } catch (e) {
+        console.error('Error parsing nav order:', e);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const fetchLogo = async () => {
@@ -80,6 +203,24 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
     };
     fetchLogo();
   }, []);
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setNavigation((items) => {
+        const oldIndex = items.findIndex(item => item.href === active.id);
+        const newIndex = items.findIndex(item => item.href === over.id);
+        const newOrder = arrayMove(items, oldIndex, newIndex);
+        
+        // Save to localStorage
+        localStorage.setItem('tidywise_nav_order', JSON.stringify(newOrder.map(i => i.href)));
+        
+        return newOrder;
+      });
+    }
+  };
+
   const handleLogout = async () => {
     await signOut();
     navigate('/');
@@ -118,28 +259,33 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-3 py-4">
-        <div className="space-y-1">
-          {navigation.map((item) => {
-            const isActive = location.pathname === item.href || 
-              (item.href !== '/dashboard' && location.pathname.startsWith(item.href));
-            return (
-              <Link
-                key={item.name}
-                to={item.href}
-                onClick={handleNavClick}
-                className={cn(
-                  'sidebar-link',
-                  isActive && 'active',
-                  !isOpen && !isMobile && 'justify-center px-2'
-                )}
-                title={!isOpen && !isMobile ? item.name : undefined}
-              >
-                <item.icon className="w-5 h-5 flex-shrink-0" />
-                {(isOpen || isMobile) && <span>{item.name}</span>}
-              </Link>
-            );
-          })}
-        </div>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={navigation.map(item => item.href)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="space-y-1">
+              {navigation.map((item) => {
+                const isActive = location.pathname === item.href || 
+                  (item.href !== '/dashboard' && location.pathname.startsWith(item.href));
+                return (
+                  <SortableNavItem
+                    key={item.href}
+                    item={item}
+                    isActive={isActive}
+                    isOpen={isOpen}
+                    isMobile={isMobile}
+                    onNavClick={handleNavClick}
+                  />
+                );
+              })}
+            </div>
+          </SortableContext>
+        </DndContext>
       </nav>
 
       {/* User Profile */}
