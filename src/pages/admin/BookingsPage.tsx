@@ -460,6 +460,7 @@ export default function BookingsPage() {
           email: booking.customer.email,
           amount: booking.total_amount,
           description: `Booking #${booking.booking_number} - ${booking.service?.name || 'Service'}`,
+          organizationId: organization?.id,
         }
       });
 
