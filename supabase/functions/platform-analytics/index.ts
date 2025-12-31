@@ -9,6 +9,16 @@ const corsHeaders = {
 
 const PLATFORM_ADMIN_EMAIL = "support@tidywisecleaning.com";
 
+// Safe date formatter
+function safeFormatDate(timestamp: number | undefined | null): string {
+  if (!timestamp || isNaN(timestamp)) return 'Unknown';
+  try {
+    return new Date(timestamp * 1000).toISOString();
+  } catch {
+    return 'Unknown';
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -21,6 +31,8 @@ serve(async (req) => {
   );
 
   try {
+    console.log("[PLATFORM-ANALYTICS] Starting...");
+    
     // Verify the user is the platform admin
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("No authorization header provided");
@@ -30,6 +42,8 @@ serve(async (req) => {
     if (userError) throw new Error(`Authentication error: ${userError.message}`);
     
     const user = userData.user;
+    console.log("[PLATFORM-ANALYTICS] User email:", user?.email);
+    
     if (!user?.email || user.email !== PLATFORM_ADMIN_EMAIL) {
       throw new Error("Unauthorized: Platform admin access only");
     }
@@ -38,6 +52,7 @@ serve(async (req) => {
     const { count: totalSignups } = await supabaseClient
       .from('profiles')
       .select('*', { count: 'exact', head: true });
+    console.log("[PLATFORM-ANALYTICS] Total signups:", totalSignups);
 
     // Get recent signups (last 30 days)
     const thirtyDaysAgo = new Date();
@@ -53,6 +68,7 @@ serve(async (req) => {
     const { count: totalOrganizations } = await supabaseClient
       .from('organizations')
       .select('*', { count: 'exact', head: true });
+    console.log("[PLATFORM-ANALYTICS] Total organizations:", totalOrganizations);
 
     // Get recent organizations
     const { data: recentOrganizations } = await supabaseClient
@@ -69,40 +85,49 @@ serve(async (req) => {
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (stripeKey) {
+      console.log("[PLATFORM-ANALYTICS] Fetching Stripe subscriptions...");
       const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
       
-      // Get all subscriptions
-      const subscriptions = await stripe.subscriptions.list({ limit: 100 });
-      
-      for (const sub of subscriptions.data) {
-        if (sub.status === 'active') activeSubscriptions++;
-        if (sub.status === 'trialing') trialSubscriptions++;
-        if (sub.status === 'canceled') canceledSubscriptions++;
+      try {
+        // Get all subscriptions
+        const subscriptions = await stripe.subscriptions.list({ limit: 100 });
+        console.log("[PLATFORM-ANALYTICS] Found subscriptions:", subscriptions.data.length);
         
-        subscriptionList.push({
-          id: sub.id,
-          customer_email: sub.customer ? (typeof sub.customer === 'string' ? sub.customer : sub.customer) : 'Unknown',
-          status: sub.status,
-          created: new Date(sub.created * 1000).toISOString(),
-          current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
-        });
-      }
-
-      // Get customer emails for subscriptions
-      for (const sub of subscriptionList) {
-        if (typeof sub.customer_email === 'string' && sub.customer_email.startsWith('cus_')) {
-          try {
-            const customer = await stripe.customers.retrieve(sub.customer_email);
-            if (!customer.deleted && 'email' in customer) {
-              sub.customer_email = customer.email || 'Unknown';
+        for (const sub of subscriptions.data) {
+          if (sub.status === 'active') activeSubscriptions++;
+          if (sub.status === 'trialing') trialSubscriptions++;
+          if (sub.status === 'canceled') canceledSubscriptions++;
+          
+          // Get customer email safely
+          let customerEmail = 'Unknown';
+          if (sub.customer) {
+            try {
+              const customerId = typeof sub.customer === 'string' ? sub.customer : sub.customer.id;
+              const customer = await stripe.customers.retrieve(customerId);
+              if (!customer.deleted && 'email' in customer && customer.email) {
+                customerEmail = customer.email;
+              }
+            } catch (e) {
+              console.log("[PLATFORM-ANALYTICS] Could not fetch customer:", e);
             }
-          } catch {
-            // Keep the customer ID if retrieval fails
           }
+          
+          subscriptionList.push({
+            id: sub.id,
+            customer_email: customerEmail,
+            status: sub.status,
+            created: safeFormatDate(sub.created),
+            current_period_end: safeFormatDate(sub.current_period_end),
+          });
         }
+      } catch (stripeError) {
+        console.error("[PLATFORM-ANALYTICS] Stripe error:", stripeError);
       }
+    } else {
+      console.log("[PLATFORM-ANALYTICS] No Stripe key found");
     }
 
+    console.log("[PLATFORM-ANALYTICS] Returning data...");
     return new Response(JSON.stringify({
       signups: {
         total: totalSignups || 0,
@@ -118,7 +143,7 @@ serve(async (req) => {
         active: activeSubscriptions,
         trialing: trialSubscriptions,
         canceled: canceledSubscriptions,
-        list: subscriptionList.slice(0, 50), // Limit to 50 most recent
+        list: subscriptionList.slice(0, 50),
       },
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -126,7 +151,7 @@ serve(async (req) => {
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error("Platform analytics error:", errorMessage);
+    console.error("[PLATFORM-ANALYTICS] Error:", errorMessage);
     return new Response(JSON.stringify({ error: errorMessage }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: error instanceof Error && error.message.includes("Unauthorized") ? 403 : 500,
