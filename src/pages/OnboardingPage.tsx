@@ -227,6 +227,25 @@ export default function OnboardingPage() {
         }
       }
 
+      // Get user's phone from profile for onboarding complete SMS
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('phone, full_name')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      // Send onboarding complete SMS (non-blocking) - uses org's SMS settings
+      if (profileData?.phone) {
+        supabase.functions.invoke('send-onboarding-complete-sms', {
+          body: {
+            to: profileData.phone,
+            businessName: name,
+            organizationId: orgData.id,
+            ownerName: profileData.full_name?.split(' ')[0] || '',
+          },
+        }).catch(err => console.log('Onboarding SMS failed (non-critical):', err));
+      }
+
       toast.success('Business created successfully with your services!');
       await refetch();
       navigate('/dashboard');
