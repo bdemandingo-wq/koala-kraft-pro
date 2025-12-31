@@ -260,8 +260,9 @@ export function BookingFormProvider({
       }
     } else if (pricingMode === 'bedroom') {
       // Find bedroom/bathroom combination in service pricing
+      // Convert to string for comparison since database may store as numbers
       const combo = servicePricing.bedroom_pricing.find(
-        (p) => p.bedrooms === bedrooms && p.bathrooms === bathrooms
+        (p) => String(p.bedrooms) === bedrooms && String(p.bathrooms) === bathrooms
       );
       basePrice = combo?.basePrice || 0;
     }
