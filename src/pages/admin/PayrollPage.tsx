@@ -19,9 +19,10 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { format, startOfMonth, endOfMonth, startOfYear, isWithinInterval } from 'date-fns';
-import { CalendarIcon, Download, AlertTriangle, DollarSign, Users, Clock, Calculator, TrendingUp, Briefcase } from 'lucide-react';
+import { CalendarIcon, Download, AlertTriangle, DollarSign, Users, Clock, Calculator, TrendingUp, Briefcase, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTestMode } from '@/contexts/TestModeContext';
+import { toast } from 'sonner';
 
 interface StaffWithPayroll {
   id: string;
@@ -59,6 +60,21 @@ export default function PayrollPage() {
     to: endOfMonth(new Date()),
   });
   const { isTestMode, maskName, maskEmail } = useTestMode();
+  const [paidStaff, setPaidStaff] = useState<Set<string>>(new Set());
+
+  const handleMarkPaid = (staffId: string, staffName: string) => {
+    setPaidStaff(prev => {
+      const next = new Set(prev);
+      if (next.has(staffId)) {
+        next.delete(staffId);
+        toast.info(`${staffName} marked as unpaid`);
+      } else {
+        next.add(staffId);
+        toast.success(`${staffName} marked as paid`);
+      }
+      return next;
+    });
+  };
 
   // Fetch staff
   const { data: staff = [] } = useQuery({
@@ -473,9 +489,24 @@ export default function PayrollPage() {
                             </Badge>
                           )}
                           {staff.totalPay > 0 && (
-                            <Badge variant="outline" className="border-green-500 text-green-600 cursor-pointer hover:bg-green-50">
-                              Mark Paid
-                            </Badge>
+                            paidStaff.has(staff.id) ? (
+                              <Badge 
+                                variant="outline" 
+                                className="border-green-500 bg-green-50 text-green-700 cursor-pointer hover:bg-green-100"
+                                onClick={() => handleMarkPaid(staff.id, staff.name)}
+                              >
+                                <Check className="w-3 h-3 mr-1" />
+                                Paid
+                              </Badge>
+                            ) : (
+                              <Badge 
+                                variant="outline" 
+                                className="border-muted-foreground text-muted-foreground cursor-pointer hover:bg-muted"
+                                onClick={() => handleMarkPaid(staff.id, staff.name)}
+                              >
+                                Mark Paid
+                              </Badge>
+                            )
                           )}
                         </div>
                       </TableCell>
