@@ -23,6 +23,21 @@ import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import { Upload, FileText, Trash2, Download, Key, Eye, EyeOff } from 'lucide-react';
 
+const STAFF_COLOR_OPTIONS = [
+  { value: '#3b82f6', label: 'Blue' },
+  { value: '#22c55e', label: 'Green' },
+  { value: '#8b5cf6', label: 'Purple' },
+  { value: '#f59e0b', label: 'Amber' },
+  { value: '#ec4899', label: 'Pink' },
+  { value: '#14b8a6', label: 'Teal' },
+  { value: '#f97316', label: 'Orange' },
+  { value: '#ef4444', label: 'Red' },
+  { value: '#06b6d4', label: 'Cyan' },
+  { value: '#a855f7', label: 'Violet' },
+  { value: '#eab308', label: 'Yellow' },
+  { value: '#6366f1', label: 'Indigo' },
+];
+
 interface StaffMember {
   id: string;
   name: string;
@@ -38,6 +53,7 @@ interface StaffMember {
   ssn_last4?: string | null;
   ein?: string | null;
   user_id?: string | null;
+  calendar_color?: string | null;
 }
 
 interface EditStaffDialogProps {
@@ -67,6 +83,7 @@ export function EditStaffDialog({ open, onOpenChange, staff }: EditStaffDialogPr
     tax_document_url: '',
     ssn_last4: '',
     ein: '',
+    calendar_color: '',
   });
 
   useEffect(() => {
@@ -83,6 +100,7 @@ export function EditStaffDialog({ open, onOpenChange, staff }: EditStaffDialogPr
         tax_document_url: staff.tax_document_url || '',
         ssn_last4: staff.ssn_last4 || '',
         ein: staff.ein || '',
+        calendar_color: staff.calendar_color || '',
       });
     }
   }, [staff]);
@@ -107,6 +125,7 @@ export function EditStaffDialog({ open, onOpenChange, staff }: EditStaffDialogPr
           tax_document_url: formData.tax_document_url || null,
           ssn_last4: formData.ssn_last4 || null,
           ein: formData.ein || null,
+          calendar_color: formData.calendar_color || null,
         })
         .eq('id', staff.id);
 
@@ -279,6 +298,36 @@ export function EditStaffDialog({ open, onOpenChange, staff }: EditStaffDialogPr
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               placeholder="(555) 123-4567"
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Calendar Color</Label>
+            <div className="flex flex-wrap gap-2">
+              {STAFF_COLOR_OPTIONS.map((color) => (
+                <button
+                  key={color.value}
+                  type="button"
+                  className={`w-8 h-8 rounded-full border-2 transition-all ${
+                    formData.calendar_color === color.value 
+                      ? 'border-foreground scale-110' 
+                      : 'border-transparent hover:scale-105'
+                  }`}
+                  style={{ backgroundColor: color.value }}
+                  onClick={() => setFormData({ ...formData, calendar_color: color.value })}
+                  title={color.label}
+                />
+              ))}
+              {formData.calendar_color && (
+                <button
+                  type="button"
+                  className="text-xs text-muted-foreground hover:text-foreground underline ml-2"
+                  onClick={() => setFormData({ ...formData, calendar_color: '' })}
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">Used for calendar bookings</p>
           </div>
 
           <div className="space-y-2">

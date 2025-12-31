@@ -72,10 +72,16 @@ const STAFF_COLOR_PALETTE = [
   '#f97316', '#ef4444', '#06b6d4', '#a855f7', '#eab308', '#6366f1'
 ];
 
-const getStaffColor = (staffId: string | null | undefined, staffList: { id: string }[]): string => {
+const getStaffColor = (staffId: string | null | undefined, staffList: { id: string; calendar_color?: string | null }[]): string => {
   if (!staffId) return '#6b7280'; // gray for unassigned
   
-  // Find index of staff in the sorted list for consistent coloring
+  // Check if staff has a custom color
+  const staff = staffList.find(s => s.id === staffId);
+  if (staff?.calendar_color) {
+    return staff.calendar_color;
+  }
+  
+  // Fall back to palette based on sorted index
   const sortedStaffIds = staffList.map(s => s.id).sort();
   const index = sortedStaffIds.indexOf(staffId);
   
@@ -94,7 +100,7 @@ interface DraggableBookingProps {
   booking: BookingWithDetails;
   index: number;
   onClick: () => void;
-  staffList: { id: string; name: string }[];
+  staffList: { id: string; name: string; calendar_color?: string | null }[];
 }
 
 interface DroppableDayProps {
@@ -178,7 +184,7 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
       if (!organization?.id) return [];
       const { data, error } = await supabase
         .from('staff')
-        .select('id, name')
+        .select('id, name, calendar_color')
         .eq('organization_id', organization.id)
         .eq('is_active', true)
         .order('name');
