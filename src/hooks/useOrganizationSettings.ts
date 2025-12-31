@@ -6,12 +6,20 @@ export interface OrganizationPricingSettings {
   id?: string;
   organization_id: string;
   show_sqft_on_booking: boolean;
+  show_addons_on_booking: boolean;
+  show_frequency_discount: boolean;
+  show_pet_options: boolean;
+  show_home_condition: boolean;
   sales_tax_percent: number;
   demo_mode_enabled: boolean;
 }
 
 const defaultSettings: Omit<OrganizationPricingSettings, 'organization_id'> = {
   show_sqft_on_booking: true,
+  show_addons_on_booking: true,
+  show_frequency_discount: true,
+  show_pet_options: true,
+  show_home_condition: true,
   sales_tax_percent: 0,
   demo_mode_enabled: false,
 };
@@ -38,6 +46,10 @@ export function useOrganizationSettings() {
           id: data.id,
           organization_id: data.organization_id,
           show_sqft_on_booking: data.show_sqft_on_booking ?? true,
+          show_addons_on_booking: data.show_addons_on_booking ?? true,
+          show_frequency_discount: data.show_frequency_discount ?? true,
+          show_pet_options: data.show_pet_options ?? true,
+          show_home_condition: data.show_home_condition ?? true,
           sales_tax_percent: Number(data.sales_tax_percent) || 0,
           demo_mode_enabled: data.demo_mode_enabled ?? false,
         });
@@ -66,6 +78,10 @@ export function useOrganizationSettings() {
       const settingsData = {
         organization_id: organization.id,
         show_sqft_on_booking: updates.show_sqft_on_booking ?? settings?.show_sqft_on_booking ?? true,
+        show_addons_on_booking: updates.show_addons_on_booking ?? settings?.show_addons_on_booking ?? true,
+        show_frequency_discount: updates.show_frequency_discount ?? settings?.show_frequency_discount ?? true,
+        show_pet_options: updates.show_pet_options ?? settings?.show_pet_options ?? true,
+        show_home_condition: updates.show_home_condition ?? settings?.show_home_condition ?? true,
         sales_tax_percent: updates.sales_tax_percent ?? settings?.sales_tax_percent ?? 0,
         demo_mode_enabled: updates.demo_mode_enabled ?? settings?.demo_mode_enabled ?? false,
       };
@@ -85,6 +101,10 @@ export function useOrganizationSettings() {
         id: data.id,
         organization_id: data.organization_id,
         show_sqft_on_booking: data.show_sqft_on_booking ?? true,
+        show_addons_on_booking: data.show_addons_on_booking ?? true,
+        show_frequency_discount: data.show_frequency_discount ?? true,
+        show_pet_options: data.show_pet_options ?? true,
+        show_home_condition: data.show_home_condition ?? true,
         sales_tax_percent: Number(data.sales_tax_percent) || 0,
         demo_mode_enabled: data.demo_mode_enabled ?? false,
       });

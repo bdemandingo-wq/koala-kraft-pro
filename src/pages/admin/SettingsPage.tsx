@@ -19,6 +19,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { SMSSettingsCard } from '@/components/admin/SMSSettingsCard';
 import { PricingSettingsCard } from '@/components/admin/PricingSettingsCard';
+import { FormDisplaySettings } from '@/components/admin/FormDisplaySettings';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/contexts/OrganizationContext';
 import { useOrganizationSettings } from '@/hooks/useOrganizationSettings';
@@ -479,6 +480,7 @@ export default function SettingsPage() {
         {/* Pricing Settings */}
         <TabsContent value="pricing" className="space-y-6">
           <PricingSettingsCard />
+          <FormDisplaySettings />
         </TabsContent>
 
         {/* Notifications */}
