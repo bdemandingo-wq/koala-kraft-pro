@@ -41,6 +41,7 @@ import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, addMonths, subMonth
 import { AddBookingDialog } from './AddBookingDialog';
 import { useTestMode } from '@/contexts/TestModeContext';
 import { useOrganization } from '@/contexts/OrganizationContext';
+import { useQuery } from '@tanstack/react-query';
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTHS = [
@@ -66,21 +67,21 @@ const statusLabels: Record<string, string> = {
   no_show: 'no show',
 };
 
-const staffColors: Record<string, string> = {};
+const STAFF_COLOR_PALETTE = [
+  '#3b82f6', '#22c55e', '#8b5cf6', '#f59e0b', '#ec4899', '#14b8a6',
+  '#f97316', '#ef4444', '#06b6d4', '#a855f7', '#eab308', '#6366f1'
+];
 
-const getStaffColor = (staffId: string | null | undefined): string => {
+const getStaffColor = (staffId: string | null | undefined, staffList: { id: string }[]): string => {
   if (!staffId) return '#6b7280'; // gray for unassigned
   
-  if (!staffColors[staffId]) {
-    const colorPalette = [
-      '#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4', '#f97316',
-      '#ef4444', '#14b8a6', '#8b5cf6', '#f97316', '#06b6d4'
-    ];
-    const index = Object.keys(staffColors).length % colorPalette.length;
-    staffColors[staffId] = colorPalette[index];
-  }
+  // Find index of staff in the sorted list for consistent coloring
+  const sortedStaffIds = staffList.map(s => s.id).sort();
+  const index = sortedStaffIds.indexOf(staffId);
   
-  return staffColors[staffId];
+  if (index === -1) return '#6b7280';
+  
+  return STAFF_COLOR_PALETTE[index % STAFF_COLOR_PALETTE.length];
 };
 
 interface SchedulerCalendarProps {
@@ -93,6 +94,7 @@ interface DraggableBookingProps {
   booking: BookingWithDetails;
   index: number;
   onClick: () => void;
+  staffList: { id: string; name: string }[];
 }
 
 interface DroppableDayProps {
@@ -118,8 +120,8 @@ function DroppableDay({ id, disabled, className, children }: DroppableDayProps) 
   );
 }
 
-function DraggableBooking({ booking, index, onClick }: DraggableBookingProps) {
-  const color = getStaffColor(booking.staff_id);
+function DraggableBooking({ booking, index, onClick, staffList }: DraggableBookingProps) {
+  const color = getStaffColor(booking.staff_id, staffList);
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: booking.id,
   });
@@ -168,6 +170,23 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
 
   const { data: allBookings = [], isLoading } = useBookings();
   const updateBooking = useUpdateBooking();
+
+  // Fetch staff for color consistency
+  const { data: staffList = [] } = useQuery({
+    queryKey: ['staff-for-calendar', organization?.id],
+    queryFn: async () => {
+      if (!organization?.id) return [];
+      const { data, error } = await supabase
+        .from('staff')
+        .select('id, name')
+        .eq('organization_id', organization.id)
+        .eq('is_active', true)
+        .order('name');
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!organization?.id,
+  });
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -570,6 +589,7 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
                               booking={booking}
                               index={bIndex}
                               onClick={() => setSelectedBooking(booking)}
+                              staffList={staffList}
                             />
                           ))}
                         {dayBookings.length > (viewMode === 'week' ? 10 : 3) && (

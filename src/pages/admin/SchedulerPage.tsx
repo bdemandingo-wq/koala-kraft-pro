@@ -74,10 +74,18 @@ export default function SchedulerPage() {
     }
   };
 
-  // Get unique colors for staff
-  const staffColors = [
-    '#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4', '#f97316'
+  // Same color palette as SchedulerCalendar for consistency
+  const STAFF_COLOR_PALETTE = [
+    '#3b82f6', '#22c55e', '#8b5cf6', '#f59e0b', '#ec4899', '#14b8a6',
+    '#f97316', '#ef4444', '#06b6d4', '#a855f7', '#eab308', '#6366f1'
   ];
+  
+  // Sort staff by ID to match the color assignment in SchedulerCalendar
+  const sortedStaff = [...staff].sort((a, b) => a.id.localeCompare(b.id));
+  const staffColorMap = new Map<string, string>();
+  sortedStaff.forEach((s, index) => {
+    staffColorMap.set(s.id, STAFF_COLOR_PALETTE[index % STAFF_COLOR_PALETTE.length]);
+  });
 
   return (
     <AdminLayout
@@ -142,11 +150,11 @@ export default function SchedulerPage() {
       {staff.length > 0 && (
         <div className="flex items-center gap-4 mb-4 flex-wrap">
           <span className="text-sm font-medium text-muted-foreground">Staff:</span>
-          {staff.map((s, index) => (
+          {staff.map((s) => (
             <div key={s.id} className="flex items-center gap-2">
               <div
                 className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: staffColors[index % staffColors.length] }}
+                style={{ backgroundColor: staffColorMap.get(s.id) || '#6b7280' }}
               />
               <span className="text-sm">{maskName(s.name)}</span>
             </div>
