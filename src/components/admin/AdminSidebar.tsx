@@ -24,6 +24,7 @@ import {
   HelpCircle,
   GripVertical,
   Tag,
+  Activity,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState, useEffect } from 'react';
@@ -76,7 +77,7 @@ const defaultNavigation = [
 const iconMap: Record<string, typeof Home> = {
   Home, Calendar, ClipboardList, Repeat, Users, Target, MapPin, MessageSquare,
   Briefcase, UserCircle, CheckSquare, Package, DollarSign, Receipt, BarChart3,
-  Sparkles, CreditCard, HelpCircle, Tag,
+  Sparkles, CreditCard, HelpCircle, Tag, Activity,
 };
 
 interface NavItem {
@@ -289,6 +290,25 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
             </div>
           </SortableContext>
         </DndContext>
+
+        {/* Platform Admin Link - Only visible for support@tidywisecleaning.com */}
+        {user?.email === 'support@tidywisecleaning.com' && (
+          <div className="mt-4 pt-4 border-t border-sidebar-border">
+            <Link
+              to="/dashboard/platform-analytics"
+              onClick={handleNavClick}
+              className={cn(
+                'sidebar-link',
+                location.pathname === '/dashboard/platform-analytics' && 'active',
+                !isOpen && !isMobile && 'justify-center px-2'
+              )}
+              title={!isOpen && !isMobile ? 'Platform Analytics' : undefined}
+            >
+              <Activity className="w-5 h-5 flex-shrink-0 text-amber-500" />
+              {(isOpen || isMobile) && <span className="text-amber-500 font-medium">Platform Analytics</span>}
+            </Link>
+          </div>
+        )}
 
         {/* Demo Mode Toggle */}
         <div className="mt-4 pt-4 border-t border-sidebar-border">
