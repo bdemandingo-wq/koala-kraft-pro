@@ -29,6 +29,7 @@ export default function AuthPage() {
     password: '',
     confirmPassword: '',
     fullName: '',
+    phone: '',
   });
 
   // Redirect if already logged in
@@ -104,18 +105,38 @@ export default function AuthPage() {
         if (error) throw error;
         toast.success('Logged in successfully');
       } else {
-        const { error } = await supabase.auth.signUp({
+        const { data: signUpData, error } = await supabase.auth.signUp({
           email: formData.email,
           password: formData.password,
           options: {
             data: {
               full_name: formData.fullName,
+              phone: formData.phone,
             },
             emailRedirectTo: `${window.location.origin}/`,
           },
         });
         if (error) throw error;
-        toast.success('Account created successfully! Please check your email to verify.');
+        
+        // Update profile with phone number if provided
+        if (signUpData.user && formData.phone) {
+          await supabase
+            .from('profiles')
+            .update({ phone: formData.phone })
+            .eq('id', signUpData.user.id);
+        }
+        
+        // Send welcome SMS (non-blocking)
+        if (formData.phone) {
+          supabase.functions.invoke('send-signup-welcome-sms', {
+            body: {
+              to: formData.phone,
+              fullName: formData.fullName,
+            },
+          }).catch(err => console.log('Welcome SMS failed (non-critical):', err));
+        }
+        
+        toast.success('Account created successfully!');
       }
     } catch (error: any) {
       toast.error(error.message);
@@ -214,19 +235,34 @@ export default function AuthPage() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               {!isLogin && (
-                <div className="space-y-2">
-                  <Label htmlFor="fullName">Full Name</Label>
-                  <Input
-                    id="fullName"
-                    type="text"
-                    placeholder="John Doe"
-                    value={formData.fullName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, fullName: e.target.value })
-                    }
-                    required={!isLogin}
-                  />
-                </div>
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="fullName">Full Name</Label>
+                    <Input
+                      id="fullName"
+                      type="text"
+                      placeholder="John Doe"
+                      value={formData.fullName}
+                      onChange={(e) =>
+                        setFormData({ ...formData, fullName: e.target.value })
+                      }
+                      required={!isLogin}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="(555) 123-4567"
+                      value={formData.phone}
+                      onChange={(e) =>
+                        setFormData({ ...formData, phone: e.target.value })
+                      }
+                    />
+                    <p className="text-xs text-muted-foreground">We'll send you a welcome text!</p>
+                  </div>
+                </>
               )}
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
