@@ -1394,6 +1394,10 @@ export type Database = {
           id: string
           organization_id: string
           sales_tax_percent: number | null
+          show_addons_on_booking: boolean | null
+          show_frequency_discount: boolean | null
+          show_home_condition: boolean | null
+          show_pet_options: boolean | null
           show_sqft_on_booking: boolean | null
           updated_at: string
         }
@@ -1403,6 +1407,10 @@ export type Database = {
           id?: string
           organization_id: string
           sales_tax_percent?: number | null
+          show_addons_on_booking?: boolean | null
+          show_frequency_discount?: boolean | null
+          show_home_condition?: boolean | null
+          show_pet_options?: boolean | null
           show_sqft_on_booking?: boolean | null
           updated_at?: string
         }
@@ -1412,6 +1420,10 @@ export type Database = {
           id?: string
           organization_id?: string
           sales_tax_percent?: number | null
+          show_addons_on_booking?: boolean | null
+          show_frequency_discount?: boolean | null
+          show_home_condition?: boolean | null
+          show_pet_options?: boolean | null
           show_sqft_on_booking?: boolean | null
           updated_at?: string
         }

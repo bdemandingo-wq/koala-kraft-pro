@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,6 +27,7 @@ import { StripeCardForm } from '@/components/stripe/StripeCardForm';
 import { useOrgId } from '@/hooks/useOrgId';
 import { useBookingForm } from '../BookingFormContext';
 import { useDiscounts } from '@/hooks/useDiscounts';
+import { useOrganizationSettings } from '@/hooks/useOrganizationSettings';
 
 export function PaymentStep() {
   const {
@@ -57,6 +58,7 @@ export function PaymentStep() {
 
   const { organizationId } = useOrgId();
   const { validateCoupon, calculateDiscountAmount } = useDiscounts();
+  const { settings: orgSettings } = useOrganizationSettings();
 
   const [sendingLinkSms, setSendingLinkSms] = useState(false);
   const [chargeError, setChargeError] = useState<string | null>(null);
@@ -71,6 +73,25 @@ export function PaymentStep() {
 
   // Use override amount if set, otherwise use calculated price
   const effectiveAmount = totalAmount > 0 ? totalAmount : calculatedPrice;
+
+  // Calculate with proper order: Subtotal → Discount → Tax → Total
+  const pricingBreakdown = useMemo(() => {
+    const subtotal = effectiveAmount;
+    const discountAmount = appliedDiscount?.discountAmount || 0;
+    const discountedSubtotal = Math.max(0, subtotal - discountAmount);
+    const taxRate = orgSettings?.sales_tax_percent || 0;
+    const taxAmount = taxRate > 0 ? (discountedSubtotal * taxRate) / 100 : 0;
+    const grandTotal = discountedSubtotal + taxAmount;
+    
+    return {
+      subtotal,
+      discountAmount,
+      discountedSubtotal,
+      taxRate,
+      taxAmount,
+      grandTotal,
+    };
+  }, [effectiveAmount, appliedDiscount, orgSettings]);
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) {
@@ -119,7 +140,8 @@ export function PaymentStep() {
       return;
     }
 
-    if (!finalPrice || finalPrice <= 0) {
+    const amountToCharge = pricingBreakdown.grandTotal;
+    if (!amountToCharge || amountToCharge <= 0) {
       toast.error('Please select a service and property details to calculate the price');
       return;
     }
@@ -132,11 +154,11 @@ export function PaymentStep() {
           email: customerEmail,
           customerName, 
           organizationId: organizationId ?? undefined,
-          amount: finalPrice
+          amount: amountToCharge
         }
       });
       if (error) throw error;
-      toast.success(`Payment link for $${finalPrice.toFixed(2)} sent via SMS`);
+      toast.success(`Payment link for $${amountToCharge.toFixed(2)} sent via SMS`);
     } catch (error: any) {
       toast.error(error.message || 'Failed to send payment link via SMS');
     } finally {
@@ -250,23 +272,35 @@ export function PaymentStep() {
             </div>
           )}
           
-          {/* Price Summary with Discount */}
-          {effectiveAmount > 0 && (
+          {/* Price Summary with Tax + Discount */}
+          {pricingBreakdown.subtotal > 0 && (
             <div className="mt-4 pt-4 border-t border-border/50 space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Subtotal</span>
-                <span>${effectiveAmount.toFixed(2)}</span>
+                <span>${pricingBreakdown.subtotal.toFixed(2)}</span>
               </div>
               {appliedDiscount && (
                 <div className="flex justify-between text-sm text-emerald-600 dark:text-emerald-400">
                   <span>Discount ({appliedDiscount.code})</span>
-                  <span>-${appliedDiscount.discountAmount.toFixed(2)}</span>
+                  <span>-${pricingBreakdown.discountAmount.toFixed(2)}</span>
+                </div>
+              )}
+              {appliedDiscount && pricingBreakdown.taxRate > 0 && (
+                <div className="flex justify-between text-sm text-muted-foreground">
+                  <span>Discounted Subtotal</span>
+                  <span>${pricingBreakdown.discountedSubtotal.toFixed(2)}</span>
+                </div>
+              )}
+              {pricingBreakdown.taxRate > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Sales Tax ({pricingBreakdown.taxRate}%)</span>
+                  <span>${pricingBreakdown.taxAmount.toFixed(2)}</span>
                 </div>
               )}
               <div className="flex justify-between font-semibold text-lg pt-2 border-t border-border/30">
-                <span>Total</span>
+                <span>Grand Total</span>
                 <span className={appliedDiscount ? 'text-emerald-600 dark:text-emerald-400' : ''}>
-                  ${finalPrice.toFixed(2)}
+                  ${pricingBreakdown.grandTotal.toFixed(2)}
                 </span>
               </div>
             </div>
@@ -423,15 +457,15 @@ export function PaymentStep() {
                 variant="outline"
                 className="h-11 w-full"
                 onClick={handleSendPaymentLinkSms}
-                disabled={sendingLinkSms || !customerPhone || !finalPrice}
-                title={!customerPhone ? "Customer phone required" : !finalPrice ? "Select service and details first" : `Send payment link for $${finalPrice.toFixed(2)}`}
+                disabled={sendingLinkSms || !customerPhone || !pricingBreakdown.grandTotal}
+                title={!customerPhone ? "Customer phone required" : !pricingBreakdown.grandTotal ? "Select service and details first" : `Send payment link for $${pricingBreakdown.grandTotal.toFixed(2)}`}
               >
                 {sendingLinkSms ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
                   <Phone className="mr-2 h-4 w-4" />
                 )}
-                Send Payment Link (${finalPrice?.toFixed(2) || '0.00'})
+                Send Payment Link (${pricingBreakdown.grandTotal?.toFixed(2) || '0.00'})
               </Button>
             </div>
           ) : (
