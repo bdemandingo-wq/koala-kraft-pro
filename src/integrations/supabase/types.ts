@@ -2081,6 +2081,7 @@ export type Database = {
           avatar_url: string | null
           base_wage: number | null
           bio: string | null
+          calendar_color: string | null
           created_at: string
           ein: string | null
           email: string
@@ -2101,6 +2102,7 @@ export type Database = {
           avatar_url?: string | null
           base_wage?: number | null
           bio?: string | null
+          calendar_color?: string | null
           created_at?: string
           ein?: string | null
           email: string
@@ -2121,6 +2123,7 @@ export type Database = {
           avatar_url?: string | null
           base_wage?: number | null
           bio?: string | null
+          calendar_color?: string | null
           created_at?: string
           ein?: string | null
           email?: string

@@ -80,11 +80,13 @@ export default function SchedulerPage() {
     '#f97316', '#ef4444', '#06b6d4', '#a855f7', '#eab308', '#6366f1'
   ];
   
-  // Sort staff by ID to match the color assignment in SchedulerCalendar
+  // Create color map using custom colors when available, fallback to palette
   const sortedStaff = [...staff].sort((a, b) => a.id.localeCompare(b.id));
   const staffColorMap = new Map<string, string>();
   sortedStaff.forEach((s, index) => {
-    staffColorMap.set(s.id, STAFF_COLOR_PALETTE[index % STAFF_COLOR_PALETTE.length]);
+    // Use custom calendar_color if set, otherwise use palette
+    const color = (s as any).calendar_color || STAFF_COLOR_PALETTE[index % STAFF_COLOR_PALETTE.length];
+    staffColorMap.set(s.id, color);
   });
 
   return (
