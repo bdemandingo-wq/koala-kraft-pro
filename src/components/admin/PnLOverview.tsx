@@ -50,6 +50,10 @@ interface PnLSettings {
   goal_repeat_revenue_amount: number;  // Dollar amount goal for recurring revenue
   goal_first_time_revenue_amount: number;  // Dollar amount goal for first-time revenue
   fixed_cost_goal: number;  // Goal for max fixed costs
+  net_profit_goal_percent: number;  // Editable net profit margin goal (e.g., 20%)
+  monthly_first_time_goals: number[];  // Monthly goals for first-time revenue
+  monthly_recurring_goals: number[];  // Monthly goals for recurring revenue
+  monthly_fixed_cost_goals: number[];  // Monthly goals for fixed costs
   avg_job_size_goal: number;
   closing_rate_goal: number;
   first_time_to_recurring_goal: number;
@@ -85,6 +89,10 @@ const defaultSettings: PnLSettings = {
   goal_repeat_revenue_amount: 0,
   goal_first_time_revenue_amount: 0,
   fixed_cost_goal: 0,
+  net_profit_goal_percent: 20,  // Default 20% profit margin goal
+  monthly_first_time_goals: Array(12).fill(0),
+  monthly_recurring_goals: Array(12).fill(0),
+  monthly_fixed_cost_goals: Array(12).fill(0),
   avg_job_size_goal: 250,
   closing_rate_goal: 50,
   first_time_to_recurring_goal: 30,
@@ -735,9 +743,10 @@ export function PnLOverview({ bookings, customers }: PnLOverviewProps) {
         periodLabel: MONTHS[selectedSummaryMonth],
         revenueGoal: settings.monthly_sales_goals[selectedSummaryMonth] || 0,
         marketingBudget: settings.monthly_marketing_budget[selectedSummaryMonth] || 0,
-        firstTimeRevenueGoal: settings.goal_first_time_revenue_amount / 12,
-        recurringRevenueGoal: settings.goal_repeat_revenue_amount / 12,
-        fixedCostGoal: settings.fixed_cost_goal / 12,
+        // Use monthly-specific goals instead of dividing annual by 12
+        firstTimeRevenueGoal: settings.monthly_first_time_goals?.[selectedSummaryMonth] || 0,
+        recurringRevenueGoal: settings.monthly_recurring_goals?.[selectedSummaryMonth] || 0,
+        fixedCostGoal: settings.monthly_fixed_cost_goals?.[selectedSummaryMonth] || 0,
       };
     }
     return {
@@ -1005,11 +1014,11 @@ export function PnLOverview({ bookings, customers }: PnLOverviewProps) {
                   ${summaryData.netProfit.toLocaleString()}
                 </TableCell>
                 <TableCell className="text-right font-medium">
-                  ${(summaryData.revenueGoal * 0.2).toLocaleString()} (20% goal)
+                  ${(summaryData.revenueGoal * (settings.net_profit_goal_percent || 20) / 100).toLocaleString()} ({settings.net_profit_goal_percent || 20}% goal)
                 </TableCell>
                 <TableCell className="text-center">
-                  <Badge className={statusColors[summaryData.revenue > 0 && (summaryData.netProfit / summaryData.revenue) * 100 >= 20 ? 'ahead' : summaryData.revenue > 0 && (summaryData.netProfit / summaryData.revenue) * 100 >= 10 ? 'at-risk' : 'behind']}>
-                    {summaryData.revenue > 0 && (summaryData.netProfit / summaryData.revenue) * 100 >= 20 ? '✅' : '⚠️'} {summaryData.revenue > 0 ? ((summaryData.netProfit / summaryData.revenue) * 100).toFixed(1) : 0}% margin
+                  <Badge className={statusColors[summaryData.revenue > 0 && (summaryData.netProfit / summaryData.revenue) * 100 >= (settings.net_profit_goal_percent || 20) ? 'ahead' : summaryData.revenue > 0 && (summaryData.netProfit / summaryData.revenue) * 100 >= (settings.net_profit_goal_percent || 20) / 2 ? 'at-risk' : 'behind']}>
+                    {summaryData.revenue > 0 && (summaryData.netProfit / summaryData.revenue) * 100 >= (settings.net_profit_goal_percent || 20) ? '✅' : '⚠️'} {summaryData.revenue > 0 ? ((summaryData.netProfit / summaryData.revenue) * 100).toFixed(1) : 0}% margin
                   </Badge>
                 </TableCell>
               </TableRow>
@@ -1178,15 +1187,26 @@ export function PnLOverview({ bookings, customers }: PnLOverviewProps) {
             </TabsContent>
 
             {/* Monthly Goals Tab */}
-            <TabsContent value="monthly" className="mt-4">
+            <TabsContent value="monthly" className="mt-4 space-y-4">
               <Card>
-                <CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="text-lg">Monthly Revenue & Cost Goals</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <Label className="text-sm text-muted-foreground">Net Profit Goal %:</Label>
+                    <Input
+                      type="number"
+                      value={inputValue(settings.net_profit_goal_percent)}
+                      onChange={(e) => setSettings({ ...settings, net_profit_goal_percent: parseInputValue(e.target.value) })}
+                      className="w-20"
+                      placeholder="20"
+                    />
+                  </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">Set annual goals (used when viewing Yearly summary):</p>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <Label>First-Time Revenue Goal ($)</Label>
+                      <Label>First-Time Revenue Goal (Annual $)</Label>
                       <Input
                         type="number"
                         value={inputValue(settings.goal_first_time_revenue_amount)}
@@ -1195,7 +1215,7 @@ export function PnLOverview({ bookings, customers }: PnLOverviewProps) {
                       />
                     </div>
                     <div>
-                      <Label>Recurring Revenue Goal ($)</Label>
+                      <Label>Recurring Revenue Goal (Annual $)</Label>
                       <Input
                         type="number"
                         value={inputValue(settings.goal_repeat_revenue_amount)}
@@ -1204,7 +1224,7 @@ export function PnLOverview({ bookings, customers }: PnLOverviewProps) {
                       />
                     </div>
                     <div>
-                      <Label>Fixed Cost Goal (Max $)</Label>
+                      <Label>Fixed Cost Goal (Annual Max $)</Label>
                       <Input
                         type="number"
                         value={inputValue(settings.fixed_cost_goal)}
@@ -1212,6 +1232,91 @@ export function PnLOverview({ bookings, customers }: PnLOverviewProps) {
                         placeholder="0"
                       />
                     </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Monthly breakdown tables */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Monthly Goals (used when viewing Monthly summary)</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Goal Type</TableHead>
+                          {MONTHS.map(m => <TableHead key={m} className="text-right text-xs">{m}</TableHead>)}
+                          <TableHead className="text-right">Total</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell className="font-medium">First-Time ($)</TableCell>
+                          {MONTHS.map((_, i) => (
+                            <TableCell key={i} className="p-1">
+                              <Input
+                                type="number"
+                                value={inputValue(settings.monthly_first_time_goals?.[i] || 0)}
+                                onChange={(e) => {
+                                  const updated = [...(settings.monthly_first_time_goals || Array(12).fill(0))];
+                                  updated[i] = parseInputValue(e.target.value);
+                                  setSettings({ ...settings, monthly_first_time_goals: updated });
+                                }}
+                                className="w-16 text-xs text-right"
+                                placeholder="0"
+                              />
+                            </TableCell>
+                          ))}
+                          <TableCell className="text-right font-bold">
+                            ${(settings.monthly_first_time_goals || Array(12).fill(0)).reduce((a, b) => a + b, 0).toLocaleString()}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-medium">Recurring ($)</TableCell>
+                          {MONTHS.map((_, i) => (
+                            <TableCell key={i} className="p-1">
+                              <Input
+                                type="number"
+                                value={inputValue(settings.monthly_recurring_goals?.[i] || 0)}
+                                onChange={(e) => {
+                                  const updated = [...(settings.monthly_recurring_goals || Array(12).fill(0))];
+                                  updated[i] = parseInputValue(e.target.value);
+                                  setSettings({ ...settings, monthly_recurring_goals: updated });
+                                }}
+                                className="w-16 text-xs text-right"
+                                placeholder="0"
+                              />
+                            </TableCell>
+                          ))}
+                          <TableCell className="text-right font-bold">
+                            ${(settings.monthly_recurring_goals || Array(12).fill(0)).reduce((a, b) => a + b, 0).toLocaleString()}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-medium">Fixed Cost Max ($)</TableCell>
+                          {MONTHS.map((_, i) => (
+                            <TableCell key={i} className="p-1">
+                              <Input
+                                type="number"
+                                value={inputValue(settings.monthly_fixed_cost_goals?.[i] || 0)}
+                                onChange={(e) => {
+                                  const updated = [...(settings.monthly_fixed_cost_goals || Array(12).fill(0))];
+                                  updated[i] = parseInputValue(e.target.value);
+                                  setSettings({ ...settings, monthly_fixed_cost_goals: updated });
+                                }}
+                                className="w-16 text-xs text-right"
+                                placeholder="0"
+                              />
+                            </TableCell>
+                          ))}
+                          <TableCell className="text-right font-bold">
+                            ${(settings.monthly_fixed_cost_goals || Array(12).fill(0)).reduce((a, b) => a + b, 0).toLocaleString()}
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
                   </div>
                 </CardContent>
               </Card>
