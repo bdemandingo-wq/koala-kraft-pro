@@ -95,11 +95,11 @@ const defaultSettings: PnLSettings = {
   credit_card_percent: 2.9,
   refunds_percent: 2,
   fixed_overhead_items: [
-    { name: 'Booking Software', monthly: Array(12).fill(57) },
-    { name: 'Insurance', monthly: Array(12).fill(62) },
-    { name: 'Website Hosting', monthly: Array(12).fill(15) },
-    { name: 'Phone/VoIP', monthly: Array(12).fill(35) },
-    { name: 'Accounting Software', monthly: Array(12).fill(38) },
+    { name: 'Booking Software', monthly: Array(12).fill(0) },
+    { name: 'Insurance', monthly: Array(12).fill(0) },
+    { name: 'Website Hosting', monthly: Array(12).fill(0) },
+    { name: 'Phone/VoIP', monthly: Array(12).fill(0) },
+    { name: 'Accounting Software', monthly: Array(12).fill(0) },
   ],
   variable_overhead_items: [
     { name: 'Supplies', monthly: Array(12).fill(0) },
