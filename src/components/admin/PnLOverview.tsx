@@ -35,6 +35,12 @@ interface MonthlyOverheadItem {
   monthly: number[];  // Array of 12 values, one per month
 }
 
+interface MarketingChannel {
+  id: string;
+  name: string;
+  monthly: number[];
+}
+
 interface PnLSettings {
   id?: string;
   year: number;
@@ -50,18 +56,23 @@ interface PnLSettings {
   churn_rate_goal: number;
   monthly_sales_goals: number[];
   monthly_inbound_leads_goals: number[];
-  monthly_marketing_budget: number[];  // Changed from percent to monthly amounts
+  monthly_marketing_budget: number[];
+  marketing_channels: MarketingChannel[];  // Dynamic marketing channels
+  // Legacy fields for backwards compatibility
   google_lsa_spend: number[];
   facebook_ads_spend: number[];
   other_online_spend: number[];
   local_marketing_spend: number[];
   direct_mail_spend: number[];
-  marketing_channel_names: { [key: string]: string };  // Custom names for marketing channels
+  marketing_channel_names: { [key: string]: string };
   credit_card_percent: number;
   refunds_percent: number;
   fixed_overhead_items: MonthlyOverheadItem[];
   variable_overhead_items: MonthlyOverheadItem[];
   recruiting_costs: number[];
+  // Manual CPL/CPA inputs
+  target_cpl: number;
+  target_cpa: number;
 }
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -81,6 +92,13 @@ const defaultSettings: PnLSettings = {
   monthly_sales_goals: Array(12).fill(0),
   monthly_inbound_leads_goals: Array(12).fill(0),
   monthly_marketing_budget: Array(12).fill(0),
+  marketing_channels: [
+    { id: 'google_lsa', name: 'Google LSA', monthly: Array(12).fill(0) },
+    { id: 'facebook_ads', name: 'Facebook Ads', monthly: Array(12).fill(0) },
+    { id: 'other_online', name: 'Other Online', monthly: Array(12).fill(0) },
+    { id: 'local_marketing', name: 'Local Marketing', monthly: Array(12).fill(0) },
+    { id: 'direct_mail', name: 'Direct Mail', monthly: Array(12).fill(0) },
+  ],
   google_lsa_spend: Array(12).fill(0),
   facebook_ads_spend: Array(12).fill(0),
   other_online_spend: Array(12).fill(0),
@@ -107,6 +125,8 @@ const defaultSettings: PnLSettings = {
     { name: 'Gas/Mileage', monthly: Array(12).fill(0) },
   ],
   recruiting_costs: Array(12).fill(0),
+  target_cpl: 0,
+  target_cpa: 0,
 };
 
 // Helper to migrate old format to new format
@@ -124,6 +144,24 @@ const migrateOverheadItems = (items: any[]): MonthlyOverheadItem[] => {
   });
 };
 
+// Helper to migrate legacy marketing spend to new channels format
+const migrateMarketingChannels = (data: any, channelNames: { [key: string]: string }): MarketingChannel[] => {
+  const legacyKeys = ['google_lsa_spend', 'facebook_ads_spend', 'other_online_spend', 'local_marketing_spend', 'direct_mail_spend'];
+  const defaultNames: { [key: string]: string } = {
+    google_lsa_spend: 'Google LSA',
+    facebook_ads_spend: 'Facebook Ads',
+    other_online_spend: 'Other Online',
+    local_marketing_spend: 'Local Marketing',
+    direct_mail_spend: 'Direct Mail',
+  };
+  
+  return legacyKeys.map(key => ({
+    id: key.replace('_spend', ''),
+    name: channelNames?.[key] || defaultNames[key] || key,
+    monthly: Array.isArray(data[key]) ? (data[key] as number[]) : Array(12).fill(0),
+  }));
+};
+
 export function PnLOverview({ bookings, customers }: PnLOverviewProps) {
   const orgId = useOrgId();
   const { toast } = useToast();
@@ -132,6 +170,7 @@ export function PnLOverview({ bookings, customers }: PnLOverviewProps) {
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('revenue-map');
   const [selectedOverheadMonth, setSelectedOverheadMonth] = useState(new Date().getMonth());
+  const [selectedMarketingMonth, setSelectedMarketingMonth] = useState(new Date().getMonth());
   const [summaryPeriod, setSummaryPeriod] = useState<'month' | 'year'>('year');
   const [selectedSummaryMonth, setSelectedSummaryMonth] = useState(new Date().getMonth());
   const [netProfitPeriod, setNetProfitPeriod] = useState<'ytd' | 'qtd' | 'mtd' | '1y' | '4w' | '1w'>('ytd');
@@ -196,6 +235,7 @@ export function PnLOverview({ bookings, customers }: PnLOverviewProps) {
           monthly_sales_goals: Array.isArray(data.monthly_sales_goals) ? (data.monthly_sales_goals as number[]) : defaultSettings.monthly_sales_goals,
           monthly_inbound_leads_goals: Array.isArray(data.monthly_inbound_leads_goals) ? (data.monthly_inbound_leads_goals as number[]) : defaultSettings.monthly_inbound_leads_goals,
           monthly_marketing_budget: monthlyMarketingBudget,
+          marketing_channels: migrateMarketingChannels(data, (data as any).marketing_channel_names || {}),
           google_lsa_spend: Array.isArray(data.google_lsa_spend) ? (data.google_lsa_spend as number[]) : defaultSettings.google_lsa_spend,
           facebook_ads_spend: Array.isArray(data.facebook_ads_spend) ? (data.facebook_ads_spend as number[]) : defaultSettings.facebook_ads_spend,
           other_online_spend: Array.isArray(data.other_online_spend) ? (data.other_online_spend as number[]) : defaultSettings.other_online_spend,
@@ -204,6 +244,8 @@ export function PnLOverview({ bookings, customers }: PnLOverviewProps) {
           fixed_overhead_items: migrateOverheadItems(data.fixed_overhead_items as any[]),
           variable_overhead_items: migrateOverheadItems(data.variable_overhead_items as any[]),
           recruiting_costs: Array.isArray(data.recruiting_costs) ? (data.recruiting_costs as number[]) : defaultSettings.recruiting_costs,
+          target_cpl: Number((data as any).target_cpl) || 0,
+          target_cpa: Number((data as any).target_cpa) || 0,
         });
       }
       setLoading(false);
@@ -384,6 +426,20 @@ export function PnLOverview({ bookings, customers }: PnLOverviewProps) {
     if (!organizationId) return;
     setSaving(true);
     
+    // Convert marketing_channels back to legacy format for database storage
+    const channelData: Record<string, number[]> = {};
+    const channelNames: Record<string, string> = {};
+    settings.marketing_channels.forEach((ch, idx) => {
+      const legacyKey = idx === 0 ? 'google_lsa_spend' :
+                        idx === 1 ? 'facebook_ads_spend' :
+                        idx === 2 ? 'other_online_spend' :
+                        idx === 3 ? 'local_marketing_spend' :
+                        idx === 4 ? 'direct_mail_spend' :
+                        `custom_channel_${idx}`;
+      channelData[legacyKey] = ch.monthly;
+      channelNames[legacyKey] = ch.name;
+    });
+
     const payload = {
       organization_id: organizationId,
       year: currentYear,
@@ -396,13 +452,11 @@ export function PnLOverview({ bookings, customers }: PnLOverviewProps) {
       churn_rate_goal: settings.churn_rate_goal,
       monthly_sales_goals: settings.monthly_sales_goals,
       monthly_inbound_leads_goals: settings.monthly_inbound_leads_goals,
-      // Store monthly budget in a field that exists - use marketing_percent_of_revenue temporarily
-      // or we store it as JSON in an existing field
-      google_lsa_spend: settings.google_lsa_spend,
-      facebook_ads_spend: settings.facebook_ads_spend,
-      other_online_spend: settings.other_online_spend,
-      local_marketing_spend: settings.local_marketing_spend,
-      direct_mail_spend: settings.direct_mail_spend,
+      google_lsa_spend: channelData['google_lsa_spend'] || settings.marketing_channels[0]?.monthly || Array(12).fill(0),
+      facebook_ads_spend: channelData['facebook_ads_spend'] || settings.marketing_channels[1]?.monthly || Array(12).fill(0),
+      other_online_spend: channelData['other_online_spend'] || settings.marketing_channels[2]?.monthly || Array(12).fill(0),
+      local_marketing_spend: channelData['local_marketing_spend'] || settings.marketing_channels[3]?.monthly || Array(12).fill(0),
+      direct_mail_spend: channelData['direct_mail_spend'] || settings.marketing_channels[4]?.monthly || Array(12).fill(0),
       credit_card_percent: settings.credit_card_percent,
       refunds_percent: settings.refunds_percent,
       fixed_overhead_items: settings.fixed_overhead_items as unknown as Json,
@@ -464,6 +518,36 @@ export function PnLOverview({ bookings, customers }: PnLOverviewProps) {
     const newBudget = [...settings.monthly_marketing_budget];
     newBudget[index] = value;
     setSettings({ ...settings, monthly_marketing_budget: newBudget });
+  };
+
+  // Marketing channel handlers
+  const addMarketingChannel = () => {
+    const newChannel: MarketingChannel = {
+      id: `channel_${Date.now()}`,
+      name: '',
+      monthly: Array(12).fill(0),
+    };
+    setSettings({
+      ...settings,
+      marketing_channels: [...settings.marketing_channels, newChannel],
+    });
+  };
+
+  const removeMarketingChannel = (index: number) => {
+    const newChannels = settings.marketing_channels.filter((_, i) => i !== index);
+    setSettings({ ...settings, marketing_channels: newChannels });
+  };
+
+  const updateMarketingChannel = (index: number, field: 'name' | 'monthly', value: string | number, monthIndex?: number) => {
+    const newChannels = [...settings.marketing_channels];
+    if (field === 'name') {
+      newChannels[index] = { ...newChannels[index], name: value as string };
+    } else if (field === 'monthly' && monthIndex !== undefined) {
+      const newMonthly = [...newChannels[index].monthly];
+      newMonthly[monthIndex] = value as number;
+      newChannels[index] = { ...newChannels[index], monthly: newMonthly };
+    }
+    setSettings({ ...settings, marketing_channels: newChannels });
   };
 
   const addOverheadItem = (type: 'fixed' | 'variable') => {
@@ -531,12 +615,8 @@ export function PnLOverview({ bookings, customers }: PnLOverviewProps) {
       // Variable Overhead - now per month
       const variableOverhead = settings.variable_overhead_items.reduce((sum, item) => sum + (item.monthly[i] || 0), 0);
       
-      // Marketing
-      const marketing = (settings.google_lsa_spend[i] || 0) + 
-                        (settings.facebook_ads_spend[i] || 0) + 
-                        (settings.other_online_spend[i] || 0) + 
-                        (settings.local_marketing_spend[i] || 0) + 
-                        (settings.direct_mail_spend[i] || 0);
+      // Marketing - use marketing_channels
+      const marketing = settings.marketing_channels.reduce((sum, ch) => sum + (ch.monthly[i] || 0), 0);
       
       // Recruiting
       const recruiting = settings.recruiting_costs[i] || 0;
@@ -588,21 +668,19 @@ export function PnLOverview({ bookings, customers }: PnLOverviewProps) {
     });
   }, [pnlData]);
 
-  // Marketing budget calculations
+  // Marketing budget calculations using marketing_channels
   const monthlyMarketingTotals = MONTHS.map((_, i) => {
-    return (settings.google_lsa_spend[i] || 0) + 
-           (settings.facebook_ads_spend[i] || 0) + 
-           (settings.other_online_spend[i] || 0) + 
-           (settings.local_marketing_spend[i] || 0) + 
-           (settings.direct_mail_spend[i] || 0);
+    return settings.marketing_channels.reduce((sum, ch) => sum + (ch.monthly[i] || 0), 0);
   });
   
   const totalMarketingSpend = monthlyMarketingTotals.reduce((a, b) => a + b, 0);
   
-  // Marketing KPIs - CPL and CPA (linked to actuals)
+  // Marketing KPIs - CPL and CPA (use target values if set, otherwise calculate)
   const totalLeadsGoal = settings.monthly_inbound_leads_goals.reduce((a, b) => a + b, 0);
-  const costPerLead = totalLeadsGoal > 0 ? totalMarketingSpend / totalLeadsGoal : 0;
-  const costPerAcquisition = actuals.totalFirstTime > 0 ? totalMarketingSpend / actuals.totalFirstTime : 0;
+  const calculatedCPL = totalLeadsGoal > 0 ? totalMarketingSpend / totalLeadsGoal : 0;
+  const calculatedCPA = actuals.totalFirstTime > 0 ? totalMarketingSpend / actuals.totalFirstTime : 0;
+  const costPerLead = settings.target_cpl > 0 ? settings.target_cpl : calculatedCPL;
+  const costPerAcquisition = settings.target_cpa > 0 ? settings.target_cpa : calculatedCPA;
   
   // Status helpers
   const getStatus = (actual: number, goal: number, higherIsBetter = true): 'on-track' | 'behind' | 'ahead' | 'at-risk' => {
@@ -912,7 +990,7 @@ export function PnLOverview({ bookings, customers }: PnLOverviewProps) {
               <TableRow>
                 <TableCell className="font-medium">Fixed Costs ({summaryData.periodLabel})</TableCell>
                 <TableCell className="text-right text-destructive">-${summaryData.fixedCosts.toLocaleString()}</TableCell>
-                <TableCell className="text-right">{summaryData.fixedCostGoal > 0 ? `Max -$${summaryData.fixedCostGoal.toLocaleString()}` : '—'}</TableCell>
+                <TableCell className="text-right">{summaryData.fixedCostGoal > 0 ? `Goal: $${summaryData.fixedCostGoal.toLocaleString()}` : '—'}</TableCell>
                 <TableCell className="text-center">
                   {summaryData.fixedCostGoal > 0 ? (
                     <Badge className={statusColors[getStatus(summaryData.fixedCostGoal, summaryData.fixedCosts, false)]}>
@@ -967,16 +1045,38 @@ export function PnLOverview({ bookings, customers }: PnLOverviewProps) {
         </Card>
         <Card>
           <CardContent className="pt-4">
-            <p className="text-xs text-muted-foreground">Cost Per Lead (CPL)</p>
-            <p className="text-xl font-bold">${costPerLead.toFixed(2)}</p>
-            <p className="text-xs text-muted-foreground">{totalLeadsGoal} leads goal</p>
+            <p className="text-xs text-muted-foreground">Target CPL</p>
+            <div className="flex items-center gap-1">
+              <span className="text-xl font-bold">$</span>
+              <Input
+                type="number"
+                value={inputValue(settings.target_cpl)}
+                onChange={(e) => setSettings({ ...settings, target_cpl: parseInputValue(e.target.value) })}
+                className="w-20 text-xl font-bold"
+                placeholder="0"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Actual: ${calculatedCPL.toFixed(2)} ({totalLeadsGoal} leads)
+            </p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4">
-            <p className="text-xs text-muted-foreground">Cost Per Acquisition (CPA)</p>
-            <p className="text-xl font-bold">${costPerAcquisition.toFixed(2)}</p>
-            <p className="text-xs text-muted-foreground">{actuals.totalFirstTime} new customers</p>
+            <p className="text-xs text-muted-foreground">Target CPA</p>
+            <div className="flex items-center gap-1">
+              <span className="text-xl font-bold">$</span>
+              <Input
+                type="number"
+                value={inputValue(settings.target_cpa)}
+                onChange={(e) => setSettings({ ...settings, target_cpa: parseInputValue(e.target.value) })}
+                className="w-20 text-xl font-bold"
+                placeholder="0"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Actual: ${calculatedCPA.toFixed(2)} ({actuals.totalFirstTime} customers)
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -1420,68 +1520,53 @@ export function PnLOverview({ bookings, customers }: PnLOverviewProps) {
           </Card>
 
           <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Monthly Marketing Spend by Channel</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Channel</TableHead>
-                      {MONTHS.map(m => <TableHead key={m} className="text-right text-xs">{m}</TableHead>)}
-                      <TableHead className="text-right">Total</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {[
-                      'google_lsa_spend',
-                      'facebook_ads_spend',
-                      'other_online_spend',
-                      'local_marketing_spend',
-                      'direct_mail_spend',
-                    ].map((key) => (
-                      <TableRow key={key}>
-                        <TableCell className="p-1">
-                          <Input
-                            type="text"
-                            value={settings.marketing_channel_names?.[key] || key.replace(/_/g, ' ').replace(/spend/i, '').trim()}
-                            onChange={(e) => setSettings({
-                              ...settings,
-                              marketing_channel_names: {
-                                ...settings.marketing_channel_names,
-                                [key]: e.target.value
-                              }
-                            })}
-                            className="w-28 text-xs font-medium"
-                            placeholder="Channel name"
-                          />
-                        </TableCell>
-                        {MONTHS.map((_, i) => (
-                          <TableCell key={i} className="p-1">
-                            <Input
-                              type="number"
-                              value={inputValue((settings[key as keyof PnLSettings] as number[])[i])}
-                              onChange={(e) => updateMarketingSpend(key as keyof PnLSettings, i, parseInputValue(e.target.value))}
-                              className="w-16 text-xs text-right"
-                              placeholder="0"
-                            />
-                          </TableCell>
-                        ))}
-                        <TableCell className="text-right font-bold">
-                          ${(settings[key as keyof PnLSettings] as number[]).reduce((a, b) => a + b, 0).toLocaleString()}
-                        </TableCell>
-                      </TableRow>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-lg">Marketing Spend by Channel</CardTitle>
+              <div className="flex items-center gap-2">
+                <Select value={String(selectedMarketingMonth)} onValueChange={(v) => setSelectedMarketingMonth(Number(v))}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {MONTHS.map((m, i) => (
+                      <SelectItem key={i} value={String(i)}>{m}</SelectItem>
                     ))}
-                    <TableRow className="font-bold border-t-2">
-                      <TableCell>TOTAL</TableCell>
-                      {monthlyMarketingTotals.map((total, i) => (
-                        <TableCell key={i} className="text-right text-xs">${total.toLocaleString()}</TableCell>
-                      ))}
-                      <TableCell className="text-right">${totalMarketingSpend.toLocaleString()}</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
+                  </SelectContent>
+                </Select>
+                <Button variant="outline" size="sm" onClick={addMarketingChannel}>
+                  <Plus className="w-4 h-4 mr-1" /> Add
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <p className="text-xs text-muted-foreground mb-2">Editing spend for: <strong>{MONTHS[selectedMarketingMonth]}</strong></p>
+              {settings.marketing_channels.map((channel, i) => (
+                <div key={channel.id} className="flex items-center gap-2">
+                  <Input
+                    value={channel.name}
+                    onChange={(e) => updateMarketingChannel(i, 'name', e.target.value)}
+                    placeholder="Channel name"
+                    className="flex-1"
+                  />
+                  <Input
+                    type="number"
+                    value={inputValue(channel.monthly[selectedMarketingMonth] || 0)}
+                    onChange={(e) => updateMarketingChannel(i, 'monthly', parseInputValue(e.target.value), selectedMarketingMonth)}
+                    className="w-24"
+                    placeholder="0"
+                  />
+                  <Button variant="ghost" size="icon" onClick={() => removeMarketingChannel(i)}>
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
+              <div className="pt-2 border-t space-y-1">
+                <p className="text-sm font-medium">
+                  {MONTHS[selectedMarketingMonth]} Total: ${settings.marketing_channels.reduce((sum, ch) => sum + (ch.monthly[selectedMarketingMonth] || 0), 0).toLocaleString()}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  YTD Total: ${totalMarketingSpend.toLocaleString()}
+                </p>
               </div>
             </CardContent>
           </Card>
