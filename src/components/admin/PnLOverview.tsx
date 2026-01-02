@@ -11,7 +11,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useOrgId } from '@/hooks/useOrgId';
 import { useToast } from '@/hooks/use-toast';
 import { BookingWithDetails } from '@/hooks/useBookings';
-import { Save, TrendingUp, TrendingDown, Target, DollarSign, Calculator, Plus, Trash2, Calendar } from 'lucide-react';
+import { Save, TrendingUp, TrendingDown, Target, DollarSign, Calculator, Plus, Trash2, Calendar, FileText } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { startOfYear, endOfYear, getMonth, getYear, startOfMonth, endOfMonth } from 'date-fns';
 import type { Json } from '@/integrations/supabase/types';
@@ -135,6 +136,25 @@ export function PnLOverview({ bookings, customers }: PnLOverviewProps) {
   const [selectedSummaryMonth, setSelectedSummaryMonth] = useState(new Date().getMonth());
   const [netProfitPeriod, setNetProfitPeriod] = useState<'ytd' | 'qtd' | 'mtd' | '1y' | '4w' | '1w'>('ytd');
 
+  // Expense category to overhead mapping
+  const EXPENSE_CATEGORY_MAP: Record<string, { type: 'fixed' | 'variable'; name: string }> = {
+    'insurance': { type: 'fixed', name: 'Insurance' },
+    'domain': { type: 'fixed', name: 'Website Hosting' },
+    'dialers': { type: 'fixed', name: 'Phone/VoIP' },
+    'office': { type: 'fixed', name: 'Office/Admin' },
+    'supplies': { type: 'variable', name: 'Supplies' },
+    'mileage': { type: 'variable', name: 'Gas/Mileage' },
+    'equipment': { type: 'variable', name: 'Equipment' },
+    'misc': { type: 'variable', name: 'Misc' },
+    'other': { type: 'variable', name: 'Other' },
+  };
+
+  // State for actual expenses from Expenses page
+  const [actualExpenses, setActualExpenses] = useState<{
+    byCategory: Record<string, number[]>;  // category -> monthly totals
+    total: number[];  // monthly totals
+  }>({ byCategory: {}, total: Array(12).fill(0) });
+
   const currentYear = new Date().getFullYear();
   const organizationId = orgId.organizationId;
 
@@ -190,6 +210,44 @@ export function PnLOverview({ bookings, customers }: PnLOverviewProps) {
     };
     
     fetchSettings();
+  }, [organizationId, currentYear]);
+
+  // Fetch actual expenses from Expenses page
+  useEffect(() => {
+    const fetchExpenses = async () => {
+      if (!organizationId) return;
+      
+      const yearStart = `${currentYear}-01-01`;
+      const yearEnd = `${currentYear}-12-31`;
+      
+      const { data, error } = await supabase
+        .from('expenses')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .gte('expense_date', yearStart)
+        .lte('expense_date', yearEnd);
+      
+      if (data) {
+        const byCategory: Record<string, number[]> = {};
+        const total = Array(12).fill(0);
+        
+        data.forEach((expense: any) => {
+          const month = getMonth(new Date(expense.expense_date));
+          const amount = Number(expense.amount) || 0;
+          const category = expense.category || 'other';
+          
+          if (!byCategory[category]) {
+            byCategory[category] = Array(12).fill(0);
+          }
+          byCategory[category][month] += amount;
+          total[month] += amount;
+        });
+        
+        setActualExpenses({ byCategory, total });
+      }
+    };
+    
+    fetchExpenses();
   }, [organizationId, currentYear]);
 
   // Calculate actuals from bookings - use address-based first-time vs recurring detection
@@ -1498,7 +1556,12 @@ export function PnLOverview({ bookings, customers }: PnLOverviewProps) {
           {/* Overhead Items with Month Selector */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-lg">Fixed Overhead (Monthly)</CardTitle>
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-lg">Fixed Overhead (Monthly)</CardTitle>
+                <Link to="/dashboard/expenses" className="text-xs text-primary hover:underline flex items-center gap-1">
+                  <FileText className="w-3 h-3" /> View Expenses
+                </Link>
+              </div>
               <div className="flex items-center gap-2">
                 <Select value={String(selectedOverheadMonth)} onValueChange={(v) => setSelectedOverheadMonth(Number(v))}>
                   <SelectTrigger className="w-32">
@@ -1517,32 +1580,60 @@ export function PnLOverview({ bookings, customers }: PnLOverviewProps) {
             </CardHeader>
             <CardContent className="space-y-2">
               <p className="text-xs text-muted-foreground mb-2">Editing costs for: <strong>{MONTHS[selectedOverheadMonth]}</strong></p>
-              {settings.fixed_overhead_items.map((item, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <Input
-                    value={item.name}
-                    onChange={(e) => updateOverheadItem('fixed', i, 'name', e.target.value)}
-                    placeholder="Item name"
-                    className="flex-1"
-                  />
-                  <Input
-                    type="number"
-                    value={inputValue(item.monthly[selectedOverheadMonth] || 0)}
-                    onChange={(e) => updateOverheadItem('fixed', i, 'monthly', parseInputValue(e.target.value), selectedOverheadMonth)}
-                    className="w-24"
-                    placeholder="0"
-                  />
-                  <Button variant="ghost" size="icon" onClick={() => removeOverheadItem('fixed', i)}>
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              ))}
-              <div className="pt-2 border-t">
+              {settings.fixed_overhead_items.map((item, i) => {
+                // Find matching expense category for this item
+                const matchingCategory = Object.entries(EXPENSE_CATEGORY_MAP).find(
+                  ([_, map]) => map.type === 'fixed' && map.name.toLowerCase() === item.name.toLowerCase()
+                )?.[0];
+                const actualAmount = matchingCategory ? (actualExpenses.byCategory[matchingCategory]?.[selectedOverheadMonth] || 0) : 0;
+                
+                return (
+                  <div key={i} className="flex items-center gap-2">
+                    <Input
+                      value={item.name}
+                      onChange={(e) => updateOverheadItem('fixed', i, 'name', e.target.value)}
+                      placeholder="Item name"
+                      className="flex-1"
+                    />
+                    <div className="flex flex-col items-end gap-0.5">
+                      <Input
+                        type="number"
+                        value={inputValue(item.monthly[selectedOverheadMonth] || 0)}
+                        onChange={(e) => updateOverheadItem('fixed', i, 'monthly', parseInputValue(e.target.value), selectedOverheadMonth)}
+                        className="w-24"
+                        placeholder="0"
+                      />
+                      {actualAmount > 0 && (
+                        <span className="text-[10px] text-muted-foreground">
+                          Actual: ${actualAmount.toFixed(0)}
+                        </span>
+                      )}
+                    </div>
+                    <Button variant="ghost" size="icon" onClick={() => removeOverheadItem('fixed', i)}>
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                );
+              })}
+              <div className="pt-2 border-t space-y-1">
                 <p className="text-sm font-medium">
-                  {MONTHS[selectedOverheadMonth]} Total: ${settings.fixed_overhead_items.reduce((sum, item) => sum + (item.monthly[selectedOverheadMonth] || 0), 0).toLocaleString()}
+                  {MONTHS[selectedOverheadMonth]} Budget: ${settings.fixed_overhead_items.reduce((sum, item) => sum + (item.monthly[selectedOverheadMonth] || 0), 0).toLocaleString()}
                 </p>
+                {(() => {
+                  const fixedCategories = Object.entries(EXPENSE_CATEGORY_MAP)
+                    .filter(([_, map]) => map.type === 'fixed')
+                    .map(([cat]) => cat);
+                  const actualMonthTotal = fixedCategories.reduce((sum, cat) => 
+                    sum + (actualExpenses.byCategory[cat]?.[selectedOverheadMonth] || 0), 0
+                  );
+                  return actualMonthTotal > 0 ? (
+                    <p className="text-xs text-primary">
+                      {MONTHS[selectedOverheadMonth]} Actual (from Expenses): ${actualMonthTotal.toLocaleString()}
+                    </p>
+                  ) : null;
+                })()}
                 <p className="text-xs text-muted-foreground">
-                  YTD Total: ${settings.fixed_overhead_items.reduce((sum, item) => sum + item.monthly.reduce((a, b) => a + b, 0), 0).toLocaleString()}
+                  YTD Budget: ${settings.fixed_overhead_items.reduce((sum, item) => sum + item.monthly.reduce((a, b) => a + b, 0), 0).toLocaleString()}
                 </p>
               </div>
             </CardContent>
@@ -1550,37 +1641,70 @@ export function PnLOverview({ bookings, customers }: PnLOverviewProps) {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-lg">Variable Overhead (Monthly)</CardTitle>
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-lg">Variable Overhead (Monthly)</CardTitle>
+                <Link to="/dashboard/expenses" className="text-xs text-primary hover:underline flex items-center gap-1">
+                  <FileText className="w-3 h-3" /> View Expenses
+                </Link>
+              </div>
               <Button variant="outline" size="sm" onClick={() => addOverheadItem('variable')}>
                 <Plus className="w-4 h-4 mr-1" /> Add
               </Button>
             </CardHeader>
             <CardContent className="space-y-2">
               <p className="text-xs text-muted-foreground mb-2">Editing costs for: <strong>{MONTHS[selectedOverheadMonth]}</strong></p>
-              {settings.variable_overhead_items.map((item, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <Input
-                    value={item.name}
-                    onChange={(e) => updateOverheadItem('variable', i, 'name', e.target.value)}
-                    placeholder="Item name"
-                    className="flex-1"
-                  />
-                  <Input
-                    type="number"
-                    value={inputValue(item.monthly[selectedOverheadMonth] || 0)}
-                    onChange={(e) => updateOverheadItem('variable', i, 'monthly', parseInputValue(e.target.value), selectedOverheadMonth)}
-                    className="w-24"
-                    placeholder="0"
-                  />
-                  <Button variant="ghost" size="icon" onClick={() => removeOverheadItem('variable', i)}>
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              ))}
-              <div className="pt-2 border-t">
+              {settings.variable_overhead_items.map((item, i) => {
+                // Find matching expense category for this item
+                const matchingCategory = Object.entries(EXPENSE_CATEGORY_MAP).find(
+                  ([_, map]) => map.type === 'variable' && map.name.toLowerCase() === item.name.toLowerCase()
+                )?.[0];
+                const actualAmount = matchingCategory ? (actualExpenses.byCategory[matchingCategory]?.[selectedOverheadMonth] || 0) : 0;
+                
+                return (
+                  <div key={i} className="flex items-center gap-2">
+                    <Input
+                      value={item.name}
+                      onChange={(e) => updateOverheadItem('variable', i, 'name', e.target.value)}
+                      placeholder="Item name"
+                      className="flex-1"
+                    />
+                    <div className="flex flex-col items-end gap-0.5">
+                      <Input
+                        type="number"
+                        value={inputValue(item.monthly[selectedOverheadMonth] || 0)}
+                        onChange={(e) => updateOverheadItem('variable', i, 'monthly', parseInputValue(e.target.value), selectedOverheadMonth)}
+                        className="w-24"
+                        placeholder="0"
+                      />
+                      {actualAmount > 0 && (
+                        <span className="text-[10px] text-muted-foreground">
+                          Actual: ${actualAmount.toFixed(0)}
+                        </span>
+                      )}
+                    </div>
+                    <Button variant="ghost" size="icon" onClick={() => removeOverheadItem('variable', i)}>
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                );
+              })}
+              <div className="pt-2 border-t space-y-1">
                 <p className="text-sm font-medium">
-                  {MONTHS[selectedOverheadMonth]} Total: ${settings.variable_overhead_items.reduce((sum, item) => sum + (item.monthly[selectedOverheadMonth] || 0), 0).toLocaleString()}
+                  {MONTHS[selectedOverheadMonth]} Budget: ${settings.variable_overhead_items.reduce((sum, item) => sum + (item.monthly[selectedOverheadMonth] || 0), 0).toLocaleString()}
                 </p>
+                {(() => {
+                  const variableCategories = Object.entries(EXPENSE_CATEGORY_MAP)
+                    .filter(([_, map]) => map.type === 'variable')
+                    .map(([cat]) => cat);
+                  const actualMonthTotal = variableCategories.reduce((sum, cat) => 
+                    sum + (actualExpenses.byCategory[cat]?.[selectedOverheadMonth] || 0), 0
+                  );
+                  return actualMonthTotal > 0 ? (
+                    <p className="text-xs text-primary">
+                      {MONTHS[selectedOverheadMonth]} Actual (from Expenses): ${actualMonthTotal.toLocaleString()}
+                    </p>
+                  ) : null;
+                })()}
               </div>
             </CardContent>
           </Card>
