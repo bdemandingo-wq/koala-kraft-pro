@@ -4,6 +4,14 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -19,14 +27,15 @@ import {
   Check,
   Sparkles,
   AlertCircle,
-  GripVertical
+  GripVertical,
+  Users
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { format, addWeeks, addMonths } from 'date-fns';
+import { format, addWeeks, addMonths, isAfter } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrgId } from '@/hooks/useOrgId';
-import { useCreateBooking, useUpdateBooking, useCreateCustomer, BookingWithDetails } from '@/hooks/useBookings';
+import { useCreateBooking, useUpdateBooking, useCreateCustomer, BookingWithDetails, useBookings } from '@/hooks/useBookings';
 import { extras as extrasData } from '@/data/pricingData';
 import { useBookingForm } from './BookingFormContext';
 import { CustomerStep } from './steps/CustomerStep';
@@ -156,6 +165,12 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
   const [submitting, setSubmitting] = useState(false);
   const [savingDraft, setSavingDraft] = useState(false);
   const [steps, setSteps] = useState<StepItem[]>(DEFAULT_STEPS);
+  const [showRecurringDialog, setShowRecurringDialog] = useState(false);
+  const [pendingBookingData, setPendingBookingData] = useState<any>(null);
+  const [applyToFuture, setApplyToFuture] = useState(false);
+  
+  // Get all bookings to check for future recurring bookings
+  const { data: allBookings = [] } = useBookings();
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -250,6 +265,7 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
     calculatedPrice,
     finalPrice,
     resetForm,
+    staff,
   } = useBookingForm();
 
   const validateStep = (stepId: string): boolean => {
@@ -371,7 +387,19 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
     }
   };
 
-  const handleSubmit = async (isDraft: boolean = false) => {
+  // Check if this customer has future bookings that could be affected by staff change
+  const getFutureBookingsForCustomer = () => {
+    if (!booking?.customer?.id) return [];
+    const now = new Date();
+    return allBookings.filter(b => 
+      b.customer?.id === booking.customer?.id &&
+      b.id !== booking.id &&
+      isAfter(new Date(b.scheduled_at), now) &&
+      !['cancelled', 'completed'].includes(b.status)
+    );
+  };
+
+  const handleSubmit = async (isDraft: boolean = false, skipRecurringCheck: boolean = false) => {
     // Final validation - validate all steps
     for (let i = 0; i < steps.length; i++) {
       if (!validateStep(steps[i].id) && !isDraft) {
@@ -380,6 +408,23 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
       }
     }
 
+    // Check if we're editing an existing booking and staff changed
+    if (booking?.id && !skipRecurringCheck) {
+      const staffChanged = selectedStaffId !== (booking.staff?.id || '');
+      const futureBookings = getFutureBookingsForCustomer();
+      
+      if (staffChanged && futureBookings.length > 0) {
+        const bookingData = await buildBookingData(isDraft);
+        setPendingBookingData({ bookingData, isDraft, futureBookings });
+        setShowRecurringDialog(true);
+        return;
+      }
+    }
+
+    await executeSubmit(isDraft);
+  };
+
+  const executeSubmit = async (isDraft: boolean = false, updateFutureBookings: boolean = false) => {
     if (isDraft) {
       setSavingDraft(true);
     } else {
@@ -387,11 +432,24 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
     }
 
     try {
-      const bookingData = await buildBookingData(isDraft);
+      const bookingData = pendingBookingData?.bookingData || await buildBookingData(isDraft);
 
       if (booking?.id) {
         await updateBooking.mutateAsync({ id: booking.id, ...bookingData });
-        toast.success('Booking updated successfully');
+        
+        // If user chose to apply to future bookings, update those too
+        if (updateFutureBookings && pendingBookingData?.futureBookings) {
+          const futureBookings = pendingBookingData.futureBookings as BookingWithDetails[];
+          for (const futureBooking of futureBookings) {
+            await updateBooking.mutateAsync({ 
+              id: futureBooking.id, 
+              staff_id: bookingData.staff_id 
+            });
+          }
+          toast.success(`Booking updated and staff assigned to ${futureBookings.length} future booking(s)`);
+        } else {
+          toast.success('Booking updated successfully');
+        }
       } else {
         const finalBookingData = {
           ...bookingData,
@@ -473,7 +531,13 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
     } finally {
       setSubmitting(false);
       setSavingDraft(false);
+      setPendingBookingData(null);
     }
+  };
+
+  const handleRecurringDialogConfirm = async (applyToFutureBookings: boolean) => {
+    setShowRecurringDialog(false);
+    await executeSubmit(pendingBookingData?.isDraft || false, applyToFutureBookings);
   };
 
   const handleDuplicate = () => {
@@ -502,7 +566,53 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 h-full">
+    <>
+      {/* Recurring Change Dialog */}
+      <Dialog open={showRecurringDialog} onOpenChange={setShowRecurringDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5" />
+              Apply to Future Bookings?
+            </DialogTitle>
+            <DialogDescription>
+              This customer has {pendingBookingData?.futureBookings?.length || 0} upcoming booking(s). 
+              Would you like to assign the same staff member to all future bookings?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Staff change: <span className="font-medium text-foreground">{booking?.staff?.name || 'Unassigned'}</span> → <span className="font-medium text-foreground">{staff?.find(s => s.id === selectedStaffId)?.name || 'Unassigned'}</span>
+            </p>
+            {pendingBookingData?.futureBookings?.slice(0, 3).map((fb: BookingWithDetails) => (
+              <div key={fb.id} className="flex items-center justify-between text-sm p-2 bg-secondary/50 rounded">
+                <span>{format(new Date(fb.scheduled_at), 'MMM d, yyyy')}</span>
+                <span className="text-muted-foreground">{fb.service?.name}</span>
+              </div>
+            ))}
+            {(pendingBookingData?.futureBookings?.length || 0) > 3 && (
+              <p className="text-xs text-muted-foreground">
+                ...and {pendingBookingData.futureBookings.length - 3} more
+              </p>
+            )}
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button 
+              variant="outline" 
+              onClick={() => handleRecurringDialogConfirm(false)}
+            >
+              This Booking Only
+            </Button>
+            <Button 
+              onClick={() => handleRecurringDialogConfirm(true)}
+            >
+              Apply to All Future
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <div className="flex flex-col lg:flex-row gap-6 h-full">
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Step Indicator */}
@@ -652,5 +762,6 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
         </div>
       </div>
     </div>
+    </>
   );
 }

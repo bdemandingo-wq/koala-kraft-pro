@@ -14,13 +14,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Save, Globe, Bell, Lock, Palette, Loader2, Star, Upload, Eye, EyeOff, AlertCircle, MessageSquare, DollarSign, LayoutGrid, PanelLeft, RotateCcw } from 'lucide-react';
+import { Save, Globe, Bell, Lock, Palette, Loader2, Star, Upload, Eye, EyeOff, AlertCircle, MessageSquare, DollarSign, LayoutGrid, PanelLeft, RotateCcw, Share2, Copy, Code, ExternalLink } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { SMSSettingsCard } from '@/components/admin/SMSSettingsCard';
 import { PricingSettingsCard } from '@/components/admin/PricingSettingsCard';
 import { FormDisplaySettings } from '@/components/admin/FormDisplaySettings';
 import { SidebarVisibilitySettings } from '@/components/admin/SidebarVisibilitySettings';
+import { BookingFormShareCard } from '@/components/admin/BookingFormShareCard';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/contexts/OrganizationContext';
 import { useOrganizationSettings } from '@/hooks/useOrganizationSettings';
@@ -351,8 +352,9 @@ export default function SettingsPage() {
       subtitle="Manage your business preferences"
     >
       <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="grid w-full max-w-4xl grid-cols-8">
+        <TabsList className="grid w-full max-w-5xl grid-cols-9">
           <TabsTrigger value="general">General</TabsTrigger>
+          <TabsTrigger value="booking-form">Booking Form</TabsTrigger>
           <TabsTrigger value="pricing">Pricing</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="sms">SMS</TabsTrigger>
@@ -477,6 +479,11 @@ export default function SettingsPage() {
               </Button>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Booking Form Sharing */}
+        <TabsContent value="booking-form" className="space-y-6">
+          <BookingFormShareCard organizationSlug={organization?.slug} />
         </TabsContent>
 
         {/* Pricing Settings */}

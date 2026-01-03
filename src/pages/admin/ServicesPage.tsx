@@ -30,6 +30,7 @@ import {
 import { Home, Sparkles, Truck, HardHat, Plus, Pencil, Save, Trash2, Bed, Settings2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ServicePricingEditor } from '@/components/admin/ServicePricingEditor';
+import { CustomServicesManager } from '@/components/admin/CustomServicesManager';
 
 interface Extra {
   id: string;
@@ -487,8 +488,12 @@ export default function ServicesPage() {
       title="Services & Pricing"
       subtitle="Manage pricing independently for each service category"
     >
-      <Tabs defaultValue="service-pricing" className="space-y-6">
+      <Tabs defaultValue="custom-services" className="space-y-6">
         <TabsList>
+          <TabsTrigger value="custom-services" className="flex items-center gap-2">
+            <Plus className="w-4 h-4" />
+            Custom Services
+          </TabsTrigger>
           <TabsTrigger value="service-pricing" className="flex items-center gap-2">
             <Settings2 className="w-4 h-4" />
             Service Pricing
@@ -496,6 +501,11 @@ export default function ServicesPage() {
           <TabsTrigger value="pricing-table">Default Pricing Sheet</TabsTrigger>
           <TabsTrigger value="extras">Add-On Extras</TabsTrigger>
         </TabsList>
+
+        {/* Custom Services Management */}
+        <TabsContent value="custom-services" className="space-y-6">
+          <CustomServicesManager />
+        </TabsContent>
 
         <TabsContent value="service-pricing" className="space-y-6">
           <ServicePricingEditor />
