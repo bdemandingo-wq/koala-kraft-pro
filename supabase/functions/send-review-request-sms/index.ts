@@ -152,11 +152,15 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Sending review request SMS to:", formattedPhone);
 
+    // OpenPhone API requires Bearer prefix
+    const apiKey = smsSettings.openphone_api_key;
+    const authHeader = apiKey.startsWith('Bearer ') ? apiKey : `Bearer ${apiKey}`;
+
     // Send SMS via OpenPhone API
     const openPhoneResponse = await fetch('https://api.openphone.com/v1/messages', {
       method: 'POST',
       headers: {
-        'Authorization': smsSettings.openphone_api_key,
+        'Authorization': authHeader,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -167,9 +171,37 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     if (!openPhoneResponse.ok) {
-      const errorData = await openPhoneResponse.json().catch(() => ({}));
-      console.error('OpenPhone API error:', errorData);
-      throw new Error(errorData.message || `Failed to send SMS (status ${openPhoneResponse.status})`);
+      const errorText = await openPhoneResponse.text();
+      console.error('OpenPhone API error:', openPhoneResponse.status, errorText);
+      
+      // Handle billing/payment issues gracefully
+      if (openPhoneResponse.status === 402) {
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: 'SMS service requires payment. Please check your OpenPhone account billing.', 
+            errorCode: 'BILLING_REQUIRED' 
+          }),
+          { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
+        );
+      }
+      
+      // Handle auth issues
+      if (openPhoneResponse.status === 401) {
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: 'Invalid OpenPhone API key. Please update your SMS settings.', 
+            errorCode: 'AUTH_FAILED' 
+          }),
+          { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
+        );
+      }
+      
+      return new Response(
+        JSON.stringify({ error: 'SMS delivery failed. Please try again later.' }),
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
     }
 
     const responseData = await openPhoneResponse.json();

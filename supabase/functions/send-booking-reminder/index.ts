@@ -116,8 +116,8 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    // Helper function to send SMS
-    const sendSMS = async (to: string, message: string): Promise<boolean> => {
+    // Helper function to send SMS - returns detailed result
+    const sendSMS = async (to: string, message: string): Promise<{ success: boolean; error?: string; errorCode?: string }> => {
       let formattedPhone = to.replace(/\D/g, '');
       if (formattedPhone.length === 10) {
         formattedPhone = `+1${formattedPhone}`;
@@ -147,9 +147,29 @@ const handler = async (req: Request): Promise<Response> => {
       if (!response.ok) {
         const errorText = await response.text();
         console.error(`[send-booking-reminder] OpenPhone API error: ${response.status} - ${errorText}`);
+        
+        // Handle billing/payment issues gracefully
+        if (response.status === 402) {
+          return { 
+            success: false, 
+            error: "SMS service requires payment. Please check your OpenPhone account billing.", 
+            errorCode: "BILLING_REQUIRED" 
+          };
+        }
+        
+        // Handle auth issues
+        if (response.status === 401) {
+          return { 
+            success: false, 
+            error: "Invalid OpenPhone API key. Please update your SMS settings.", 
+            errorCode: "AUTH_FAILED" 
+          };
+        }
+        
+        return { success: false, error: "SMS delivery failed. Please try again later." };
       }
 
-      return response.ok;
+      return { success: true };
     };
 
     // Manual reminder send
@@ -183,9 +203,9 @@ const handler = async (req: Request): Promise<Response> => {
 
       console.log(`[send-booking-reminder] Manual reminder to ${payload.customerPhone}`);
 
-      const success = await sendSMS(payload.customerPhone, message);
+      const result = await sendSMS(payload.customerPhone, message);
 
-      if (success) {
+      if (result.success) {
         return new Response(
           JSON.stringify({
             success: true,
@@ -197,9 +217,10 @@ const handler = async (req: Request): Promise<Response> => {
         return new Response(
           JSON.stringify({
             success: false,
-            error: "Failed to send reminder SMS",
+            error: result.error || "Failed to send reminder SMS",
+            errorCode: result.errorCode,
           }),
-          { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
+          { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
         );
       }
     }
@@ -272,12 +293,12 @@ const handler = async (req: Request): Promise<Response> => {
           `\nPlease ensure access to the property. Reply with any questions!`;
 
         try {
-          const success = await sendSMS(booking.customer.phone, message);
-          if (success) {
+          const result = await sendSMS(booking.customer.phone, message);
+          if (result.success) {
             sentReminders.push(`#${booking.booking_number} (${window.label})`);
             console.log(`[send-booking-reminder] SMS sent for booking #${booking.booking_number}`);
           } else {
-            console.error(`[send-booking-reminder] Failed to send SMS for booking #${booking.booking_number}`);
+            console.error(`[send-booking-reminder] Failed to send SMS for booking #${booking.booking_number}: ${result.error}`);
           }
         } catch (smsError) {
           console.error(`[send-booking-reminder] Error sending SMS for booking #${booking.booking_number}:`, smsError);

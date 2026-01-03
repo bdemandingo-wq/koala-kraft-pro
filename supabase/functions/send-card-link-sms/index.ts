@@ -195,10 +195,14 @@ const handler = async (req: Request): Promise<Response> => {
     // Send SMS via OpenPhone
     const smsMessage = `${companyName}: Your cleaning service total is $${amount.toFixed(2)}. Pay securely here: ${session.url}`;
 
+    // OpenPhone API requires Bearer prefix
+    const apiKey = smsSettings.openphone_api_key;
+    const authHeader = apiKey.startsWith('Bearer ') ? apiKey : `Bearer ${apiKey}`;
+
     const openPhoneResponse = await fetch('https://api.openphone.com/v1/messages', {
       method: 'POST',
       headers: {
-        'Authorization': smsSettings.openphone_api_key,
+        'Authorization': authHeader,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -210,11 +214,40 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (!openPhoneResponse.ok) {
       const errorText = await openPhoneResponse.text();
-      console.error("OpenPhone API error:", errorText);
+      console.error("OpenPhone API error:", openPhoneResponse.status, errorText);
+      
+      // Handle billing/payment issues gracefully
+      if (openPhoneResponse.status === 402) {
+        return new Response(JSON.stringify({ 
+          success: false,
+          error: "SMS service requires payment. Please check your OpenPhone account billing.",
+          errorCode: "BILLING_REQUIRED",
+          sessionUrl: session.url // Still provide the payment URL
+        }), {
+          status: 200,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        });
+      }
+      
+      // Handle auth issues
+      if (openPhoneResponse.status === 401) {
+        return new Response(JSON.stringify({ 
+          success: false,
+          error: "Invalid OpenPhone API key. Please update your SMS settings.",
+          errorCode: "AUTH_FAILED",
+          sessionUrl: session.url
+        }), {
+          status: 200,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        });
+      }
+      
       return new Response(JSON.stringify({ 
-        error: `Failed to send SMS: ${errorText}` 
+        success: false,
+        error: "SMS delivery failed. Please try again later.",
+        sessionUrl: session.url
       }), {
-        status: 500,
+        status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
