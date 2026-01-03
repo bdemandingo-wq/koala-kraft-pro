@@ -1617,6 +1617,7 @@ export type Database = {
           id: string
           last_year_revenue: number | null
           local_marketing_spend: Json | null
+          marketing_channel_names: Json
           marketing_percent_of_revenue: number | null
           monthly_first_time_goals: Json | null
           monthly_fixed_cost_goals: Json | null
@@ -1654,6 +1655,7 @@ export type Database = {
           id?: string
           last_year_revenue?: number | null
           local_marketing_spend?: Json | null
+          marketing_channel_names?: Json
           marketing_percent_of_revenue?: number | null
           monthly_first_time_goals?: Json | null
           monthly_fixed_cost_goals?: Json | null
@@ -1691,6 +1693,7 @@ export type Database = {
           id?: string
           last_year_revenue?: number | null
           local_marketing_spend?: Json | null
+          marketing_channel_names?: Json
           marketing_percent_of_revenue?: number | null
           monthly_first_time_goals?: Json | null
           monthly_fixed_cost_goals?: Json | null
