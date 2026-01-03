@@ -50,11 +50,14 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Sending help inquiry SMS to admin:', ADMIN_PHONE);
 
+    // OpenPhone API requires Bearer prefix
+    const authHeader = openPhoneApiKey.startsWith('Bearer ') ? openPhoneApiKey : `Bearer ${openPhoneApiKey}`;
+
     // Send SMS via OpenPhone
     const openPhoneResponse = await fetch('https://api.openphone.com/v1/messages', {
       method: 'POST',
       headers: {
-        'Authorization': openPhoneApiKey,
+        'Authorization': authHeader,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -66,10 +69,35 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (!openPhoneResponse.ok) {
       const errorText = await openPhoneResponse.text();
-      console.error('OpenPhone API error:', errorText);
+      console.error('OpenPhone API error:', openPhoneResponse.status, errorText);
+      
+      // Handle billing/payment issues gracefully
+      if (openPhoneResponse.status === 402) {
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: 'SMS service requires payment. Please check your OpenPhone account billing.', 
+            errorCode: 'BILLING_REQUIRED' 
+          }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      // Handle auth issues
+      if (openPhoneResponse.status === 401) {
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: 'Invalid OpenPhone API key. Please update your SMS settings.', 
+            errorCode: 'AUTH_FAILED' 
+          }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
       return new Response(
-        JSON.stringify({ error: 'Failed to send message' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Failed to send message. Please try again later.' }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 

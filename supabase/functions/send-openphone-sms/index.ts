@@ -115,11 +115,14 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`[send-openphone-sms] Sending SMS to ${formattedPhone} for org: ${organizationId}`);
 
+    // OpenPhone API requires Bearer prefix
+    const authHeader = apiKey.startsWith('Bearer ') ? apiKey : `Bearer ${apiKey}`;
+
     // Send SMS via OpenPhone API
     const response = await fetch("https://api.openphone.com/v1/messages", {
       method: "POST",
       headers: {
-        "Authorization": apiKey,
+        "Authorization": authHeader,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -132,9 +135,34 @@ const handler = async (req: Request): Promise<Response> => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`[send-openphone-sms] OpenPhone API error: ${response.status} - ${errorText}`);
+      
+      // Handle billing/payment issues gracefully
+      if (response.status === 402) {
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: "SMS service requires payment. Please check your OpenPhone account billing.", 
+            errorCode: "BILLING_REQUIRED" 
+          }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      
+      // Handle auth issues
+      if (response.status === 401) {
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: "Invalid OpenPhone API key. Please update your SMS settings.", 
+            errorCode: "AUTH_FAILED" 
+          }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      
       return new Response(
-        JSON.stringify({ success: false, error: `OpenPhone API error: ${response.status}` }),
-        { status: response.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ success: false, error: `SMS delivery failed. Please try again later.` }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
