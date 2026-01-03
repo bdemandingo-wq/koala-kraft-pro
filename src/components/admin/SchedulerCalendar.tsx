@@ -67,9 +67,20 @@ const statusLabels: Record<string, string> = {
   no_show: 'no show',
 };
 
+// Bolder, more distinct staff colors with higher saturation and contrast
 const STAFF_COLOR_PALETTE = [
-  '#3b82f6', '#22c55e', '#8b5cf6', '#f59e0b', '#ec4899', '#14b8a6',
-  '#f97316', '#ef4444', '#06b6d4', '#a855f7', '#eab308', '#6366f1'
+  '#1d4ed8', // deep blue
+  '#15803d', // forest green
+  '#7c3aed', // vivid purple
+  '#c2410c', // burnt orange
+  '#be185d', // magenta
+  '#0e7490', // dark cyan
+  '#b91c1c', // bold red
+  '#4338ca', // indigo
+  '#0f766e', // teal
+  '#a21caf', // fuchsia
+  '#ca8a04', // dark yellow
+  '#0369a1', // sky blue dark
 ];
 
 const getStaffColor = (staffId: string | null | undefined, staffList: { id: string; calendar_color?: string | null }[]): string => {
