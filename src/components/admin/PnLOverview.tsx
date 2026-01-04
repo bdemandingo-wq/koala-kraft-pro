@@ -213,9 +213,19 @@ export function PnLOverview({ bookings, customers }: PnLOverviewProps) {
         .single();
       
       if (data) {
-        // Calculate monthly marketing budget from percentage if not stored separately
-        let monthlyMarketingBudget = defaultSettings.monthly_marketing_budget;
-        if (data.marketing_percent_of_revenue && data.annual_revenue_goal) {
+        // Prefer stored monthly marketing budget; fall back to % of revenue when empty
+        const storedBudget = (data as any).monthly_marketing_budget;
+        const normalize12 = (arr: unknown[]): number[] => {
+          const nums = arr.map(v => Number(v) || 0);
+          if (nums.length >= 12) return nums.slice(0, 12);
+          return [...nums, ...Array(12 - nums.length).fill(0)];
+        };
+
+        let monthlyMarketingBudget = Array.isArray(storedBudget) && storedBudget.length > 0
+          ? normalize12(storedBudget)
+          : defaultSettings.monthly_marketing_budget;
+
+        if ((!Array.isArray(storedBudget) || storedBudget.length === 0) && data.marketing_percent_of_revenue && data.annual_revenue_goal) {
           const monthlyBudget = (Number(data.annual_revenue_goal) * Number(data.marketing_percent_of_revenue) / 100) / 12;
           monthlyMarketingBudget = Array(12).fill(Math.round(monthlyBudget));
         }
