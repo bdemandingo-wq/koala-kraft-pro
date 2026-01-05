@@ -25,7 +25,7 @@ export function AdminLayout({ children, title, subtitle, actions }: AdminLayoutP
         sidebarOpen && "md:pl-64"
       )}>
         <AdminHeader title={title} subtitle={subtitle} actions={actions} />
-        <main className="p-4 md:p-6 pt-20 md:pt-6">
+        <main className="p-4 md:p-6 pt-20 md:pt-6 animate-page-enter">
           {children}
         </main>
       </div>
