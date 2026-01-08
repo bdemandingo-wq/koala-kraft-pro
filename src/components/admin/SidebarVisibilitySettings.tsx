@@ -4,6 +4,9 @@ import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { useOrgId } from '@/hooks/useOrgId';
 import {
   Home,
   Calendar,
@@ -26,6 +29,7 @@ import {
   Tag,
   PanelLeft,
   RotateCcw,
+  Loader2,
 } from 'lucide-react';
 
 const sidebarItems = [
@@ -54,17 +58,60 @@ const sidebarItems = [
 
 export function SidebarVisibilitySettings() {
   const [hiddenItems, setHiddenItems] = useState<string[]>([]);
+  const [saving, setSaving] = useState(false);
+  const { user } = useAuth();
+  const { organizationId } = useOrgId();
 
+  // Load from database on mount
   useEffect(() => {
-    const saved = localStorage.getItem('tidywise_nav_hidden');
-    if (saved) {
-      try {
-        setHiddenItems(JSON.parse(saved));
-      } catch (e) {
-        console.error('Error loading hidden items:', e);
+    const loadPreferences = async () => {
+      if (!user?.id || !organizationId) return;
+      
+      const { data } = await supabase
+        .from('user_preferences')
+        .select('preference_value')
+        .eq('user_id', user.id)
+        .eq('organization_id', organizationId)
+        .eq('preference_key', 'sidebar_hidden')
+        .maybeSingle();
+      
+      if (data?.preference_value) {
+        const hidden = data.preference_value as string[];
+        setHiddenItems(hidden);
+        // Sync to localStorage for sidebar component
+        localStorage.setItem('tidywise_nav_hidden', JSON.stringify(hidden));
+        window.dispatchEvent(new Event('navHiddenChanged'));
       }
+    };
+    
+    loadPreferences();
+  }, [user?.id, organizationId]);
+
+  const saveToDatabase = async (newHidden: string[]) => {
+    if (!user?.id || !organizationId) return;
+    
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from('user_preferences')
+        .upsert({
+          user_id: user.id,
+          organization_id: organizationId,
+          preference_key: 'sidebar_hidden',
+          preference_value: newHidden,
+          updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'user_id,organization_id,preference_key'
+        });
+      
+      if (error) throw error;
+    } catch (e) {
+      console.error('Error saving preferences:', e);
+      toast.error('Failed to save preference');
+    } finally {
+      setSaving(false);
     }
-  }, []);
+  };
 
   const toggleItem = (href: string) => {
     setHiddenItems(prev => {
@@ -73,18 +120,31 @@ export function SidebarVisibilitySettings() {
         : [...prev, href];
       
       localStorage.setItem('tidywise_nav_hidden', JSON.stringify(newHidden));
-      // Dispatch custom event for same-tab updates
       window.dispatchEvent(new Event('navHiddenChanged'));
+      
+      // Save to database
+      saveToDatabase(newHidden);
       
       return newHidden;
     });
   };
 
-  const resetToDefault = () => {
+  const resetToDefault = async () => {
     setHiddenItems([]);
     localStorage.removeItem('tidywise_nav_hidden');
     localStorage.removeItem('tidywise_nav_order');
     window.dispatchEvent(new Event('navHiddenChanged'));
+    
+    // Delete from database
+    if (user?.id && organizationId) {
+      await supabase
+        .from('user_preferences')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('organization_id', organizationId)
+        .eq('preference_key', 'sidebar_hidden');
+    }
+    
     toast.success('Sidebar reset to default');
   };
 
@@ -103,8 +163,8 @@ export function SidebarVisibilitySettings() {
               Choose which menu items to show in your sidebar. Drag items in the sidebar to reorder them.
             </CardDescription>
           </div>
-          <Button variant="outline" size="sm" onClick={resetToDefault} className="gap-2">
-            <RotateCcw className="w-4 h-4" />
+          <Button variant="outline" size="sm" onClick={resetToDefault} className="gap-2" disabled={saving}>
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <RotateCcw className="w-4 h-4" />}
             Reset to Default
           </Button>
         </div>

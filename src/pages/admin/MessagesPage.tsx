@@ -6,7 +6,10 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrgId } from '@/hooks/useOrgId';
 import { toast } from 'sonner';
@@ -19,7 +22,12 @@ import {
   Phone, 
   User,
   Loader2,
-  RefreshCw
+  RefreshCw,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+  Users,
+  HardHat,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -30,6 +38,7 @@ interface Conversation {
   customer_name: string | null;
   last_message_at: string;
   unread_count: number;
+  conversation_type?: 'client' | 'cleaner';
 }
 
 interface Message {
@@ -39,6 +48,8 @@ interface Message {
   sent_at: string;
   status: string;
 }
+
+type ConversationTab = 'all' | 'clients' | 'cleaners';
 
 export default function MessagesPage() {
   const { organizationId } = useOrgId();
@@ -52,6 +63,10 @@ export default function MessagesPage() {
   const [newConversationOpen, setNewConversationOpen] = useState(false);
   const [newPhone, setNewPhone] = useState('');
   const [newName, setNewName] = useState('');
+  const [conversationType, setConversationType] = useState<'client' | 'cleaner'>('client');
+  const [activeTab, setActiveTab] = useState<ConversationTab>('all');
+  const [editNameOpen, setEditNameOpen] = useState(false);
+  const [editingName, setEditingName] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -222,7 +237,8 @@ export default function MessagesPage() {
       .insert({
         organization_id: organizationId,
         customer_phone: phoneWithCountry,
-        customer_name: newName.trim() || null
+        customer_name: newName.trim() || null,
+        conversation_type: conversationType
       })
       .select()
       .single();
@@ -237,12 +253,62 @@ export default function MessagesPage() {
     setNewConversationOpen(false);
     setNewPhone('');
     setNewName('');
+    setConversationType('client');
   };
 
-  const filteredConversations = conversations.filter(conv => 
-    conv.customer_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    conv.customer_phone.includes(searchQuery)
-  );
+  const handleUpdateCustomerName = async () => {
+    if (!selectedConversation) return;
+    
+    const { error } = await supabase
+      .from('sms_conversations')
+      .update({ customer_name: editingName.trim() || null })
+      .eq('id', selectedConversation.id);
+    
+    if (error) {
+      toast.error('Failed to update name');
+      return;
+    }
+    
+    setConversations(prev => prev.map(c => 
+      c.id === selectedConversation.id 
+        ? { ...c, customer_name: editingName.trim() || null }
+        : c
+    ));
+    setSelectedConversation(prev => prev ? { ...prev, customer_name: editingName.trim() || null } : null);
+    setEditNameOpen(false);
+    toast.success('Name updated');
+  };
+
+  const handleDeleteConversation = async (convId: string) => {
+    if (!confirm('Delete this conversation and all messages?')) return;
+    
+    // Delete messages first
+    await supabase.from('sms_messages').delete().eq('conversation_id', convId);
+    // Then delete conversation
+    const { error } = await supabase.from('sms_conversations').delete().eq('id', convId);
+    
+    if (error) {
+      toast.error('Failed to delete conversation');
+      return;
+    }
+    
+    setConversations(prev => prev.filter(c => c.id !== convId));
+    if (selectedConversation?.id === convId) {
+      setSelectedConversation(null);
+      setMessages([]);
+    }
+    toast.success('Conversation deleted');
+  };
+
+  const filteredConversations = conversations.filter(conv => {
+    const matchesSearch = conv.customer_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      conv.customer_phone.includes(searchQuery);
+    
+    if (activeTab === 'all') return matchesSearch;
+    if (activeTab === 'clients') return matchesSearch && conv.conversation_type !== 'cleaner';
+    if (activeTab === 'cleaners') return matchesSearch && conv.conversation_type === 'cleaner';
+    return matchesSearch;
+  });
 
   const getInitials = (name: string | null, phone: string) => {
     if (name) {
@@ -273,7 +339,22 @@ export default function MessagesPage() {
               </DialogHeader>
               <div className="space-y-4 pt-4">
                 <div>
-                  <label className="text-sm font-medium">Phone Number</label>
+                  <Label className="text-sm font-medium">Contact Type</Label>
+                  <Tabs value={conversationType} onValueChange={(v) => setConversationType(v as 'client' | 'cleaner')} className="mt-2">
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="client" className="gap-2">
+                        <Users className="h-4 w-4" />
+                        Client
+                      </TabsTrigger>
+                      <TabsTrigger value="cleaner" className="gap-2">
+                        <HardHat className="h-4 w-4" />
+                        Cleaner
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Phone Number</Label>
                   <Input
                     placeholder="(555) 123-4567"
                     value={newPhone}
@@ -281,9 +362,9 @@ export default function MessagesPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Name (optional)</label>
+                  <Label className="text-sm font-medium">Name (optional)</Label>
                   <Input
-                    placeholder="Customer name"
+                    placeholder="Contact name"
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
                   />
@@ -300,7 +381,20 @@ export default function MessagesPage() {
       <div className="flex h-[calc(100vh-12rem)] border rounded-lg overflow-hidden bg-card">
         {/* Conversation List */}
         <div className="w-80 border-r flex flex-col">
-          <div className="p-3 border-b">
+          <div className="p-3 border-b space-y-3">
+            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as ConversationTab)}>
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="all">All</TabsTrigger>
+                <TabsTrigger value="clients" className="gap-1">
+                  <Users className="h-3 w-3" />
+                  Clients
+                </TabsTrigger>
+                <TabsTrigger value="cleaners" className="gap-1">
+                  <HardHat className="h-3 w-3" />
+                  Cleaners
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -371,22 +465,76 @@ export default function MessagesPage() {
           {selectedConversation ? (
             <>
               {/* Chat Header */}
-              <div className="p-4 border-b flex items-center gap-3">
-                <Avatar className="h-10 w-10">
-                  <AvatarFallback className="bg-primary/10 text-primary">
-                    {getInitials(selectedConversation.customer_name, selectedConversation.customer_phone)}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="font-medium">
-                    {selectedConversation.customer_name || selectedConversation.customer_phone}
-                  </p>
-                  <p className="text-sm text-muted-foreground flex items-center gap-1">
-                    <Phone className="h-3 w-3" />
-                    {selectedConversation.customer_phone}
-                  </p>
+              <div className="p-4 border-b flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10">
+                    <AvatarFallback className={cn(
+                      "text-primary",
+                      selectedConversation.conversation_type === 'cleaner' 
+                        ? "bg-amber-100" 
+                        : "bg-primary/10"
+                    )}>
+                      {selectedConversation.conversation_type === 'cleaner' 
+                        ? <HardHat className="h-5 w-5 text-amber-600" />
+                        : getInitials(selectedConversation.customer_name, selectedConversation.customer_phone)
+                      }
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium">
+                      {selectedConversation.customer_name || selectedConversation.customer_phone}
+                    </p>
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                      <Phone className="h-3 w-3" />
+                      {selectedConversation.customer_phone}
+                    </p>
+                  </div>
                 </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => {
+                      setEditingName(selectedConversation.customer_name || '');
+                      setEditNameOpen(true);
+                    }}>
+                      <Pencil className="h-4 w-4 mr-2" />
+                      Edit Name
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      className="text-destructive"
+                      onClick={() => handleDeleteConversation(selectedConversation.id)}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete Conversation
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
+
+              {/* Edit Name Dialog */}
+              <Dialog open={editNameOpen} onOpenChange={setEditNameOpen}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Edit Contact Name</DialogTitle>
+                  </DialogHeader>
+                  <div className="py-4">
+                    <Label>Name</Label>
+                    <Input 
+                      value={editingName} 
+                      onChange={(e) => setEditingName(e.target.value)}
+                      placeholder="Enter contact name"
+                    />
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setEditNameOpen(false)}>Cancel</Button>
+                    <Button onClick={handleUpdateCustomerName}>Save</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
 
               {/* Messages */}
               <ScrollArea className="flex-1 p-4">

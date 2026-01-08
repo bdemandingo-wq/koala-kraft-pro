@@ -281,7 +281,23 @@ export default function StaffPage() {
                     )}
                     <div className="flex items-center justify-between pt-3 border-t">
                       <span className="text-sm text-muted-foreground">Active</span>
-                      <Switch checked={member.is_active} disabled />
+                      <Switch 
+                        checked={member.is_active} 
+                        onCheckedChange={async (checked) => {
+                          try {
+                            const { error } = await supabase
+                              .from('staff')
+                              .update({ is_active: checked })
+                              .eq('id', member.id);
+                            if (error) throw error;
+                            queryClient.invalidateQueries({ queryKey: ['staff'] });
+                            toast.success(`Staff member ${checked ? 'activated' : 'deactivated'}`);
+                          } catch (error) {
+                            console.error('Error updating staff status:', error);
+                            toast.error('Failed to update staff status');
+                          }
+                        }}
+                      />
                     </div>
                   </div>
                 </CardContent>
