@@ -6,6 +6,7 @@ import { AddBookingDialog } from '@/components/admin/AddBookingDialog';
 import { ThemeToggle } from '@/components/admin/ThemeToggle';
 import { useTestMode } from '@/contexts/TestModeContext';
 import { Badge } from '@/components/ui/badge';
+import { AdminNotificationBell } from '@/components/admin/AdminNotificationBell';
 
 interface AdminHeaderProps {
   title: string;
@@ -47,6 +48,9 @@ export function AdminHeader({ title, subtitle, actions }: AdminHeaderProps) {
 
             {/* Actions */}
             {actions}
+
+            {/* Notification Bell */}
+            <AdminNotificationBell />
 
             {/* Test Mode Toggle */}
             <Button

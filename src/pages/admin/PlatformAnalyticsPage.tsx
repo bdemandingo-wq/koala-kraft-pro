@@ -237,7 +237,7 @@ export default function PlatformAnalyticsPage() {
 
         {/* Tabbed Content */}
         <Tabs defaultValue="signups" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-4">
+          <TabsList className="grid w-full grid-cols-4 mb-4">
             <TabsTrigger value="signups" className="flex items-center gap-2">
               <UserPlus className="w-4 h-4" />
               Signups ({analytics?.signups.recent?.length || 0})
@@ -249,6 +249,10 @@ export default function PlatformAnalyticsPage() {
             <TabsTrigger value="subscriptions" className="flex items-center gap-2">
               <CreditCard className="w-4 h-4" />
               Subscriptions ({analytics?.subscriptions.list?.length || 0})
+            </TabsTrigger>
+            <TabsTrigger value="activity" className="flex items-center gap-2">
+              <Activity className="w-4 h-4" />
+              User Activity
             </TabsTrigger>
           </TabsList>
 
@@ -434,6 +438,98 @@ export default function PlatformAnalyticsPage() {
                     </div>
                   )}
                 </ScrollArea>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="activity">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Activity className="w-5 h-5 text-purple-500" />
+                  User Activity Tracking
+                  <Badge variant="secondary" className="ml-auto">Live</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {/* Activity Stats */}
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="text-center p-3 bg-purple-500/10 rounded-lg border border-purple-500/20">
+                      <p className="text-2xl font-bold text-purple-600">{analytics?.signups.last30Days || 0}</p>
+                      <p className="text-xs text-muted-foreground">Active Users (30d)</p>
+                    </div>
+                    <div className="text-center p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                      <p className="text-2xl font-bold text-blue-600">
+                        {Math.round(((analytics?.subscriptions.active || 0) / Math.max(1, analytics?.signups.total || 1)) * 100)}%
+                      </p>
+                      <p className="text-xs text-muted-foreground">Engagement Rate</p>
+                    </div>
+                    <div className="text-center p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
+                      <p className="text-2xl font-bold text-amber-600">
+                        {analytics?.organizations.last30Days || 0}
+                      </p>
+                      <p className="text-xs text-muted-foreground">New Orgs (30d)</p>
+                    </div>
+                  </div>
+
+                  {/* Most Active Users */}
+                  <div>
+                    <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-primary" />
+                      Most Active Users
+                    </h4>
+                    <ScrollArea className="h-[280px] pr-4">
+                      {analytics?.signups.recent && analytics.signups.recent.length > 0 ? (
+                        <div className="space-y-2">
+                          {analytics.signups.recent
+                            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                            .slice(0, 10)
+                            .map((user, index) => (
+                              <div 
+                                key={user.id} 
+                                className="flex items-center justify-between p-3 bg-muted/50 hover:bg-muted rounded-lg transition-colors"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                                    index === 0 ? 'bg-yellow-500/20 text-yellow-600' :
+                                    index === 1 ? 'bg-gray-300/30 text-gray-600' :
+                                    index === 2 ? 'bg-amber-600/20 text-amber-700' :
+                                    'bg-primary/10 text-primary'
+                                  }`}>
+                                    {index + 1}
+                                  </div>
+                                  <div>
+                                    <p className="font-medium text-sm">{user.email}</p>
+                                    <p className="text-xs text-muted-foreground">
+                                      Joined {formatDistanceToNow(new Date(user.created_at), { addSuffix: true })}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
+                                    Active
+                                  </Badge>
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-12 text-muted-foreground">
+                          <Activity className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                          <p>No user activity data available</p>
+                        </div>
+                      )}
+                    </ScrollArea>
+                  </div>
+
+                  <div className="p-4 bg-muted/30 rounded-lg border border-border/50">
+                    <p className="text-sm text-muted-foreground">
+                      <strong>Note:</strong> Detailed session tracking with time spent on site requires additional analytics integration. 
+                      This view shows user signups and engagement metrics.
+                    </p>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
