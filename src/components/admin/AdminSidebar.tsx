@@ -59,6 +59,7 @@ const defaultNavigation = [
   { name: 'Recurring', href: '/dashboard/recurring', icon: Repeat },
   { name: 'Customers', href: '/dashboard/customers', icon: Users },
   { name: 'Messages', href: '/dashboard/messages', icon: MessageSquare },
+  { name: 'Tasks', href: '/dashboard/tasks', icon: CheckSquare },
   { name: 'Leads', href: '/dashboard/leads', icon: Target },
   { name: 'Operations', href: '/dashboard/operations', icon: MapPin },
   { name: 'Feedback', href: '/dashboard/feedback', icon: MessageSquare },

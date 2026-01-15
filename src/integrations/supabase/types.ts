@@ -1689,6 +1689,47 @@ export type Database = {
         }
         Relationships: []
       }
+      payroll_payments: {
+        Row: {
+          amount: number | null
+          created_at: string
+          id: string
+          organization_id: string | null
+          paid_at: string
+          paid_by: string
+          staff_id: string
+          week_start: string
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          id?: string
+          organization_id?: string | null
+          paid_at?: string
+          paid_by: string
+          staff_id: string
+          week_start: string
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          id?: string
+          organization_id?: string | null
+          paid_at?: string
+          paid_by?: string
+          staff_id?: string
+          week_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_payments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pnl_settings: {
         Row: {
           annual_revenue_goal: number | null
@@ -2594,6 +2635,50 @@ export type Database = {
             columns: ["staff_id"]
             isOneToOne: false
             referencedRelation: "staff_safe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tasks_and_notes: {
+        Row: {
+          content: string
+          created_at: string
+          due_date: string | null
+          id: string
+          is_completed: boolean | null
+          organization_id: string | null
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          is_completed?: boolean | null
+          organization_id?: string | null
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          is_completed?: boolean | null
+          organization_id?: string | null
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_and_notes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
