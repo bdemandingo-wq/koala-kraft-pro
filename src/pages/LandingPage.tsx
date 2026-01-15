@@ -23,6 +23,7 @@ import { PrivacyPolicyDialog } from "@/components/legal/PrivacyPolicyDialog";
 import { TermsOfServiceDialog } from "@/components/legal/TermsOfServiceDialog";
 import { AIBusinessTools } from "@/components/landing/AIBusinessTools";
 import { CompetitorComparison } from "@/components/landing/CompetitorComparison";
+import { BlogSection } from "@/components/landing/BlogSection";
 
 const cleaningConfig = {
   jobLabel: "Cleans",
@@ -139,6 +140,7 @@ export default function LandingPage() {
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-8">
               <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
+              <a href="#blog" className="text-muted-foreground hover:text-foreground transition-colors">Blog</a>
               <a href="#testimonials" className="text-muted-foreground hover:text-foreground transition-colors">Testimonials</a>
               <Button variant="ghost" onClick={() => navigate("/staff/login")}>Staff Portal</Button>
               <Button variant="ghost" onClick={() => navigate("/auth")}>Log In</Button>
@@ -159,6 +161,7 @@ export default function LandingPage() {
             <div className="md:hidden py-4 border-t border-border">
               <div className="flex flex-col gap-4">
                 <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
+                <a href="#blog" className="text-muted-foreground hover:text-foreground transition-colors">Blog</a>
                 <a href="#testimonials" className="text-muted-foreground hover:text-foreground transition-colors">Testimonials</a>
                 <Button variant="ghost" className="justify-start" onClick={() => navigate("/staff/login")}>Staff Portal</Button>
                 <Button variant="ghost" className="justify-start" onClick={() => navigate("/auth")}>Log In</Button>
@@ -307,6 +310,9 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* Blog Section */}
+      <BlogSection />
 
       {/* Competitor Comparison Section - moved up to hook customers */}
       <CompetitorComparison />
