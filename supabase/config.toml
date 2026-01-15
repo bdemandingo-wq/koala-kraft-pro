@@ -92,3 +92,21 @@ verify_jwt = false
 
 [functions.generate-daily-blogs]
 verify_jwt = false
+
+[functions.quote-expiry-reminder]
+verify_jwt = false
+
+[functions.post-booking-upsell]
+verify_jwt = false
+
+[functions.send-referral-request]
+verify_jwt = false
+
+[functions.weekly-payroll-summary]
+verify_jwt = false
+
+[functions.weekly-business-report]
+verify_jwt = false
+
+[functions.booking-chatbot]
+verify_jwt = false
