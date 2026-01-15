@@ -164,6 +164,7 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
   const [currentStep, setCurrentStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [savingDraft, setSavingDraft] = useState(false);
+  const [sendingQuoteSms, setSendingQuoteSms] = useState(false);
   const [steps, setSteps] = useState<StepItem[]>(DEFAULT_STEPS);
   const [showRecurringDialog, setShowRecurringDialog] = useState(false);
   const [pendingBookingData, setPendingBookingData] = useState<any>(null);
@@ -270,6 +271,49 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
     resetForm,
     staff,
   } = useBookingForm();
+
+  // Get customer phone for quote SMS
+  const customerPhone = customerTab === 'existing' && selectedCustomer 
+    ? selectedCustomer.phone 
+    : newCustomer.phone;
+
+  // Send quote SMS handler
+  const handleSendQuoteSms = async () => {
+    if (!customerPhone) {
+      toast.error('Customer phone number is required to send a quote');
+      return;
+    }
+    
+    const quoteAmount = totalAmount > 0 ? totalAmount : calculatedPrice;
+    if (quoteAmount <= 0) {
+      toast.error('Please configure service and pricing first');
+      return;
+    }
+
+    setSendingQuoteSms(true);
+    try {
+      const message = `Hi ${customerName}! Here's your quote for ${selectedService?.name || 'cleaning services'}:\n\n` +
+        `📍 Address: ${address}${city ? `, ${city}` : ''}\n` +
+        `💰 Total: $${quoteAmount.toFixed(2)}\n\n` +
+        `This quote is valid for 7 days. Reply YES to confirm or call us with any questions!`;
+
+      const { error } = await supabase.functions.invoke('send-openphone-sms', {
+        body: {
+          to: customerPhone,
+          message,
+          organizationId: organizationId ?? undefined,
+        },
+      });
+      
+      if (error) throw error;
+      toast.success('Quote sent via SMS!');
+    } catch (error: any) {
+      console.error('Quote SMS error:', error);
+      toast.error(error.message || 'Failed to send quote via SMS');
+    } finally {
+      setSendingQuoteSms(false);
+    }
+  };
 
   const validateStep = (stepId: string): boolean => {
     switch (stepId) {
@@ -801,10 +845,10 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
             Back
           </Button>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             {currentStep === steps.length - 1 ? (
               <>
-                <div className="flex items-center gap-2 mr-4 p-2 bg-secondary/30 rounded-lg">
+                <div className="flex items-center gap-2 p-2 bg-secondary/30 rounded-lg">
                   <Checkbox
                     id="sendConfirmationSms"
                     checked={sendConfirmationSms}
@@ -818,6 +862,22 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
                     Send confirmation text
                   </Label>
                 </div>
+
+                {/* Send Quote via SMS button */}
+                <Button 
+                  variant="outline" 
+                  onClick={handleSendQuoteSms} 
+                  disabled={sendingQuoteSms || !customerPhone}
+                  className="h-11"
+                  title={!customerPhone ? 'Customer phone required' : 'Send quote to customer'}
+                >
+                  {sendingQuoteSms ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <MessageSquare className="mr-2 h-4 w-4" />
+                  )}
+                  Send Quote SMS
+                </Button>
 
                 {booking && (
                   <Button variant="outline" onClick={handleDuplicate} className="h-11">

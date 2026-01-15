@@ -585,11 +585,6 @@ export default function BookingsPage() {
   };
 
   const handleSendCleanerNotification = async (booking: BookingWithDetails) => {
-    if (!booking.staff?.phone) {
-      toast({ title: "Error", description: "No cleaner assigned or cleaner has no phone number", variant: "destructive" });
-      return;
-    }
-
     setSendingCleanerNotification(booking.id);
     
     try {
@@ -598,34 +593,72 @@ export default function BookingsPage() {
         .filter(Boolean)
         .join(', ');
 
-      const { data, error } = await supabase.functions.invoke('send-cleaner-notification', {
-        body: {
-          cleanerName: booking.staff.name,
-          cleanerPhone: booking.staff.phone,
-          customerName: booking.customer ? `${booking.customer.first_name} ${booking.customer.last_name}` : 'Customer',
-          customerPhone: booking.customer?.phone || 'N/A',
-          serviceName: booking.service?.name || 'Cleaning Service',
-          appointmentDate: format(scheduledDate, 'MMMM d, yyyy'),
-          appointmentTime: format(scheduledDate, 'h:mm a'),
-          address: fullAddress || 'Address not provided',
-          bookingNumber: booking.booking_number,
-          organizationId: organization?.id,
+      // Get team members for this booking
+      const { data: teamAssignments } = await supabase
+        .from('booking_team_assignments')
+        .select('staff_id, staff:staff(id, name, phone)')
+        .eq('booking_id', booking.id);
+
+      // Collect all staff to notify (primary + team members)
+      const staffToNotify: { name: string; phone: string }[] = [];
+      
+      // Add primary staff if assigned
+      if (booking.staff?.phone) {
+        staffToNotify.push({ name: booking.staff.name, phone: booking.staff.phone });
+      }
+      
+      // Add team members (avoid duplicates)
+      if (teamAssignments && teamAssignments.length > 0) {
+        for (const assignment of teamAssignments) {
+          const staffMember = assignment.staff as any;
+          if (staffMember?.phone && !staffToNotify.some(s => s.phone === staffMember.phone)) {
+            staffToNotify.push({ name: staffMember.name, phone: staffMember.phone });
+          }
         }
-      });
+      }
 
-      if (error) throw error;
-
-      if (!data?.success) {
-        const title = data?.errorCode === 'BILLING_REQUIRED' ? 'SMS Paused' : 'SMS Not Sent';
-        toast({
-          title,
-          description: data?.error || 'Failed to send cleaner notification',
-          variant: 'destructive',
-        });
+      if (staffToNotify.length === 0) {
+        toast({ title: "Error", description: "No cleaners assigned or none have phone numbers", variant: "destructive" });
         return;
       }
 
-      toast({ title: "Notification Sent", description: `SMS sent to ${booking.staff.name} (${booking.staff.phone})` });
+      let successCount = 0;
+      let failCount = 0;
+
+      for (const staffMember of staffToNotify) {
+        try {
+          const { data, error } = await supabase.functions.invoke('send-cleaner-notification', {
+            body: {
+              cleanerName: staffMember.name,
+              cleanerPhone: staffMember.phone,
+              customerName: booking.customer ? `${booking.customer.first_name} ${booking.customer.last_name}` : 'Customer',
+              customerPhone: booking.customer?.phone || 'N/A',
+              serviceName: booking.service?.name || 'Cleaning Service',
+              appointmentDate: format(scheduledDate, 'MMMM d, yyyy'),
+              appointmentTime: format(scheduledDate, 'h:mm a'),
+              address: fullAddress || 'Address not provided',
+              bookingNumber: booking.booking_number,
+              organizationId: organization?.id,
+            }
+          });
+
+          if (error) throw error;
+          if (!data?.success) throw new Error(data?.error || 'SMS delivery failed');
+          successCount++;
+        } catch (error) {
+          console.error(`Failed to notify ${staffMember.name}:`, error);
+          failCount++;
+        }
+      }
+
+      if (successCount > 0) {
+        const message = staffToNotify.length > 1 
+          ? `SMS sent to ${successCount} team member(s)${failCount > 0 ? `, ${failCount} failed` : ''}`
+          : `SMS sent to ${staffToNotify[0].name}`;
+        toast({ title: "Notification Sent", description: message });
+      } else {
+        toast({ title: "SMS Not Sent", description: "All notifications failed", variant: "destructive" });
+      }
     } catch (error: any) {
       console.error('Failed to send cleaner notification:', error);
       toast({ title: "Error", description: error.message || "Failed to send cleaner notification", variant: "destructive" });
