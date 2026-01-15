@@ -287,7 +287,7 @@ export function QuotesTabContent() {
               </div>
               <span className="text-sm font-medium text-muted-foreground">Total Value</span>
             </div>
-            <p className="text-3xl font-bold">${maskAmount(stats.totalValue).toLocaleString()}</p>
+            <p className="text-3xl font-bold">${isTestMode ? '0.00' : stats.totalValue.toLocaleString()}</p>
           </CardContent>
         </Card>
       </div>
