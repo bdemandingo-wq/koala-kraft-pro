@@ -30,6 +30,7 @@ import {
   PanelLeft,
   RotateCcw,
   Loader2,
+  Zap,
 } from 'lucide-react';
 
 const sidebarItems = [
@@ -41,6 +42,7 @@ const sidebarItems = [
   { name: 'Messages', href: '/dashboard/messages', icon: MessageSquare },
   { name: 'Leads', href: '/dashboard/leads', icon: Target },
   { name: 'Operations', href: '/dashboard/operations', icon: MapPin },
+  { name: 'Campaigns', href: '/dashboard/campaigns', icon: Zap },
   { name: 'Feedback', href: '/dashboard/feedback', icon: MessageSquare },
   { name: 'Services', href: '/dashboard/services', icon: Briefcase },
   { name: 'Staff', href: '/dashboard/staff', icon: UserCircle },
