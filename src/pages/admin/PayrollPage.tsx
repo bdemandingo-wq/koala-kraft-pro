@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,11 +17,14 @@ import {
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { supabase } from '@/integrations/supabase/client';
-import { useQuery } from '@tanstack/react-query';
-import { format, startOfMonth, endOfMonth, startOfYear, isWithinInterval } from 'date-fns';
-import { CalendarIcon, Download, AlertTriangle, DollarSign, Users, Clock, Calculator, TrendingUp, Briefcase, Check } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { format, startOfMonth, endOfMonth, startOfYear, isWithinInterval, startOfWeek
+ } from 'date-fns';
+import { CalendarIcon, Download, AlertTriangle, DollarSign, Users, Clock, Calculator, TrendingUp, Briefcase, Check, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTestMode } from '@/contexts/TestModeContext';
+import { useOrgId } from '@/hooks/useOrgId';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
 interface StaffWithPayroll {
@@ -60,20 +63,77 @@ export default function PayrollPage() {
     to: endOfMonth(new Date()),
   });
   const { isTestMode, maskName, maskEmail } = useTestMode();
-  const [paidStaff, setPaidStaff] = useState<Set<string>>(new Set());
+  const { organizationId } = useOrgId();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
 
-  const handleMarkPaid = (staffId: string, staffName: string) => {
-    setPaidStaff(prev => {
-      const next = new Set(prev);
-      if (next.has(staffId)) {
-        next.delete(staffId);
-        toast.info(`${staffName} marked as unpaid`);
+  // Calculate week start for current date range (for weekly reset)
+  const weekStart = format(startOfWeek(dateRange.from, { weekStartsOn: 1 }), 'yyyy-MM-dd');
+
+  // Fetch paid staff for current week
+  const { data: paidPayments = [] } = useQuery({
+    queryKey: ['payroll-payments', organizationId, weekStart],
+    queryFn: async () => {
+      if (!organizationId) return [];
+      const { data, error } = await supabase
+        .from('payroll_payments')
+        .select('staff_id')
+        .eq('organization_id', organizationId)
+        .eq('week_start', weekStart);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!organizationId,
+  });
+
+  const paidStaffIds = new Set(paidPayments.map(p => p.staff_id));
+
+  // Mark paid mutation
+  const markPaidMutation = useMutation({
+    mutationFn: async ({ staffId, staffName, isPaid, amount }: { staffId: string; staffName: string; isPaid: boolean; amount?: number }) => {
+      if (!organizationId || !user) throw new Error('Missing context');
+      
+      if (isPaid) {
+        // Remove paid status
+        const { error } = await supabase
+          .from('payroll_payments')
+          .delete()
+          .eq('organization_id', organizationId)
+          .eq('staff_id', staffId)
+          .eq('week_start', weekStart);
+        if (error) throw error;
+        return { staffName, isPaid: false };
       } else {
-        next.add(staffId);
-        toast.success(`${staffName} marked as paid`);
+        // Add paid status
+        const { error } = await supabase
+          .from('payroll_payments')
+          .insert({
+            organization_id: organizationId,
+            staff_id: staffId,
+            week_start: weekStart,
+            paid_by: user.id,
+            amount: amount || null,
+          });
+        if (error) throw error;
+        return { staffName, isPaid: true };
       }
-      return next;
-    });
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['payroll-payments'] });
+      if (data.isPaid) {
+        toast.success(`${data.staffName} marked as paid`);
+      } else {
+        toast.info(`${data.staffName} marked as unpaid`);
+      }
+    },
+    onError: () => {
+      toast.error('Failed to update payment status');
+    },
+  });
+
+  const handleMarkPaid = (staffId: string, staffName: string, amount?: number) => {
+    const isPaid = paidStaffIds.has(staffId);
+    markPaidMutation.mutate({ staffId, staffName, isPaid, amount });
   };
 
   // Fetch staff
@@ -489,11 +549,11 @@ export default function PayrollPage() {
                             </Badge>
                           )}
                           {staff.totalPay > 0 && (
-                            paidStaff.has(staff.id) ? (
+                            paidStaffIds.has(staff.id) ? (
                               <Badge 
                                 variant="outline" 
                                 className="border-green-500 bg-green-50 text-green-700 cursor-pointer hover:bg-green-100"
-                                onClick={() => handleMarkPaid(staff.id, staff.name)}
+                                onClick={() => handleMarkPaid(staff.id, staff.name, staff.totalPay)}
                               >
                                 <Check className="w-3 h-3 mr-1" />
                                 Paid
@@ -502,7 +562,7 @@ export default function PayrollPage() {
                               <Badge 
                                 variant="outline" 
                                 className="border-muted-foreground text-muted-foreground cursor-pointer hover:bg-muted"
-                                onClick={() => handleMarkPaid(staff.id, staff.name)}
+                                onClick={() => handleMarkPaid(staff.id, staff.name, staff.totalPay)}
                               >
                                 Mark Paid
                               </Badge>

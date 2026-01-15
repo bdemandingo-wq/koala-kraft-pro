@@ -39,6 +39,7 @@ import HelpPage from "./pages/admin/HelpPage";
 import DiscountsPage from "./pages/admin/DiscountsPage";
 import PlatformAnalyticsPage from "./pages/admin/PlatformAnalyticsPage";
 import MessagesPage from "./pages/admin/MessagesPage";
+import TasksPage from "./pages/admin/TasksPage";
 import StaffPortal from "./pages/staff/StaffPortal";
 import StaffLoginPage from "./pages/staff/StaffLoginPage";
 import StaffResetPasswordPage from "./pages/staff/StaffResetPasswordPage";
@@ -96,6 +97,7 @@ const App = () => (
                   <Route path="/dashboard/help" element={<ProtectedOrgRoute><HelpPage /></ProtectedOrgRoute>} />
                   <Route path="/dashboard/discounts" element={<ProtectedOrgRoute><DiscountsPage /></ProtectedOrgRoute>} />
                   <Route path="/dashboard/messages" element={<ProtectedOrgRoute><MessagesPage /></ProtectedOrgRoute>} />
+                  <Route path="/dashboard/tasks" element={<ProtectedOrgRoute><TasksPage /></ProtectedOrgRoute>} />
                   <Route path="/dashboard/platform-analytics" element={<ProtectedOrgRoute><PlatformAnalyticsPage /></ProtectedOrgRoute>} />
 
                   {/* Legacy admin routes - redirect to dashboard */}
