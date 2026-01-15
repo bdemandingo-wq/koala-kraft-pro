@@ -1,0 +1,184 @@
+import { useEffect, useRef, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+
+const IDLE_TIMEOUT_MS = 2 * 60 * 1000; // 2 minutes of inactivity = idle
+const UPDATE_INTERVAL_MS = 30 * 1000; // Update session every 30 seconds
+
+export function useSessionTracker() {
+  const { user } = useAuth();
+  const sessionIdRef = useRef<string | null>(null);
+  const lastActivityRef = useRef<number>(Date.now());
+  const sessionStartRef = useRef<number>(Date.now());
+  const isIdleRef = useRef<boolean>(false);
+  const activeTimeRef = useRef<number>(0);
+
+  // Reset activity timer on user interaction
+  const handleActivity = useCallback(() => {
+    const now = Date.now();
+    
+    // If we were idle, don't count the idle time
+    if (!isIdleRef.current) {
+      activeTimeRef.current += now - lastActivityRef.current;
+    }
+    
+    lastActivityRef.current = now;
+    isIdleRef.current = false;
+  }, []);
+
+  // Check for idle state
+  const checkIdle = useCallback(() => {
+    const now = Date.now();
+    const timeSinceActivity = now - lastActivityRef.current;
+    
+    if (timeSinceActivity >= IDLE_TIMEOUT_MS && !isIdleRef.current) {
+      isIdleRef.current = true;
+    }
+  }, []);
+
+  // Create a new session
+  const createSession = useCallback(async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('user_sessions')
+        .insert({
+          user_id: user.id,
+          user_email: user.email,
+          session_start: new Date().toISOString(),
+          is_active: true,
+          duration_seconds: 0,
+        })
+        .select('id')
+        .single();
+
+      if (error) throw error;
+      sessionIdRef.current = data.id;
+      sessionStartRef.current = Date.now();
+      activeTimeRef.current = 0;
+      lastActivityRef.current = Date.now();
+    } catch (err) {
+      console.error('Failed to create session:', err);
+    }
+  }, [user]);
+
+  // Update session duration
+  const updateSession = useCallback(async () => {
+    if (!sessionIdRef.current || !user) return;
+    
+    // Check for idle before updating
+    checkIdle();
+    
+    // Only count active time
+    if (!isIdleRef.current) {
+      const now = Date.now();
+      activeTimeRef.current += now - lastActivityRef.current;
+      lastActivityRef.current = now;
+    }
+    
+    const durationSeconds = Math.floor(activeTimeRef.current / 1000);
+    
+    try {
+      await supabase
+        .from('user_sessions')
+        .update({
+          duration_seconds: durationSeconds,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', sessionIdRef.current);
+    } catch (err) {
+      console.error('Failed to update session:', err);
+    }
+  }, [user, checkIdle]);
+
+  // End the session
+  const endSession = useCallback(async () => {
+    if (!sessionIdRef.current) return;
+    
+    // Final activity check
+    if (!isIdleRef.current) {
+      const now = Date.now();
+      activeTimeRef.current += now - lastActivityRef.current;
+    }
+    
+    const durationSeconds = Math.floor(activeTimeRef.current / 1000);
+    
+    try {
+      await supabase
+        .from('user_sessions')
+        .update({
+          session_end: new Date().toISOString(),
+          duration_seconds: durationSeconds,
+          is_active: false,
+        })
+        .eq('id', sessionIdRef.current);
+    } catch (err) {
+      console.error('Failed to end session:', err);
+    }
+    
+    sessionIdRef.current = null;
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+
+    // Start session
+    createSession();
+
+    // Activity event listeners
+    const activityEvents = ['mousedown', 'keydown', 'scroll', 'touchstart', 'mousemove'];
+    activityEvents.forEach(event => {
+      window.addEventListener(event, handleActivity, { passive: true });
+    });
+
+    // Visibility change handler
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        isIdleRef.current = true;
+        updateSession();
+      } else {
+        handleActivity();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Update interval
+    const updateInterval = setInterval(updateSession, UPDATE_INTERVAL_MS);
+
+    // Idle check interval
+    const idleCheckInterval = setInterval(checkIdle, 10000);
+
+    // Cleanup on unmount or user change
+    return () => {
+      activityEvents.forEach(event => {
+        window.removeEventListener(event, handleActivity);
+      });
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearInterval(updateInterval);
+      clearInterval(idleCheckInterval);
+      endSession();
+    };
+  }, [user, createSession, handleActivity, updateSession, endSession, checkIdle]);
+
+  // Handle page unload
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (sessionIdRef.current) {
+        // Use sendBeacon for reliable session end on page close
+        const durationSeconds = Math.floor(activeTimeRef.current / 1000);
+        const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/user_sessions?id=eq.${sessionIdRef.current}`;
+        const body = JSON.stringify({
+          session_end: new Date().toISOString(),
+          duration_seconds: durationSeconds,
+          is_active: false,
+        });
+        
+        navigator.sendBeacon(url, new Blob([body], { type: 'application/json' }));
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
+}

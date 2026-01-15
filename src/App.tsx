@@ -9,6 +9,7 @@ import { OrganizationProvider } from "@/contexts/OrganizationContext";
 import { TestModeProvider } from "@/contexts/TestModeContext";
 import { ProtectedOrgRoute } from "@/components/ProtectedOrgRoute";
 import { StaffRoute } from "@/components/StaffRoute";
+import { SessionTrackerProvider } from "@/components/SessionTrackerProvider";
 import LandingPage from "./pages/LandingPage";
 import PublicBookingPage from "./pages/PublicBookingPage";
 import AuthPage from "./pages/AuthPage";
@@ -52,9 +53,10 @@ const App = () => (
   <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <OrganizationProvider>
-          <TestModeProvider>
-            <TooltipProvider>
+        <SessionTrackerProvider>
+          <OrganizationProvider>
+            <TestModeProvider>
+              <TooltipProvider>
               <Toaster />
               <Sonner />
               <BrowserRouter>
@@ -108,9 +110,10 @@ const App = () => (
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>
-            </TooltipProvider>
-          </TestModeProvider>
-        </OrganizationProvider>
+              </TooltipProvider>
+            </TestModeProvider>
+          </OrganizationProvider>
+        </SessionTrackerProvider>
       </AuthProvider>
     </QueryClientProvider>
   </ThemeProvider>
