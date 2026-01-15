@@ -132,10 +132,10 @@ export function QuotesTabContent() {
   };
 
   const sendQuoteReminderSms = async (quote: Quote) => {
-    // Get customer phone from the full customer object
+    // Get customer phone and organization_id from the full customer object
     const { data: customer } = await supabase
       .from('customers')
-      .select('phone, first_name, last_name')
+      .select('phone, first_name, last_name, organization_id')
       .eq('id', quote.customer_id)
       .single();
 
@@ -144,19 +144,28 @@ export function QuotesTabContent() {
       return;
     }
 
+    if (!customer?.organization_id) {
+      toast.error('Organization context missing');
+      return;
+    }
+
     setSendingReminder(quote.id);
     try {
       const validUntil = quote.valid_until ? format(new Date(quote.valid_until), 'MMM d, yyyy') : 'soon';
       const message = `Hi ${customer.first_name}! Just a reminder - your quote #${quote.quote_number} for $${quote.total_amount.toFixed(2)} expires on ${validUntil}. Reply YES to confirm or call us with any questions!`;
 
-      const { error } = await supabase.functions.invoke('send-openphone-sms', {
+      const { data, error } = await supabase.functions.invoke('send-openphone-sms', {
         body: {
           to: customer.phone,
           message,
+          organizationId: customer.organization_id,
         },
       });
 
       if (error) throw error;
+      if (data && !data.success) {
+        throw new Error(data.error || 'Failed to send SMS');
+      }
 
       toast.success(`Reminder SMS sent to ${customer.first_name}`);
     } catch (error: any) {
