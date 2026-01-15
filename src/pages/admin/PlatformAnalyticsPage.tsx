@@ -5,11 +5,11 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Loader2, Users, Building2, CreditCard, TrendingUp, 
   UserPlus, RefreshCw, Trash2, Activity, Calendar,
-  ArrowUpRight, ArrowDownRight
+  ArrowUpRight, ArrowDownRight, Clock, Timer
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow, subDays } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import {
@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useQuery } from '@tanstack/react-query';
 
 interface PlatformAnalytics {
   signups: {
@@ -44,6 +45,25 @@ interface PlatformAnalytics {
   };
 }
 
+interface UserSessionStats {
+  user_id: string;
+  user_email: string;
+  total_duration_seconds: number;
+  session_count: number;
+}
+
+// Helper to format seconds into human readable time
+function formatDuration(seconds: number): string {
+  if (seconds < 60) return `${seconds}s`;
+  if (seconds < 3600) {
+    const mins = Math.floor(seconds / 60);
+    return `${mins}m`;
+  }
+  const hours = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+}
+
 export default function PlatformAnalyticsPage() {
   const { user } = useAuth();
   const [analytics, setAnalytics] = useState<PlatformAnalytics | null>(null);
@@ -52,6 +72,55 @@ export default function PlatformAnalyticsPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<{ id: string; type: 'user' | 'organization'; name: string } | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  // Fetch session data for the last 30 days
+  const thirtyDaysAgo = subDays(new Date(), 30).toISOString();
+  
+  const { data: sessionStats, refetch: refetchSessions } = useQuery({
+    queryKey: ['platform-session-stats'],
+    queryFn: async () => {
+      // Get all sessions from the last 30 days
+      const { data: sessions, error } = await supabase
+        .from('user_sessions')
+        .select('user_id, user_email, duration_seconds')
+        .gte('session_start', thirtyDaysAgo);
+      
+      if (error) throw error;
+      
+      // Aggregate by user
+      const userStats: Record<string, UserSessionStats> = {};
+      let totalDuration = 0;
+      let totalSessions = 0;
+      
+      sessions?.forEach((session: any) => {
+        const userId = session.user_id;
+        const duration = session.duration_seconds || 0;
+        totalDuration += duration;
+        totalSessions++;
+        
+        if (!userStats[userId]) {
+          userStats[userId] = {
+            user_id: userId,
+            user_email: session.user_email || 'Unknown',
+            total_duration_seconds: 0,
+            session_count: 0,
+          };
+        }
+        userStats[userId].total_duration_seconds += duration;
+        userStats[userId].session_count++;
+      });
+      
+      const avgDuration = totalSessions > 0 ? Math.floor(totalDuration / totalSessions) : 0;
+      const userList = Object.values(userStats).sort((a, b) => b.total_duration_seconds - a.total_duration_seconds);
+      
+      return {
+        avgSessionDuration: avgDuration,
+        totalSessions,
+        userList,
+      };
+    },
+    enabled: user?.email === 'support@tidywisecleaning.com',
+  });
 
   const fetchAnalytics = async () => {
     setLoading(true);
@@ -156,7 +225,7 @@ export default function PlatformAnalyticsPage() {
               Last updated: {format(new Date(), 'MMM d, h:mm a')}
             </span>
           </div>
-          <Button variant="outline" size="sm" onClick={fetchAnalytics} disabled={loading}>
+          <Button variant="outline" size="sm" onClick={() => { fetchAnalytics(); refetchSessions(); }} disabled={loading}>
             <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
@@ -454,7 +523,7 @@ export default function PlatformAnalyticsPage() {
               <CardContent>
                 <div className="space-y-6">
                   {/* Activity Stats */}
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-4 gap-3">
                     <div className="text-center p-3 bg-purple-500/10 rounded-lg border border-purple-500/20">
                       <p className="text-2xl font-bold text-purple-600">{analytics?.signups.last30Days || 0}</p>
                       <p className="text-xs text-muted-foreground">Active Users (30d)</p>
@@ -465,11 +534,20 @@ export default function PlatformAnalyticsPage() {
                       </p>
                       <p className="text-xs text-muted-foreground">Engagement Rate</p>
                     </div>
+                    <div className="text-center p-3 bg-green-500/10 rounded-lg border border-green-500/20">
+                      <div className="flex items-center justify-center gap-1">
+                        <Timer className="w-4 h-4 text-green-600" />
+                        <p className="text-2xl font-bold text-green-600">
+                          {formatDuration(sessionStats?.avgSessionDuration || 0)}
+                        </p>
+                      </div>
+                      <p className="text-xs text-muted-foreground">Avg Session Duration</p>
+                    </div>
                     <div className="text-center p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
                       <p className="text-2xl font-bold text-amber-600">
-                        {analytics?.organizations.last30Days || 0}
+                        {sessionStats?.totalSessions || 0}
                       </p>
-                      <p className="text-xs text-muted-foreground">New Orgs (30d)</p>
+                      <p className="text-xs text-muted-foreground">Total Sessions (30d)</p>
                     </div>
                   </div>
 
@@ -478,56 +556,49 @@ export default function PlatformAnalyticsPage() {
                     <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
                       <TrendingUp className="w-4 h-4 text-primary" />
                       Most Active Users
+                      <span className="text-xs text-muted-foreground ml-auto">By time spent (30 days)</span>
                     </h4>
                     <ScrollArea className="h-[280px] pr-4">
-                      {analytics?.signups.recent && analytics.signups.recent.length > 0 ? (
+                      {sessionStats?.userList && sessionStats.userList.length > 0 ? (
                         <div className="space-y-2">
-                          {analytics.signups.recent
-                            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-                            .slice(0, 10)
-                            .map((user, index) => (
-                              <div 
-                                key={user.id} 
-                                className="flex items-center justify-between p-3 bg-muted/50 hover:bg-muted rounded-lg transition-colors"
-                              >
-                                <div className="flex items-center gap-3">
-                                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                                    index === 0 ? 'bg-yellow-500/20 text-yellow-600' :
-                                    index === 1 ? 'bg-gray-300/30 text-gray-600' :
-                                    index === 2 ? 'bg-amber-600/20 text-amber-700' :
-                                    'bg-primary/10 text-primary'
-                                  }`}>
-                                    {index + 1}
-                                  </div>
-                                  <div>
-                                    <p className="font-medium text-sm">{user.email}</p>
-                                    <p className="text-xs text-muted-foreground">
-                                      Joined {formatDistanceToNow(new Date(user.created_at), { addSuffix: true })}
-                                    </p>
-                                  </div>
+                          {sessionStats.userList.slice(0, 15).map((userStat, index) => (
+                            <div 
+                              key={userStat.user_id} 
+                              className="flex items-center justify-between p-3 bg-muted/50 hover:bg-muted rounded-lg transition-colors"
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                                  index === 0 ? 'bg-yellow-500/20 text-yellow-600' :
+                                  index === 1 ? 'bg-gray-300/30 text-gray-600' :
+                                  index === 2 ? 'bg-amber-600/20 text-amber-700' :
+                                  'bg-primary/10 text-primary'
+                                }`}>
+                                  {index + 1}
                                 </div>
-                                <div className="flex items-center gap-2">
-                                  <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
-                                    Active
-                                  </Badge>
+                                <div>
+                                  <p className="font-medium text-sm">{userStat.user_email}</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {userStat.session_count} session{userStat.session_count !== 1 ? 's' : ''}
+                                  </p>
                                 </div>
                               </div>
-                            ))}
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200 flex items-center gap-1">
+                                  <Clock className="w-3 h-3" />
+                                  {formatDuration(userStat.total_duration_seconds)}
+                                </Badge>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       ) : (
                         <div className="text-center py-12 text-muted-foreground">
                           <Activity className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                          <p>No user activity data available</p>
+                          <p>No session data available yet</p>
+                          <p className="text-xs mt-1">Sessions are tracked as users browse the app</p>
                         </div>
                       )}
                     </ScrollArea>
-                  </div>
-
-                  <div className="p-4 bg-muted/30 rounded-lg border border-border/50">
-                    <p className="text-sm text-muted-foreground">
-                      <strong>Note:</strong> Detailed session tracking with time spent on site requires additional analytics integration. 
-                      This view shows user signups and engagement metrics.
-                    </p>
                   </div>
                 </div>
               </CardContent>
