@@ -50,6 +50,12 @@ import HowToStartCleaningBusiness from "./pages/blog/HowToStartCleaningBusiness"
 import BookingKoalaVsJobberVsTidywise from "./pages/blog/BookingKoalaVsJobberVsTidywise";
 import DynamicBlogPost from "./pages/blog/DynamicBlogPost";
 import NotFound from "./pages/NotFound";
+import CompareJobber from "./pages/compare/CompareJobber";
+import CompareBookingKoala from "./pages/compare/CompareBookingKoala";
+import AutomatedDispatching from "./pages/features/AutomatedDispatching";
+import QuoteSoftware from "./pages/features/QuoteSoftware";
+import SMSNotifications from "./pages/features/SMSNotifications";
+import PaymentProcessing from "./pages/features/PaymentProcessing";
 
 const queryClient = new QueryClient();
 
