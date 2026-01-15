@@ -54,6 +54,10 @@ export function PaymentStep() {
     finalPrice,
     appliedDiscount,
     setAppliedDiscount,
+    isTeamMode,
+    selectedTeamMembers,
+    teamMemberPay,
+    staff,
   } = useBookingForm();
 
   const { organizationId } = useOrgId();
@@ -308,72 +312,114 @@ export function PaymentStep() {
         </CardContent>
       </Card>
 
-      {/* Cleaner Payment Section */}
-      <Card className="border-border/50 shadow-sm">
-        <CardContent className="pt-6">
-          <div className="flex items-center gap-2 mb-4">
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-            <Label className="text-sm font-medium">Cleaner Payment (Optional)</Label>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label className="text-xs text-muted-foreground">Payment Type</Label>
-              <Select value={cleanerWageType} onValueChange={setCleanerWageType}>
-                <SelectTrigger className="mt-2 h-11 bg-secondary/30 border-border/50">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border">
-                  <SelectItem value="hourly">Hourly Rate</SelectItem>
-                  <SelectItem value="flat">Flat Rate</SelectItem>
-                  <SelectItem value="percentage">Percentage</SelectItem>
-                </SelectContent>
-              </Select>
+      {/* Cleaner Payment Section - Only show if NOT in team mode */}
+      {!(isTeamMode && selectedTeamMembers.length > 0) && (
+        <Card className="border-border/50 shadow-sm">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 mb-4">
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+              <Label className="text-sm font-medium">Cleaner Payment (Optional)</Label>
             </div>
-            <div>
-              <Label className="text-xs text-muted-foreground">
-                {cleanerWageType === 'hourly' ? 'Hourly Rate ($)' : 
-                 cleanerWageType === 'flat' ? 'Flat Amount ($)' : 'Percentage (%)'}
-              </Label>
-              <Input
-                type="number"
-                value={cleanerWage}
-                onChange={(e) => setCleanerWage(e.target.value)}
-                placeholder="0.00"
-                className="mt-2 h-11 bg-secondary/30 border-border/50"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-xs text-muted-foreground">Payment Type</Label>
+                <Select value={cleanerWageType} onValueChange={setCleanerWageType}>
+                  <SelectTrigger className="mt-2 h-11 bg-secondary/30 border-border/50">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border-border">
+                    <SelectItem value="hourly">Hourly Rate</SelectItem>
+                    <SelectItem value="flat">Flat Rate</SelectItem>
+                    <SelectItem value="percentage">Percentage</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">
+                  {cleanerWageType === 'hourly' ? 'Hourly Rate ($)' : 
+                   cleanerWageType === 'flat' ? 'Flat Amount ($)' : 'Percentage (%)'}
+                </Label>
+                <Input
+                  type="number"
+                  value={cleanerWage}
+                  onChange={(e) => setCleanerWage(e.target.value)}
+                  placeholder="0.00"
+                  className="mt-2 h-11 bg-secondary/30 border-border/50"
+                />
+              </div>
             </div>
-          </div>
-          
-          {cleanerWageType === 'hourly' && (
-            <div className="mt-4">
-              <Label className="text-xs text-muted-foreground">Override Hours</Label>
-              <Input
-                type="number"
-                value={cleanerOverrideHours}
-                onChange={(e) => setCleanerOverrideHours(e.target.value)}
-                placeholder="Default: 5.0 hrs"
-                className="mt-2 h-11 bg-secondary/30 border-border/50"
-              />
-            </div>
-          )}
+            
+            {cleanerWageType === 'hourly' && (
+              <div className="mt-4">
+                <Label className="text-xs text-muted-foreground">Override Hours</Label>
+                <Input
+                  type="number"
+                  value={cleanerOverrideHours}
+                  onChange={(e) => setCleanerOverrideHours(e.target.value)}
+                  placeholder="Default: 5.0 hrs"
+                  className="mt-2 h-11 bg-secondary/30 border-border/50"
+                />
+              </div>
+            )}
 
-          {cleanerWage && (
-            <div className="mt-4 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-200 dark:border-emerald-800">
-              <p className="text-xs text-emerald-700 dark:text-emerald-300">Estimated Cleaner Pay</p>
-              <p className="text-xl font-bold text-emerald-700 dark:text-emerald-300">
-                ${(() => {
-                  const wage = parseFloat(cleanerWage);
-                  if (isNaN(wage)) return '0.00';
-                  if (cleanerWageType === 'flat') return wage.toFixed(2);
-                  if (cleanerWageType === 'percentage') return ((totalAmount * wage) / 100).toFixed(2);
-                  const hours = parseFloat(cleanerOverrideHours) || ((selectedService?.duration || 60) / 60);
-                  return (wage * hours).toFixed(2);
-                })()}
-              </p>
+            {cleanerWage && (
+              <div className="mt-4 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-200 dark:border-emerald-800">
+                <p className="text-xs text-emerald-700 dark:text-emerald-300">Estimated Cleaner Pay</p>
+                <p className="text-xl font-bold text-emerald-700 dark:text-emerald-300">
+                  ${(() => {
+                    const wage = parseFloat(cleanerWage);
+                    if (isNaN(wage)) return '0.00';
+                    if (cleanerWageType === 'flat') return wage.toFixed(2);
+                    if (cleanerWageType === 'percentage') return ((totalAmount * wage) / 100).toFixed(2);
+                    const hours = parseFloat(cleanerOverrideHours) || ((selectedService?.duration || 60) / 60);
+                    return (wage * hours).toFixed(2);
+                  })()}
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Team Mode Pay Summary */}
+      {isTeamMode && selectedTeamMembers.length > 0 && (
+        <Card className="border-border/50 shadow-sm">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 mb-4">
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+              <Label className="text-sm font-medium">Team Pay Summary</Label>
             </div>
-          )}
-        </CardContent>
-      </Card>
+            <div className="space-y-2">
+              {selectedTeamMembers.map((staffId, index) => {
+                const staffMember = staff?.find(s => s.id === staffId);
+                const pay = teamMemberPay[staffId] || 0;
+                return (
+                  <div key={staffId} className="flex items-center justify-between p-3 bg-secondary/30 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      {index === 0 && (
+                        <Badge className="bg-primary text-primary-foreground text-xs">Lead</Badge>
+                      )}
+                      <span className="font-medium">{staffMember?.name || 'Unknown'}</span>
+                    </div>
+                    <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                      ${pay.toFixed(2)}
+                    </span>
+                  </div>
+                );
+              })}
+              <div className="flex justify-between pt-2 border-t border-border/50 font-semibold">
+                <span>Total Team Pay</span>
+                <span className="text-emerald-600 dark:text-emerald-400">
+                  ${Object.values(teamMemberPay).reduce((sum, pay) => sum + pay, 0).toFixed(2)}
+                </span>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">
+              Individual pay was set in the Schedule step. Each cleaner will see their assigned amount.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Payment Card Section */}
       <Card className="border-border/50 shadow-sm">
