@@ -25,6 +25,7 @@ import {
   GripVertical,
   Tag,
   Activity,
+  Zap,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState, useEffect } from 'react';
@@ -62,6 +63,7 @@ const defaultNavigation = [
   { name: 'Tasks', href: '/dashboard/tasks', icon: CheckSquare },
   { name: 'Leads', href: '/dashboard/leads', icon: Target },
   { name: 'Operations', href: '/dashboard/operations', icon: MapPin },
+  { name: 'Campaigns', href: '/dashboard/campaigns', icon: Zap },
   { name: 'Feedback', href: '/dashboard/feedback', icon: MessageSquare },
   { name: 'Services', href: '/dashboard/services', icon: Briefcase },
   { name: 'Staff', href: '/dashboard/staff', icon: UserCircle },
