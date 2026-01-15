@@ -139,27 +139,124 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
     // Handle delivery status updates (read receipts)
+    // Also insert the message if it doesn't exist (for messages sent directly from OpenPhone)
     if (isDeliveryUpdate) {
       const openphoneMessageId = payload.data.object.id;
+      const messageObj = payload.data.object;
       console.log(`[openphone-webhook] Processing delivery status for message: ${openphoneMessageId}`);
 
-      const { error: updateError } = await supabase
+      // Check if message already exists
+      const { data: existingMsg } = await supabase
         .from('sms_messages')
-        .update({
-          delivery_status: 'delivered',
-          delivered_at: new Date().toISOString(),
-          status: 'delivered',
-        })
-        .eq('openphone_message_id', openphoneMessageId);
+        .select('id')
+        .eq('openphone_message_id', openphoneMessageId)
+        .maybeSingle();
 
-      if (updateError) {
-        console.error('[openphone-webhook] Error updating delivery status:', updateError);
+      if (!existingMsg) {
+        // Message doesn't exist - this was sent directly from OpenPhone, not through our app
+        // We need to insert it first, then mark as delivered
+        console.log(`[openphone-webhook] Message ${openphoneMessageId} not found, inserting as outbound message first`);
+
+        const phoneNumberId = messageObj.phoneNumberId;
+        const customerPhone = messageObj.to; // For outbound, 'to' is the customer
+
+        // Find organization by phone number ID
+        const { data: smsSettings } = await supabase
+          .from('organization_sms_settings')
+          .select('organization_id')
+          .eq('openphone_phone_number_id', phoneNumberId)
+          .maybeSingle();
+
+        let organizationId = smsSettings?.organization_id;
+
+        if (!organizationId) {
+          // Try partial match
+          const { data: allSettings } = await supabase
+            .from('organization_sms_settings')
+            .select('organization_id, openphone_phone_number_id');
+
+          if (allSettings) {
+            for (const setting of allSettings) {
+              if (
+                setting.openphone_phone_number_id?.includes(phoneNumberId) ||
+                phoneNumberId.includes(setting.openphone_phone_number_id || '')
+              ) {
+                organizationId = setting.organization_id;
+                break;
+              }
+            }
+          }
+        }
+
+        if (organizationId) {
+          // Find or create conversation
+          const { data: conv } = await supabase
+            .from('sms_conversations')
+            .select('id')
+            .eq('organization_id', organizationId)
+            .eq('customer_phone', customerPhone)
+            .maybeSingle();
+
+          let conversationId = conv?.id;
+
+          if (!conversationId) {
+            const { data: newConv } = await supabase
+              .from('sms_conversations')
+              .insert({
+                organization_id: organizationId,
+                customer_phone: customerPhone,
+                customer_name: null,
+              })
+              .select('id')
+              .single();
+            conversationId = newConv?.id;
+          }
+
+          if (conversationId) {
+            // Insert the outbound message
+            await supabase.from('sms_messages').insert({
+              conversation_id: conversationId,
+              organization_id: organizationId,
+              direction: 'outbound',
+              content: messageObj.body || '',
+              status: 'delivered',
+              delivery_status: 'delivered',
+              openphone_message_id: openphoneMessageId,
+              sent_at: messageObj.createdAt || new Date().toISOString(),
+              delivered_at: new Date().toISOString(),
+            });
+
+            // Update conversation timestamp
+            await supabase
+              .from('sms_conversations')
+              .update({ last_message_at: new Date().toISOString() })
+              .eq('id', conversationId);
+
+            console.log(`[openphone-webhook] Inserted outbound message ${openphoneMessageId} for conversation ${conversationId}`);
+          }
+        } else {
+          console.log(`[openphone-webhook] Could not find organization for phoneNumberId: ${phoneNumberId}`);
+        }
       } else {
-        console.log(`[openphone-webhook] Updated delivery status for message: ${openphoneMessageId}`);
+        // Message exists, just update delivery status
+        const { error: updateError } = await supabase
+          .from('sms_messages')
+          .update({
+            delivery_status: 'delivered',
+            delivered_at: new Date().toISOString(),
+            status: 'delivered',
+          })
+          .eq('openphone_message_id', openphoneMessageId);
+
+        if (updateError) {
+          console.error('[openphone-webhook] Error updating delivery status:', updateError);
+        } else {
+          console.log(`[openphone-webhook] Updated delivery status for message: ${openphoneMessageId}`);
+        }
       }
 
       return new Response(
-        JSON.stringify({ success: true, message: 'Delivery status updated' }),
+        JSON.stringify({ success: true, message: 'Delivery status processed' }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
