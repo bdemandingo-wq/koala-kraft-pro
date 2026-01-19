@@ -180,10 +180,18 @@ export function InvoiceFormDialog({
     ? customers.find(c => c.id === formData.customer_id)
     : leads.find(l => l.id === formData.lead_id);
 
-  // Save mutation
+  // Save and optionally send invoice
   const saveMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (shouldSend: boolean = false) => {
       const validLineItems = lineItems.filter(item => item.description);
+
+      if (validLineItems.length === 0) {
+        throw new Error('Please add at least one item to the invoice');
+      }
+
+      if (!selectedCustomer) {
+        throw new Error('Please select a customer or lead');
+      }
 
       const invoiceData = {
         organization_id: organizationId,
@@ -201,6 +209,7 @@ export function InvoiceFormDialog({
       };
 
       let invoiceId: string;
+      let invoiceNumber: number;
 
       if (isEditing) {
         const { error } = await supabase
@@ -209,15 +218,17 @@ export function InvoiceFormDialog({
           .eq('id', invoice.id);
         if (error) throw error;
         invoiceId = invoice.id;
+        invoiceNumber = invoice.invoice_number;
         await supabase.from('invoice_items').delete().eq('invoice_id', invoiceId);
       } else {
         const { data, error } = await supabase
           .from('invoices')
           .insert(invoiceData)
-          .select('id')
+          .select('id, invoice_number')
           .single();
         if (error) throw error;
         invoiceId = data.id;
+        invoiceNumber = data.invoice_number;
       }
 
       if (validLineItems.length > 0) {
@@ -234,14 +245,66 @@ export function InvoiceFormDialog({
         const { error: itemsError } = await supabase.from('invoice_items').insert(itemsToInsert);
         if (itemsError) throw itemsError;
       }
+
+      // If we should send the invoice, call the edge function
+      if (shouldSend) {
+        const customerEmail = selectedCustomer.email;
+        const customerName = formData.customer_type === 'customer' 
+          ? `${selectedCustomer.first_name} ${selectedCustomer.last_name}`
+          : selectedCustomer.name;
+        const customerPhone = selectedCustomer.phone;
+
+        if (!customerEmail && !customerPhone) {
+          throw new Error('Customer has no email or phone - cannot send invoice');
+        }
+
+        const { error: sendError } = await supabase.functions.invoke('create-stripe-invoice', {
+          body: {
+            invoiceId,
+            organizationId,
+            customerEmail,
+            customerName,
+            customerPhone,
+            items: validLineItems.map(item => ({
+              description: item.description,
+              quantity: item.quantity,
+              unitPrice: item.unit_price,
+            })),
+            totalAmount,
+            taxAmount: showTax ? taxAmount : 0,
+            dueDate: formData.due_upon_receipt ? null : formData.due_date,
+            notes: formData.notes || null,
+          },
+        });
+
+        if (sendError) throw sendError;
+        
+        return { sent: true, invoiceNumber };
+      }
+
+      return { sent: false, invoiceNumber };
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
-      toast.success(isEditing ? 'Invoice updated' : 'Invoice created');
+      if (result?.sent) {
+        toast.success(`Invoice #${result.invoiceNumber} sent successfully`);
+      } else {
+        toast.success(isEditing ? 'Invoice updated' : 'Invoice saved as draft');
+      }
       onOpenChange(false);
     },
-    onError: (error: any) => toast.error(error.message),
+    onError: (error: any) => toast.error(error.message || 'Failed to save invoice'),
   });
+
+  // Handle save as draft
+  const handleSaveDraft = () => {
+    saveMutation.mutate(false);
+  };
+
+  // Handle send invoice
+  const handleSend = () => {
+    saveMutation.mutate(true);
+  };
 
   const SectionHeader = ({ 
     title, 
@@ -674,20 +737,20 @@ export function InvoiceFormDialog({
           <div className="flex gap-3">
             <Button
               variant="outline"
-              className="flex-1 border-primary text-primary hover:bg-primary/5"
-              onClick={() => {
-                // Preview functionality would go here
-                toast.info('Preview coming soon');
-              }}
-            >
-              Preview
-            </Button>
-            <Button
-              className="flex-1"
-              onClick={() => saveMutation.mutate()}
+              className="flex-1 border-muted-foreground/30 text-muted-foreground hover:bg-muted/50"
+              onClick={handleSaveDraft}
               disabled={saveMutation.isPending}
             >
               {saveMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Save Draft
+            </Button>
+            <Button
+              className="flex-1"
+              onClick={handleSend}
+              disabled={saveMutation.isPending || lineItems.length === 0 || !selectedCustomer}
+            >
+              {saveMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              <Mail className="w-4 h-4 mr-2" />
               Send
             </Button>
           </div>
