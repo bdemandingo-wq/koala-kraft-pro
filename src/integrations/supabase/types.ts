@@ -1363,6 +1363,44 @@ export type Database = {
           },
         ]
       }
+      invoice_payment_reminders: {
+        Row: {
+          created_at: string
+          days_after_due: number
+          id: string
+          is_active: boolean | null
+          organization_id: string
+          send_email: boolean | null
+          send_sms: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          days_after_due?: number
+          id?: string
+          is_active?: boolean | null
+          organization_id: string
+          send_email?: boolean | null
+          send_sms?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          days_after_due?: number
+          id?: string
+          is_active?: boolean | null
+          organization_id?: string
+          send_email?: boolean | null
+          send_sms?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_payment_reminders_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoices: {
         Row: {
           address: string | null
@@ -1373,10 +1411,14 @@ export type Database = {
           due_date: string | null
           id: string
           invoice_number: number
+          is_recurring: boolean | null
           lead_id: string | null
           notes: string | null
           organization_id: string | null
           paid_at: string | null
+          recurring_interval: string | null
+          scheduled_send_at: string | null
+          send_copy_to_self: boolean | null
           sent_at: string | null
           status: string
           stripe_invoice_id: string | null
@@ -1397,10 +1439,14 @@ export type Database = {
           due_date?: string | null
           id?: string
           invoice_number?: number
+          is_recurring?: boolean | null
           lead_id?: string | null
           notes?: string | null
           organization_id?: string | null
           paid_at?: string | null
+          recurring_interval?: string | null
+          scheduled_send_at?: string | null
+          send_copy_to_self?: boolean | null
           sent_at?: string | null
           status?: string
           stripe_invoice_id?: string | null
@@ -1421,10 +1467,14 @@ export type Database = {
           due_date?: string | null
           id?: string
           invoice_number?: number
+          is_recurring?: boolean | null
           lead_id?: string | null
           notes?: string | null
           organization_id?: string | null
           paid_at?: string | null
+          recurring_interval?: string | null
+          scheduled_send_at?: string | null
+          send_copy_to_self?: boolean | null
           sent_at?: string | null
           status?: string
           stripe_invoice_id?: string | null
@@ -1812,6 +1862,59 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "organization_email_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_invoice_settings: {
+        Row: {
+          accept_ach: boolean | null
+          accept_cards: boolean | null
+          accept_checks: boolean | null
+          accept_paypal: boolean | null
+          ach_fee_fixed: number | null
+          ach_fee_percent: number | null
+          card_fee_fixed: number | null
+          card_fee_percent: number | null
+          created_at: string
+          id: string
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          accept_ach?: boolean | null
+          accept_cards?: boolean | null
+          accept_checks?: boolean | null
+          accept_paypal?: boolean | null
+          ach_fee_fixed?: number | null
+          ach_fee_percent?: number | null
+          card_fee_fixed?: number | null
+          card_fee_percent?: number | null
+          created_at?: string
+          id?: string
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          accept_ach?: boolean | null
+          accept_cards?: boolean | null
+          accept_checks?: boolean | null
+          accept_paypal?: boolean | null
+          ach_fee_fixed?: number | null
+          ach_fee_percent?: number | null
+          card_fee_fixed?: number | null
+          card_fee_percent?: number | null
+          created_at?: string
+          id?: string
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_invoice_settings_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: true
             referencedRelation: "organizations"
