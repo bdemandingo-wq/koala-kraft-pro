@@ -13,7 +13,41 @@ interface InviteStaffRequest {
   hourly_rate?: number;
   percentage_rate?: number;
   tax_classification?: 'w2' | '1099';
-  password?: string; // Admin-set password
+  password?: string;
+}
+
+// Helper to log to system_logs
+async function logToSystem(
+  level: 'info' | 'warn' | 'error',
+  message: string,
+  details?: Record<string, unknown>,
+  userId?: string,
+  organizationId?: string
+) {
+  try {
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    );
+    
+    await supabaseAdmin.from("system_logs").insert([{
+      level,
+      source: "invite-staff",
+      message,
+      details: details ? JSON.stringify(details) : null,
+      user_id: userId || null,
+      organization_id: organizationId || null,
+    }]);
+  } catch (err) {
+    console.error("Failed to log:", err);
+  }
+}
+
+// Validate email format
+function isValidEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
 }
 
 serve(async (req) => {
@@ -21,17 +55,21 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  try {
-    const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      { auth: { autoRefreshToken: false, persistSession: false } }
-    );
+  const supabaseAdmin = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  );
 
+  let adminUserId: string | undefined;
+  let organizationId: string | undefined;
+  let createdAuthUserId: string | undefined;
+
+  try {
     // Verify the requesting user is an admin
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
-      return new Response(JSON.stringify({ error: "No authorization header" }), {
+      return new Response(JSON.stringify({ error: "Authentication required. Please log in." }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -41,11 +79,14 @@ serve(async (req) => {
     const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
     
     if (authError || !user) {
-      return new Response(JSON.stringify({ error: "Invalid token" }), {
+      await logToSystem('warn', 'Invalid token provided', { error: authError?.message });
+      return new Response(JSON.stringify({ error: "Session expired. Please log in again." }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    adminUserId = user.id;
 
     // Check if user has admin role
     const { data: adminRole } = await supabaseAdmin
@@ -56,49 +97,81 @@ serve(async (req) => {
       .single();
 
     if (!adminRole) {
-      return new Response(JSON.stringify({ error: "Admin access required" }), {
+      await logToSystem('warn', 'Non-admin attempted staff invite', { userId: user.id });
+      return new Response(JSON.stringify({ error: "You need admin permissions to add staff members." }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const { email, name, phone, hourly_rate, percentage_rate, tax_classification, password }: InviteStaffRequest = await req.json();
-
-    if (!email || !name) {
-      return new Response(JSON.stringify({ error: "Email and name are required" }), {
+    // Parse and validate request body
+    let requestBody: InviteStaffRequest;
+    try {
+      requestBody = await req.json();
+    } catch {
+      return new Response(JSON.stringify({ error: "Invalid request format." }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
+    const { email, name, phone, hourly_rate, percentage_rate, tax_classification, password } = requestBody;
+
+    // Validate required fields
+    if (!email || !name) {
+      return new Response(JSON.stringify({ error: "Name and email are required." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Validate email format
+    if (!isValidEmail(email)) {
+      return new Response(JSON.stringify({ error: "Please enter a valid email address." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Validate password
     if (!password || password.length < 6) {
-      return new Response(JSON.stringify({ error: "Password is required and must be at least 6 characters" }), {
+      return new Response(JSON.stringify({ error: "Password must be at least 6 characters." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Validate name length
+    if (name.trim().length < 2 || name.trim().length > 100) {
+      return new Response(JSON.stringify({ error: "Name must be between 2 and 100 characters." }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     // Get admin's organization
-    const { data: adminMembership } = await supabaseAdmin
+    const { data: adminMembership, error: membershipError } = await supabaseAdmin
       .from("org_memberships")
       .select("organization_id")
       .eq("user_id", user.id)
       .single();
 
-    if (!adminMembership) {
-      return new Response(JSON.stringify({ error: "Admin must belong to an organization" }), {
+    if (membershipError || !adminMembership) {
+      await logToSystem('error', 'Admin has no organization', { userId: user.id, error: membershipError?.message });
+      return new Response(JSON.stringify({ error: "Unable to find your organization. Please contact support." }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const organizationId = adminMembership.organization_id;
+    organizationId = adminMembership.organization_id;
+    console.log("Creating staff for organization:", organizationId);
 
     // Check if staff record already exists (including inactive ones) in this org
     const { data: existingStaff } = await supabaseAdmin
       .from("staff")
       .select("*")
-      .eq("email", email)
+      .eq("email", email.toLowerCase().trim())
       .eq("organization_id", organizationId)
       .single();
 
@@ -108,7 +181,7 @@ serve(async (req) => {
         const { error: updateError } = await supabaseAdmin
           .from("staff")
           .update({
-            name,
+            name: name.trim(),
             phone: phone || null,
             hourly_rate: hourly_rate || null,
             percentage_rate: percentage_rate || null,
@@ -118,8 +191,8 @@ serve(async (req) => {
           .eq("id", existingStaff.id);
 
         if (updateError) {
-          console.error("Error reactivating staff:", updateError);
-          return new Response(JSON.stringify({ error: updateError.message }), {
+          await logToSystem('error', 'Failed to reactivate staff', { staffId: existingStaff.id, error: updateError.message }, adminUserId, organizationId);
+          return new Response(JSON.stringify({ error: "Failed to reactivate staff member. Please try again." }), {
             status: 400,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
@@ -136,11 +209,13 @@ serve(async (req) => {
           }
         }
 
+        await logToSystem('info', 'Staff member reactivated', { staffId: existingStaff.id, email }, adminUserId, organizationId);
+
         return new Response(
           JSON.stringify({
             success: true,
             staff: { ...existingStaff, is_active: true, name, phone, hourly_rate },
-            message: "Staff member reactivated with new password.",
+            message: "Staff member reactivated successfully!",
             reactivated: true,
           }),
           {
@@ -150,18 +225,19 @@ serve(async (req) => {
         );
       } else {
         // Staff is already active
-        return new Response(JSON.stringify({ error: "A staff member with this email already exists and is active" }), {
+        return new Response(JSON.stringify({ error: "A staff member with this email already exists." }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
     }
 
-    // Check if auth user already exists (they might exist without a staff record)
+    // Check if auth user already exists (they might exist without a staff record in this org)
     const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
-    const existingAuthUser = existingUsers?.users?.find(u => u.email?.toLowerCase() === email.toLowerCase());
+    const existingAuthUser = existingUsers?.users?.find(u => u.email?.toLowerCase() === email.toLowerCase().trim());
 
     let userId: string;
+    let wasNewUserCreated = false;
 
     if (existingAuthUser) {
       // User exists in auth - just update their password and use their ID
@@ -169,12 +245,12 @@ serve(async (req) => {
       
       const { error: passwordError } = await supabaseAdmin.auth.admin.updateUserById(
         existingAuthUser.id,
-        { password, user_metadata: { full_name: name } }
+        { password, user_metadata: { full_name: name.trim() } }
       );
       
       if (passwordError) {
-        console.error("Error updating existing user password:", passwordError);
-        return new Response(JSON.stringify({ error: "Failed to update user credentials: " + passwordError.message }), {
+        await logToSystem('error', 'Failed to update existing user password', { email, error: passwordError.message }, adminUserId, organizationId);
+        return new Response(JSON.stringify({ error: "Failed to set up user account. Please try again." }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -184,21 +260,33 @@ serve(async (req) => {
     } else {
       // Create new auth user with admin-provided password
       const { data: authData, error: createUserError } = await supabaseAdmin.auth.admin.createUser({
-        email,
+        email: email.toLowerCase().trim(),
         password,
         email_confirm: true,
-        user_metadata: { full_name: name },
+        user_metadata: { full_name: name.trim() },
       });
 
       if (createUserError) {
-        console.error("Error creating user:", createUserError);
-        return new Response(JSON.stringify({ error: createUserError.message }), {
+        await logToSystem('error', 'Failed to create auth user', { email, error: createUserError.message }, adminUserId, organizationId);
+        
+        // Parse common auth errors
+        const errorMsg = createUserError.message.toLowerCase();
+        if (errorMsg.includes('already registered') || errorMsg.includes('already exists')) {
+          return new Response(JSON.stringify({ error: "This email is already registered. Please use a different email." }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        
+        return new Response(JSON.stringify({ error: "Failed to create user account. Please try again." }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       
       userId = authData.user.id;
+      createdAuthUserId = userId;
+      wasNewUserCreated = true;
     }
 
     // Create staff record
@@ -207,8 +295,8 @@ serve(async (req) => {
       .insert({
         user_id: userId,
         organization_id: organizationId,
-        email,
-        name,
+        email: email.toLowerCase().trim(),
+        name: name.trim(),
         phone: phone || null,
         hourly_rate: hourly_rate || null,
         percentage_rate: percentage_rate || null,
@@ -219,12 +307,15 @@ serve(async (req) => {
       .single();
 
     if (staffError) {
-      console.error("Error creating staff record:", staffError);
-      // Only delete auth user if we just created them (not if they existed before)
-      if (!existingAuthUser) {
-        await supabaseAdmin.auth.admin.deleteUser(userId);
+      await logToSystem('error', 'Failed to create staff record', { userId, email, error: staffError.message }, adminUserId, organizationId);
+      
+      // ROLLBACK: Delete auth user if we just created them
+      if (wasNewUserCreated && createdAuthUserId) {
+        console.log("Rolling back: deleting newly created auth user", createdAuthUserId);
+        await supabaseAdmin.auth.admin.deleteUser(createdAuthUserId);
       }
-      return new Response(JSON.stringify({ error: staffError.message }), {
+      
+      return new Response(JSON.stringify({ error: "Failed to create staff record. Please try again." }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -240,11 +331,11 @@ serve(async (req) => {
 
     if (roleError) {
       console.error("Error assigning role:", roleError);
+      await logToSystem('warn', 'Failed to assign staff role', { userId, error: roleError.message }, adminUserId, organizationId);
     }
 
     // Also add to org_memberships so they can access org data
-    // Note: org_memberships uses 'member' role for staff (not 'staff')
-    const { error: membershipError } = await supabaseAdmin
+    const { error: orgMembershipError } = await supabaseAdmin
       .from("org_memberships")
       .upsert({
         user_id: userId,
@@ -252,15 +343,18 @@ serve(async (req) => {
         role: "member",
       }, { onConflict: 'organization_id,user_id' });
 
-    if (membershipError) {
-      console.error("Error creating org membership:", membershipError);
+    if (orgMembershipError) {
+      console.error("Error creating org membership:", orgMembershipError);
+      await logToSystem('warn', 'Failed to create org membership', { userId, error: orgMembershipError.message }, adminUserId, organizationId);
     }
+
+    await logToSystem('info', 'Staff member created successfully', { staffId: staffData.id, email, wasNewUser: wasNewUserCreated }, adminUserId, organizationId);
 
     return new Response(
       JSON.stringify({
         success: true,
         staff: staffData,
-        message: "Staff member created successfully. Share the login credentials with them.",
+        message: "Staff member created successfully!",
       }),
       {
         status: 200,
@@ -270,7 +364,20 @@ serve(async (req) => {
   } catch (error) {
     console.error("Error in invite-staff:", error);
     const message = error instanceof Error ? error.message : "Unknown error occurred";
-    return new Response(JSON.stringify({ error: message }), {
+    
+    await logToSystem('error', 'Unexpected error in invite-staff', { error: message, stack: error instanceof Error ? error.stack : undefined }, adminUserId, organizationId);
+    
+    // ROLLBACK: Clean up if we created an auth user but something else failed
+    if (createdAuthUserId) {
+      console.log("Rolling back: deleting newly created auth user after error", createdAuthUserId);
+      try {
+        await supabaseAdmin.auth.admin.deleteUser(createdAuthUserId);
+      } catch (cleanupError) {
+        console.error("Failed to clean up auth user:", cleanupError);
+      }
+    }
+    
+    return new Response(JSON.stringify({ error: "An unexpected error occurred. Please try again." }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
