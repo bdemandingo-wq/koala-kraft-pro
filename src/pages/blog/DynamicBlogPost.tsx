@@ -5,6 +5,7 @@ import { ArrowLeft, Clock, Calendar, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import DOMPurify from "dompurify";
 
 export default function DynamicBlogPost() {
   const { slug } = useParams<{ slug: string }>();
@@ -118,7 +119,7 @@ export default function DynamicBlogPost() {
             </p>
           </header>
 
-          {/* Content */}
+          {/* Content - Sanitized to prevent XSS */}
           <div 
             className="prose prose-lg max-w-none dark:prose-invert
               prose-headings:font-semibold prose-headings:text-foreground
@@ -127,7 +128,12 @@ export default function DynamicBlogPost() {
               prose-strong:text-foreground
               prose-ul:text-muted-foreground prose-ol:text-muted-foreground
               prose-li:marker:text-primary"
-            dangerouslySetInnerHTML={{ __html: post.content }}
+            dangerouslySetInnerHTML={{ 
+              __html: DOMPurify.sanitize(post.content, {
+                ALLOWED_TAGS: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'strong', 'em', 'a', 'blockquote', 'br', 'span', 'div', 'code', 'pre'],
+                ALLOWED_ATTR: ['href', 'target', 'rel', 'class', 'id']
+              })
+            }}
           />
 
           {/* CTA */}
