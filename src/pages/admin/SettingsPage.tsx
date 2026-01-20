@@ -286,11 +286,10 @@ export default function SettingsPage() {
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('booking-photos')
-        .getPublicUrl(filePath);
-
-      updateField('logo_url', publicUrl);
+      // Store the path (not public URL) for signed URL generation
+      // For logos, we'll store the full path including 'booking-photos:' prefix
+      // to indicate it's a storage path that needs signed URL
+      updateField('logo_url', `storage:booking-photos:${filePath}`);
       toast.success('Logo uploaded successfully');
     } catch (error) {
       console.error('Error uploading logo:', error);

@@ -62,25 +62,22 @@ export function BookingPhotoUpload({ bookingId, staffId, onPhotoUploaded }: Book
     setUploading(true);
     try {
       const fileExt = selectedFile.name.split('.').pop();
-      const fileName = `${bookingId}/${photoType}_${Date.now()}.${fileExt}`;
+      // Store path only (not full URL) for signed URL generation
+      const filePath = `${bookingId}/${photoType}_${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from('booking-photos')
-        .upload(fileName, selectedFile);
+        .upload(filePath, selectedFile);
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('booking-photos')
-        .getPublicUrl(fileName);
-
-      // Save to booking_photos table
+      // Save the storage PATH (not URL) to database for signed URL generation
       const { error: dbError } = await supabase
         .from('booking_photos')
         .insert({
           booking_id: bookingId,
           staff_id: staffId,
-          photo_url: publicUrl,
+          photo_url: filePath, // Store path, not public URL
           photo_type: photoType,
         });
 
