@@ -1,3 +1,5 @@
+# TidyWise Robots.txt - Cleaning Business Software
+
 User-agent: Googlebot
 Allow: /
 
@@ -10,7 +12,26 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
+User-agent: LinkedInBot
+Allow: /
+
 User-agent: *
 Allow: /
 
-Sitemap: https://yourdomain.com/sitemap.xml
+# Block admin and staff routes from indexing
+Disallow: /dashboard/
+Disallow: /admin/
+Disallow: /staff/
+Disallow: /onboarding
+
+# Allow public pages
+Allow: /
+Allow: /blog
+Allow: /blog/*
+Allow: /compare/*
+Allow: /features/*
+Allow: /auth
+Allow: /book/*
+
+# Sitemap
+Sitemap: https://jointidywise.lovable.app/sitemap.xml

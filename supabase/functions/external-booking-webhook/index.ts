@@ -87,8 +87,15 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     if (!organizationId) {
-      // Default to TidyWise organization for external website bookings
-      organizationId = 'e95b92d0-7099-408e-a773-e4407b34f8b4';
+      // SECURITY: Require organization context - do not default to any organization
+      console.error("[external-booking-webhook] Missing organization context - organization_slug or organization_id required");
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: "organization_slug or organization_id is required for multi-tenant isolation" 
+        }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     console.log("[external-booking-webhook] Using organization:", organizationId);
