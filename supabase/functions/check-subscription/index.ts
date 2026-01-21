@@ -78,8 +78,8 @@ serve(async (req) => {
     }
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    // Bypass subscription check for owner account
-    const FREE_ACCOUNTS = ["support@tidywisecleaning.com"];
+    // Bypass subscription check for owner account and Apple review
+    const FREE_ACCOUNTS = ["support@tidywisecleaning.com", "applereview@tidywise.com"];
     if (FREE_ACCOUNTS.includes(user.email.toLowerCase())) {
       logStep("Free account detected - bypassing subscription check", { email: user.email });
       return new Response(JSON.stringify({
