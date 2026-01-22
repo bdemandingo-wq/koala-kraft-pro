@@ -159,8 +159,12 @@ serve(async (req) => {
       );
     }
 
-    const origin = req.headers.get("origin") || "";
-    const inviteUrl = `${origin}/portal/invite?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`;
+    // Prefer an explicit site URL so invites always land on the branded/published site
+    // (instead of the preview domain which can show a Lovable loading screen first).
+    const origin = (req.headers.get("origin") || "").trim();
+    const configuredBase = (Deno.env.get("PROJECT_URL") || "").trim();
+    const baseUrl = (configuredBase || origin).replace(/\/$/, "");
+    const inviteUrl = `${baseUrl}/portal/invite?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`;
 
     await logToSystem({
       level: "info",
