@@ -13,11 +13,11 @@ import { toast } from "sonner";
 export default function PortalAuthPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isLogin, setIsLogin] = useState(true);
-  const [loading, setLoading] = useState(false);
-
+  // If someone arrives from an invite link, default to account creation.
   const inviteToken = useMemo(() => sessionStorage.getItem("portal_invite_token") ?? "", []);
   const inviteEmail = useMemo(() => sessionStorage.getItem("portal_invite_email") ?? "", []);
+  const [isLogin, setIsLogin] = useState(!inviteToken);
+  const [loading, setLoading] = useState(false);
   const from = (location.state as any)?.from || "/portal";
 
   const [email, setEmail] = useState(inviteEmail);
