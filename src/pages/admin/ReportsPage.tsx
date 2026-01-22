@@ -1,6 +1,6 @@
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { StatCard } from '@/components/admin/StatCard';
-import { useBookings, useServices, useStaff, BookingWithDetails } from '@/hooks/useBookings';
+import { useBookings, useServices, useStaff } from '@/hooks/useBookings';
 import { DollarSign, TrendingUp, Users, Calendar, Loader2, Repeat, UserCheck } from 'lucide-react';
 import {
   PieChart,
@@ -34,6 +34,19 @@ import { CalendarIcon } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { useOrgId } from '@/hooks/useOrgId';
 
+// Helper to fetch data - uses any to break TS2589 type depth chain
+async function fetchOrgData(orgId: string): Promise<{ whData: any[]; custData: any[]; recData: any[] }> {
+  const client: any = supabase;
+  const whRes = await client.from('working_hours').select('*').eq('organization_id', orgId);
+  const custRes = await client.from('customers').select('id, first_name, last_name, email, created_at, is_recurring, address').eq('organization_id', orgId);
+  const recRes = await client.from('recurring_bookings').select('total_amount, frequency, is_active, customer_id').eq('organization_id', orgId);
+  return {
+    whData: whRes.data || [],
+    custData: custRes.data || [],
+    recData: recRes.data || [],
+  };
+}
+
 // Default service colors
 const defaultColors = [
   '#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4', '#f97316'
@@ -59,32 +72,23 @@ export default function ReportsPage() {
   });
 
   useEffect(() => {
-    const fetchData = async () => {
+    const loadData = async () => {
       if (!organizationId) return;
       
-      // @ts-ignore - Supabase type depth issue workaround
-      const whQuery = supabase.from('working_hours').select('*').eq('organization_id', organizationId);
-      // @ts-ignore - Supabase type depth issue workaround
-      const custQuery = supabase.from('customers').select('id, first_name, last_name, email, created_at, is_recurring, address').eq('organization_id', organizationId);
-      // @ts-ignore - Supabase type depth issue workaround
-      const recQuery = supabase.from('recurring_bookings').select('total_amount, frequency, is_active, customer_id').eq('organization_id', organizationId);
+      const { whData, custData, recData } = await fetchOrgData(organizationId);
       
-      const whRes = await whQuery;
-      const custRes = await custQuery;
-      const recRes = await recQuery;
-      
-      if (whRes.data) setWorkingHours(whRes.data);
-      if (custRes.data) setCustomers(custRes.data);
-      if (recRes.data) setRecurringBookings(recRes.data);
+      setWorkingHours(whData);
+      setCustomers(custData);
+      setRecurringBookings(recData);
 
-      const totalRecurringPlans = recRes.data?.length ?? 0;
+      const totalRecurringPlans = recData.length;
       setRecurringStats({
         recurringClients: totalRecurringPlans,
         recurringCleans: 0,
         recurringRevenue: 0,
       });
     };
-    fetchData();
+    loadData();
   }, [organizationId]);
 
   const isLoading = bookingsLoading || servicesLoading || staffLoading;
