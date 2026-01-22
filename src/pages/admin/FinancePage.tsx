@@ -16,12 +16,11 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
-import { format, startOfMonth, endOfMonth, startOfYear, isWithinInterval } from 'date-fns';
+import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { 
   CalendarIcon, 
   Download, 
   DollarSign, 
-  TrendingUp, 
   TrendingDown,
   CreditCard,
   Receipt,
@@ -33,6 +32,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useTestMode } from '@/contexts/TestModeContext';
 import { useAuth } from '@/hooks/useAuth';
+import { useOrganization } from '@/contexts/OrganizationContext';
 
 interface Transaction {
   id: string;
@@ -51,18 +51,21 @@ interface Transaction {
 
 export default function FinancePage() {
   const { subscription, setShowSubscriptionDialog } = useAuth();
+  const { organization } = useOrganization();
+  const organizationId = organization?.id;
   const isSubscribed = subscription?.subscribed ?? false;
   
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
     from: startOfMonth(new Date()),
     to: endOfMonth(new Date()),
   });
-  const { maskName, maskAmount, isTestMode } = useTestMode();
+  const { maskName, isTestMode } = useTestMode();
 
-  // Fetch completed bookings with payment data
+  // Fetch completed bookings with payment data - scoped to organization
   const { data: bookings = [] } = useQuery({
-    queryKey: ['bookings-finance', dateRange],
+    queryKey: ['bookings-finance', organizationId, dateRange],
     queryFn: async () => {
+      if (!organizationId) return [];
       const { data, error } = await supabase
         .from('bookings')
         .select(`
@@ -71,28 +74,31 @@ export default function FinancePage() {
           service:services(*),
           staff:staff(*)
         `)
+        .eq('organization_id', organizationId)
         .gte('scheduled_at', dateRange.from.toISOString())
         .lte('scheduled_at', dateRange.to.toISOString())
         .order('scheduled_at', { ascending: false });
       if (error) throw error;
       return data;
     },
-    enabled: isSubscribed,
+    enabled: isSubscribed && !!organizationId,
   });
 
-  // Fetch expenses for the date range
+  // Fetch expenses for the date range - scoped to organization
   const { data: expenses = [] } = useQuery({
-    queryKey: ['expenses-finance', dateRange],
+    queryKey: ['expenses-finance', organizationId, dateRange],
     queryFn: async () => {
+      if (!organizationId) return [];
       const { data, error } = await supabase
         .from('expenses')
         .select('*')
+        .eq('organization_id', organizationId)
         .gte('expense_date', format(dateRange.from, 'yyyy-MM-dd'))
         .lte('expense_date', format(dateRange.to, 'yyyy-MM-dd'));
       if (error) throw error;
       return data;
     },
-    enabled: isSubscribed,
+    enabled: isSubscribed && !!organizationId,
   });
 
   // Transform bookings to transactions with calculated fees

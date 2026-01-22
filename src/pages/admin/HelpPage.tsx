@@ -60,14 +60,19 @@ export default function HelpPage() {
   const [newUrl, setNewUrl] = useState('');
 
   useEffect(() => {
-    fetchVideos();
-  }, []);
+    if (organizationId) {
+      fetchVideos();
+    }
+  }, [organizationId]);
 
   const fetchVideos = async () => {
+    if (!organizationId) return;
     try {
+      // Fetch global videos (organization_id is null) and org-specific videos
       const { data, error } = await supabase
         .from('help_videos')
         .select('*')
+        .or(`organization_id.is.null,organization_id.eq.${organizationId}`)
         .order('sort_order', { ascending: true });
 
       if (error) throw error;

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -23,6 +23,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, Save, Search, DollarSign, Percent } from 'lucide-react';
 import { format } from 'date-fns';
+import { useOrganization } from '@/contexts/OrganizationContext';
 
 interface BookingWithWage {
   id: string;
@@ -46,6 +47,8 @@ interface BookingWithWage {
 }
 
 export function BulkEditCleanerWages() {
+  const { organization } = useOrganization();
+  const organizationId = organization?.id;
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedBookings, setSelectedBookings] = useState<Set<string>>(new Set());
   const [bulkWageType, setBulkWageType] = useState<string>('');
@@ -56,9 +59,12 @@ export function BulkEditCleanerWages() {
   const queryClient = useQueryClient();
 
   const { data: bookings = [], isLoading } = useQuery({
-    queryKey: ['bookings-wages'],
+    queryKey: ['bookings-wages', organizationId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      if (!organizationId) return [];
+      // Use type workaround for Supabase deep type inference
+      const client: any = supabase;
+      const { data, error } = await client
         .from('bookings')
         .select(`
           id, booking_number, scheduled_at, total_amount, 
@@ -67,12 +73,14 @@ export function BulkEditCleanerWages() {
           service:services(name),
           staff:staff(name, hourly_rate, percentage_rate)
         `)
+        .eq('organization_id', organizationId)
         .order('scheduled_at', { ascending: false })
         .limit(200);
 
       if (error) throw error;
       return data as BookingWithWage[];
     },
+    enabled: !!organizationId,
   });
 
   const filteredBookings = bookings.filter((booking) => {
@@ -141,19 +149,27 @@ export function BulkEditCleanerWages() {
       return;
     }
 
+    if (!organizationId) {
+      toast({ title: 'Error', description: 'No organization context', variant: 'destructive' });
+      return;
+    }
+
     setSaving(true);
     try {
+      // Use type workaround for Supabase deep type inference
+      const client: any = supabase;
       for (const id of editedIds) {
         const edit = localEdits[id];
         const wageValue = edit.value ? parseFloat(edit.value) : null;
 
-        await supabase
+        await client
           .from('bookings')
           .update({
             cleaner_wage_type: edit.type || null,
             cleaner_wage: wageValue,
           })
-          .eq('id', id);
+          .eq('id', id)
+          .eq('organization_id', organizationId);
       }
 
       toast({
@@ -162,7 +178,7 @@ export function BulkEditCleanerWages() {
       });
       setLocalEdits({});
       setSelectedBookings(new Set());
-      queryClient.invalidateQueries({ queryKey: ['bookings-wages'] });
+      queryClient.invalidateQueries({ queryKey: ['bookings-wages', organizationId] });
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
     } catch (error) {
       console.error('Failed to save changes:', error);

@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { Gift, Star, Trophy, Crown, Users, TrendingUp, Award } from 'lucide-react';
 import { format } from 'date-fns';
+import { useOrganization } from '@/contexts/OrganizationContext';
 
 interface CustomerLoyalty {
   id: string;
@@ -33,37 +34,54 @@ interface LoyaltyTransaction {
 
 export function LoyaltyProgramSettings() {
   const queryClient = useQueryClient();
+  const { organization } = useOrganization();
+  const organizationId = organization?.id;
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerLoyalty | null>(null);
   const [bonusPoints, setBonusPoints] = useState('');
 
   const { data: loyaltyMembers = [], isLoading } = useQuery({
-    queryKey: ['loyalty-members'],
+    queryKey: ['loyalty-members', organizationId],
     queryFn: async () => {
+      if (!organizationId) return [];
       const { data, error } = await supabase
         .from('customer_loyalty')
         .select(`
           id, customer_id, points, lifetime_points, tier,
-          customer:customers(first_name, last_name, email)
+          customer:customers!inner(first_name, last_name, email, organization_id)
         `)
+        .eq('customer.organization_id', organizationId)
         .order('lifetime_points', { ascending: false });
 
       if (error) throw error;
       return data as CustomerLoyalty[];
     },
+    enabled: !!organizationId,
   });
 
   const { data: recentTransactions = [] } = useQuery({
-    queryKey: ['loyalty-transactions-recent'],
+    queryKey: ['loyalty-transactions-recent', organizationId],
     queryFn: async () => {
+      if (!organizationId) return [];
+      // Get customer IDs for this org first, then filter transactions
+      const { data: customers } = await supabase
+        .from('customers')
+        .select('id')
+        .eq('organization_id', organizationId);
+      
+      const customerIds = customers?.map(c => c.id) || [];
+      if (customerIds.length === 0) return [];
+      
       const { data, error } = await supabase
         .from('loyalty_transactions')
         .select('*')
+        .in('customer_id', customerIds)
         .order('created_at', { ascending: false })
         .limit(20);
 
       if (error) throw error;
       return data as LoyaltyTransaction[];
     },
+    enabled: !!organizationId,
   });
 
   const addBonusPoints = useMutation({

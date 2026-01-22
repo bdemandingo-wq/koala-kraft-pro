@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { Clock, Save } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useOrganization } from '@/contexts/OrganizationContext';
 
 interface WorkingHour {
   id?: string;
@@ -36,22 +37,28 @@ interface Props {
 
 export function CleanerAvailabilityManager({ staffId }: Props) {
   const queryClient = useQueryClient();
+  const { organization } = useOrganization();
+  const organizationId = organization?.id;
   const [workingHours, setWorkingHours] = useState<WorkingHour[]>([]);
   const [hasChanges, setHasChanges] = useState(false);
 
-  // Fetch existing working hours
+  // Fetch existing working hours - scoped to organization for defense-in-depth
   const { data: existingHours, isLoading } = useQuery({
-    queryKey: ['working-hours', staffId],
+    queryKey: ['working-hours', staffId, organizationId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      if (!organizationId) return [];
+      // Use type workaround for Supabase deep type inference
+      const client: any = supabase;
+      const { data, error } = await client
         .from('working_hours')
         .select('*')
-        .eq('staff_id', staffId);
+        .eq('staff_id', staffId)
+        .eq('organization_id', organizationId);
 
       if (error) throw error;
-      return data;
+      return data || [];
     },
-    enabled: !!staffId,
+    enabled: !!staffId && !!organizationId,
   });
 
   // Initialize working hours
@@ -74,17 +81,24 @@ export function CleanerAvailabilityManager({ staffId }: Props) {
   // Save mutation
   const saveMutation = useMutation({
     mutationFn: async () => {
-      // Delete existing and insert new
-      await supabase
+      if (!organizationId) throw new Error('No organization context');
+      
+      // Use type workaround for Supabase deep type inference
+      const client: any = supabase;
+      
+      // Delete existing and insert new - scoped to organization
+      await client
         .from('working_hours')
         .delete()
-        .eq('staff_id', staffId);
+        .eq('staff_id', staffId)
+        .eq('organization_id', organizationId);
 
-      const { error } = await supabase
+      const { error } = await client
         .from('working_hours')
         .insert(
           workingHours.map((h) => ({
             staff_id: staffId,
+            organization_id: organizationId,
             day_of_week: h.day_of_week,
             start_time: h.start_time,
             end_time: h.end_time,
@@ -95,7 +109,7 @@ export function CleanerAvailabilityManager({ staffId }: Props) {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['working-hours', staffId] });
+      queryClient.invalidateQueries({ queryKey: ['working-hours', staffId, organizationId] });
       toast.success('Availability saved!');
       setHasChanges(false);
     },
