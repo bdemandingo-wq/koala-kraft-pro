@@ -1,10 +1,13 @@
 # TidyWise Robots.txt - Cleaning Business Software
+# https://www.jointidywise.com
 
 User-agent: Googlebot
 Allow: /
+Crawl-delay: 1
 
 User-agent: Bingbot
 Allow: /
+Crawl-delay: 1
 
 User-agent: Twitterbot
 Allow: /
@@ -18,20 +21,21 @@ Allow: /
 User-agent: *
 Allow: /
 
-# Block admin and staff routes from indexing
+# Block admin, staff, and private routes from indexing
 Disallow: /dashboard/
 Disallow: /admin/
 Disallow: /staff/
 Disallow: /onboarding
+Disallow: /book/
 
-# Allow public pages
+# Allow public marketing pages
 Allow: /
+Allow: /auth
 Allow: /blog
 Allow: /blog/*
 Allow: /compare/*
 Allow: /features/*
-Allow: /auth
-Allow: /book/*
+Allow: /privacy-policy
 
 # Sitemap
-Sitemap: https://jointidywise.lovable.app/sitemap.xml
+Sitemap: https://www.jointidywise.com/sitemap.xml
