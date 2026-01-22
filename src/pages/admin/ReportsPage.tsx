@@ -35,11 +35,15 @@ import { Label } from '@/components/ui/label';
 import { useOrgId } from '@/hooks/useOrgId';
 
 // Helper to fetch data - uses any to break TS2589 type depth chain
+// Includes pagination limits for performance
 async function fetchOrgData(orgId: string): Promise<{ whData: any[]; custData: any[]; recData: any[] }> {
   const client: any = supabase;
-  const whRes = await client.from('working_hours').select('*').eq('organization_id', orgId);
-  const custRes = await client.from('customers').select('id, first_name, last_name, email, created_at, is_recurring, address').eq('organization_id', orgId);
-  const recRes = await client.from('recurring_bookings').select('total_amount, frequency, is_active, customer_id').eq('organization_id', orgId);
+  // Working hours are limited per staff, so 500 is plenty
+  const whRes = await client.from('working_hours').select('*').eq('organization_id', orgId).limit(500);
+  // Customers: fetch most recent 1000 for reports (order by created_at desc)
+  const custRes = await client.from('customers').select('id, first_name, last_name, email, created_at, is_recurring, address').eq('organization_id', orgId).order('created_at', { ascending: false }).limit(1000);
+  // Recurring bookings: fetch all active + limit to 500
+  const recRes = await client.from('recurring_bookings').select('total_amount, frequency, is_active, customer_id').eq('organization_id', orgId).limit(500);
   return {
     whData: whRes.data || [],
     custData: custRes.data || [],
