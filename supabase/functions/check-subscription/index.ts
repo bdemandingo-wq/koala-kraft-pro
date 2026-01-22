@@ -16,6 +16,22 @@ const logStep = (step: string, details?: any) => {
   console.log(`[CHECK-SUBSCRIPTION] ${step}${detailsStr}`);
 };
 
+// Manual trial overrides (used for one-off arrangements).
+// NOTE: These are fixed timestamps so the trial does NOT extend on each check.
+const MANUAL_TRIAL_OVERRIDES: Record<
+  string,
+  {
+    trial_start_iso: string;
+    trial_end_iso: string;
+  }
+> = {
+  // Free for 2 months starting 2026-01-22
+  "info@openarmscleaning.com": {
+    trial_start_iso: "2026-01-22T00:00:00.000Z",
+    trial_end_iso: "2026-03-22T00:00:00.000Z",
+  },
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -78,9 +94,68 @@ serve(async (req) => {
     }
     logStep("User authenticated", { userId: user.id, email: user.email });
 
+    // Manual trial override (no Stripe customer required)
+    const normalizedEmail = user.email.toLowerCase();
+    const manualTrial = MANUAL_TRIAL_OVERRIDES[normalizedEmail];
+    if (manualTrial) {
+      const now = Date.now();
+      const trialStartMs = Date.parse(manualTrial.trial_start_iso);
+      const trialEndMs = Date.parse(manualTrial.trial_end_iso);
+
+      if (Number.isNaN(trialStartMs) || Number.isNaN(trialEndMs)) {
+        logStep("Manual trial override has invalid timestamps", { email: normalizedEmail, manualTrial });
+        return new Response(JSON.stringify({
+          subscribed: false,
+          trial_active: false,
+          product_id: null,
+          subscription_end: null,
+          trial_end: null,
+          message: "Trial configuration error. Please contact support.",
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
+
+      const isWithinTrial = now >= trialStartMs && now < trialEndMs;
+
+      logStep("Manual trial override applied", {
+        email: normalizedEmail,
+        trial_start_iso: manualTrial.trial_start_iso,
+        trial_end_iso: manualTrial.trial_end_iso,
+        isWithinTrial,
+      });
+
+      if (isWithinTrial) {
+        return new Response(JSON.stringify({
+          subscribed: true,
+          trial_active: true,
+          product_id: "manual_trial",
+          subscription_end: null,
+          trial_end: manualTrial.trial_end_iso,
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
+
+      // Trial has ended — treat as unsubscribed so the frontend paywall popup appears.
+      return new Response(JSON.stringify({
+        subscribed: false,
+        trial_active: false,
+        product_id: null,
+        subscription_end: null,
+        trial_end: manualTrial.trial_end_iso,
+        message: "Your free trial has ended. Please subscribe to continue.",
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
     // Bypass subscription check for owner account and Apple review
     const FREE_ACCOUNTS = ["support@tidywisecleaning.com", "applereview@tidywise.com"];
-    if (FREE_ACCOUNTS.includes(user.email.toLowerCase())) {
+    if (FREE_ACCOUNTS.includes(normalizedEmail)) {
       logStep("Free account detected - bypassing subscription check", { email: user.email });
       return new Response(JSON.stringify({
         subscribed: true,
