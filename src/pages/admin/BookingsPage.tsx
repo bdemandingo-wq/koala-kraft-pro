@@ -67,7 +67,7 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { useBookings, useUpdateBooking, useDeleteBooking, useStaff, BookingWithDetails } from '@/hooks/useBookings';
-import { format, isWithinInterval, startOfDay, endOfDay, differenceInDays, differenceInHours, startOfWeek, endOfWeek, addDays } from 'date-fns';
+import { format, isWithinInterval, startOfDay, endOfDay, differenceInDays, differenceInHours, addDays } from 'date-fns';
 import { AddBookingDialog } from '@/components/admin/AddBookingDialog';
 import { BookingDetailsDialog, AdjustPaymentDialog } from '@/components/admin/BookingDialogs';
 import { PaymentHistoryLogDialog } from '@/components/admin/PaymentHistoryLogDialog';

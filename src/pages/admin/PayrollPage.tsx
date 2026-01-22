@@ -1,9 +1,7 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -18,9 +16,8 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { format, startOfMonth, endOfMonth, startOfYear, isWithinInterval, startOfWeek
- } from 'date-fns';
-import { CalendarIcon, Download, AlertTriangle, DollarSign, Users, Clock, Calculator, TrendingUp, Briefcase, Check, Loader2 } from 'lucide-react';
+import { format, startOfMonth, endOfMonth, startOfYear, startOfWeek } from 'date-fns';
+import { CalendarIcon, Download, AlertTriangle, DollarSign, Clock, Calculator, Briefcase, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTestMode } from '@/contexts/TestModeContext';
 import { useOrgId } from '@/hooks/useOrgId';

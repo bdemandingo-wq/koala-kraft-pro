@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
-import { useStaff, useServices } from '@/hooks/useBookings';
+import { useStaff } from '@/hooks/useBookings';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -69,7 +69,6 @@ export default function StaffPage() {
   const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
   
   const { data: staff = [], isLoading } = useStaff();
-  const { data: services = [] } = useServices();
   const queryClient = useQueryClient();
   const { isTestMode, maskName, maskEmail, maskPhone } = useTestMode();
 
