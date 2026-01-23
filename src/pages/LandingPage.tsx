@@ -176,6 +176,16 @@ export default function LandingPage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Prevent the page behind the mobile menu from scrolling
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [mobileMenuOpen]);
+
   const handleGetStarted = () => {
     sessionStorage.setItem("selectedIndustry", "Home Cleaning");
     navigate("/auth", { state: { email, industry: "Home Cleaning", mode: "signup" } });
@@ -230,71 +240,83 @@ export default function LandingPage() {
             </button>
           </div>
 
-          {/* Mobile Navigation (overlay panel so it doesn't cover hero content) */}
-          <div
-            className={`md:hidden absolute left-0 right-0 top-full transition-all duration-200 ${
-              mobileMenuOpen
-                ? "opacity-100 translate-y-0 pointer-events-auto"
-                : "opacity-0 -translate-y-2 pointer-events-none"
-            }`}
-          >
-            <div className="mt-2 rounded-2xl border border-border/50 bg-background/95 backdrop-blur-xl shadow-lg overflow-hidden">
-              <div className="flex flex-col gap-1 p-2">
-                <a
-                  href="#features"
-                  onClick={closeMobileMenu}
-                  className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all"
-                >
-                  Features
-                </a>
-                <a
-                  href="#blog"
-                  onClick={closeMobileMenu}
-                  className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all"
-                >
-                  Blog
-                </a>
-                <a
-                  href="#testimonials"
-                  onClick={closeMobileMenu}
-                  className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all"
-                >
-                  Testimonials
-                </a>
-                <Button
-                  variant="ghost"
-                  className="justify-start"
-                  onClick={() => {
-                    closeMobileMenu();
-                    navigate("/staff/login");
-                  }}
-                >
-                  Staff Portal
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="justify-start"
-                  onClick={() => {
-                    closeMobileMenu();
-                    navigate("/auth");
-                  }}
-                >
-                  Log In
-                </Button>
-                <Button
-                  variant="premium"
-                  className="mt-1"
-                  onClick={() => {
-                    closeMobileMenu();
-                    navigate("/auth");
-                  }}
-                >
-                  Start Free Trial
-                  <ArrowRight className="ml-1 h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
+           {/* Mobile Navigation: fixed overlay to avoid colliding with the hero */}
+           {mobileMenuOpen ? (
+             <div
+               className="md:hidden fixed inset-0 z-[60]"
+               role="dialog"
+               aria-modal="true"
+               aria-label="Mobile menu"
+             >
+               {/* Backdrop */}
+               <button
+                 type="button"
+                 className="absolute inset-0 bg-background/60 backdrop-blur-sm"
+                 aria-label="Close menu"
+                 onClick={closeMobileMenu}
+               />
+
+               {/* Panel */}
+               <div className="absolute left-3 right-3 top-[calc(4.25rem+env(safe-area-inset-top))]">
+                 <div className="rounded-2xl border border-border bg-background shadow-lg">
+                   <div className="flex flex-col gap-1 p-2">
+                     <a
+                       href="#features"
+                       onClick={closeMobileMenu}
+                       className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all"
+                     >
+                       Features
+                     </a>
+                     <a
+                       href="#blog"
+                       onClick={closeMobileMenu}
+                       className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all"
+                     >
+                       Blog
+                     </a>
+                     <a
+                       href="#testimonials"
+                       onClick={closeMobileMenu}
+                       className="px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all"
+                     >
+                       Testimonials
+                     </a>
+                     <Button
+                       variant="ghost"
+                       className="justify-start"
+                       onClick={() => {
+                         closeMobileMenu();
+                         navigate("/staff/login");
+                       }}
+                     >
+                       Staff Portal
+                     </Button>
+                     <Button
+                       variant="ghost"
+                       className="justify-start"
+                       onClick={() => {
+                         closeMobileMenu();
+                         navigate("/auth");
+                       }}
+                     >
+                       Log In
+                     </Button>
+                     <Button
+                       variant="premium"
+                       className="mt-1"
+                       onClick={() => {
+                         closeMobileMenu();
+                         navigate("/auth");
+                       }}
+                     >
+                       Start Free Trial
+                       <ArrowRight className="ml-1 h-4 w-4" />
+                     </Button>
+                   </div>
+                 </div>
+               </div>
+             </div>
+           ) : null}
         </div>
       </nav>
 
