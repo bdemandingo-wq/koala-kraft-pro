@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { stripePromise } from '@/lib/stripe';
+import { getStripePromise } from '@/lib/stripe';
 import { Button } from '@/components/ui/button';
 import { Loader2, CreditCard, Lock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -228,6 +228,9 @@ function CardFormInner({
 }
 
 export function StripeCardForm(props: CardFormProps) {
+  // Lazily load Stripe.js only when this component is actually rendered.
+  const stripePromise = useMemo(() => getStripePromise(), []);
+
   return (
     <Elements stripe={stripePromise}>
       <CardFormInner {...props} />
