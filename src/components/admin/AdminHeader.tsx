@@ -26,12 +26,12 @@ export function AdminHeader({ title, subtitle, actions }: AdminHeaderProps) {
         We respect the safe-area inset here and keep the visual height consistent.
       */}
       <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b border-border pt-[env(safe-area-inset-top)]">
-        <div className="flex items-center justify-between h-16 px-6">
+        <div className="flex items-center justify-between h-14 md:h-16 px-4 md:px-6">
           <div className="flex items-center gap-3">
             <div>
-              <h1 className="text-xl font-semibold text-foreground">{title}</h1>
+              <h1 className="text-lg md:text-xl font-semibold text-foreground leading-tight">{title}</h1>
               {subtitle && (
-                <p className="text-sm text-muted-foreground">{subtitle}</p>
+                <p className="text-xs md:text-sm text-muted-foreground leading-tight">{subtitle}</p>
               )}
             </div>
             {isTestMode && (
@@ -41,7 +41,7 @@ export function AdminHeader({ title, subtitle, actions }: AdminHeaderProps) {
             )}
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
             {/* Search */}
             <div className="relative hidden md:block">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -74,7 +74,7 @@ export function AdminHeader({ title, subtitle, actions }: AdminHeaderProps) {
             {/* Quick Add */}
             <Button size="sm" className="gap-2" onClick={() => setBookingDialogOpen(true)}>
               <Plus className="w-4 h-4" />
-              New Booking
+              <span className="hidden sm:inline">New Booking</span>
             </Button>
           </div>
         </div>

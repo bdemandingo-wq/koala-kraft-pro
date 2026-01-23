@@ -26,7 +26,11 @@ export function AdminLayout({ children, title, subtitle, actions }: AdminLayoutP
         sidebarOpen && "md:pl-64"
       )}>
         <AdminHeader title={title} subtitle={subtitle} actions={actions} />
-        <main className="p-4 md:p-6 pt-20 md:pt-6 pb-24 md:pb-6 animate-page-enter overflow-y-auto">
+        {/*
+          AdminHeader is sticky (not overlay), so we don't need the large top padding.
+          Keeping this compact avoids the “huge header” feel on mobile across all admin pages.
+        */}
+        <main className="p-4 md:p-6 pt-4 md:pt-6 pb-24 md:pb-6 animate-page-enter overflow-y-auto">
           {children}
         </main>
       </div>
