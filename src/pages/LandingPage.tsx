@@ -192,8 +192,8 @@ export default function LandingPage() {
         canonicalPath="/"
       />
 
-      {/* Navigation - Premium glassmorphism */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      {/* Navigation - Premium glassmorphism (iOS safe-area aware) */}
+      <nav className={`fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top)] transition-all duration-300 ${
         isScrolled 
           ? 'bg-background/80 backdrop-blur-xl border-b border-border/50 shadow-sm' 
           : 'bg-transparent'
@@ -247,7 +247,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section - Premium redesign */}
-      <section className="relative pt-28 md:pt-36 pb-20 md:pb-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <section className="relative pt-[calc(7rem+env(safe-area-inset-top))] md:pt-[calc(9rem+env(safe-area-inset-top))] pb-20 md:pb-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
         {/* Animated gradient background */}
         <div className="hero-gradient-bg" />
         
