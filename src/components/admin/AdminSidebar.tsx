@@ -436,7 +436,7 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
       <Button
         variant="ghost"
         size="icon"
-        className="fixed top-4 left-4 z-50 md:hidden"
+         className="fixed top-[calc(1rem+env(safe-area-inset-top))] left-4 z-50 md:hidden"
         onClick={() => setMobileOpen(true)}
       >
         <Menu className="w-6 h-6" />
