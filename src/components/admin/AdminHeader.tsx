@@ -20,8 +20,13 @@ export function AdminHeader({ title, subtitle, actions }: AdminHeaderProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-30 h-16 bg-background/80 backdrop-blur-sm border-b border-border">
-        <div className="flex items-center justify-between h-full px-6">
+      {/*
+        iOS (especially in native) can place content under the status bar/notch.
+        If interactive elements sit under it, taps can fail.
+        We respect the safe-area inset here and keep the visual height consistent.
+      */}
+      <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b border-border pt-[env(safe-area-inset-top)]">
+        <div className="flex items-center justify-between h-16 px-6">
           <div className="flex items-center gap-3">
             <div>
               <h1 className="text-xl font-semibold text-foreground">{title}</h1>
