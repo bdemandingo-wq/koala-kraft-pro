@@ -49,8 +49,11 @@ export function AdminHeader({ title, actions }: AdminHeaderProps) {
             Mobile: header actions can overflow on smaller screens.
             Make this horizontally scrollable so users can swipe to reach actions like “New Booking”.
           */}
-          <div className="flex-1 min-w-0 flex justify-end">
-            <div className="flex items-center gap-1.5 md:gap-4 overflow-x-auto whitespace-nowrap max-w-full pl-2">
+          <div
+            className="flex-1 min-w-0 overflow-x-auto pl-2 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            aria-label="Header actions"
+          >
+            <div className="flex w-max min-w-full items-center justify-end gap-1.5 md:gap-4 whitespace-nowrap">
               {/* Search */}
               <div className="relative hidden md:block">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
