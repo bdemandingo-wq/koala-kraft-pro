@@ -30,13 +30,16 @@ export function AdminHeader({ title, actions }: AdminHeaderProps) {
         We respect the safe-area inset here and keep the visual height consistent.
       */}
       <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b border-border pt-[env(safe-area-inset-top)]">
-        <div className="flex items-center justify-between h-14 md:h-16 px-4 md:px-6">
+        <div className="flex items-center justify-between h-12 md:h-16 px-3 md:px-6">
           <div className="flex items-center gap-3">
             <div>
-              <h1 className="text-lg md:text-xl font-semibold text-foreground leading-tight">{title}</h1>
+              <h1 className="text-base md:text-xl font-semibold text-foreground leading-tight">{title}</h1>
             </div>
             {isTestMode && (
-              <Badge variant="outline" className="bg-yellow-100 text-yellow-700 border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-700">
+              <Badge
+                variant="outline"
+                className="bg-accent/10 text-foreground border-accent/30"
+              >
                 Demo Mode
               </Badge>
             )}
@@ -47,7 +50,7 @@ export function AdminHeader({ title, actions }: AdminHeaderProps) {
             Make this horizontally scrollable so users can swipe to reach actions like “New Booking”.
           */}
           <div className="flex-1 min-w-0 flex justify-end">
-            <div className="flex items-center gap-2 md:gap-4 overflow-x-auto whitespace-nowrap max-w-full pl-2">
+            <div className="flex items-center gap-1.5 md:gap-4 overflow-x-auto whitespace-nowrap max-w-full pl-2">
               {/* Search */}
               <div className="relative hidden md:block">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -69,7 +72,7 @@ export function AdminHeader({ title, actions }: AdminHeaderProps) {
                 size="icon"
                 onClick={toggleTestMode}
                 title={isTestMode ? 'Disable Demo Mode' : 'Enable Demo Mode'}
-                className={isTestMode ? 'text-yellow-600' : ''}
+                className={isTestMode ? 'text-accent' : ''}
               >
                 {isTestMode ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </Button>
