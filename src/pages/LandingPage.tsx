@@ -188,12 +188,12 @@ export default function LandingPage() {
 
   const handleGetStarted = () => {
     sessionStorage.setItem("selectedIndustry", "Home Cleaning");
-    navigate("/auth", { state: { email, industry: "Home Cleaning", mode: "signup" } });
+    navigate("/signup");
   };
 
   const handleStartFreeTrial = () => {
     sessionStorage.setItem("selectedIndustry", "Home Cleaning");
-    navigate("/auth", { state: { mode: "signup" } });
+    navigate("/signup");
   };
 
   return (
@@ -222,8 +222,8 @@ export default function LandingPage() {
               <a href="#blog" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium">Blog</a>
               <a href="#testimonials" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium">Testimonials</a>
               <Button variant="ghost" onClick={() => navigate("/staff/login")} className="text-sm">Staff Portal</Button>
-              <Button variant="ghost" onClick={() => navigate("/auth")} className="text-sm">Log In</Button>
-              <Button variant="premium" onClick={() => navigate("/auth")} className="text-sm">
+              <Button variant="ghost" onClick={() => navigate("/login")} className="text-sm">Log In</Button>
+              <Button variant="premium" onClick={() => navigate("/signup")} className="text-sm">
                 Start Free Trial
                 <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
@@ -296,7 +296,7 @@ export default function LandingPage() {
                        className="justify-start"
                        onClick={() => {
                          closeMobileMenu();
-                         navigate("/auth");
+                         navigate("/login");
                        }}
                      >
                        Log In
@@ -306,7 +306,7 @@ export default function LandingPage() {
                        className="mt-1"
                        onClick={() => {
                          closeMobileMenu();
-                         navigate("/auth");
+                         navigate("/signup");
                        }}
                      >
                        Start Free Trial
