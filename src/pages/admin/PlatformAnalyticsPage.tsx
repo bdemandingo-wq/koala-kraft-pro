@@ -114,18 +114,36 @@ export default function PlatformAnalyticsPage() {
   };
 
   const handleDelete = async () => {
-    // HARD SAFETY: backend deletions are intentionally disabled.
-    toast.error('Account deletion is disabled.');
-    setDeleteDialogOpen(false);
-    setItemToDelete(null);
+    if (!itemToDelete) return;
+    
+    setDeleting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('delete-platform-account', {
+        body: { userId: itemToDelete.id, type: itemToDelete.type }
+      });
+      
+      if (error || data?.error) {
+        const errorMessage = data?.error || error?.message || 'Failed to delete';
+        toast.error(errorMessage);
+        return;
+      }
+      
+      toast.success(`${itemToDelete.type === 'user' ? 'User' : 'Organization'} deleted successfully`);
+      setDeleteDialogOpen(false);
+      setItemToDelete(null);
+      fetchAnalytics();
+      refetchSessions();
+    } catch (err: any) {
+      console.error('Error deleting:', err);
+      toast.error(err.message || 'Failed to delete');
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const openDeleteDialog = (id: string, type: 'user' | 'organization', name: string) => {
-    // Prevent even opening the dialog to avoid calling the disabled backend function.
-    void id;
-    void type;
-    void name;
-    toast.error('Account deletion is disabled.');
+    setItemToDelete({ id, type, name });
+    setDeleteDialogOpen(true);
   };
 
   useEffect(() => {

@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
-import { createErrorResponse, logToSystem } from "../_shared/system-logger.ts";
+import { logToSystem } from "../_shared/system-logger.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -21,45 +21,114 @@ serve(async (req) => {
   );
 
   try {
-    // HARD SAFETY: This function is permanently disabled to prevent accidental data loss.
-    // If you ever want to re-enable deletions in the future, revert this block explicitly.
-    const authHeader = req.headers.get("Authorization");
-    const token = authHeader?.replace("Bearer ", "") ?? null;
-    const { data: userData } = token
-      ? await supabaseClient.auth.getUser(token)
-      : { data: { user: null } };
-
     const requestId = crypto.randomUUID();
-    await logToSystem({
-      level: "warn",
-      source: "delete-platform-account",
-      message: "Blocked account deletion attempt (function disabled)",
-      details: {
-        method: req.method,
-        path: new URL(req.url).pathname,
-      },
-      userId: userData.user?.id,
-      requestId,
+    
+    // Verify the user is the platform admin
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await supabaseClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(JSON.stringify({ error: "Authentication error: Invalid token" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const userEmail = claimsData.claims.email as string | undefined;
+    const userId = claimsData.claims.sub as string | undefined;
+    
+    if (!userEmail || userEmail !== PLATFORM_ADMIN_EMAIL) {
+      await logToSystem({
+        level: "warn",
+        source: "delete-platform-account",
+        message: "Unauthorized deletion attempt",
+        userId,
+        requestId,
+      });
+      return new Response(JSON.stringify({ error: "Unauthorized: Platform admin access only" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Parse request body
+    const body = await req.json();
+    const { userId: targetUserId, type } = body;
+
+    if (!targetUserId || !type) {
+      return new Response(JSON.stringify({ error: "Missing userId or type" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    console.log(`[DELETE-ACCOUNT] Deleting ${type}: ${targetUserId}`);
+
+    if (type === 'user') {
+      // Delete user from auth.users (this cascades to profiles due to FK)
+      const { error: deleteError } = await supabaseClient.auth.admin.deleteUser(targetUserId);
+      
+      if (deleteError) {
+        console.error("[DELETE-ACCOUNT] Error deleting user:", deleteError);
+        throw new Error(`Failed to delete user: ${deleteError.message}`);
+      }
+
+      await logToSystem({
+        level: "info",
+        source: "delete-platform-account",
+        message: `User deleted successfully: ${targetUserId}`,
+        userId,
+        requestId,
+      });
+
+    } else if (type === 'organization') {
+      // Delete organization and cascade to related data
+      // First delete org_memberships
+      await supabaseClient.from('org_memberships').delete().eq('organization_id', targetUserId);
+      
+      // Delete the organization itself
+      const { error: deleteError } = await supabaseClient
+        .from('organizations')
+        .delete()
+        .eq('id', targetUserId);
+      
+      if (deleteError) {
+        console.error("[DELETE-ACCOUNT] Error deleting organization:", deleteError);
+        throw new Error(`Failed to delete organization: ${deleteError.message}`);
+      }
+
+      await logToSystem({
+        level: "info",
+        source: "delete-platform-account",
+        message: `Organization deleted successfully: ${targetUserId}`,
+        userId,
+        requestId,
+      });
+    } else {
+      return new Response(JSON.stringify({ error: "Invalid type. Must be 'user' or 'organization'" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    return new Response(JSON.stringify({ success: true }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 200,
     });
 
-    return await createErrorResponse(
-      "Account deletion is disabled.",
-      403,
-      corsHeaders,
-      {
-        source: "delete-platform-account",
-        userId: userData.user?.id,
-        requestId,
-      }
-    );
-
-    // Verify the user is the platform admin
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error("[DELETE-ACCOUNT] Error:", errorMessage);
     return new Response(JSON.stringify({ error: errorMessage }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: error instanceof Error && error.message.includes("Unauthorized") ? 403 : 500,
+      status: 500,
     });
   }
 });
