@@ -3,7 +3,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import { getOrgEmailSettings, formatEmailFrom, getReplyTo } from "../_shared/get-org-email-settings.ts";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+// Platform-level Resend API key (shared email service)
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
@@ -50,6 +51,16 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
+    // STRICT ISOLATION: Verify Resend API key is available
+    if (!RESEND_API_KEY) {
+      console.error("[send-admin-booking-notification] Missing RESEND_API_KEY");
+      return new Response(JSON.stringify({ error: "Email service not configured" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    const resend = new Resend(RESEND_API_KEY);
     console.log("[send-admin-booking-notification] Sending notification for org:", organizationId);
 
     // Get email settings from organization_email_settings table
