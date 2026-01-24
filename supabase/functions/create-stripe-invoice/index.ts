@@ -62,23 +62,32 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("User not authorized for this organization");
     }
 
-    // STRICT ISOLATION: Get organization-specific Stripe credentials
-    const { data: orgStripeSettings } = await supabase
+    // STRICT ISOLATION: Get organization-specific Stripe credentials - NO FALLBACK ALLOWED
+    const { data: orgStripeSettings, error: stripeSettingsError } = await supabase
       .from("org_stripe_settings")
       .select("stripe_secret_key")
       .eq("organization_id", data.organizationId)
       .maybeSingle();
 
-    const stripeSecretKey = orgStripeSettings?.stripe_secret_key || Deno.env.get("STRIPE_SECRET_KEY");
-    
-    if (!stripeSecretKey) {
+    if (stripeSettingsError) {
+      console.error("[create-stripe-invoice] Error fetching Stripe settings for org:", data.organizationId, stripeSettingsError);
+      return new Response(
+        JSON.stringify({ error: "Failed to fetch Stripe configuration" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // CRITICAL: NO FALLBACK - Organization must have its own Stripe key configured
+    if (!orgStripeSettings?.stripe_secret_key) {
+      console.error("[create-stripe-invoice] No Stripe key configured for organization:", data.organizationId);
       return new Response(
         JSON.stringify({ error: "Stripe not configured for this organization. Please connect your Stripe account in Settings → Payments." }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const stripe = new Stripe(stripeSecretKey, { apiVersion: "2025-08-27.basil" });
+    console.log("[create-stripe-invoice] Using organization-specific Stripe key for org:", data.organizationId);
+    const stripe = new Stripe(orgStripeSettings.stripe_secret_key, { apiVersion: "2025-08-27.basil" });
 
     // Get or create Stripe customer
     const customers = await stripe.customers.list({ email: data.customerEmail, limit: 1 });

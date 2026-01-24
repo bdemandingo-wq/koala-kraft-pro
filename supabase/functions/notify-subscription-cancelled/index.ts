@@ -1,8 +1,10 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
+import { getOrgEmailSettings, formatEmailFrom } from "../_shared/get-org-email-settings.ts";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+// Platform-level Resend API key (shared email service)
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
@@ -15,7 +17,7 @@ interface CancellationRequest {
   customerEmail: string;
   customerName: string;
   reason?: string;
-  organizationId?: string;
+  organizationId: string; // REQUIRED - no fallback allowed
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -26,34 +28,53 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { customerEmail, customerName, reason, organizationId }: CancellationRequest = await req.json();
 
-    // Fetch business settings for sender email and admin email
-    // Default to Resend's verified domain for other organizations
-    let senderEmail = "onboarding@resend.dev";
-    let adminEmail = "onboarding@resend.dev";
-    let companyName = "TIDYWISE";
-    
-    if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
-      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-      
-      const settingsQuery = organizationId 
-        ? supabase.from('business_settings').select('company_email, company_name').eq('organization_id', organizationId).maybeSingle()
-        : supabase.from('business_settings').select('company_email, company_name').order('updated_at', { ascending: false }).limit(1).maybeSingle();
-      
-      const { data: settings } = await settingsQuery;
-      
-      if (settings?.company_email) {
-        senderEmail = settings.company_email;
-        adminEmail = settings.company_email;
-        console.log("Using custom sender email:", senderEmail);
-      }
-      if (settings?.company_name) {
-        companyName = settings.company_name;
-      }
+    // CRITICAL: organizationId is REQUIRED for multi-tenant isolation
+    if (!organizationId) {
+      console.error("[notify-subscription-cancelled] Missing organizationId - cannot send notification without organization context");
+      return new Response(JSON.stringify({ 
+        error: "Missing organizationId - organization context is required" 
+      }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
     }
 
-    // Send notification to support
+    // STRICT ISOLATION: Verify Resend API key is available
+    if (!RESEND_API_KEY) {
+      console.error("[notify-subscription-cancelled] Missing RESEND_API_KEY");
+      return new Response(JSON.stringify({ error: "Email service not configured" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    console.log("[notify-subscription-cancelled] Processing cancellation for org:", organizationId);
+
+    // Get org-specific email settings - STRICT ISOLATION
+    const emailSettingsResult = await getOrgEmailSettings(organizationId);
+    
+    if (!emailSettingsResult.success || !emailSettingsResult.settings) {
+      console.error("[notify-subscription-cancelled] Failed to get email settings:", emailSettingsResult.error);
+      return new Response(JSON.stringify({ 
+        error: emailSettingsResult.error || "Email settings not configured for this organization" 
+      }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    const emailSettings = emailSettingsResult.settings;
+    const senderFrom = formatEmailFrom(emailSettings);
+    const adminEmail = emailSettings.from_email;
+    const companyName = emailSettings.from_name;
+
+    console.log("[notify-subscription-cancelled] Using org email settings - from:", senderFrom, "to:", adminEmail);
+
+    const resend = new Resend(RESEND_API_KEY);
+
+    // Send notification to the organization admin
     const emailResponse = await resend.emails.send({
-      from: `${companyName} <${senderEmail}>`,
+      from: senderFrom,
       to: [adminEmail],
       subject: `Subscription Cancelled: ${customerName}`,
       html: `
@@ -84,14 +105,14 @@ const handler = async (req: Request): Promise<Response> => {
       `,
     });
 
-    console.log("Cancellation notification sent:", emailResponse);
+    console.log("[notify-subscription-cancelled] Cancellation notification sent:", emailResponse);
 
-    return new Response(JSON.stringify({ success: true }), {
+    return new Response(JSON.stringify({ success: true, emailId: emailResponse.data?.id }), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   } catch (error: any) {
-    console.error("Error in notify-subscription-cancelled:", error);
+    console.error("[notify-subscription-cancelled] Error:", error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }

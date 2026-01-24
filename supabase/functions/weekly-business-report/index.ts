@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
+import { getOrgEmailSettings, formatEmailFrom } from "../_shared/get-org-email-settings.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -20,6 +21,12 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
       throw new Error("Missing Supabase configuration");
+    }
+
+    // STRICT ISOLATION: Require platform-level Resend key
+    if (!RESEND_API_KEY) {
+      console.error("[weekly-business-report] Missing RESEND_API_KEY");
+      throw new Error("Email service not configured");
     }
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -253,20 +260,26 @@ Give practical advice for a cleaning business owner.`;
         </html>
       `;
 
-      // Send email
-      if (RESEND_API_KEY) {
+      // Send email using organization-specific settings
+      const emailSettingsResult = await getOrgEmailSettings(org.id);
+      
+      if (emailSettingsResult.success && emailSettingsResult.settings && RESEND_API_KEY) {
         try {
           const resend = new Resend(RESEND_API_KEY);
+          const senderFrom = formatEmailFrom(emailSettingsResult.settings);
+          
           await resend.emails.send({
-            from: 'TidyWise <noreply@resend.dev>',
+            from: senderFrom,
             to: [adminEmail],
             subject: `📈 Weekly Report: $${thisWeekRevenue.toFixed(0)} revenue, ${thisWeekCompleted} jobs`,
             html: reportHtml,
           });
-          console.log(`[weekly-business-report] Email sent to ${adminEmail}`);
+          console.log(`[weekly-business-report] Email sent to ${adminEmail} for org: ${org.id}`);
         } catch (emailError) {
-          console.error(`[weekly-business-report] Email error:`, emailError);
+          console.error(`[weekly-business-report] Email error for org ${org.id}:`, emailError);
         }
+      } else {
+        console.log(`[weekly-business-report] Skipping email for org ${org.id} - email settings not configured`);
       }
 
       reports.push({

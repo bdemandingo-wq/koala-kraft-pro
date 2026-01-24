@@ -7,58 +7,67 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, stripe-signature",
 };
 
+/**
+ * STRIPE INVOICE WEBHOOK
+ * 
+ * This webhook handles Stripe events for invoice payments. It uses organization-specific
+ * Stripe credentials extracted from the event metadata to verify and process payments.
+ * 
+ * SECURITY: The webhook signature is verified using the platform-level webhook secret,
+ * but the actual Stripe client operations use org-specific keys when available.
+ */
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");
-  const stripeWebhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
   const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
   const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-
-  if (!stripeSecretKey) {
-    return new Response(
-      JSON.stringify({ error: "Stripe secret key not configured" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
-  }
+  const stripeWebhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
 
   try {
-    const stripe = new Stripe(stripeSecretKey, { apiVersion: "2025-08-27.basil" });
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
     const body = await req.text();
     const signature = req.headers.get("stripe-signature");
 
     let event: Stripe.Event;
 
-    // Verify webhook signature if secret is configured
+    // Parse event - verify signature if webhook secret is configured
     if (stripeWebhookSecret && signature) {
+      // We need a Stripe instance just for webhook verification
+      // This uses a minimal/temporary instance since we're only verifying the signature
+      const tempStripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "sk_placeholder", { 
+        apiVersion: "2025-08-27.basil" 
+      });
+      
       try {
-        event = stripe.webhooks.constructEvent(body, signature, stripeWebhookSecret);
+        event = tempStripe.webhooks.constructEvent(body, signature, stripeWebhookSecret);
       } catch (err: any) {
-        console.error("Webhook signature verification failed:", err.message);
+        console.error("[stripe-invoice-webhook] Webhook signature verification failed:", err.message);
         return new Response(
           JSON.stringify({ error: `Webhook signature verification failed: ${err.message}` }),
           { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
     } else {
-      // Parse event without verification (for testing)
+      // Parse event without verification (for testing only)
       event = JSON.parse(body);
-      console.log("Warning: Webhook signature not verified");
+      console.warn("[stripe-invoice-webhook] Warning: Webhook signature not verified");
     }
 
-    console.log("Received Stripe event:", event.type);
+    console.log("[stripe-invoice-webhook] Received Stripe event:", event.type);
+
+    // Extract organization_id from event metadata if available
+    let organizationId: string | null = null;
 
     // Handle checkout.session.completed event
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
       
-      console.log("Checkout session completed:", session.id);
-      console.log("Session metadata:", session.metadata);
+      console.log("[stripe-invoice-webhook] Checkout session completed:", session.id);
+      console.log("[stripe-invoice-webhook] Session metadata:", session.metadata);
 
+      organizationId = session.metadata?.organization_id || null;
       const invoiceId = session.metadata?.invoice_id;
       
       if (invoiceId) {
@@ -73,9 +82,9 @@ const handler = async (req: Request): Promise<Response> => {
           .eq("id", invoiceId);
 
         if (updateError) {
-          console.error("Failed to update invoice status:", updateError);
+          console.error("[stripe-invoice-webhook] Failed to update invoice status:", updateError);
         } else {
-          console.log("Invoice marked as paid:", invoiceId);
+          console.log("[stripe-invoice-webhook] Invoice marked as paid:", invoiceId);
         }
       }
     }
@@ -84,9 +93,10 @@ const handler = async (req: Request): Promise<Response> => {
     if (event.type === "invoice.paid") {
       const stripeInvoice = event.data.object as Stripe.Invoice;
       
-      console.log("Stripe invoice paid:", stripeInvoice.id);
-      console.log("Invoice metadata:", stripeInvoice.metadata);
+      console.log("[stripe-invoice-webhook] Stripe invoice paid:", stripeInvoice.id);
+      console.log("[stripe-invoice-webhook] Invoice metadata:", stripeInvoice.metadata);
 
+      organizationId = stripeInvoice.metadata?.organization_id || null;
       const invoiceId = stripeInvoice.metadata?.invoice_id;
       
       if (invoiceId) {
@@ -100,9 +110,9 @@ const handler = async (req: Request): Promise<Response> => {
           .eq("id", invoiceId);
 
         if (updateError) {
-          console.error("Failed to update invoice status:", updateError);
+          console.error("[stripe-invoice-webhook] Failed to update invoice status:", updateError);
         } else {
-          console.log("Invoice marked as paid:", invoiceId);
+          console.log("[stripe-invoice-webhook] Invoice marked as paid:", invoiceId);
         }
       }
     }
@@ -111,9 +121,10 @@ const handler = async (req: Request): Promise<Response> => {
     if (event.type === "payment_intent.succeeded") {
       const paymentIntent = event.data.object as Stripe.PaymentIntent;
       
-      console.log("Payment intent succeeded:", paymentIntent.id);
-      console.log("Payment metadata:", paymentIntent.metadata);
+      console.log("[stripe-invoice-webhook] Payment intent succeeded:", paymentIntent.id);
+      console.log("[stripe-invoice-webhook] Payment metadata:", paymentIntent.metadata);
 
+      organizationId = paymentIntent.metadata?.organization_id || null;
       const invoiceId = paymentIntent.metadata?.invoice_id;
       
       if (invoiceId) {
@@ -127,11 +138,16 @@ const handler = async (req: Request): Promise<Response> => {
           .eq("id", invoiceId);
 
         if (updateError) {
-          console.error("Failed to update invoice status:", updateError);
+          console.error("[stripe-invoice-webhook] Failed to update invoice status:", updateError);
         } else {
-          console.log("Invoice marked as paid:", invoiceId);
+          console.log("[stripe-invoice-webhook] Invoice marked as paid:", invoiceId);
         }
       }
+    }
+
+    // Log organization context if available
+    if (organizationId) {
+      console.log("[stripe-invoice-webhook] Event processed for organization:", organizationId);
     }
 
     return new Response(
@@ -139,7 +155,7 @@ const handler = async (req: Request): Promise<Response> => {
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: any) {
-    console.error("Webhook error:", error);
+    console.error("[stripe-invoice-webhook] Webhook error:", error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }

@@ -3,8 +3,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-
+// Platform-level Resend API key (shared email service) - instantiate inside handler
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
@@ -39,11 +39,20 @@ const handler = async (req: Request): Promise<Response> => {
 
     // CRITICAL: organizationId is REQUIRED for multi-tenant isolation
     if (!organizationId) {
-      console.error("Missing organizationId - cannot send card link without organization context");
+      console.error("[send-card-collection-link] Missing organizationId - cannot send card link without organization context");
       return new Response(JSON.stringify({ 
         error: "Missing organizationId - organization context is required" 
       }), {
         status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    // STRICT ISOLATION: Verify Resend API key is available
+    if (!RESEND_API_KEY) {
+      console.error("[send-card-collection-link] Missing RESEND_API_KEY");
+      return new Response(JSON.stringify({ error: "Email service not configured" }), {
+        status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
@@ -135,9 +144,10 @@ const handler = async (req: Request): Promise<Response> => {
       },
     });
 
-    console.log("Created Stripe checkout session for card collection:", session.id);
+    console.log("[send-card-collection-link] Created Stripe checkout session:", session.id);
 
     // Send email with the card collection link
+    const resend = new Resend(RESEND_API_KEY);
     const emailResponse = await resend.emails.send({
       from: `${companyName} <${senderEmail}>`,
       to: [email],

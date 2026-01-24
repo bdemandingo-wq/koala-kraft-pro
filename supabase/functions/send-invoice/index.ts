@@ -4,8 +4,8 @@ import Stripe from "https://esm.sh/stripe@18.5.0";
 import { getOrgEmailSettings, formatEmailFrom, getReplyTo } from "../_shared/get-org-email-settings.ts";
 import { logAudit, AuditActions } from "../_shared/audit-log.ts";
 
+// Platform-level Resend API key (shared service)
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
@@ -28,27 +28,16 @@ interface InvoiceEmailRequest {
 }
 
 const handler = async (req: Request): Promise<Response> => {
-  console.log("send-invoice function called");
+  console.log("[send-invoice] Function called");
   
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   if (!RESEND_API_KEY) {
-    console.error("Missing RESEND_API_KEY secret");
+    console.error("[send-invoice] Missing RESEND_API_KEY secret");
     return new Response(
       JSON.stringify({ error: "Email service is not configured" }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      }
-    );
-  }
-
-  if (!STRIPE_SECRET_KEY) {
-    console.error("Missing STRIPE_SECRET_KEY secret");
-    return new Response(
-      JSON.stringify({ error: "Payment service is not configured" }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -100,27 +89,54 @@ const handler = async (req: Request): Promise<Response> => {
     const emailSettings = emailSettingsResult.settings;
     const companyName = emailSettings.from_name;
     
-    console.log("Using org email settings - from:", emailSettings.from_email, "name:", companyName);
+    console.log("[send-invoice] Using org email settings - from:", emailSettings.from_email, "name:", companyName);
 
-    // Initialize Stripe
-    const stripe = new Stripe(STRIPE_SECRET_KEY, {
+    // STRICT ISOLATION: Get organization-specific Stripe credentials - NO FALLBACK ALLOWED
+    const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
+    
+    const { data: orgStripeSettings, error: stripeSettingsError } = await supabase
+      .from("org_stripe_settings")
+      .select("stripe_secret_key")
+      .eq("organization_id", data.organizationId)
+      .maybeSingle();
+
+    if (stripeSettingsError) {
+      console.error("[send-invoice] Error fetching Stripe settings for org:", data.organizationId, stripeSettingsError);
+      return new Response(
+        JSON.stringify({ error: "Failed to fetch Stripe configuration" }),
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // CRITICAL: NO FALLBACK - Organization must have its own Stripe key configured
+    if (!orgStripeSettings?.stripe_secret_key) {
+      console.error("[send-invoice] No Stripe key configured for organization:", data.organizationId);
+      return new Response(
+        JSON.stringify({ error: "Stripe not configured for this organization. Please connect your Stripe account in Settings → Payments." }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    console.log("[send-invoice] Using organization-specific Stripe key for org:", data.organizationId);
+    const stripe = new Stripe(orgStripeSettings.stripe_secret_key, {
       apiVersion: "2025-08-27.basil",
     });
 
-    // Check if customer exists in Stripe
+    // Check if customer exists in Stripe (scoped to org's Stripe account)
     const customers = await stripe.customers.list({ email: customerEmail, limit: 1 });
     let customerId: string | undefined;
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
-      console.log("Found existing Stripe customer:", customerId);
+      console.log("[send-invoice] Found existing Stripe customer:", customerId);
     } else {
-      // Create new customer
+      // Create new customer with organization metadata
       const newCustomer = await stripe.customers.create({
         email: customerEmail,
         name: customerName,
+        metadata: { organization_id: data.organizationId },
       });
       customerId = newCustomer.id;
-      console.log("Created new Stripe customer:", customerId);
+      console.log("[send-invoice] Created new Stripe customer:", customerId);
     }
 
     // Create a Stripe Checkout session for this invoice payment
