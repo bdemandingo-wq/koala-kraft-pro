@@ -8,7 +8,7 @@ import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/hooks/useAuth";
 import { OrganizationProvider } from "@/contexts/OrganizationContext";
 import { TestModeProvider } from "@/contexts/TestModeContext";
-import { ProtectedOrgRoute } from "@/components/ProtectedOrgRoute";
+import { AdminRoute } from "@/components/AdminRoute";
 import { StaffRoute } from "@/components/StaffRoute";
 import { SessionTrackerProvider } from "@/components/SessionTrackerProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -141,38 +141,38 @@ const App = () => (
                       <Route path="/staff/reset-password" element={<StaffResetPasswordPage />} />
                       <Route path="/staff" element={<StaffRoute><ErrorBoundary featureName="Staff Portal"><StaffPortal /></ErrorBoundary></StaffRoute>} />
 
-                      {/* Dashboard Routes - All Lazy Loaded */}
-                      <Route path="/dashboard" element={<ProtectedOrgRoute><ErrorBoundary featureName="Dashboard"><AdminDashboard /></ErrorBoundary></ProtectedOrgRoute>} />
-                      <Route path="/dashboard/scheduler" element={<ProtectedOrgRoute><ErrorBoundary featureName="Scheduler"><SchedulerPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                      <Route path="/dashboard/bookings" element={<ProtectedOrgRoute><ErrorBoundary featureName="Bookings"><BookingsPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                      <Route path="/dashboard/customers" element={<ProtectedOrgRoute><ErrorBoundary featureName="Customers"><CustomersPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                      <Route path="/dashboard/services" element={<ProtectedOrgRoute><ErrorBoundary featureName="Services"><ServicesPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                      <Route path="/dashboard/staff" element={<ProtectedOrgRoute><ErrorBoundary featureName="Staff Management"><StaffPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                      <Route path="/dashboard/payroll" element={<ProtectedOrgRoute><ErrorBoundary featureName="Payroll"><PayrollPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                      <Route path="/dashboard/finance" element={<ProtectedOrgRoute><ErrorBoundary featureName="Finance"><FinancePage /></ErrorBoundary></ProtectedOrgRoute>} />
-                      <Route path="/dashboard/expenses" element={<ProtectedOrgRoute><ErrorBoundary featureName="Expenses"><ExpensesPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                      <Route path="/dashboard/reports" element={<ProtectedOrgRoute><ErrorBoundary featureName="Reports"><ReportsPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                      <Route path="/dashboard/settings" element={<ProtectedOrgRoute><ErrorBoundary featureName="Settings"><SettingsPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                      <Route path="/dashboard/notifications" element={<ProtectedOrgRoute><ErrorBoundary featureName="Notifications"><NotificationsPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                      <Route path="/dashboard/recurring" element={<ProtectedOrgRoute><ErrorBoundary featureName="Recurring Bookings"><RecurringBookingsPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                      <Route path="/dashboard/leads" element={<ProtectedOrgRoute><ErrorBoundary featureName="Leads"><LeadsPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                      <Route path="/dashboard/inventory" element={<ProtectedOrgRoute><ErrorBoundary featureName="Inventory"><InventoryPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                      <Route path="/dashboard/invoices" element={<ProtectedOrgRoute><ErrorBoundary featureName="Invoices"><InvoicesPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                      <Route path="/dashboard/operations" element={<ProtectedOrgRoute><ErrorBoundary featureName="Operations Tracker"><OperationsTrackerPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                      <Route path="/dashboard/feedback" element={<ProtectedOrgRoute><ErrorBoundary featureName="Client Feedback"><ClientFeedbackPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                      <Route path="/dashboard/campaigns" element={<ProtectedOrgRoute><ErrorBoundary featureName="Campaigns"><CampaignsPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                      <Route path="/dashboard/checklists" element={<ProtectedOrgRoute><ErrorBoundary featureName="Checklists"><ChecklistsPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                      <Route path="/dashboard/payment-integration" element={<ProtectedOrgRoute><ErrorBoundary featureName="Payment Integration"><PaymentIntegrationPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                      <Route path="/dashboard/subscription" element={<ProtectedOrgRoute><ErrorBoundary featureName="Subscription"><SubscriptionPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                      <Route path="/dashboard/help" element={<ProtectedOrgRoute><ErrorBoundary featureName="Help Center"><HelpPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                      <Route path="/dashboard/discounts" element={<ProtectedOrgRoute><ErrorBoundary featureName="Discounts"><DiscountsPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                      <Route path="/dashboard/messages" element={<ProtectedOrgRoute><ErrorBoundary featureName="Messages"><MessagesPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                      <Route path="/dashboard/tasks" element={<ProtectedOrgRoute><ErrorBoundary featureName="Tasks"><TasksPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                      <Route path="/dashboard/platform-analytics" element={<ProtectedOrgRoute><ErrorBoundary featureName="Platform Analytics"><PlatformAnalyticsPage /></ErrorBoundary></ProtectedOrgRoute>} />
+                      {/* Dashboard Routes - All Lazy Loaded (AdminRoute enforces owner/admin role) */}
+                      <Route path="/dashboard" element={<AdminRoute><ErrorBoundary featureName="Dashboard"><AdminDashboard /></ErrorBoundary></AdminRoute>} />
+                      <Route path="/dashboard/scheduler" element={<AdminRoute><ErrorBoundary featureName="Scheduler"><SchedulerPage /></ErrorBoundary></AdminRoute>} />
+                      <Route path="/dashboard/bookings" element={<AdminRoute><ErrorBoundary featureName="Bookings"><BookingsPage /></ErrorBoundary></AdminRoute>} />
+                      <Route path="/dashboard/customers" element={<AdminRoute><ErrorBoundary featureName="Customers"><CustomersPage /></ErrorBoundary></AdminRoute>} />
+                      <Route path="/dashboard/services" element={<AdminRoute><ErrorBoundary featureName="Services"><ServicesPage /></ErrorBoundary></AdminRoute>} />
+                      <Route path="/dashboard/staff" element={<AdminRoute><ErrorBoundary featureName="Staff Management"><StaffPage /></ErrorBoundary></AdminRoute>} />
+                      <Route path="/dashboard/payroll" element={<AdminRoute><ErrorBoundary featureName="Payroll"><PayrollPage /></ErrorBoundary></AdminRoute>} />
+                      <Route path="/dashboard/finance" element={<AdminRoute><ErrorBoundary featureName="Finance"><FinancePage /></ErrorBoundary></AdminRoute>} />
+                      <Route path="/dashboard/expenses" element={<AdminRoute><ErrorBoundary featureName="Expenses"><ExpensesPage /></ErrorBoundary></AdminRoute>} />
+                      <Route path="/dashboard/reports" element={<AdminRoute><ErrorBoundary featureName="Reports"><ReportsPage /></ErrorBoundary></AdminRoute>} />
+                      <Route path="/dashboard/settings" element={<AdminRoute><ErrorBoundary featureName="Settings"><SettingsPage /></ErrorBoundary></AdminRoute>} />
+                      <Route path="/dashboard/notifications" element={<AdminRoute><ErrorBoundary featureName="Notifications"><NotificationsPage /></ErrorBoundary></AdminRoute>} />
+                      <Route path="/dashboard/recurring" element={<AdminRoute><ErrorBoundary featureName="Recurring Bookings"><RecurringBookingsPage /></ErrorBoundary></AdminRoute>} />
+                      <Route path="/dashboard/leads" element={<AdminRoute><ErrorBoundary featureName="Leads"><LeadsPage /></ErrorBoundary></AdminRoute>} />
+                      <Route path="/dashboard/inventory" element={<AdminRoute><ErrorBoundary featureName="Inventory"><InventoryPage /></ErrorBoundary></AdminRoute>} />
+                      <Route path="/dashboard/invoices" element={<AdminRoute><ErrorBoundary featureName="Invoices"><InvoicesPage /></ErrorBoundary></AdminRoute>} />
+                      <Route path="/dashboard/operations" element={<AdminRoute><ErrorBoundary featureName="Operations Tracker"><OperationsTrackerPage /></ErrorBoundary></AdminRoute>} />
+                      <Route path="/dashboard/feedback" element={<AdminRoute><ErrorBoundary featureName="Client Feedback"><ClientFeedbackPage /></ErrorBoundary></AdminRoute>} />
+                      <Route path="/dashboard/campaigns" element={<AdminRoute><ErrorBoundary featureName="Campaigns"><CampaignsPage /></ErrorBoundary></AdminRoute>} />
+                      <Route path="/dashboard/checklists" element={<AdminRoute><ErrorBoundary featureName="Checklists"><ChecklistsPage /></ErrorBoundary></AdminRoute>} />
+                      <Route path="/dashboard/payment-integration" element={<AdminRoute><ErrorBoundary featureName="Payment Integration"><PaymentIntegrationPage /></ErrorBoundary></AdminRoute>} />
+                      <Route path="/dashboard/subscription" element={<AdminRoute><ErrorBoundary featureName="Subscription"><SubscriptionPage /></ErrorBoundary></AdminRoute>} />
+                      <Route path="/dashboard/help" element={<AdminRoute><ErrorBoundary featureName="Help Center"><HelpPage /></ErrorBoundary></AdminRoute>} />
+                      <Route path="/dashboard/discounts" element={<AdminRoute><ErrorBoundary featureName="Discounts"><DiscountsPage /></ErrorBoundary></AdminRoute>} />
+                      <Route path="/dashboard/messages" element={<AdminRoute><ErrorBoundary featureName="Messages"><MessagesPage /></ErrorBoundary></AdminRoute>} />
+                      <Route path="/dashboard/tasks" element={<AdminRoute><ErrorBoundary featureName="Tasks"><TasksPage /></ErrorBoundary></AdminRoute>} />
+                      <Route path="/dashboard/platform-analytics" element={<AdminRoute><ErrorBoundary featureName="Platform Analytics"><PlatformAnalyticsPage /></ErrorBoundary></AdminRoute>} />
 
                       {/* Legacy admin routes */}
-                      <Route path="/admin" element={<ProtectedOrgRoute><ErrorBoundary featureName="Dashboard"><AdminDashboard /></ErrorBoundary></ProtectedOrgRoute>} />
-                      <Route path="/admin/*" element={<ProtectedOrgRoute><ErrorBoundary featureName="Dashboard"><AdminDashboard /></ErrorBoundary></ProtectedOrgRoute>} />
+                      <Route path="/admin" element={<AdminRoute><ErrorBoundary featureName="Dashboard"><AdminDashboard /></ErrorBoundary></AdminRoute>} />
+                      <Route path="/admin/*" element={<AdminRoute><ErrorBoundary featureName="Dashboard"><AdminDashboard /></ErrorBoundary></AdminRoute>} />
 
                       {/* Catch-all */}
                       <Route path="*" element={<NotFound />} />
@@ -218,38 +218,38 @@ const App = () => (
                     <Route path="/staff/reset-password" element={<StaffResetPasswordPage />} />
                     <Route path="/staff" element={<StaffRoute><ErrorBoundary featureName="Staff Portal"><StaffPortal /></ErrorBoundary></StaffRoute>} />
 
-                    {/* Dashboard Routes - All Lazy Loaded */}
-                    <Route path="/dashboard" element={<ProtectedOrgRoute><ErrorBoundary featureName="Dashboard"><AdminDashboard /></ErrorBoundary></ProtectedOrgRoute>} />
-                    <Route path="/dashboard/scheduler" element={<ProtectedOrgRoute><ErrorBoundary featureName="Scheduler"><SchedulerPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                    <Route path="/dashboard/bookings" element={<ProtectedOrgRoute><ErrorBoundary featureName="Bookings"><BookingsPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                    <Route path="/dashboard/customers" element={<ProtectedOrgRoute><ErrorBoundary featureName="Customers"><CustomersPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                    <Route path="/dashboard/services" element={<ProtectedOrgRoute><ErrorBoundary featureName="Services"><ServicesPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                    <Route path="/dashboard/staff" element={<ProtectedOrgRoute><ErrorBoundary featureName="Staff Management"><StaffPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                    <Route path="/dashboard/payroll" element={<ProtectedOrgRoute><ErrorBoundary featureName="Payroll"><PayrollPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                    <Route path="/dashboard/finance" element={<ProtectedOrgRoute><ErrorBoundary featureName="Finance"><FinancePage /></ErrorBoundary></ProtectedOrgRoute>} />
-                    <Route path="/dashboard/expenses" element={<ProtectedOrgRoute><ErrorBoundary featureName="Expenses"><ExpensesPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                    <Route path="/dashboard/reports" element={<ProtectedOrgRoute><ErrorBoundary featureName="Reports"><ReportsPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                    <Route path="/dashboard/settings" element={<ProtectedOrgRoute><ErrorBoundary featureName="Settings"><SettingsPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                    <Route path="/dashboard/notifications" element={<ProtectedOrgRoute><ErrorBoundary featureName="Notifications"><NotificationsPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                    <Route path="/dashboard/recurring" element={<ProtectedOrgRoute><ErrorBoundary featureName="Recurring Bookings"><RecurringBookingsPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                    <Route path="/dashboard/leads" element={<ProtectedOrgRoute><ErrorBoundary featureName="Leads"><LeadsPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                    <Route path="/dashboard/inventory" element={<ProtectedOrgRoute><ErrorBoundary featureName="Inventory"><InventoryPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                    <Route path="/dashboard/invoices" element={<ProtectedOrgRoute><ErrorBoundary featureName="Invoices"><InvoicesPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                    <Route path="/dashboard/operations" element={<ProtectedOrgRoute><ErrorBoundary featureName="Operations Tracker"><OperationsTrackerPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                    <Route path="/dashboard/feedback" element={<ProtectedOrgRoute><ErrorBoundary featureName="Client Feedback"><ClientFeedbackPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                    <Route path="/dashboard/campaigns" element={<ProtectedOrgRoute><ErrorBoundary featureName="Campaigns"><CampaignsPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                    <Route path="/dashboard/checklists" element={<ProtectedOrgRoute><ErrorBoundary featureName="Checklists"><ChecklistsPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                    <Route path="/dashboard/payment-integration" element={<ProtectedOrgRoute><ErrorBoundary featureName="Payment Integration"><PaymentIntegrationPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                    <Route path="/dashboard/subscription" element={<ProtectedOrgRoute><ErrorBoundary featureName="Subscription"><SubscriptionPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                    <Route path="/dashboard/help" element={<ProtectedOrgRoute><ErrorBoundary featureName="Help Center"><HelpPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                    <Route path="/dashboard/discounts" element={<ProtectedOrgRoute><ErrorBoundary featureName="Discounts"><DiscountsPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                    <Route path="/dashboard/messages" element={<ProtectedOrgRoute><ErrorBoundary featureName="Messages"><MessagesPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                    <Route path="/dashboard/tasks" element={<ProtectedOrgRoute><ErrorBoundary featureName="Tasks"><TasksPage /></ErrorBoundary></ProtectedOrgRoute>} />
-                    <Route path="/dashboard/platform-analytics" element={<ProtectedOrgRoute><ErrorBoundary featureName="Platform Analytics"><PlatformAnalyticsPage /></ErrorBoundary></ProtectedOrgRoute>} />
+                    {/* Dashboard Routes - All Lazy Loaded (AdminRoute enforces owner/admin role) */}
+                    <Route path="/dashboard" element={<AdminRoute><ErrorBoundary featureName="Dashboard"><AdminDashboard /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/scheduler" element={<AdminRoute><ErrorBoundary featureName="Scheduler"><SchedulerPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/bookings" element={<AdminRoute><ErrorBoundary featureName="Bookings"><BookingsPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/customers" element={<AdminRoute><ErrorBoundary featureName="Customers"><CustomersPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/services" element={<AdminRoute><ErrorBoundary featureName="Services"><ServicesPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/staff" element={<AdminRoute><ErrorBoundary featureName="Staff Management"><StaffPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/payroll" element={<AdminRoute><ErrorBoundary featureName="Payroll"><PayrollPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/finance" element={<AdminRoute><ErrorBoundary featureName="Finance"><FinancePage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/expenses" element={<AdminRoute><ErrorBoundary featureName="Expenses"><ExpensesPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/reports" element={<AdminRoute><ErrorBoundary featureName="Reports"><ReportsPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/settings" element={<AdminRoute><ErrorBoundary featureName="Settings"><SettingsPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/notifications" element={<AdminRoute><ErrorBoundary featureName="Notifications"><NotificationsPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/recurring" element={<AdminRoute><ErrorBoundary featureName="Recurring Bookings"><RecurringBookingsPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/leads" element={<AdminRoute><ErrorBoundary featureName="Leads"><LeadsPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/inventory" element={<AdminRoute><ErrorBoundary featureName="Inventory"><InventoryPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/invoices" element={<AdminRoute><ErrorBoundary featureName="Invoices"><InvoicesPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/operations" element={<AdminRoute><ErrorBoundary featureName="Operations Tracker"><OperationsTrackerPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/feedback" element={<AdminRoute><ErrorBoundary featureName="Client Feedback"><ClientFeedbackPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/campaigns" element={<AdminRoute><ErrorBoundary featureName="Campaigns"><CampaignsPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/checklists" element={<AdminRoute><ErrorBoundary featureName="Checklists"><ChecklistsPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/payment-integration" element={<AdminRoute><ErrorBoundary featureName="Payment Integration"><PaymentIntegrationPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/subscription" element={<AdminRoute><ErrorBoundary featureName="Subscription"><SubscriptionPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/help" element={<AdminRoute><ErrorBoundary featureName="Help Center"><HelpPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/discounts" element={<AdminRoute><ErrorBoundary featureName="Discounts"><DiscountsPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/messages" element={<AdminRoute><ErrorBoundary featureName="Messages"><MessagesPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/tasks" element={<AdminRoute><ErrorBoundary featureName="Tasks"><TasksPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/platform-analytics" element={<AdminRoute><ErrorBoundary featureName="Platform Analytics"><PlatformAnalyticsPage /></ErrorBoundary></AdminRoute>} />
 
                     {/* Legacy admin routes */}
-                    <Route path="/admin" element={<ProtectedOrgRoute><ErrorBoundary featureName="Dashboard"><AdminDashboard /></ErrorBoundary></ProtectedOrgRoute>} />
-                    <Route path="/admin/*" element={<ProtectedOrgRoute><ErrorBoundary featureName="Dashboard"><AdminDashboard /></ErrorBoundary></ProtectedOrgRoute>} />
+                    <Route path="/admin" element={<AdminRoute><ErrorBoundary featureName="Dashboard"><AdminDashboard /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/admin/*" element={<AdminRoute><ErrorBoundary featureName="Dashboard"><AdminDashboard /></ErrorBoundary></AdminRoute>} />
 
                     {/* Catch-all */}
                     <Route path="*" element={<NotFound />} />
