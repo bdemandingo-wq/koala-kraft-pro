@@ -107,6 +107,7 @@ function CardFormInnerDynamic({
         const { data: cardData, error: cardError } = await supabase.functions.invoke('get-payment-method-details', {
           body: {
             paymentMethodId: setupIntent.payment_method,
+            organizationId,
           },
         });
 
