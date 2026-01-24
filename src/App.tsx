@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, HashRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/hooks/useAuth";
+import { AuthProviderNoSession } from "@/hooks/useAuthNoSession";
 import { OrganizationProvider } from "@/contexts/OrganizationContext";
 import { TestModeProvider } from "@/contexts/TestModeContext";
 import { AdminRoute } from "@/components/AdminRoute";
@@ -16,6 +17,13 @@ import { Capacitor } from "@capacitor/core";
 
 // Critical path: keep the shell light; lazy-load even the public entry pages
 const LandingPage = lazy(() => import("./pages/LandingPage"));
+
+// New auth pages with no session persistence
+const LoginPage = lazy(() => import("./pages/LoginPage"));
+const SignupPage = lazy(() => import("./pages/SignupPage"));
+const LogoutPage = lazy(() => import("./pages/LogoutPage"));
+
+// Legacy auth page (kept for backwards compatibility)
 const AuthPage = lazy(() => import("./pages/AuthPage"));
 
 // Lazy-loaded page skeleton for loading states
@@ -92,25 +100,32 @@ const queryClient = new QueryClient({
 const App = () => (
   <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
     <QueryClientProvider client={queryClient}>
+      {/* Wrap with BOTH auth providers for backwards compatibility */}
       <AuthProvider>
-        <SessionTrackerProvider>
-          <OrganizationProvider>
-            <TestModeProvider>
-              <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              {/*
-                Native (Capacitor) builds should use HashRouter to avoid blank screens on launch
-                due to history-based routing not being handled by the embedded webview.
-              */}
-              {Capacitor.isNativePlatform() ? (
-                <HashRouter>
-                   <ErrorBoundary featureName="App">
-                     <Suspense fallback={<PageLoader />}>
-                       <Routes>
-                    {/* Public Routes - Critical Path */}
-                      <Route path="/" element={<LandingPage />} />
-                      <Route path="/auth" element={<AuthPage />} />
+        <AuthProviderNoSession>
+          <SessionTrackerProvider>
+            <OrganizationProvider>
+              <TestModeProvider>
+                <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                {/*
+                  Native (Capacitor) builds should use HashRouter to avoid blank screens on launch
+                  due to history-based routing not being handled by the embedded webview.
+                */}
+                {Capacitor.isNativePlatform() ? (
+                  <HashRouter>
+                     <ErrorBoundary featureName="App">
+                       <Suspense fallback={<PageLoader />}>
+                         <Routes>
+                      {/* Auth Routes - No Session Persistence */}
+                        <Route path="/login" element={<LoginPage />} />
+                        <Route path="/signup" element={<SignupPage />} />
+                        <Route path="/logout" element={<LogoutPage />} />
+                        
+                      {/* Public Routes - Critical Path */}
+                        <Route path="/" element={<LandingPage />} />
+                        <Route path="/auth" element={<AuthPage />} />
 
                       {/* Public Routes - Lazy Loaded */}
                       <Route path="/book/:orgSlug" element={<PublicBookingPage />} />
@@ -185,6 +200,11 @@ const App = () => (
                  <ErrorBoundary featureName="App">
                    <Suspense fallback={<PageLoader />}>
                      <Routes>
+                  {/* Auth Routes - No Session Persistence */}
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/signup" element={<SignupPage />} />
+                    <Route path="/logout" element={<LogoutPage />} />
+                    
                   {/* Public Routes - Critical Path */}
                     <Route path="/" element={<LandingPage />} />
                     <Route path="/auth" element={<AuthPage />} />
@@ -259,9 +279,10 @@ const App = () => (
                 </BrowserRouter>
               )}
               </TooltipProvider>
-            </TestModeProvider>
-          </OrganizationProvider>
-        </SessionTrackerProvider>
+              </TestModeProvider>
+            </OrganizationProvider>
+          </SessionTrackerProvider>
+        </AuthProviderNoSession>
       </AuthProvider>
     </QueryClientProvider>
   </ThemeProvider>

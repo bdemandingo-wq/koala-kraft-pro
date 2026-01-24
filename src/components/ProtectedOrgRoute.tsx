@@ -21,9 +21,9 @@ export function ProtectedOrgRoute({ children, requireAdmin = false }: ProtectedO
     );
   }
 
-  // Not logged in - redirect to auth
+  // Not logged in - redirect to login
   if (!user) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   // Logged in but no organization - redirect to onboarding

@@ -38,7 +38,7 @@ export function InteractiveDemo() {
 
   const handleStartFreeTrial = () => {
     sessionStorage.setItem("selectedIndustry", "Home Cleaning");
-    navigate("/auth", { state: { mode: "signup" } });
+    navigate("/signup");
   };
 
   const tabs = [

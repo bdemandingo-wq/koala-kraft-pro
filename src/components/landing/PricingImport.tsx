@@ -105,7 +105,7 @@ export function PricingImport() {
     if (parsedData) {
       sessionStorage.setItem("importedPricing", JSON.stringify(parsedData));
     }
-    navigate("/auth");
+    navigate("/signup");
   };
 
   return (
