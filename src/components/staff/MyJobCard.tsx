@@ -7,7 +7,7 @@ import { format } from 'date-fns';
 import { Calendar, MapPin, Clock, User, Phone, Navigation, DollarSign, ClipboardCheck } from 'lucide-react';
 import { BookingPhotoUpload } from './BookingPhotoUpload';
 import { BookingChecklist } from './BookingChecklist';
-
+import { useMapsNavigation } from '@/hooks/useMapsNavigation';
 interface StaffInfo {
   hourly_rate: number | null;
   base_wage: number | null;
@@ -135,13 +135,18 @@ export function MyJobCard({ booking, staffInfo, onUpdateStatus, isUpdating }: Pr
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
-  const getGoogleMapsUrl = () => {
-    if (!booking.address) return null;
-    const fullAddress = `${booking.address}${booking.city ? `, ${booking.city}` : ''}${booking.state ? `, ${booking.state}` : ''}`;
-    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`;
-  };
+  const { openDirections, platform } = useMapsNavigation();
+  
+  const hasAddress = Boolean(booking.address);
 
-  const mapsUrl = getGoogleMapsUrl();
+  const handleDirectionsClick = () => {
+    openDirections({
+      address: booking.address,
+      city: booking.city,
+      state: booking.state,
+      label: `Job #${booking.booking_number}`,
+    });
+  };
 
   return (
     <Card className="hover:shadow-md transition-shadow">
@@ -221,12 +226,15 @@ export function MyJobCard({ booking, staffInfo, onUpdateStatus, isUpdating }: Pr
         )}
 
         <div className="flex flex-wrap gap-2 pt-2">
-          {mapsUrl && (
-            <Button variant="outline" size="sm" asChild className="gap-2">
-              <a href={mapsUrl} target="_blank" rel="noopener noreferrer">
-                <Navigation className="w-4 h-4" />
-                Directions
-              </a>
+          {hasAddress && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-2"
+              onClick={handleDirectionsClick}
+            >
+              <Navigation className="w-4 h-4" />
+              Directions
             </Button>
           )}
           {staffInfo.id && (booking.status === 'in_progress' || booking.status === 'confirmed') && (
