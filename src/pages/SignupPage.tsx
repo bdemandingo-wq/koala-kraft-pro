@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { TermsOfServiceDialog } from '@/components/legal/TermsOfServiceDialog';
+import { SplashScreen } from '@/components/SplashScreen';
 import { toast } from 'sonner';
 import { Eye, EyeOff, Loader2, ArrowLeft, Mail, Lock, User, Phone } from 'lucide-react';
 import { z } from 'zod';
@@ -48,6 +49,7 @@ export default function SignupPage() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [splashComplete, setSplashComplete] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -203,17 +205,13 @@ export default function SignupPage() {
     }
   };
 
-  // Show loading state
-  if (authLoading || !initialCleanupDone || googleLoading) {
+  // Show splash screen while auth loads
+  if (authLoading || !initialCleanupDone || googleLoading || !splashComplete) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">
-            {googleLoading ? 'Setting up your account...' : 'Loading...'}
-          </p>
-        </div>
-      </div>
+      <SplashScreen 
+        onComplete={() => setSplashComplete(true)} 
+        minDuration={authLoading || !initialCleanupDone || googleLoading ? 1200 : 600}
+      />
     );
   }
 
