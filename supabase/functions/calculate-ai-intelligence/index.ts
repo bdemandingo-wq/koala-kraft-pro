@@ -793,16 +793,58 @@ function calculateBusinessIntelligence(
 }
 
 async function generateAIInsights(apiKey: string, data: any): Promise<string[]> {
-  const prompt = `You are a business intelligence analyst for a cleaning/service company. Based on this data, provide 3 specific, actionable insights (max 25 words each):
+  // Rotate through different insight categories to ensure variety
+  const insightCategories = [
+    'competitive_edge',
+    'pricing_optimization', 
+    'staffing',
+    'lead_generation',
+    'customer_retention',
+    'operational_efficiency',
+    'marketing_strategy',
+    'seasonal_planning'
+  ];
+  
+  // Pick 3 random categories for this run
+  const shuffled = insightCategories.sort(() => Math.random() - 0.5);
+  const selectedCategories = shuffled.slice(0, 3);
+  
+  const categoryPrompts: Record<string, string> = {
+    competitive_edge: `How can this business differentiate from competitors? Consider unique services, faster response times, better customer experience, or niche specialization.`,
+    pricing_optimization: `Analyze if pricing is optimal. Win rate is ${data.priceWinRate.toFixed(1)}%. If low (<50%), suggest raising prices. If high (>70%), prices may be too low and leaving money on the table.`,
+    staffing: `Based on ${data.bookingsNeeded} bookings needed for revenue goals, suggest staffing adjustments. Consider hiring, training, or optimizing schedules.`,
+    lead_generation: `With ${data.conversionRate.toFixed(1)}% conversion rate and ${data.bestSource} as best source, suggest how to get more leads from top channels.`,
+    customer_retention: `Suggest ways to reduce churn, increase repeat bookings, and turn one-time customers into regulars through loyalty programs or follow-ups.`,
+    operational_efficiency: `Suggest ways to reduce costs, improve job completion times, or optimize routes and scheduling for maximum profit per job.`,
+    marketing_strategy: `${data.bestDay} is the best converting day. Suggest targeted marketing tactics to capitalize on peak demand times.`,
+    seasonal_planning: `Suggest how to prepare for seasonal fluctuations - slow seasons, holiday rushes, and maintaining steady revenue year-round.`
+  };
+  
+  const focusAreas = selectedCategories.map(cat => categoryPrompts[cat]).join('\n');
+  
+  const prompt = `You are an expert business consultant for service businesses (cleaning, home services, etc.). Analyze this data and provide 3 UNIQUE, SPECIFIC, ACTIONABLE insights.
 
-Revenue: $${data.predictedRevenue}/month predicted
-Conversion Rate: ${data.conversionRate.toFixed(1)}%
-Best Source: ${data.bestSource}
-Best Day: ${data.bestDay}
-Bookings Needed: ${data.bookingsNeeded} for goal
-Win Rate: ${data.priceWinRate.toFixed(1)}%
+BUSINESS DATA:
+- Monthly Revenue Projection: $${data.predictedRevenue}
+- Lead Conversion Rate: ${data.conversionRate.toFixed(1)}%
+- Best Lead Source: ${data.bestSource || 'Unknown'}
+- Best Converting Day: ${data.bestDay || 'Unknown'}
+- Bookings Needed for Goal: ${data.bookingsNeeded}
+- Quote Win Rate: ${data.priceWinRate.toFixed(1)}%
+- Optimal Price Range: $${data.priceRangeLow || 0} - $${data.priceRangeHigh || 0}
 
-Format: Return only 3 bullet points, no numbering.`;
+FOCUS ON THESE AREAS:
+${focusAreas}
+
+RULES:
+- Each insight MUST be different and actionable
+- Be specific with numbers when possible (e.g., "increase prices by 10-15%", "add 1-2 staff members")
+- Focus on growth, profitability, and competitive advantage
+- If win rate is above 65%, suggest raising prices - they're likely undercharging
+- If conversion rate is below 30%, suggest lead quality or follow-up improvements
+- Maximum 30 words per insight
+
+Format: Return exactly 3 bullet points, no numbering, no asterisks.`;
 
   const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
     method: 'POST',
@@ -813,6 +855,7 @@ Format: Return only 3 bullet points, no numbering.`;
     body: JSON.stringify({
       model: 'google/gemini-3-flash-preview',
       messages: [{ role: 'user', content: prompt }],
+      temperature: 0.8, // Higher temperature for more variety
     }),
   });
 
@@ -827,6 +870,7 @@ Format: Return only 3 bullet points, no numbering.`;
     .split('\n')
     .filter((line: string) => line.trim().length > 0)
     .map((line: string) => line.replace(/^[-•*]\s*/, '').trim())
+    .filter((line: string) => line.length > 10) // Filter out very short lines
     .slice(0, 3);
 }
 
