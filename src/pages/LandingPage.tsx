@@ -599,8 +599,8 @@ export default function LandingPage() {
               <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/10 rounded-3xl blur-xl" />
               <div className="relative grid grid-cols-2 gap-4">
                 {[
-                  { value: '20K+', label: 'Active businesses', delay: '0s' },
-                  { value: '1M+', label: 'Cleans completed', delay: '0.1s' },
+                  { value: '500+', label: 'Active businesses', delay: '0s' },
+                  { value: '20K+', label: 'Cleans completed', delay: '0.1s' },
                   { value: '50+', label: 'Countries', delay: '0.2s' },
                   { value: '4.9', label: 'Average rating', delay: '0.3s' },
                 ].map((stat, i) => (
@@ -701,15 +701,10 @@ export default function LandingPage() {
               Start Free Trial
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </Button>
-            <Button 
-              size="xl" 
-              variant="outline"
-              className="bg-transparent text-primary-foreground border-primary-foreground/30 hover:bg-primary-foreground/10 hover:border-primary-foreground/50"
-              onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-            >
-              <Play className="mr-2 h-5 w-5" />
-              Watch Demo
-            </Button>
+            <div className="flex items-center gap-3 text-primary-foreground/90">
+              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-lg font-medium">First 60 days free</span>
+            </div>
           </div>
         </div>
       </section>

@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { TermsOfServiceDialog } from '@/components/legal/TermsOfServiceDialog';
+import { SplashScreen } from '@/components/SplashScreen';
 import { toast } from 'sonner';
 import { Eye, EyeOff, Loader2, ArrowLeft, Mail, Lock } from 'lucide-react';
 import { z } from 'zod';
@@ -29,6 +30,7 @@ export default function LoginPage() {
   
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [splashComplete, setSplashComplete] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -95,15 +97,13 @@ export default function LoginPage() {
     }
   };
 
-  // Show loading state while initial auth cleanup happens
-  if (authLoading || !initialCleanupDone) {
+  // Show splash screen while initial auth cleanup happens
+  if (authLoading || !initialCleanupDone || !splashComplete) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading...</p>
-        </div>
-      </div>
+      <SplashScreen 
+        onComplete={() => setSplashComplete(true)} 
+        minDuration={authLoading || !initialCleanupDone ? 1200 : 600}
+      />
     );
   }
 
