@@ -168,8 +168,13 @@ export function AdminNotificationBell() {
   };
 
   const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
-    setUnreadCount(0);
+    if (unreadCount > 0) {
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+      setUnreadCount(0);
+    } else {
+      // Clear all notifications if all are already read
+      setNotifications([]);
+    }
     setIsOpen(false);
   };
 
@@ -212,9 +217,9 @@ export function AdminNotificationBell() {
       <PopoverContent className="w-80 p-0" align="end">
         <div className="flex items-center justify-between p-4 border-b">
           <h4 className="font-semibold">Notifications</h4>
-          {unreadCount > 0 && (
+          {notifications.length > 0 && (
             <Button variant="ghost" size="sm" onClick={markAllAsRead}>
-              Mark all read
+              {unreadCount > 0 ? 'Mark all read' : 'Clear all'}
             </Button>
           )}
         </div>
