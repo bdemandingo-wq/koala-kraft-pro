@@ -396,17 +396,12 @@ export default function TasksPage() {
                               key={task.id}
                               className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
                             >
-                              {/* Daily tasks only have delete, weekly tasks have checkbox */}
-                              {type === 'weekly' ? (
-                                <Checkbox
-                                  checked={task.is_completed}
-                                  onCheckedChange={(checked) => 
-                                    toggleMutation.mutate({ id: task.id, is_completed: !!checked })
-                                  }
-                                />
-                              ) : (
-                                <Circle className="w-5 h-5 text-muted-foreground shrink-0" />
-                              )}
+                              <Checkbox
+                                checked={task.is_completed}
+                                onCheckedChange={(checked) => 
+                                  toggleMutation.mutate({ id: task.id, is_completed: !!checked })
+                                }
+                              />
                               <div className="flex-1 min-w-0">
                                 <p className="truncate">{task.content}</p>
                                 {task.due_date && (
