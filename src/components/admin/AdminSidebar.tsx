@@ -29,13 +29,14 @@ import {
   Brain,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/contexts/OrganizationContext';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { SignedImage } from '@/components/ui/signed-image';
 import { supabase } from '@/lib/supabase';
+import { usePlatform } from '@/hooks/usePlatform';
 
 import {
   DndContext,
@@ -239,8 +240,20 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
     }
   }, []);
 
-  // Filter out hidden items
-  const visibleNavigation = navigation.filter(item => !hiddenItems.includes(item.href));
+  // Platform detection for App Store compliance
+  const { canShowPaymentFlows } = usePlatform();
+  
+  // Items to hide on native apps (App Store compliance - no payment flows)
+  const nativeHiddenItems = useMemo(() => {
+    if (canShowPaymentFlows) return [];
+    // Hide payment-related items on native platforms
+    return ['/dashboard/payment-integration'];
+  }, [canShowPaymentFlows]);
+
+  // Filter out hidden items (user preferences + platform restrictions)
+  const visibleNavigation = navigation.filter(item => 
+    !hiddenItems.includes(item.href) && !nativeHiddenItems.includes(item.href)
+  );
 
   useEffect(() => {
     const fetchLogo = async () => {

@@ -21,6 +21,8 @@ const LandingPage = lazy(() => import("./pages/LandingPage"));
 // New auth pages with no session persistence
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const SignupPage = lazy(() => import("./pages/SignupPage"));
+// Native redirect for signup (App Store compliance - no in-app signup on native)
+const NativeSignupRedirect = lazy(() => import("./pages/NativeSignupRedirect"));
 const LogoutPage = lazy(() => import("./pages/LogoutPage"));
 
 // Legacy auth page (kept for backwards compatibility)
@@ -57,7 +59,12 @@ const ClientFeedbackPage = lazy(() => import("./pages/admin/ClientFeedbackPage")
 const CampaignsPage = lazy(() => import("./pages/admin/CampaignsPage"));
 const ChecklistsPage = lazy(() => import("./pages/admin/ChecklistsPage"));
 const PaymentIntegrationPage = lazy(() => import("./pages/admin/PaymentIntegrationPage"));
-const SubscriptionPage = lazy(() => import("./pages/admin/SubscriptionPage"));
+// Platform-aware subscription page: native apps show compliant version (no prices/payments)
+const SubscriptionPage = lazy(() => 
+  Capacitor.isNativePlatform() 
+    ? import("./pages/admin/SubscriptionPageNative")
+    : import("./pages/admin/SubscriptionPage")
+);
 const HelpPage = lazy(() => import("./pages/admin/HelpPage"));
 const DiscountsPage = lazy(() => import("./pages/admin/DiscountsPage"));
 const PlatformAnalyticsPage = lazy(() => import("./pages/admin/PlatformAnalyticsPage"));
@@ -120,8 +127,9 @@ const App = () => (
                        <Suspense fallback={<PageLoader />}>
                          <Routes>
                       {/* Auth Routes - No Session Persistence */}
+                        {/* On native: redirect signup to website (App Store compliance) */}
                         <Route path="/login" element={<LoginPage />} />
-                        <Route path="/signup" element={<SignupPage />} />
+                        <Route path="/signup" element={<NativeSignupRedirect />} />
                         <Route path="/logout" element={<LogoutPage />} />
                         
                       {/* Public Routes - Critical Path */}
