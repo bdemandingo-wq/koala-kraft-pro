@@ -1,5 +1,18 @@
 {
   "appId": "app.lovable.b5fbe592e63a4ccf8d0f0393049d0881",
   "appName": "TidyWise",
-  "webDir": "dist"
+  "webDir": "dist",
+  "ios": {
+    "contentInset": "automatic",
+    "allowsLinkPreview": false,
+    "appendUserAgent": "TidyWise-iOS"
+  },
+  "plugins": {
+    "Camera": {
+      "presentationStyle": "popover"
+    },
+    "PushNotifications": {
+      "presentationOptions": ["badge", "sound", "alert"]
+    }
+  }
 }
