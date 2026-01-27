@@ -271,32 +271,47 @@ export function BookingFormProvider({
 
   // Calculate price from service-specific pricing
   const calculatedPrice = useMemo(() => {
-    if (!selectedService || !servicePricing) return 0;
+    if (!selectedService) return 0;
     
     let basePrice = 0;
     
-    if (pricingMode === 'sqft' && squareFootage) {
-      const sqFtIndex = squareFootageRanges.findIndex(r => r.label === squareFootage);
-      if (sqFtIndex !== -1 && servicePricing.sqft_prices[sqFtIndex]) {
-        basePrice = servicePricing.sqft_prices[sqFtIndex];
+    // First check if there's custom pricing configured for this service
+    const hasCustomPricing = servicePricing && (
+      (servicePricing.sqft_prices && servicePricing.sqft_prices.length > 0 && servicePricing.sqft_prices.some(p => p > 0)) ||
+      (servicePricing.bedroom_pricing && servicePricing.bedroom_pricing.length > 0)
+    );
+    
+    if (hasCustomPricing) {
+      // Use custom pricing from service_pricing table
+      if (pricingMode === 'sqft' && squareFootage) {
+        const sqFtIndex = squareFootageRanges.findIndex(r => r.label === squareFootage);
+        if (sqFtIndex !== -1 && servicePricing!.sqft_prices[sqFtIndex]) {
+          basePrice = servicePricing!.sqft_prices[sqFtIndex];
+        }
+      } else if (pricingMode === 'bedroom') {
+        // Find bedroom/bathroom combination in service pricing
+        // Convert to string for comparison since database may store as numbers
+        const combo = servicePricing!.bedroom_pricing.find(
+          (p) => String(p.bedrooms) === bedrooms && String(p.bathrooms) === bathrooms
+        );
+        basePrice = combo?.basePrice || 0;
       }
-    } else if (pricingMode === 'bedroom') {
-      // Find bedroom/bathroom combination in service pricing
-      // Convert to string for comparison since database may store as numbers
-      const combo = servicePricing.bedroom_pricing.find(
-        (p) => String(p.bedrooms) === bedrooms && String(p.bathrooms) === bathrooms
-      );
-      basePrice = combo?.basePrice || 0;
+    }
+    
+    // FIX: If no base price from sqft/bedroom pricing, use the service's base price
+    // This ensures custom services always have their price included
+    if (basePrice === 0 && selectedService.price && selectedService.price > 0) {
+      basePrice = Number(selectedService.price);
     }
     
     // Apply frequency discount
     const freqOption = frequencyOptions.find(f => f.id === frequency);
-    if (freqOption && freqOption.discount > 0) {
+    if (freqOption && freqOption.discount > 0 && basePrice > 0) {
       basePrice = Math.round(basePrice * (1 - freqOption.discount));
     }
     
-    // Ensure minimum price
-    if (servicePricing.minimum_price && basePrice > 0 && basePrice < servicePricing.minimum_price) {
+    // Ensure minimum price from service pricing if configured
+    if (servicePricing?.minimum_price && basePrice > 0 && basePrice < servicePricing.minimum_price) {
       basePrice = servicePricing.minimum_price;
     }
     

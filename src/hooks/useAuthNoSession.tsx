@@ -1,11 +1,7 @@
 /**
- * AUTH HOOK WITH NO SESSION PERSISTENCE
+ * AUTH HOOK WITH SESSION PERSISTENCE
  * 
- * This hook implements mandatory login every visit:
- * - Sessions are NOT persisted across browser restarts or new tabs
- * - On every fresh page load, users are treated as logged out
- * - No localStorage session persistence
- * - Auto-clears any existing sessions on app start
+ * Sessions are now persisted across browser restarts for mobile app support.
  */
 
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback, useRef } from 'react';
@@ -34,50 +30,30 @@ export function AuthProviderNoSession({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [initialCleanupDone, setInitialCleanupDone] = useState(false);
-  const cleanupRef = useRef(false);
+  const initRef = useRef(false);
 
   /**
-   * CRITICAL: Clear ALL auth state on app start
-   * This enforces mandatory login every visit
+   * Initialize auth - check for existing session (sessions now persist)
    */
   useEffect(() => {
-    if (cleanupRef.current) return;
-    cleanupRef.current = true;
+    if (initRef.current) return;
+    initRef.current = true;
 
-    const clearAuthOnStart = async () => {
+    const initializeAuth = async () => {
       try {
-        // Clear any localStorage auth keys that might exist from previous sessions
-        const authKeys = Object.keys(localStorage).filter(key => 
-          key.startsWith('sb-') || key.includes('supabase')
-        );
-        authKeys.forEach(key => localStorage.removeItem(key));
-
-        // Clear sessionStorage too
-        const sessionKeys = Object.keys(sessionStorage).filter(key => 
-          key.startsWith('sb-') || key.includes('supabase')
-        );
-        sessionKeys.forEach(key => sessionStorage.removeItem(key));
-
-        // Check if we're returning from an OAuth callback
-        const hashParams = new URLSearchParams(window.location.hash.substring(1));
-        const queryParams = new URLSearchParams(window.location.search);
-        const hasAuthCallback = hashParams.has('access_token') || queryParams.has('code');
-
-        if (!hasAuthCallback) {
-          // Not an OAuth callback - clear any existing session
-          await supabaseNoSession.auth.signOut();
-          setUser(null);
-          setSession(null);
-        }
+        // Check for existing session
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
       } catch (err) {
-        console.error('Error clearing auth on start:', err);
+        console.error('Error initializing auth:', err);
       } finally {
         setInitialCleanupDone(true);
         setLoading(false);
       }
     };
 
-    clearAuthOnStart();
+    initializeAuth();
   }, []);
 
   // Listen for auth state changes AFTER initial cleanup

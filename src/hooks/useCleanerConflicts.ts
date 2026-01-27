@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
-import { differenceInMinutes, parseISO, format, isSameDay } from 'date-fns';
+import { differenceInMinutes, parseISO, format, isSameDay, getDay } from 'date-fns';
 
 export interface ConflictInfo {
   bookingId: string;
@@ -9,7 +9,7 @@ export interface ConflictInfo {
   duration: number;
   customerName: string;
   serviceName: string;
-  overlapType: 'overlap' | 'proximity';
+  overlapType: 'overlap' | 'proximity' | 'unavailable';
   minutesApart: number;
 }
 
@@ -17,6 +17,15 @@ export interface StaffAvailability {
   staffId: string;
   isAvailable: boolean;
   conflicts: ConflictInfo[];
+  isOutsideWorkingHours?: boolean; // New: indicates if unavailable due to working hours
+}
+
+interface WorkingHour {
+  day_of_week: number;
+  start_time: string;
+  end_time: string;
+  is_available: boolean;
+  staff_id: string;
 }
 
 const TRAVEL_BUFFER_MINUTES = 60;
@@ -28,16 +37,18 @@ export function useCleanerConflicts(
   currentBookingId?: string // Exclude this booking when editing
 ) {
   const [allBookingsOnDate, setAllBookingsOnDate] = useState<any[]>([]);
+  const [workingHours, setWorkingHours] = useState<WorkingHour[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch bookings for the selected date
+  // Fetch bookings and working hours for the selected date
   useEffect(() => {
     if (!selectedDate) {
       setAllBookingsOnDate([]);
+      setWorkingHours([]);
       return;
     }
 
-    const fetchBookings = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
         const startOfDay = new Date(selectedDate);
@@ -45,7 +56,8 @@ export function useCleanerConflicts(
         const endOfDay = new Date(selectedDate);
         endOfDay.setHours(23, 59, 59, 999);
 
-        const { data, error } = await supabase
+        // Fetch bookings
+        const { data: bookingsData, error: bookingsError } = await supabase
           .from('bookings')
           .select(`
             id,
@@ -61,15 +73,15 @@ export function useCleanerConflicts(
           .lte('scheduled_at', endOfDay.toISOString())
           .not('status', 'in', '("cancelled","no_show")');
 
-        if (error) throw error;
+        if (bookingsError) throw bookingsError;
 
-        // Also fetch team assignments
+        // Fetch team assignments
         const { data: teamAssignments } = await supabase
           .from('booking_team_assignments')
           .select('booking_id, staff_id');
 
         // Merge team assignments into bookings
-        const bookingsWithTeam = (data || []).map(booking => {
+        const bookingsWithTeam = (bookingsData || []).map(booking => {
           const teamStaffIds = (teamAssignments || [])
             .filter(t => t.booking_id === booking.id)
             .map(t => t.staff_id);
@@ -80,16 +92,57 @@ export function useCleanerConflicts(
         });
 
         setAllBookingsOnDate(bookingsWithTeam);
+
+        // Fetch working hours for all staff
+        // Use type workaround for Supabase deep type inference
+        const client: any = supabase;
+        const { data: hoursData, error: hoursError } = await client
+          .from('working_hours')
+          .select('*');
+
+        if (hoursError) throw hoursError;
+        setWorkingHours(hoursData || []);
       } catch (error) {
-        console.error('Error fetching bookings for conflicts:', error);
+        console.error('Error fetching bookings/working hours for conflicts:', error);
         setAllBookingsOnDate([]);
+        setWorkingHours([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchBookings();
+    fetchData();
   }, [selectedDate?.toDateString()]);
+
+  // Check if staff is within their working hours for the selected date/time
+  const isStaffWithinWorkingHours = useCallback((staffId: string): boolean => {
+    if (!selectedDate || !selectedTime) return true; // Assume available if no date/time
+
+    const dayOfWeek = getDay(selectedDate); // 0 = Sunday, 6 = Saturday
+    const staffWorkingHours = workingHours.filter(wh => wh.staff_id === staffId);
+    
+    // If no working hours configured, assume available
+    if (staffWorkingHours.length === 0) return true;
+
+    const daySchedule = staffWorkingHours.find(wh => wh.day_of_week === dayOfWeek);
+    
+    // If no schedule for this day or explicitly marked unavailable
+    if (!daySchedule || !daySchedule.is_available) return false;
+
+    // Check if the selected time falls within working hours
+    const [selectedHour, selectedMinute] = selectedTime.split(':').map(Number);
+    const selectedMinutes = selectedHour * 60 + selectedMinute;
+
+    const [startHour, startMin] = daySchedule.start_time.split(':').map(Number);
+    const [endHour, endMin] = daySchedule.end_time.split(':').map(Number);
+    const startMinutes = startHour * 60 + startMin;
+    const endMinutes = endHour * 60 + endMin;
+
+    // Also check if the booking would end after working hours
+    const bookingEndMinutes = selectedMinutes + duration;
+
+    return selectedMinutes >= startMinutes && bookingEndMinutes <= endMinutes;
+  }, [selectedDate, selectedTime, duration, workingHours]);
 
   // Check conflicts for a specific staff member
   const checkConflictsForStaff = useCallback((staffId: string): ConflictInfo[] => {
@@ -155,26 +208,30 @@ export function useCleanerConflicts(
     return conflicts;
   }, [allBookingsOnDate, selectedDate, selectedTime, duration, currentBookingId]);
 
-  // Get availability status for all staff
+  // Get availability status for all staff - now includes working hours check
   const getStaffAvailability = useCallback((staffIds: string[]): Map<string, StaffAvailability> => {
     const availabilityMap = new Map<string, StaffAvailability>();
 
     for (const staffId of staffIds) {
       const conflicts = checkConflictsForStaff(staffId);
+      const isWithinWorkingHours = isStaffWithinWorkingHours(staffId);
+      
       availabilityMap.set(staffId, {
         staffId,
-        isAvailable: conflicts.length === 0,
-        conflicts
+        isAvailable: conflicts.length === 0 && isWithinWorkingHours,
+        conflicts,
+        isOutsideWorkingHours: !isWithinWorkingHours
       });
     }
 
     return availabilityMap;
-  }, [checkConflictsForStaff]);
+  }, [checkConflictsForStaff, isStaffWithinWorkingHours]);
 
   return {
     loading,
     checkConflictsForStaff,
     getStaffAvailability,
+    isStaffWithinWorkingHours,
     allBookingsOnDate
   };
 }

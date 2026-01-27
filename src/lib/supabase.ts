@@ -1,11 +1,8 @@
 /**
- * UNIFIED SUPABASE CLIENT - NO SESSION PERSISTENCE
+ * UNIFIED SUPABASE CLIENT
  * 
- * This module exports a Supabase client configured for mandatory login every visit.
- * Use this client instead of @/integrations/supabase/client for all authenticated operations.
- * 
- * IMPORTANT: This client does NOT persist sessions across browser restarts or new tabs.
- * Users must re-authenticate every time they visit the site.
+ * Session persistence is now ENABLED for better mobile app experience.
+ * Users will stay logged in between app restarts.
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -15,16 +12,15 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 /**
- * Supabase client with NO session persistence
- * - persistSession: false - Sessions are NOT stored in localStorage
- * - autoRefreshToken: false - Tokens are NOT auto-refreshed
- * - storage: undefined - No storage mechanism for sessions
+ * Supabase client with session persistence enabled
+ * - persistSession: true - Sessions ARE stored in localStorage
+ * - autoRefreshToken: true - Tokens ARE auto-refreshed
  */
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
-    persistSession: false,  // DO NOT persist sessions
-    autoRefreshToken: false, // DO NOT auto-refresh tokens
-    storage: undefined,      // NO storage
-    detectSessionInUrl: true, // Still detect OAuth callbacks
+    persistSession: true,   // Persist sessions for mobile app
+    autoRefreshToken: true, // Auto-refresh tokens
+    storage: localStorage,  // Use localStorage for persistence
+    detectSessionInUrl: true,
   }
 });
