@@ -71,7 +71,7 @@ export function ScheduleStep({ currentBookingId }: { currentBookingId?: string }
   } = useBookingForm();
 
   // Use conflict detection hook
-  const { checkConflictsForStaff, getStaffAvailability, loading: conflictLoading } = useCleanerConflicts(
+  const { checkConflictsForStaff, getStaffAvailability, isStaffWithinWorkingHours, loading: conflictLoading } = useCleanerConflicts(
     selectedDate,
     selectedTime,
     selectedService?.duration || 120,
@@ -83,6 +83,23 @@ export function ScheduleStep({ currentBookingId }: { currentBookingId?: string }
   const staffAvailability = useMemo(() => {
     return getStaffAvailability(activeStaff.map(s => s.id));
   }, [activeStaff, selectedDate, selectedTime, getStaffAvailability]);
+
+  // Filter staff to only show those available based on working hours
+  // Staff are completely hidden if they're outside their configured working hours
+  const availableStaff = useMemo(() => {
+    if (!selectedDate || !selectedTime) {
+      // If no date/time selected yet, show all active staff
+      return activeStaff;
+    }
+    // Only show staff who are within their working hours for the selected date/time
+    return activeStaff.filter(s => {
+      const availability = staffAvailability.get(s.id);
+      // If no availability data, show the staff (default available)
+      if (!availability) return true;
+      // Hide staff who are outside their working hours
+      return !availability.isOutsideWorkingHours;
+    });
+  }, [activeStaff, selectedDate, selectedTime, staffAvailability]);
 
   // Get conflicts for currently selected staff (single mode)
   const currentConflicts = useMemo(() => {
@@ -297,37 +314,44 @@ export function ScheduleStep({ currentBookingId }: { currentBookingId?: string }
           </div>
 
           {!isTeamMode ? (
-            // Single staff selection
+            // Single staff selection - only show staff who are available based on working hours
             <>
               <Select value={selectedStaffId || "unassigned"} onValueChange={(val) => setSelectedStaffId(val === "unassigned" ? "" : val)}>
                 <SelectTrigger className="h-12 bg-secondary/30 border-border/50">
                   <SelectValue placeholder="Select a cleaner (optional)">
-                    {selectedStaffId && activeStaff.find(s => s.id === selectedStaffId)?.name}
+                    {selectedStaffId && availableStaff.find(s => s.id === selectedStaffId)?.name}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="bg-popover border-border">
                   <SelectItem value="unassigned">Unassigned</SelectItem>
-                  {activeStaff.map((member) => {
-                    const availability = staffAvailability.get(member.id);
-                    const isBusy = availability && !availability.isAvailable;
-                    return (
-                      <SelectItem key={member.id} value={member.id}>
-                        <div className="flex items-center justify-between w-full">
-                          <span>{member.name}</span>
-                          {selectedDate && selectedTime && (
-                            <span className={cn(
-                              "ml-2 text-xs px-1.5 py-0.5 rounded",
-                              isBusy 
-                                ? "bg-amber-100 text-amber-700" 
-                                : "bg-emerald-100 text-emerald-700"
-                            )}>
-                              {isBusy ? 'Busy' : 'Available'}
-                            </span>
-                          )}
-                        </div>
-                      </SelectItem>
-                    );
-                  })}
+                  {availableStaff.length === 0 && selectedDate && selectedTime ? (
+                    <div className="p-3 text-sm text-muted-foreground text-center">
+                      No staff available for this time slot
+                    </div>
+                  ) : (
+                    availableStaff.map((member) => {
+                      const availability = staffAvailability.get(member.id);
+                      // Only show busy badge for booking conflicts (not working hours since those are already filtered)
+                      const hasConflicts = availability && availability.conflicts.length > 0;
+                      return (
+                        <SelectItem key={member.id} value={member.id}>
+                          <div className="flex items-center justify-between w-full">
+                            <span>{member.name}</span>
+                            {selectedDate && selectedTime && (
+                              <span className={cn(
+                                "ml-2 text-xs px-1.5 py-0.5 rounded",
+                                hasConflicts 
+                                  ? "bg-amber-100 text-amber-700" 
+                                  : "bg-emerald-100 text-emerald-700"
+                              )}>
+                                {hasConflicts ? 'Busy' : 'Available'}
+                              </span>
+                            )}
+                          </div>
+                        </SelectItem>
+                      );
+                    })
+                  )}
                 </SelectContent>
               </Select>
 
@@ -335,7 +359,7 @@ export function ScheduleStep({ currentBookingId }: { currentBookingId?: string }
               {currentConflicts.length > 0 && (
                 <div className="mt-4">
                   <CleanerConflictWarning
-                    cleanerName={activeStaff.find(s => s.id === selectedStaffId)?.name || 'Selected cleaner'}
+                    cleanerName={availableStaff.find(s => s.id === selectedStaffId)?.name || 'Selected cleaner'}
                     conflicts={currentConflicts}
                     overrideConflict={conflictOverride}
                     onOverrideChange={setConflictOverride}
@@ -344,13 +368,14 @@ export function ScheduleStep({ currentBookingId }: { currentBookingId?: string }
               )}
             </>
           ) : (
-            // Team selection mode
+            // Team selection mode - only show staff who are available based on working hours
             <div className="space-y-4">
               {/* Selected Team Members with Editable Pay */}
               {selectedTeamMembers.length > 0 && (
                 <div className="space-y-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
                   <p className="text-xs font-medium text-muted-foreground mb-2">Team Members & Pay (Editable)</p>
                   {selectedTeamMembers.map((staffId, idx) => {
+                    // For already selected members, look in activeStaff (they might have been selected before time changed)
                     const member = activeStaff.find(s => s.id === staffId);
                     const currentPay = teamMemberPay[staffId] ?? 0;
                     const memberConflicts = teamConflicts.get(staffId);
@@ -421,44 +446,51 @@ export function ScheduleStep({ currentBookingId }: { currentBookingId?: string }
                 </div>
               )}
 
-              {/* Add Team Members */}
+              {/* Add Team Members - only show staff who are available based on working hours */}
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                {activeStaff.map((member) => {
-                  const isSelected = selectedTeamMembers.includes(member.id);
-                  const availability = staffAvailability.get(member.id);
-                  const isBusy = availability && !availability.isAvailable;
-                  return (
-                    <button
-                      key={member.id}
-                      type="button"
-                      onClick={() => toggleTeamMember(member.id)}
-                      className={cn(
-                        "flex flex-col items-start gap-1 p-3 rounded-lg border text-left transition-all",
-                        isSelected 
-                          ? "border-primary bg-primary/10 text-primary" 
-                          : "border-border/50 bg-secondary/30 hover:border-primary/50"
-                      )}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Checkbox checked={isSelected} className="pointer-events-none" />
-                        <span className="text-sm font-medium truncate">{member.name}</span>
-                      </div>
-                      {selectedDate && selectedTime && (
-                        <span className={cn(
-                          "text-xs px-1.5 py-0.5 rounded ml-6",
-                          isBusy 
-                            ? "bg-amber-100 text-amber-700" 
-                            : "bg-emerald-100 text-emerald-700"
-                        )}>
-                          {isBusy ? 'Busy' : 'Available'}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
+                {availableStaff.length === 0 && selectedDate && selectedTime ? (
+                  <div className="col-span-full p-3 text-sm text-muted-foreground text-center border border-dashed rounded-lg">
+                    No staff available for this time slot
+                  </div>
+                ) : (
+                  availableStaff.map((member) => {
+                    const isSelected = selectedTeamMembers.includes(member.id);
+                    const availability = staffAvailability.get(member.id);
+                    // Only show busy badge for booking conflicts (not working hours since those are already filtered)
+                    const hasConflicts = availability && availability.conflicts.length > 0;
+                    return (
+                      <button
+                        key={member.id}
+                        type="button"
+                        onClick={() => toggleTeamMember(member.id)}
+                        className={cn(
+                          "flex flex-col items-start gap-1 p-3 rounded-lg border text-left transition-all",
+                          isSelected 
+                            ? "border-primary bg-primary/10 text-primary" 
+                            : "border-border/50 bg-secondary/30 hover:border-primary/50"
+                        )}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Checkbox checked={isSelected} className="pointer-events-none" />
+                          <span className="text-sm font-medium truncate">{member.name}</span>
+                        </div>
+                        {selectedDate && selectedTime && (
+                          <span className={cn(
+                            "text-xs px-1.5 py-0.5 rounded ml-6",
+                            hasConflicts 
+                              ? "bg-amber-100 text-amber-700" 
+                              : "bg-emerald-100 text-emerald-700"
+                          )}>
+                            {hasConflicts ? 'Busy' : 'Available'}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })
+                )}
               </div>
 
-              {selectedTeamMembers.length === 0 && (
+              {selectedTeamMembers.length === 0 && availableStaff.length > 0 && (
                 <p className="text-sm text-muted-foreground text-center py-2">
                   Select team members for this job
                 </p>
