@@ -15,8 +15,45 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { TermsOfServiceDialog } from '@/components/legal/TermsOfServiceDialog';
 import { SplashScreen } from '@/components/SplashScreen';
 import { toast } from 'sonner';
-import { Eye, EyeOff, Loader2, ArrowLeft, Mail, Lock } from 'lucide-react';
+import { Eye, EyeOff, Loader2, ArrowLeft, Mail, Lock, ExternalLink } from 'lucide-react';
 import { z } from 'zod';
+import { usePlatform } from '@/hooks/usePlatform';
+
+// Native-aware signup link component for App Store compliance
+function NativeAwareSignupLink() {
+  const { canShowPaymentFlows, signupUrl } = usePlatform();
+  
+  if (!canShowPaymentFlows) {
+    // On native: show website link instead of in-app signup
+    return (
+      <div className="mt-6 text-center text-sm space-y-2">
+        <p className="text-muted-foreground">Don't have an account?</p>
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => window.open(signupUrl, '_blank')}
+          className="gap-2"
+        >
+          <ExternalLink className="h-4 w-4" />
+          Sign up at jointidywise.lovable.app
+        </Button>
+      </div>
+    );
+  }
+  
+  // On web: normal in-app signup link
+  return (
+    <div className="mt-6 text-center text-sm">
+      <span className="text-muted-foreground">Don't have an account? </span>
+      <Link
+        to="/signup"
+        className="text-primary hover:underline font-medium"
+      >
+        Create account
+      </Link>
+    </div>
+  );
+}
 
 // Validation schema
 const loginSchema = z.object({
@@ -213,16 +250,8 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            {/* Sign up link */}
-            <div className="mt-6 text-center text-sm">
-              <span className="text-muted-foreground">Don't have an account? </span>
-              <Link
-                to="/signup"
-                className="text-primary hover:underline font-medium"
-              >
-                Create account
-              </Link>
-            </div>
+            {/* Sign up link - on native, direct to website */}
+            <NativeAwareSignupLink />
           </CardContent>
         </Card>
 

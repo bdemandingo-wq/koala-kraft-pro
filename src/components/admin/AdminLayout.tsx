@@ -7,8 +7,10 @@ import { cn } from '@/lib/utils';
 import { MobileBottomNav } from '@/components/mobile/MobileBottomNav';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { hapticImpact } from '@/lib/haptics';
+import { usePlatform } from '@/hooks/usePlatform';
 
 // Performance: only load subscription UI when it's actually needed (opened).
+// Only load on web - native apps don't show payment dialogs (App Store compliance)
 const SubscriptionDialog = lazy(() =>
   import('./SubscriptionDialog').then((m) => ({ default: m.SubscriptionDialog }))
 );
@@ -23,6 +25,7 @@ interface AdminLayoutProps {
 export function AdminLayout({ children, title, subtitle, actions }: AdminLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const { showSubscriptionDialog, setShowSubscriptionDialog, checkSubscription } = useAuth();
+  const { canShowPaymentFlows } = usePlatform();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -93,15 +96,18 @@ export function AdminLayout({ children, title, subtitle, actions }: AdminLayoutP
 
       <MobileBottomNav />
       
-      <Suspense fallback={null}>
-        {showSubscriptionDialog ? (
-          <SubscriptionDialog
-            open={showSubscriptionDialog}
-            onOpenChange={setShowSubscriptionDialog}
-            onSubscriptionActive={checkSubscription}
-          />
-        ) : null}
-      </Suspense>
+      {/* Only show subscription dialog on web - native apps direct to website */}
+      {canShowPaymentFlows && (
+        <Suspense fallback={null}>
+          {showSubscriptionDialog ? (
+            <SubscriptionDialog
+              open={showSubscriptionDialog}
+              onOpenChange={setShowSubscriptionDialog}
+              onSubscriptionActive={checkSubscription}
+            />
+          ) : null}
+        </Suspense>
+      )}
       
       <OfflineIndicator />
     </div>
