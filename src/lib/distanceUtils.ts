@@ -69,6 +69,27 @@ export function formatDriveTime(minutes: number): string {
  * Normalize US address abbreviations to improve geocoding accuracy
  */
 function normalizeUSAddress(address: string): string {
+  let normalized = ` ${address.toLowerCase()} `;
+
+  // Remove apartment/unit/suite numbers - they confuse the geocoder
+  // and don't affect the street location for distance calculations
+  const unitPatterns = [
+    /\s+apt\.?\s*#?\s*\w+/gi,      // apt 22g, apt. #22, apt 3
+    /\s+apartment\.?\s*#?\s*\w+/gi, // apartment 22
+    /\s+unit\.?\s*#?\s*\w+/gi,      // unit 5, unit #5
+    /\s+suite\.?\s*#?\s*\w+/gi,     // suite 100
+    /\s+ste\.?\s*#?\s*\w+/gi,       // ste 100
+    /\s+#\s*\w+/gi,                  // #22g
+    /\s+bldg\.?\s*#?\s*\w+/gi,      // bldg 2
+    /\s+building\.?\s*#?\s*\w+/gi,  // building 2
+    /\s+fl\.?\s*\d+/gi,             // fl 2 (floor)
+    /\s+floor\.?\s*\d+/gi,          // floor 2
+  ];
+
+  for (const pattern of unitPatterns) {
+    normalized = normalized.replace(pattern, ' ');
+  }
+
   // Common street type abbreviations to expand
   const abbreviations: Record<string, string> = {
     ' rd ': ' road ',
@@ -100,8 +121,6 @@ function normalizeUSAddress(address: string): string {
     ' way ': ' way ',
     ' way,': ' way,',
   };
-
-  let normalized = ` ${address.toLowerCase()} `;
   
   // Expand abbreviations
   for (const [abbr, full] of Object.entries(abbreviations)) {
