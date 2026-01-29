@@ -392,8 +392,6 @@ export function AdditionalChargesDialog({
               disabled={
                 chargeAndAdd.isPending || 
                 loadingCards ||
-                !newCharge.charge_name.trim() || 
-                !newCharge.charge_amount ||
                 (paymentMethod === 'existing_card' && savedCards.length === 0)
               }
             >
