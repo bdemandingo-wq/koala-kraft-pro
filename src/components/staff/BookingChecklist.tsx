@@ -159,6 +159,7 @@ export function BookingChecklist({ bookingId, staffId, onComplete }: BookingChec
                 checklist_item_id: item.id,
                 title: item.title,
                 is_completed: false,
+                organization_id: booking.organization_id,
               }))
             );
           
@@ -226,6 +227,7 @@ export function BookingChecklist({ bookingId, staffId, onComplete }: BookingChec
               checklist_item_id: item.id,
               title: item.title,
               is_completed: false,
+              organization_id: booking.organization_id,
             }))
           );
 
@@ -280,6 +282,7 @@ export function BookingChecklist({ bookingId, staffId, onComplete }: BookingChec
             booking_checklist_id: newChecklist.id,
             title,
             is_completed: false,
+            organization_id: booking.organization_id,
           }))
         );
 
