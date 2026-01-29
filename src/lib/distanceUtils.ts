@@ -109,6 +109,80 @@ function normalizeUSAddress(address: string): string {
   return normalized.trim();
 }
 
+function buildCommaFormattedCandidates(
+  normalizedNoCountry: string
+): string[] {
+  // Input example (already lowercased, units removed, abbreviations expanded):
+  // "6701 mallards cove road jupiter fl 33458"
+  const cleaned = normalizedNoCountry
+    .replace(/\s+/g, " ")
+    .replace(/,/g, " ")
+    .trim();
+
+  const tokens = cleaned.split(" ").filter(Boolean);
+  if (tokens.length < 4) return [];
+
+  const zip = tokens[tokens.length - 1];
+  const state = tokens[tokens.length - 2];
+
+  const isZip = /^\d{5}(?:-\d{4})?$/.test(zip);
+  const isState = /^[a-z]{2}$/i.test(state);
+  if (!isZip || !isState) return [];
+
+  const prefix = tokens.slice(0, -2);
+  if (prefix.length < 2) return [];
+
+  // Heuristic 1 (preferred): split street/city using a known street suffix.
+  const streetSuffixes = new Set([
+    "road",
+    "street",
+    "avenue",
+    "boulevard",
+    "drive",
+    "lane",
+    "court",
+    "circle",
+    "place",
+    "parkway",
+    "highway",
+    "trail",
+    "terrace",
+    "way",
+  ]);
+
+  const candidates: string[] = [];
+
+  let suffixIdx = -1;
+  for (let i = prefix.length - 1; i >= 0; i--) {
+    if (streetSuffixes.has(prefix[i])) {
+      suffixIdx = i;
+      break;
+    }
+  }
+
+  if (suffixIdx >= 0 && suffixIdx < prefix.length - 1) {
+    const street = prefix.slice(0, suffixIdx + 1).join(" ").trim();
+    const city = prefix.slice(suffixIdx + 1).join(" ").trim();
+    if (street && city) {
+      candidates.push(`${street}, ${city}, ${state.toUpperCase()} ${zip}`);
+    }
+  }
+
+  // Heuristic 2 (fallback): assume city is the last 1–3 tokens before state.
+  // This helps when the street suffix is missing (or abbreviated in an unexpected way).
+  for (const cityLen of [1, 2, 3]) {
+    if (prefix.length <= cityLen) continue;
+    const street = prefix.slice(0, prefix.length - cityLen).join(" ").trim();
+    const city = prefix.slice(prefix.length - cityLen).join(" ").trim();
+    if (street && city) {
+      const formatted = `${street}, ${city}, ${state.toUpperCase()} ${zip}`;
+      if (!candidates.includes(formatted)) candidates.push(formatted);
+    }
+  }
+
+  return candidates;
+}
+
 /**
  * Geocode an address using OpenStreetMap Nominatim
  * Returns null if geocoding fails
@@ -122,33 +196,39 @@ export async function geocodeAddress(address: string): Promise<{ lat: number; ln
     // Normalize the address for better geocoding results
     const normalizedAddress = normalizeUSAddress(trimmed);
 
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(normalizedAddress)}&limit=1&countrycodes=us`,
-      { headers: { Accept: 'application/json' } }
-    );
-    const results = await response.json();
-    
-    if (results && results.length > 0) {
-      return {
-        lat: parseFloat(results[0].lat),
-        lng: parseFloat(results[0].lon),
-      };
+    const candidates: string[] = [];
+    candidates.push(normalizedAddress);
+
+    // If the normalized address doesn't already contain commas, try a few comma-formatted
+    // variants that better match "Street, City, ST ZIP" expectations.
+    const normalizedNoCountry = normalizedAddress
+      .replace(/,\s*usa\s*$/i, "")
+      .trim();
+    const commaVariants = buildCommaFormattedCandidates(normalizedNoCountry);
+    for (const variant of commaVariants) {
+      const withCountry = variant.toLowerCase().includes("usa")
+        ? variant
+        : `${variant}, usa`;
+      if (!candidates.includes(withCountry)) candidates.push(withCountry);
     }
-    
-    // If normalized search fails, try the original address as fallback
-    const fallbackResponse = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(trimmed)}&limit=1&countrycodes=us`,
-      { headers: { Accept: 'application/json' } }
-    );
-    const fallbackResults = await fallbackResponse.json();
-    
-    if (fallbackResults && fallbackResults.length > 0) {
-      return {
-        lat: parseFloat(fallbackResults[0].lat),
-        lng: parseFloat(fallbackResults[0].lon),
-      };
+
+    // Always include the raw user input as a last resort.
+    if (!candidates.includes(trimmed)) candidates.push(trimmed);
+
+    for (const query of candidates) {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&countrycodes=us`,
+        { headers: { Accept: 'application/json' } }
+      );
+      const results = await response.json();
+      if (results && results.length > 0) {
+        return {
+          lat: parseFloat(results[0].lat),
+          lng: parseFloat(results[0].lon),
+        };
+      }
     }
-    
+
     return null;
   } catch (error) {
     console.error('Geocoding failed:', error);
