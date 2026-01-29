@@ -509,7 +509,7 @@ export default function BookingsPage() {
           description: `Booking #${booking.booking_number} - ${booking.service?.name || 'Service'}`,
           organizationId: organization?.id,
           bookingId: booking.id,
-          idempotencyKey: `charge:${organization?.id || 'no-org'}:${booking.id}:${Math.round(booking.total_amount * 100)}`,
+          // Let the edge function generate the idempotency key with a time bucket
         }
       });
 
