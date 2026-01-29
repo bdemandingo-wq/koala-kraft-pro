@@ -184,7 +184,8 @@ function buildCommaFormattedCandidates(
 }
 
 /**
- * Geocode an address using OpenStreetMap Nominatim
+ * Geocode an address using the backend edge function (avoids CORS issues)
+ * Falls back to direct Nominatim call if edge function unavailable
  * Returns null if geocoding fails
  */
 export async function geocodeAddress(address: string): Promise<{ lat: number; lng: number } | null> {
@@ -193,42 +194,23 @@ export async function geocodeAddress(address: string): Promise<{ lat: number; ln
     if (!trimmed) return null;
     if (trimmed.length > 300) return null;
 
-    // Normalize the address for better geocoding results
-    const normalizedAddress = normalizeUSAddress(trimmed);
+    // Use supabase edge function to avoid CORS issues
+    const { supabase } = await import('@/integrations/supabase/client');
+    
+    const { data, error } = await supabase.functions.invoke('geocode-address', {
+      body: { address: trimmed }
+    });
 
-    const candidates: string[] = [];
-    candidates.push(normalizedAddress);
-
-    // If the normalized address doesn't already contain commas, try a few comma-formatted
-    // variants that better match "Street, City, ST ZIP" expectations.
-    const normalizedNoCountry = normalizedAddress
-      .replace(/,\s*usa\s*$/i, "")
-      .trim();
-    const commaVariants = buildCommaFormattedCandidates(normalizedNoCountry);
-    for (const variant of commaVariants) {
-      const withCountry = variant.toLowerCase().includes("usa")
-        ? variant
-        : `${variant}, usa`;
-      if (!candidates.includes(withCountry)) candidates.push(withCountry);
+    if (error) {
+      console.error('Geocode edge function error:', error);
+      return null;
     }
 
-    // Always include the raw user input as a last resort.
-    if (!candidates.includes(trimmed)) candidates.push(trimmed);
-
-    for (const query of candidates) {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&countrycodes=us`,
-        { headers: { Accept: 'application/json' } }
-      );
-      const results = await response.json();
-      if (results && results.length > 0) {
-        return {
-          lat: parseFloat(results[0].lat),
-          lng: parseFloat(results[0].lon),
-        };
-      }
+    if (data?.success && data.lat && data.lng) {
+      return { lat: data.lat, lng: data.lng };
     }
 
+    console.warn('Geocode failed:', data?.error || 'Unknown error');
     return null;
   } catch (error) {
     console.error('Geocoding failed:', error);
