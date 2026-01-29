@@ -391,15 +391,16 @@ export function AdditionalChargesDialog({
               className="w-full"
               disabled={
                 chargeAndAdd.isPending || 
+                loadingCards ||
                 !newCharge.charge_name.trim() || 
                 !newCharge.charge_amount ||
                 (paymentMethod === 'existing_card' && savedCards.length === 0)
               }
             >
-              {chargeAndAdd.isPending ? (
+              {chargeAndAdd.isPending || loadingCards ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : null}
-              Charge now
+              {loadingCards ? 'Loading cards...' : 'Charge now'}
             </Button>
           </form>
         </div>
