@@ -48,25 +48,6 @@ export function BookingChecklist({ bookingId, staffId, onComplete }: BookingChec
   const { data: checklist, isLoading } = useQuery({
     queryKey: ['booking-checklist', bookingId],
     queryFn: async () => {
-      // First check if a checklist exists
-      const { data: existing } = await supabase
-        .from('booking_checklists')
-        .select(`
-          id,
-          completed_at,
-          template_id,
-          booking_checklist_items(
-            id,
-            title,
-            is_completed,
-            notes,
-            photo_url,
-            checklist_item_id
-          )
-        `)
-        .eq('booking_id', bookingId)
-        .single();
-
       // Get the booking's service and organization to find a matching template
       const { data: booking } = await supabase
         .from('bookings')
@@ -77,6 +58,41 @@ export function BookingChecklist({ bookingId, staffId, onComplete }: BookingChec
       if (!booking?.organization_id) {
         throw new Error('Booking has no organization');
       }
+
+      const checklistSelect = `
+        id,
+        completed_at,
+        template_id,
+        organization_id,
+        booking_checklist_items(
+          id,
+          title,
+          is_completed,
+          notes,
+          photo_url,
+          checklist_item_id
+        )
+      `;
+
+      // First try: org-scoped checklist (correct + preferred)
+      const { data: existingOrgMatch } = await supabase
+        .from('booking_checklists')
+        .select(checklistSelect)
+        .eq('booking_id', bookingId)
+        .eq('organization_id', booking.organization_id)
+        .maybeSingle();
+
+      // Fallback: legacy checklist rows that were created before org_id was enforced
+      const { data: existingNullOrg } = existingOrgMatch
+        ? { data: null }
+        : await supabase
+            .from('booking_checklists')
+            .select(checklistSelect)
+            .eq('booking_id', bookingId)
+            .is('organization_id', null)
+            .maybeSingle();
+
+      const existing = existingOrgMatch ?? existingNullOrg;
 
       // Helper to find the correct template for this booking's service
       const findMatchingTemplate = async () => {
@@ -136,10 +152,10 @@ export function BookingChecklist({ bookingId, staffId, onComplete }: BookingChec
             .delete()
             .eq('booking_checklist_id', existing.id);
           
-          // Update checklist with template_id
+          // Update checklist with template_id + ensure org is set (org-scoped)
           await supabase
             .from('booking_checklists')
-            .update({ template_id: matchingTemplate.id })
+            .update({ template_id: matchingTemplate.id, organization_id: booking.organization_id })
             .eq('id', existing.id);
           
           // Insert new items from template
