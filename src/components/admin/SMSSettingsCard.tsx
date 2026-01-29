@@ -75,15 +75,18 @@ export function SMSSettingsCard() {
 
   // Extract phone number ID from full URL if pasted
   const extractPhoneNumberId = (input: string): string => {
-    // If it's a full URL like https://my.openphone.com/settings/phone-numbers/PNr7XukuaV
-    const urlMatch = input.match(/phone-numbers\/(PN[a-zA-Z0-9]+)/);
-    if (urlMatch) return urlMatch[1];
+    const trimmed = input.trim();
     
-    // If it already looks like an ID (starts with PN)
-    if (input.startsWith('PN')) return input;
+    // Try to extract PN... pattern from anywhere in the string (handles any URL format)
+    const pnMatch = trimmed.match(/(PN[a-zA-Z0-9]+)/);
+    if (pnMatch) return pnMatch[1];
     
-    // Otherwise return as-is
-    return input;
+    // If it's a path like /inbox/xxx or /phone-numbers/xxx without PN prefix
+    const pathMatch = trimmed.match(/(?:phone-numbers|inbox)\/([A-Za-z0-9]+)$/);
+    if (pathMatch) return pathMatch[1];
+    
+    // Otherwise return trimmed input
+    return trimmed;
   };
 
   const saveSettings = async () => {
