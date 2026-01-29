@@ -95,11 +95,19 @@ export function AdditionalChargesDialog({
         
         if (error) throw error;
         
-        if (data?.cards && data.cards.length > 0) {
-          setSavedCards(data.cards);
-          // Select default card or first card
-          const defaultCard = data.cards.find((c: SavedCard) => c.isDefault) || data.cards[0];
-          setSelectedCardId(defaultCard.id);
+        // The edge function returns a flat object, not an array
+        if (data?.hasCard && data?.paymentMethodId) {
+          const card: SavedCard = {
+            id: data.paymentMethodId,
+            brand: data.brand || 'card',
+            last4: data.last4 || '****',
+            exp_month: data.expMonth || 0,
+            exp_year: data.expYear || 0,
+            isDefault: true
+          };
+          setSavedCards([card]);
+          setSelectedCardId(card.id);
+          setPaymentMethod('existing_card');
         } else {
           setSavedCards([]);
           setPaymentMethod('cash');
