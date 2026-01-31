@@ -3396,6 +3396,41 @@ export type Database = {
           },
         ]
       }
+      short_urls: {
+        Row: {
+          code: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          organization_id: string | null
+          target_url: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          organization_id?: string | null
+          target_url: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          organization_id?: string | null
+          target_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "short_urls_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sms_conversations: {
         Row: {
           conversation_type: string | null
