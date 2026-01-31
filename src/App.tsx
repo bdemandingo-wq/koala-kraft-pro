@@ -91,7 +91,7 @@ const InvoicingSoftware = lazy(() => import("./pages/features/InvoicingSoftware"
 const SchedulingSoftware = lazy(() => import("./pages/features/SchedulingSoftware"));
 const CompareHousecallPro = lazy(() => import("./pages/compare/CompareHousecallPro"));
 const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage"));
-
+const RedirectPage = lazy(() => import("./pages/RedirectPage"));
 
 // Optimized QueryClient with stale time and caching
 const queryClient = new QueryClient({
@@ -138,6 +138,7 @@ const App = () => (
 
                       {/* Public Routes - Lazy Loaded */}
                       <Route path="/book/:orgSlug" element={<PublicBookingPage />} />
+                      <Route path="/c/:code" element={<RedirectPage />} />
                       <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
                       <Route path="/onboarding" element={<OnboardingPage />} />
                       <Route path="/review/:token" element={<ReviewPage />} />
@@ -221,6 +222,7 @@ const App = () => (
 
                     {/* Public Routes - Lazy Loaded */}
                     <Route path="/book/:orgSlug" element={<PublicBookingPage />} />
+                    <Route path="/c/:code" element={<RedirectPage />} />
                     <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
                     <Route path="/onboarding" element={<OnboardingPage />} />
                     <Route path="/review/:token" element={<ReviewPage />} />

@@ -4,6 +4,7 @@ import Stripe from "https://esm.sh/stripe@18.5.0";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+const APP_URL = "https://jointidywise.lovable.app";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,6 +20,16 @@ interface CardLinkSmsRequest {
   amount: number; // Amount in dollars
 }
 
+// Generate a short random code (6 chars)
+function generateShortCode(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+  let result = '';
+  for (let i = 0; i < 6; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -27,7 +38,7 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { phone, email, customerName, organizationId, amount }: CardLinkSmsRequest = await req.json();
 
-    console.log("Creating payment link SMS for:", { phone, customerName, organizationId, amount });
+    console.log("Creating card link SMS for:", { phone, customerName, organizationId, amount });
 
     if (!phone || !customerName || !amount) {
       return new Response(
@@ -184,8 +195,26 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Created Stripe setup session (card save only):", session.id);
 
-    // Send SMS via OpenPhone - short, clear message with card collection link
-    const smsMessage = `${companyName}: Add your card for your $${amount.toFixed(2)} service (not charged until complete): ${session.url}`;
+    // Create short URL for the Stripe checkout link
+    const shortCode = generateShortCode();
+    const { error: shortUrlError } = await supabase
+      .from('short_urls')
+      .insert({
+        code: shortCode,
+        target_url: session.url,
+        organization_id: organizationId,
+      });
+    
+    if (shortUrlError) {
+      console.error("Error creating short URL:", shortUrlError);
+      // Fall back to full URL if short URL creation fails
+    }
+    
+    // Use short URL if created successfully, otherwise fall back to full URL
+    const linkUrl = shortUrlError ? session.url : `${APP_URL}/c/${shortCode}`;
+
+    // Send SMS via OpenPhone - short, clean message
+    const smsMessage = `${companyName}: Add your card for $${amount.toFixed(2)} service (not charged now): ${linkUrl}`;
     let formattedPhone = phone.replace(/\D/g, '');
     if (!formattedPhone.startsWith('1') && formattedPhone.length === 10) {
       formattedPhone = '1' + formattedPhone;
