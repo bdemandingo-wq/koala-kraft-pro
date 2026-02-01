@@ -4363,6 +4363,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      hash_client_portal_password: {
+        Args: { p_password: string }
+        Returns: string
+      }
       is_client_portal_user: {
         Args: { _client_user_id: string; _user_id: string }
         Returns: boolean
@@ -4373,6 +4377,10 @@ export type Database = {
       staff_can_view_customer: {
         Args: { _customer_id: string; _org_id: string }
         Returns: boolean
+      }
+      validate_client_portal_login: {
+        Args: { p_password: string; p_username: string }
+        Returns: Json
       }
     }
     Enums: {

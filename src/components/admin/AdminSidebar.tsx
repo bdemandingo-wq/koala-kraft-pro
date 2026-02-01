@@ -28,6 +28,7 @@ import {
   Zap,
   Brain,
   Trash2,
+  Globe,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState, useEffect, useMemo } from 'react';
@@ -64,6 +65,7 @@ const defaultNavigation = [
   { name: 'Bookings', href: '/dashboard/bookings', icon: ClipboardList },
   { name: 'Recurring', href: '/dashboard/recurring', icon: Repeat },
   { name: 'Customers', href: '/dashboard/customers', icon: Users },
+  { name: 'Client Portal', href: '/dashboard/client-portal', icon: Globe },
   { name: 'Invoices', href: '/dashboard/invoices', icon: Receipt },
   { name: 'Messages', href: '/dashboard/messages', icon: MessageSquare },
   { name: 'Tasks', href: '/dashboard/tasks', icon: CheckSquare },
@@ -88,7 +90,7 @@ const defaultNavigation = [
 const iconMap: Record<string, typeof Home> = {
   Home, Calendar, ClipboardList, Repeat, Users, Target, MapPin, MessageSquare,
   Briefcase, UserCircle, CheckSquare, Package, DollarSign, Receipt, BarChart3,
-  Sparkles, CreditCard, HelpCircle, Tag, Activity, Brain,
+  Sparkles, CreditCard, HelpCircle, Tag, Activity, Brain, Globe,
 };
 
 interface NavItem {

@@ -78,7 +78,8 @@ export function ClientPortalProvider({ children }: { children: ReactNode }) {
   const signIn = async (username: string, password: string): Promise<{ error: string | null }> => {
     try {
       // Call the RPC function to validate credentials
-      const { data, error } = await supabase.rpc('validate_client_portal_login', {
+      // Using type assertion since the function is dynamically created
+      const { data, error } = await supabase.rpc('validate_client_portal_login' as any, {
         p_username: username.toLowerCase().trim(),
         p_password: password,
       });
@@ -88,7 +89,9 @@ export function ClientPortalProvider({ children }: { children: ReactNode }) {
         return { error: 'Invalid username or password' };
       }
 
-      if (!data || !data.valid) {
+      const result = data as { valid: boolean; reason?: string; user_id?: string } | null;
+      
+      if (!result || !result.valid) {
         return { error: 'Invalid username or password' };
       }
 
