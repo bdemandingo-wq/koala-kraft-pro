@@ -9,8 +9,10 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { AuthProviderNoSession } from "@/hooks/useAuthNoSession";
 import { OrganizationProvider } from "@/contexts/OrganizationContext";
 import { TestModeProvider } from "@/contexts/TestModeContext";
+import { ClientPortalProvider } from "@/contexts/ClientPortalContext";
 import { AdminRoute } from "@/components/AdminRoute";
 import { StaffRoute } from "@/components/StaffRoute";
+import { ProtectedPortalRoute } from "@/components/ProtectedPortalRoute";
 import { SessionTrackerProvider } from "@/components/SessionTrackerProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Capacitor } from "@capacitor/core";
@@ -71,9 +73,16 @@ const PlatformAnalyticsPage = lazy(() => import("./pages/admin/PlatformAnalytics
 const MessagesPage = lazy(() => import("./pages/admin/MessagesPage"));
 const TasksPage = lazy(() => import("./pages/admin/TasksPage"));
 const AIIntelligencePage = lazy(() => import("./pages/admin/AIIntelligencePage"));
+const ClientPortalAdminPage = lazy(() => import("./pages/admin/ClientPortalPage"));
 const StaffPortal = lazy(() => import("./pages/staff/StaffPortal"));
 const StaffLoginPage = lazy(() => import("./pages/staff/StaffLoginPage"));
 const StaffResetPasswordPage = lazy(() => import("./pages/staff/StaffResetPasswordPage"));
+
+// Client Portal Pages
+const PortalLoginPage = lazy(() => import("./pages/portal/PortalLoginPage"));
+const PortalDashboardPage = lazy(() => import("./pages/portal/PortalDashboardPage"));
+const PortalRequestPage = lazy(() => import("./pages/portal/PortalRequestPage"));
+
 const ReviewPage = lazy(() => import("./pages/ReviewPage"));
 const BlogIndex = lazy(() => import("./pages/blog/BlogIndex"));
 const HowToStartCleaningBusiness = lazy(() => import("./pages/blog/HowToStartCleaningBusiness"));
@@ -114,6 +123,7 @@ const App = () => (
           <SessionTrackerProvider>
             <OrganizationProvider>
               <TestModeProvider>
+                <ClientPortalProvider>
                 <TooltipProvider>
                 <Toaster />
                 <Sonner />
@@ -166,6 +176,11 @@ const App = () => (
                       <Route path="/staff/reset-password" element={<StaffResetPasswordPage />} />
                       <Route path="/staff" element={<StaffRoute><ErrorBoundary featureName="Staff Portal"><StaffPortal /></ErrorBoundary></StaffRoute>} />
 
+                      {/* Client Portal */}
+                      <Route path="/portal" element={<PortalLoginPage />} />
+                      <Route path="/portal/dashboard" element={<ProtectedPortalRoute><PortalDashboardPage /></ProtectedPortalRoute>} />
+                      <Route path="/portal/request" element={<ProtectedPortalRoute><PortalRequestPage /></ProtectedPortalRoute>} />
+
                       {/* Dashboard Routes - All Lazy Loaded (AdminRoute enforces owner/admin role) */}
                       <Route path="/dashboard" element={<AdminRoute><ErrorBoundary featureName="Dashboard"><AdminDashboard /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/scheduler" element={<AdminRoute><ErrorBoundary featureName="Scheduler"><SchedulerPage /></ErrorBoundary></AdminRoute>} />
@@ -195,8 +210,8 @@ const App = () => (
                       <Route path="/dashboard/tasks" element={<AdminRoute><ErrorBoundary featureName="Tasks"><TasksPage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/platform-analytics" element={<AdminRoute><ErrorBoundary featureName="Platform Analytics"><PlatformAnalyticsPage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/ai-intelligence" element={<AdminRoute><ErrorBoundary featureName="AI Intelligence"><AIIntelligencePage /></ErrorBoundary></AdminRoute>} />
+                      <Route path="/dashboard/client-portal" element={<AdminRoute><ErrorBoundary featureName="Client Portal"><ClientPortalAdminPage /></ErrorBoundary></AdminRoute>} />
 
-                      {/* Legacy admin routes */}
                       <Route path="/admin" element={<AdminRoute><ErrorBoundary featureName="Dashboard"><AdminDashboard /></ErrorBoundary></AdminRoute>} />
                       <Route path="/admin/*" element={<AdminRoute><ErrorBoundary featureName="Dashboard"><AdminDashboard /></ErrorBoundary></AdminRoute>} />
 
@@ -250,7 +265,11 @@ const App = () => (
                     <Route path="/staff/reset-password" element={<StaffResetPasswordPage />} />
                     <Route path="/staff" element={<StaffRoute><ErrorBoundary featureName="Staff Portal"><StaffPortal /></ErrorBoundary></StaffRoute>} />
 
-                    {/* Dashboard Routes - All Lazy Loaded (AdminRoute enforces owner/admin role) */}
+                    {/* Client Portal */}
+                    <Route path="/portal" element={<PortalLoginPage />} />
+                    <Route path="/portal/dashboard" element={<ProtectedPortalRoute><PortalDashboardPage /></ProtectedPortalRoute>} />
+                    <Route path="/portal/request" element={<ProtectedPortalRoute><PortalRequestPage /></ProtectedPortalRoute>} />
+
                     <Route path="/dashboard" element={<AdminRoute><ErrorBoundary featureName="Dashboard"><AdminDashboard /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/scheduler" element={<AdminRoute><ErrorBoundary featureName="Scheduler"><SchedulerPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/bookings" element={<AdminRoute><ErrorBoundary featureName="Bookings"><BookingsPage /></ErrorBoundary></AdminRoute>} />
@@ -279,6 +298,7 @@ const App = () => (
                     <Route path="/dashboard/tasks" element={<AdminRoute><ErrorBoundary featureName="Tasks"><TasksPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/platform-analytics" element={<AdminRoute><ErrorBoundary featureName="Platform Analytics"><PlatformAnalyticsPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/ai-intelligence" element={<AdminRoute><ErrorBoundary featureName="AI Intelligence"><AIIntelligencePage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/client-portal" element={<AdminRoute><ErrorBoundary featureName="Client Portal"><ClientPortalAdminPage /></ErrorBoundary></AdminRoute>} />
 
                     {/* Legacy admin routes */}
                     <Route path="/admin" element={<AdminRoute><ErrorBoundary featureName="Dashboard"><AdminDashboard /></ErrorBoundary></AdminRoute>} />
@@ -292,6 +312,7 @@ const App = () => (
                 </BrowserRouter>
               )}
               </TooltipProvider>
+              </ClientPortalProvider>
               </TestModeProvider>
             </OrganizationProvider>
           </SessionTrackerProvider>

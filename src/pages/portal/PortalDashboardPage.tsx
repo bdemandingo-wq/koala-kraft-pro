@@ -175,13 +175,13 @@ export default function PortalDashboardPage() {
       case "pending":
         return <Badge variant="secondary">Pending</Badge>;
       case "approved":
-        return <Badge className="bg-green-500">Approved</Badge>;
+        return <Badge variant="default" className="bg-primary">Approved</Badge>;
       case "rejected":
         return <Badge variant="destructive">Rejected</Badge>;
       case "confirmed":
-        return <Badge className="bg-blue-500">Confirmed</Badge>;
+        return <Badge variant="default">Confirmed</Badge>;
       case "completed":
-        return <Badge className="bg-green-500">Completed</Badge>;
+        return <Badge variant="default" className="bg-primary">Completed</Badge>;
       case "cancelled":
         return <Badge variant="destructive">Cancelled</Badge>;
       default:
