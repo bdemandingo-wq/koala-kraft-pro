@@ -78,61 +78,69 @@ export function ClientPortalProvider({ children }: { children: ReactNode }) {
   const signIn = async (username: string, password: string): Promise<{ error: string | null }> => {
     try {
       // Call the RPC function to validate credentials
-      // Using type assertion since the function is dynamically created
-      const { data, error } = await supabase.rpc('validate_client_portal_login' as any, {
+      const { data: validationResult, error: validationError } = await supabase.rpc('validate_client_portal_login' as any, {
         p_username: username.toLowerCase().trim(),
         p_password: password,
       });
 
-      if (error) {
-        console.error('Login error:', error);
+      if (validationError) {
+        console.error('Login validation error:', validationError);
         return { error: 'Invalid username or password' };
       }
 
-      const result = data as { valid: boolean; reason?: string; user_id?: string } | null;
+      const validation = validationResult as { valid: boolean; reason?: string; user_id?: string } | null;
       
-      if (!result || !result.valid) {
+      if (!validation || !validation.valid) {
         return { error: 'Invalid username or password' };
       }
 
-      // Get the full user record
-      const { data: portalUser, error: userError } = await supabase
-        .from('client_portal_users')
-        .select('id, username, customer_id, organization_id, is_active, must_change_password')
-        .eq('username', username.toLowerCase().trim())
-        .single();
+      // Use the security definer function to get all user data
+      const { data: userData, error: userDataError } = await supabase.rpc('get_client_portal_user_data' as any, {
+        p_username: username.toLowerCase().trim(),
+      });
 
-      if (userError || !portalUser) {
+      if (userDataError) {
+        console.error('Failed to load user data:', userDataError);
         return { error: 'Failed to load user data' };
       }
 
-      if (!portalUser.is_active) {
+      if (!userData || userData.length === 0) {
+        return { error: 'Failed to load user data' };
+      }
+
+      const row = userData[0];
+
+      if (!row.is_active) {
         return { error: 'This account has been deactivated' };
       }
 
-      // Get customer info
-      const { data: customerData, error: customerError } = await supabase
-        .from('customers')
-        .select('id, first_name, last_name, email, phone')
-        .eq('id', portalUser.customer_id)
-        .single();
+      const portalUser: ClientPortalUser = {
+        id: row.user_id,
+        username: row.username,
+        customer_id: row.customer_id,
+        organization_id: row.organization_id,
+        is_active: row.is_active,
+        must_change_password: row.must_change_password,
+      };
 
-      if (customerError || !customerData) {
-        return { error: 'Failed to load customer data' };
-      }
+      const customerData: CustomerInfo = {
+        id: row.customer_id,
+        first_name: row.first_name,
+        last_name: row.last_name,
+        email: row.email,
+        phone: row.phone,
+      };
 
-      // Get loyalty info
-      const { data: loyaltyData } = await supabase
-        .from('customer_loyalty')
-        .select('points, lifetime_points, tier')
-        .eq('customer_id', portalUser.customer_id)
-        .maybeSingle();
+      const loyaltyData: LoyaltyInfo | null = row.loyalty_points !== null ? {
+        points: row.loyalty_points,
+        lifetime_points: row.loyalty_lifetime_points,
+        tier: row.loyalty_tier,
+      } : null;
 
-      // Update last login
-      await supabase
-        .from('client_portal_users')
-        .update({ last_login_at: new Date().toISOString() })
-        .eq('id', portalUser.id);
+      // Update last login using security definer function
+      await supabase.rpc('update_client_portal_last_login' as any, {
+        p_user_id: row.user_id,
+      });
 
       setUser(portalUser);
       setCustomer(customerData);
