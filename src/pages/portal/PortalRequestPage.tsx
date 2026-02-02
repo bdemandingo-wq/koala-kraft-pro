@@ -68,14 +68,14 @@ export default function PortalRequestPage() {
     setSubmitting(true);
 
     try {
-      const { error } = await supabase.from("client_booking_requests").insert({
-        client_user_id: user.id,
-        customer_id: user.customer_id,
-        organization_id: user.organization_id,
-        requested_date: selectedDate.toISOString(),
-        service_id: selectedService || null,
-        notes: notes.trim() || null,
-        status: "pending",
+      // Use security definer RPC to bypass RLS (client portal users aren't authenticated via Supabase Auth)
+      const { data, error } = await supabase.rpc("submit_client_booking_request", {
+        p_client_user_id: user.id,
+        p_customer_id: user.customer_id,
+        p_organization_id: user.organization_id,
+        p_requested_date: selectedDate.toISOString(),
+        p_service_id: selectedService || null,
+        p_notes: notes.trim() || null,
       });
 
       if (error) throw error;
