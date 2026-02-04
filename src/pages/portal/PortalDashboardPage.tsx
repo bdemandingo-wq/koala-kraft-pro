@@ -147,6 +147,20 @@ export default function PortalDashboardPage() {
     }
   };
 
+  const deleteRequest = async (id: string) => {
+    if (!user) return;
+
+    const { data } = await supabase.rpc("delete_client_booking_request", {
+      p_request_id: id,
+      p_client_user_id: user.id,
+    });
+
+    if (data) {
+      setRequests((prev) => prev.filter((r) => r.id !== id));
+      toast.success("Request deleted");
+    }
+  };
+
   if (loading || !user || !customer) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-background">
@@ -360,7 +374,7 @@ export default function PortalDashboardPage() {
               requests.map((request) => (
                 <Card key={request.id} className="p-4">
                   <div className="flex items-start justify-between">
-                    <div className="space-y-1">
+                    <div className="space-y-1 flex-1 min-w-0">
                       <p className="font-medium">
                         {request.service_name || "Service Request"}
                       </p>
@@ -379,8 +393,19 @@ export default function PortalDashboardPage() {
                         </p>
                       )}
                     </div>
-                    <div className="flex flex-col items-end gap-1">
-                      {getStatusBadge(request.status)}
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <div className="flex items-center gap-2">
+                        {getStatusBadge(request.status)}
+                        {request.status === "pending" && (
+                          <button
+                            onClick={() => deleteRequest(request.id)}
+                            className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                            aria-label="Delete request"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
                       <span className="text-xs text-muted-foreground">
                         {format(new Date(request.created_at), "MMM d")}
                       </span>
