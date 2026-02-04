@@ -4387,6 +4387,10 @@ export type Database = {
         }
         Returns: string
       }
+      delete_client_booking_request: {
+        Args: { p_client_user_id: string; p_request_id: string }
+        Returns: boolean
+      }
       delete_client_portal_location: {
         Args: { p_client_user_id: string; p_location_id: string }
         Returns: boolean
