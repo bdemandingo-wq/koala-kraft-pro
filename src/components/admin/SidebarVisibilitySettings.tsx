@@ -61,7 +61,9 @@ const sidebarItems = [
 
 export function SidebarVisibilitySettings() {
   const [hiddenItems, setHiddenItems] = useState<string[]>([]);
+  const [initialHiddenItems, setInitialHiddenItems] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
   const { user } = useAuth();
   const { organizationId } = useOrgId();
 
@@ -81,14 +83,24 @@ export function SidebarVisibilitySettings() {
       if (data?.preference_value) {
         const hidden = data.preference_value as string[];
         setHiddenItems(hidden);
+        setInitialHiddenItems(hidden);
         // Sync to localStorage for sidebar component
         localStorage.setItem('tidywise_nav_hidden', JSON.stringify(hidden));
         window.dispatchEvent(new Event('navHiddenChanged'));
+      } else {
+        setHiddenItems([]);
+        setInitialHiddenItems([]);
       }
     };
     
     loadPreferences();
   }, [user?.id, organizationId]);
+
+  // Track changes
+  useEffect(() => {
+    const changed = JSON.stringify(hiddenItems.sort()) !== JSON.stringify(initialHiddenItems.sort());
+    setHasChanges(changed);
+  }, [hiddenItems, initialHiddenItems]);
 
   const saveToDatabase = async (newHidden: string[]) => {
     if (!user?.id || !organizationId) return;
@@ -122,18 +134,44 @@ export function SidebarVisibilitySettings() {
         ? prev.filter(h => h !== href)
         : [...prev, href];
       
+      // Update localStorage for instant preview
       localStorage.setItem('tidywise_nav_hidden', JSON.stringify(newHidden));
       window.dispatchEvent(new Event('navHiddenChanged'));
-      
-      // Save to database
-      saveToDatabase(newHidden);
       
       return newHidden;
     });
   };
 
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from('user_preferences')
+        .upsert({
+          user_id: user!.id,
+          organization_id: organizationId,
+          preference_key: 'sidebar_hidden',
+          preference_value: hiddenItems,
+          updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'user_id,organization_id,preference_key'
+        });
+      
+      if (error) throw error;
+      
+      setInitialHiddenItems([...hiddenItems]);
+      toast.success('Sidebar settings saved');
+    } catch (e) {
+      console.error('Error saving preferences:', e);
+      toast.error('Failed to save settings');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const resetToDefault = async () => {
     setHiddenItems([]);
+    setInitialHiddenItems([]);
     localStorage.removeItem('tidywise_nav_hidden');
     localStorage.removeItem('tidywise_nav_order');
     window.dispatchEvent(new Event('navHiddenChanged'));
@@ -166,15 +204,29 @@ export function SidebarVisibilitySettings() {
               Choose which menu items to show in your sidebar. Drag items in the sidebar to reorder them.
             </CardDescription>
           </div>
-          <Button variant="outline" size="sm" onClick={resetToDefault} className="gap-2" disabled={saving}>
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <RotateCcw className="w-4 h-4" />}
-            Reset to Default
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={resetToDefault} className="gap-2" disabled={saving}>
+              <RotateCcw className="w-4 h-4" />
+              Reset
+            </Button>
+            <Button 
+              size="sm" 
+              onClick={handleSave} 
+              className="gap-2" 
+              disabled={saving || !hasChanges}
+            >
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+              Save Changes
+            </Button>
+          </div>
         </div>
         <div className="flex items-center gap-2 mt-2">
           <Badge variant="secondary">{visibleCount} visible</Badge>
           {hiddenItems.length > 0 && (
             <Badge variant="outline">{hiddenItems.length} hidden</Badge>
+          )}
+          {hasChanges && (
+            <Badge variant="secondary" className="bg-warning text-warning-foreground">Unsaved changes</Badge>
           )}
         </div>
       </CardHeader>
