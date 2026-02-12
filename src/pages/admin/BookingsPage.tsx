@@ -59,7 +59,8 @@ import {
   Settings2,
   Star,
   PlusCircle,
-  RotateCcw
+  RotateCcw,
+  Heart
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { handleSmsError } from '@/lib/smsErrorHandler';
@@ -153,6 +154,7 @@ export default function BookingsPage() {
   const [bulkNotifyingCleaners, setBulkNotifyingCleaners] = useState(false);
   const [notifyingOpenJob, setNotifyingOpenJob] = useState<string | null>(null);
   const [sendingReviewRequest, setSendingReviewRequest] = useState<string | null>(null);
+  const [sendingTipRequest, setSendingTipRequest] = useState<string | null>(null);
   const [bulkNotifyingWeek, setBulkNotifyingWeek] = useState(false);
   const [weeklyReminderDialogOpen, setWeeklyReminderDialogOpen] = useState(false);
   const [weeklyReminderClients, setWeeklyReminderClients] = useState<BookingWithDetails[]>([]);
@@ -996,6 +998,39 @@ export default function BookingsPage() {
       toast({ title: "Error", description: error.message || "Failed to notify cleaners", variant: "destructive" });
     } finally {
       setNotifyingOpenJob(null);
+    }
+  };
+
+  const handleSendTipRequest = async (booking: BookingWithDetails) => {
+    if (!booking.customer?.phone) {
+      toast({ title: "Error", description: "Customer has no phone number", variant: "destructive" });
+      return;
+    }
+    if (!organization?.id) {
+      toast({ title: "Error", description: "Organization context required", variant: "destructive" });
+      return;
+    }
+
+    setSendingTipRequest(booking.id);
+    try {
+      const { data, error } = await supabase.functions.invoke('send-tip-request', {
+        body: {
+          bookingId: booking.id,
+          organizationId: organization.id,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.success) {
+        toast({ title: "Tip Link Sent", description: `Tip request SMS sent to ${booking.customer.first_name}` });
+      } else {
+        toast({ title: "Error", description: data?.error || "Failed to send tip request", variant: "destructive" });
+      }
+    } catch (error: any) {
+      console.error('Failed to send tip request:', error);
+      toast({ title: "Error", description: error.message || "Failed to send tip request", variant: "destructive" });
+    } finally {
+      setSendingTipRequest(null);
     }
   };
 
@@ -1851,6 +1886,14 @@ export default function BookingsPage() {
                                 >
                                   {sendingReviewRequest === booking.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Star className="w-3 h-3" />}
                                   Send Review
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  className="gap-2 cursor-pointer text-emerald-600" 
+                                  onClick={() => handleSendTipRequest(booking)}
+                                  disabled={sendingTipRequest === booking.id || !booking.customer?.phone || booking.status !== 'completed'}
+                                >
+                                  {sendingTipRequest === booking.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Heart className="w-3 h-3" />}
+                                  Send Tip Link
                                 </DropdownMenuItem>
                               </div>
                             </div>

@@ -143,3 +143,12 @@ verify_jwt = false
 
 [functions.notify-booking-request]
 verify_jwt = false
+
+[functions.send-tip-request]
+verify_jwt = false
+
+[functions.process-tip]
+verify_jwt = false
+
+[functions.get-tip-details]
+verify_jwt = false

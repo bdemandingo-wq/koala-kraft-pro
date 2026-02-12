@@ -4200,6 +4200,69 @@ export type Database = {
           },
         ]
       }
+      tips: {
+        Row: {
+          amount: number | null
+          booking_id: string
+          created_at: string
+          customer_name: string | null
+          customer_phone: string | null
+          id: string
+          organization_id: string
+          paid_at: string | null
+          payment_intent_id: string | null
+          sms_sent_at: string | null
+          status: string
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number | null
+          booking_id: string
+          created_at?: string
+          customer_name?: string | null
+          customer_phone?: string | null
+          id?: string
+          organization_id: string
+          paid_at?: string | null
+          payment_intent_id?: string | null
+          sms_sent_at?: string | null
+          status?: string
+          token?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number | null
+          booking_id?: string
+          created_at?: string
+          customer_name?: string | null
+          customer_phone?: string | null
+          id?: string
+          organization_id?: string
+          paid_at?: string | null
+          payment_intent_id?: string | null
+          sms_sent_at?: string | null
+          status?: string
+          token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tips_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tips_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_preferences: {
         Row: {
           created_at: string
