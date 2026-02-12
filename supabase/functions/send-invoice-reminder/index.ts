@@ -8,9 +8,18 @@ const corsHeaders = {
 
 /**
  * SMS-Only Invoice Payment Reminder
- * This function sends automated SMS reminders for unpaid invoices
- * based on the organization's payment reminder settings.
+ * Triggered daily by pg_cron. Sends automated SMS reminders for unpaid invoices
+ * based on each organization's payment reminder settings.
+ * Also auto-marks past-due invoices as "overdue".
  */
+
+function formatPhoneE164(phone: string): string | null {
+  const digits = phone.replace(/\D/g, '');
+  if (digits.length === 10) return `+1${digits}`;
+  if (digits.length === 11 && digits.startsWith('1')) return `+${digits}`;
+  if (digits.length > 10) return `+${digits}`;
+  return null; // Invalid
+}
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
@@ -24,16 +33,26 @@ const handler = async (req: Request): Promise<Response> => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     console.log("[send-invoice-reminder] Starting reminder check...");
 
-    // Get all active payment reminders
+    // Step 1: Auto-mark past-due invoices as "overdue"
+    const today = new Date().toISOString().split('T')[0];
+    const { data: overdueUpdated, error: overdueError } = await supabase
+      .from("invoices")
+      .update({ status: "overdue" })
+      .eq("status", "sent")
+      .lt("due_date", today)
+      .not("due_date", "is", null)
+      .select("id");
+
+    if (overdueError) {
+      console.error("[send-invoice-reminder] Error updating overdue invoices:", overdueError);
+    } else {
+      console.log(`[send-invoice-reminder] Marked ${overdueUpdated?.length || 0} invoices as overdue`);
+    }
+
+    // Step 2: Get all active SMS payment reminders
     const { data: reminders, error: remindersError } = await supabase
       .from("invoice_payment_reminders")
-      .select(`
-        *,
-        organizations:organization_id (
-          id,
-          name
-        )
-      `)
+      .select("*")
       .eq("is_active", true)
       .eq("send_sms", true);
 
@@ -45,17 +64,19 @@ const handler = async (req: Request): Promise<Response> => {
 
     let sentCount = 0;
     let errorCount = 0;
+    let skippedCount = 0;
 
     for (const reminder of reminders || []) {
       const organizationId = reminder.organization_id;
       const daysAfterDue = reminder.days_after_due;
 
-      // Calculate the target due date (invoices that were due X days ago)
+      // Calculate the target due date (invoices that were due exactly X days ago)
       const targetDate = new Date();
       targetDate.setDate(targetDate.getDate() - daysAfterDue);
       const targetDateStr = targetDate.toISOString().split('T')[0];
 
-      // Get unpaid invoices for this organization that match the reminder date
+      // Get unpaid invoices for this organization that match the reminder timing
+      // Check both "sent" and "overdue" statuses
       const { data: invoices, error: invoicesError } = await supabase
         .from("invoices")
         .select(`
@@ -65,10 +86,15 @@ const handler = async (req: Request): Promise<Response> => {
             last_name,
             phone,
             email
+          ),
+          leads:lead_id (
+            name,
+            phone,
+            email
           )
         `)
         .eq("organization_id", organizationId)
-        .eq("status", "sent")
+        .in("status", ["sent", "overdue"])
         .eq("due_date", targetDateStr);
 
       if (invoicesError) {
@@ -76,21 +102,24 @@ const handler = async (req: Request): Promise<Response> => {
         continue;
       }
 
-      // Get organization SMS settings
+      if (!invoices || invoices.length === 0) {
+        continue;
+      }
+
+      console.log(`[send-invoice-reminder] Found ${invoices.length} invoices due on ${targetDateStr} for org ${organizationId}`);
+
+      // Get organization SMS settings (STRICT ISOLATION)
       const { data: smsSettings } = await supabase
         .from("organization_sms_settings")
         .select("openphone_api_key, openphone_phone_number_id, sms_enabled")
         .eq("organization_id", organizationId)
         .maybeSingle();
 
-      // STRICT ISOLATION: Only use organization-specific credentials, never fallback to platform keys
-      if (!smsSettings?.openphone_api_key || !smsSettings?.openphone_phone_number_id) {
-        console.log(`[send-invoice-reminder] Skipping org ${organizationId} - no OpenPhone credentials configured`);
+      if (!smsSettings?.openphone_api_key || !smsSettings?.openphone_phone_number_id || !smsSettings?.sms_enabled) {
+        console.log(`[send-invoice-reminder] Skipping org ${organizationId} - SMS not configured or disabled`);
+        skippedCount += invoices.length;
         continue;
       }
-
-      const openPhoneApiKey = smsSettings.openphone_api_key;
-      const openPhoneNumberId = smsSettings.openphone_phone_number_id;
 
       // Get business settings for company name
       const { data: businessSettings } = await supabase
@@ -102,54 +131,68 @@ const handler = async (req: Request): Promise<Response> => {
       const companyName = businessSettings?.company_name || "Your service provider";
 
       // Send SMS reminders for each matching invoice
-      for (const invoice of invoices || []) {
+      for (const invoice of invoices) {
+        // Get customer/lead phone number
         const customer = invoice.customers;
-        if (!customer?.phone) {
-          console.log(`[send-invoice-reminder] Skipping invoice ${invoice.id} - no customer phone`);
+        const lead = invoice.leads;
+        const rawPhone = customer?.phone || lead?.phone;
+        const customerName = customer
+          ? `${customer.first_name} ${customer.last_name}`.trim()
+          : lead?.name || "Customer";
+
+        if (!rawPhone) {
+          console.log(`[send-invoice-reminder] Skipping invoice ${invoice.id} - no phone number`);
+          skippedCount++;
           continue;
         }
 
-        const customerName = `${customer.first_name} ${customer.last_name}`.trim();
-        const paymentUrl = invoice.stripe_invoice_url || '';
+        const formattedPhone = formatPhoneE164(rawPhone);
+        if (!formattedPhone) {
+          console.log(`[send-invoice-reminder] Skipping invoice ${invoice.id} - invalid phone: ${rawPhone}`);
+          skippedCount++;
+          continue;
+        }
 
-        const smsContent = `Hi ${customerName}! 📋 Friendly reminder: Your invoice #${invoice.invoice_number} for $${invoice.total_amount.toFixed(2)} from ${companyName} is now ${daysAfterDue} days past due.\n\n${paymentUrl ? `Pay now: ${paymentUrl}` : 'Please contact us to arrange payment.'}`;
+        const paymentUrl = invoice.stripe_invoice_url || '';
+        const smsContent = `Hi ${customerName}! 📋 Friendly reminder: Your invoice #${invoice.invoice_number} for $${invoice.total_amount.toFixed(2)} from ${companyName} is now ${daysAfterDue} day${daysAfterDue > 1 ? 's' : ''} past due.\n\n${paymentUrl ? `Pay now: ${paymentUrl}` : 'Please contact us to arrange payment.'}`;
 
         try {
           const smsResponse = await fetch("https://api.openphone.com/v1/messages", {
             method: "POST",
             headers: {
-              "Authorization": openPhoneApiKey,
+              "Authorization": smsSettings.openphone_api_key,
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
               content: smsContent,
-              from: openPhoneNumberId,
-              to: [customer.phone],
+              from: smsSettings.openphone_phone_number_id,
+              to: [formattedPhone],
             }),
           });
 
           if (smsResponse.ok) {
-            console.log(`[send-invoice-reminder] SMS sent for invoice ${invoice.id} to ${customer.phone}`);
+            console.log(`[send-invoice-reminder] SMS sent for invoice #${invoice.invoice_number} to ${formattedPhone}`);
             sentCount++;
           } else {
             const errorText = await smsResponse.text();
-            console.error(`[send-invoice-reminder] SMS failed for invoice ${invoice.id}:`, errorText);
+            console.error(`[send-invoice-reminder] SMS failed for invoice #${invoice.invoice_number}:`, errorText);
             errorCount++;
           }
         } catch (smsError) {
-          console.error(`[send-invoice-reminder] SMS error for invoice ${invoice.id}:`, smsError);
+          console.error(`[send-invoice-reminder] SMS error for invoice #${invoice.invoice_number}:`, smsError);
           errorCount++;
         }
       }
     }
 
-    console.log(`[send-invoice-reminder] Complete. Sent: ${sentCount}, Errors: ${errorCount}`);
+    console.log(`[send-invoice-reminder] Complete. Sent: ${sentCount}, Errors: ${errorCount}, Skipped: ${skippedCount}`);
 
     return new Response(
       JSON.stringify({
         success: true,
         sent: sentCount,
         errors: errorCount,
+        skipped: skippedCount,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
