@@ -399,7 +399,7 @@ export default function BookingsPage() {
         toast({
           title: data.declined ? "Card Declined" : "Hold Failed",
           description: data.error,
-          variant: "destructive"
+          variant: data.declined ? "default" : "destructive"
         });
       }
     } catch (error: any) {
