@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,6 +25,8 @@ import {
   Loader2,
   Star,
   Gift,
+  CreditCard,
+  Lock,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
@@ -32,7 +34,8 @@ import { squareFootageRanges } from '@/data/pricingData';
 import { usePublicOrgPricing } from '@/hooks/usePublicOrgPricing';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
-import { useEffect } from 'react';
+import { applyPublicBranding, clearPublicBranding } from '@/hooks/useBrandingColors';
+import { StripeCardForm } from '@/components/stripe/StripeCardForm';
 
 // Generate 30-minute time slots from 8:00 AM to 5:00 PM in 12-hour format
 const timeSlots = Array.from({ length: 19 }, (_, i) => {
@@ -44,37 +47,6 @@ const timeSlots = Array.from({ length: 19 }, (_, i) => {
   return `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`;
 });
 
-function hexToHSL(hex: string): string {
-  hex = hex.replace('#', '');
-  if (hex.length !== 6) return '221 83% 53%';
-  const r = parseInt(hex.substring(0, 2), 16) / 255;
-  const g = parseInt(hex.substring(2, 4), 16) / 255;
-  const b = parseInt(hex.substring(4, 6), 16) / 255;
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  let h = 0, s = 0;
-  const l = (max + min) / 2;
-  if (max !== min) {
-    const d = max - min;
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-    switch (max) {
-      case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
-      case g: h = ((b - r) / d + 2) / 6; break;
-      case b: h = ((r - g) / d + 4) / 6; break;
-    }
-  }
-  return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
-}
-
-function adjustLightness(hsl: string, amount: number): string {
-  const parts = hsl.match(/(\d+)\s+(\d+)%\s+(\d+)%/);
-  if (!parts) return hsl;
-  const h = parseInt(parts[1]);
-  const sv = parseInt(parts[2]);
-  const lv = Math.min(100, Math.max(0, parseInt(parts[3]) + amount));
-  return `${h} ${sv}% ${lv}%`;
-}
-
 export default function PublicBookingPage() {
   const { orgSlug } = useParams<{ orgSlug: string }>();
   const [step, setStep] = useState(1);
@@ -85,6 +57,7 @@ export default function PublicBookingPage() {
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmationNumber, setConfirmationNumber] = useState<string>('');
+  const [cardSaved, setCardSaved] = useState(false);
   const [customerInfo, setCustomerInfo] = useState({
     name: '',
     email: '',
@@ -108,37 +81,12 @@ export default function PublicBookingPage() {
     loading: pricingLoading 
   } = usePublicOrgPricing(orgSlug);
 
-  // Apply org branding colors to the page's CSS variables
+  // Apply org branding colors once when loaded (no re-renders)
   useEffect(() => {
-    if (!primaryColor && !accentColor) return;
-    const root = document.documentElement;
-    if (primaryColor) {
-      const pHSL = hexToHSL(primaryColor);
-      root.style.setProperty('--primary', pHSL);
-      root.style.setProperty('--primary-foreground', '210 40% 98%');
-      root.style.setProperty('--primary-glow', adjustLightness(pHSL, 7));
-      root.style.setProperty('--ring', pHSL);
-      root.style.setProperty('--sidebar-primary', pHSL);
-      root.style.setProperty('--sidebar-ring', pHSL);
+    if (primaryColor || accentColor) {
+      applyPublicBranding(primaryColor, accentColor);
     }
-    if (accentColor) {
-      const aHSL = hexToHSL(accentColor);
-      root.style.setProperty('--accent', aHSL);
-      root.style.setProperty('--accent-foreground', '0 0% 100%');
-      root.style.setProperty('--accent-glow', adjustLightness(aHSL, 5));
-    }
-    return () => {
-      // Clean up on unmount
-      root.style.removeProperty('--primary');
-      root.style.removeProperty('--primary-foreground');
-      root.style.removeProperty('--primary-glow');
-      root.style.removeProperty('--ring');
-      root.style.removeProperty('--sidebar-primary');
-      root.style.removeProperty('--sidebar-ring');
-      root.style.removeProperty('--accent');
-      root.style.removeProperty('--accent-foreground');
-      root.style.removeProperty('--accent-glow');
-    };
+    return () => clearPublicBranding();
   }, [primaryColor, accentColor]);
 
   const service = services.find(s => s.id === selectedService);
@@ -159,7 +107,6 @@ export default function PublicBookingPage() {
   const buildScheduledAt = () => {
     if (!selectedDate || !selectedTime) return new Date().toISOString();
     const date = new Date(selectedDate);
-    // Parse time like "9:00 AM" or "3:30 PM"
     const match = selectedTime.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
     if (match) {
       let hour = parseInt(match[1]);
@@ -173,8 +120,8 @@ export default function PublicBookingPage() {
   };
 
   const handleNext = async () => {
-    if (step === 3) {
-      // Submit booking: create in DB then send confirmation email
+    if (step === 4) {
+      // Step 4 is card step — submit booking after card is saved
       setIsSubmitting(true);
       
       try {
@@ -184,7 +131,6 @@ export default function PublicBookingPage() {
         const firstName = nameParts[0] || '';
         const lastName = nameParts.slice(1).join(' ') || '';
 
-        // 1. Create the booking via the external-booking-webhook (handles customer + booking creation)
         const { data: webhookResult, error: webhookError } = await supabase.functions.invoke('external-booking-webhook', {
           body: {
             first_name: firstName,
@@ -220,14 +166,14 @@ export default function PublicBookingPage() {
         setConfirmationNumber(newConfirmationNumber);
 
         toast.success(`Booking confirmed! Your confirmation number is ${newConfirmationNumber}. You'll receive an SMS confirmation shortly.`);
-        setStep(4);
+        setStep(5);
       } catch (err) {
         console.error('Failed to create booking:', err);
         toast.error('Something went wrong. Please try again.');
       } finally {
         setIsSubmitting(false);
       }
-    } else if (step < 4) {
+    } else if (step < 5) {
       setStep(step + 1);
     }
   };
@@ -249,9 +195,19 @@ export default function PublicBookingPage() {
       case 1: return selectedService !== null && selectedSqFtIndex !== null;
       case 2: return selectedDate !== undefined && selectedTime !== null;
       case 3: return customerInfo.name && customerInfo.email && customerInfo.phone && customerInfo.address;
+      case 4: return cardSaved;
       default: return true;
     }
   };
+
+  // Steps config — 5 steps now (card step added)
+  const steps = [
+    { num: 1, label: 'Select Service' },
+    { num: 2, label: 'Choose Time' },
+    { num: 3, label: 'Your Details' },
+    { num: 4, label: 'Payment Method' },
+    { num: 5, label: 'Confirmation' },
+  ];
 
   if (pricingLoading) {
     return (
@@ -305,14 +261,9 @@ export default function PublicBookingPage() {
       {/* Progress Steps */}
       <div className="border-b border-border bg-card">
         <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-center gap-8">
-            {[
-              { num: 1, label: 'Select Service' },
-              { num: 2, label: 'Choose Time' },
-              { num: 3, label: 'Your Details' },
-              { num: 4, label: 'Confirmation' },
-            ].map((s, i) => (
-              <div key={s.num} className="flex items-center gap-3">
+          <div className="flex items-center justify-center gap-4 md:gap-8 overflow-x-auto">
+            {steps.map((s, i) => (
+              <div key={s.num} className="flex items-center gap-2 md:gap-3 shrink-0">
                 <div
                   className={cn(
                     'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors',
@@ -333,8 +284,8 @@ export default function PublicBookingPage() {
                 >
                   {s.label}
                 </span>
-                {i < 3 && (
-                  <div className="w-12 h-0.5 bg-border hidden md:block" />
+                {i < steps.length - 1 && (
+                  <div className="w-8 md:w-12 h-0.5 bg-border hidden md:block" />
                 )}
               </div>
             ))}
@@ -430,7 +381,7 @@ export default function PublicBookingPage() {
                 </div>
               </div>
 
-              {/* Extras - Only show if NOT Deep Clean (deep clean includes all add-ons) */}
+              {/* Extras - Only show if NOT Deep Clean */}
               {service && !service.name.toLowerCase().includes('deep') && (
                 <div>
                   <h2 className="text-2xl font-bold mb-2">Add Extras</h2>
@@ -507,7 +458,6 @@ export default function PublicBookingPage() {
                       disabled={(date) => {
                         const today = new Date();
                         today.setHours(0, 0, 0, 0);
-                        // Only block past dates and Sundays
                         return date < today || date.getDay() === 0;
                       }}
                       className="rounded-md border"
@@ -522,8 +472,6 @@ export default function PublicBookingPage() {
                     {selectedDate ? (
                       <div className="grid grid-cols-2 gap-2 max-h-[400px] overflow-y-auto pr-1">
                         {timeSlots.map((time) => {
-                          // All time slots are available by default - actual availability 
-                          // should be checked against existing bookings in a real implementation
                           const available = true;
                           return (
                             <Button
@@ -566,93 +514,48 @@ export default function PublicBookingPage() {
                       <Label htmlFor="name">Full Name *</Label>
                       <div className="relative">
                         <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          id="name"
-                          placeholder="John Doe"
-                          className="pl-9"
-                          value={customerInfo.name}
-                          onChange={(e) => setCustomerInfo({ ...customerInfo, name: e.target.value })}
-                        />
+                        <Input id="name" placeholder="John Doe" className="pl-9" value={customerInfo.name} onChange={(e) => setCustomerInfo({ ...customerInfo, name: e.target.value })} />
                       </div>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="email">Email Address *</Label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          id="email"
-                          type="email"
-                          placeholder="john@example.com"
-                          className="pl-9"
-                          value={customerInfo.email}
-                          onChange={(e) => setCustomerInfo({ ...customerInfo, email: e.target.value })}
-                        />
+                        <Input id="email" type="email" placeholder="john@example.com" className="pl-9" value={customerInfo.email} onChange={(e) => setCustomerInfo({ ...customerInfo, email: e.target.value })} />
                       </div>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="phone">Phone Number *</Label>
                       <div className="relative">
                         <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          id="phone"
-                          placeholder="(555) 123-4567"
-                          className="pl-9"
-                          value={customerInfo.phone}
-                          onChange={(e) => setCustomerInfo({ ...customerInfo, phone: e.target.value })}
-                        />
+                        <Input id="phone" placeholder="(555) 123-4567" className="pl-9" value={customerInfo.phone} onChange={(e) => setCustomerInfo({ ...customerInfo, phone: e.target.value })} />
                       </div>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="address">Street Address *</Label>
                       <div className="relative">
                         <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          id="address"
-                          placeholder="123 Main Street"
-                          className="pl-9"
-                          value={customerInfo.address}
-                          onChange={(e) => setCustomerInfo({ ...customerInfo, address: e.target.value })}
-                        />
+                        <Input id="address" placeholder="123 Main Street" className="pl-9" value={customerInfo.address} onChange={(e) => setCustomerInfo({ ...customerInfo, address: e.target.value })} />
                       </div>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="city">City</Label>
-                      <Input
-                        id="city"
-                        placeholder="City"
-                        value={customerInfo.city}
-                        onChange={(e) => setCustomerInfo({ ...customerInfo, city: e.target.value })}
-                      />
+                      <Input id="city" placeholder="City" value={customerInfo.city} onChange={(e) => setCustomerInfo({ ...customerInfo, city: e.target.value })} />
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div className="space-y-2">
                         <Label htmlFor="state">State</Label>
-                        <Input
-                          id="state"
-                          placeholder="State"
-                          value={customerInfo.state}
-                          onChange={(e) => setCustomerInfo({ ...customerInfo, state: e.target.value })}
-                        />
+                        <Input id="state" placeholder="State" value={customerInfo.state} onChange={(e) => setCustomerInfo({ ...customerInfo, state: e.target.value })} />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="zipCode">ZIP Code</Label>
-                        <Input
-                          id="zipCode"
-                          placeholder="12345"
-                          value={customerInfo.zipCode}
-                          onChange={(e) => setCustomerInfo({ ...customerInfo, zipCode: e.target.value })}
-                        />
+                        <Input id="zipCode" placeholder="12345" value={customerInfo.zipCode} onChange={(e) => setCustomerInfo({ ...customerInfo, zipCode: e.target.value })} />
                       </div>
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="notes">Special Instructions (Optional)</Label>
-                    <Textarea
-                      id="notes"
-                      placeholder="Any special requests or access instructions..."
-                      value={customerInfo.notes}
-                      onChange={(e) => setCustomerInfo({ ...customerInfo, notes: e.target.value })}
-                    />
+                    <Textarea id="notes" placeholder="Any special requests or access instructions..." value={customerInfo.notes} onChange={(e) => setCustomerInfo({ ...customerInfo, notes: e.target.value })} />
                   </div>
                 </CardContent>
               </Card>
@@ -685,8 +588,81 @@ export default function PublicBookingPage() {
             </div>
           )}
 
-          {/* Step 4: Confirmation */}
+          {/* Step 4: Card on File (Required) */}
           {step === 4 && (
+            <div className="animate-fade-in space-y-6">
+              <h2 className="text-2xl font-bold mb-2">Payment Method</h2>
+              <p className="text-muted-foreground mb-6">A card on file is required to complete your booking. Your card will <strong>not</strong> be charged now.</p>
+              
+              <Card>
+                <CardContent className="p-6 space-y-4">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <CreditCard className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">Add Card on File</h3>
+                      <p className="text-sm text-muted-foreground">Securely stored — only charged when services are rendered</p>
+                    </div>
+                  </div>
+
+                  {cardSaved ? (
+                    <div className="p-4 bg-success/10 border border-success/20 rounded-lg flex items-center gap-3">
+                      <Check className="w-5 h-5 text-success" />
+                      <div>
+                        <p className="font-medium text-success">Card saved successfully!</p>
+                        <p className="text-sm text-muted-foreground">You can now complete your booking.</p>
+                      </div>
+                    </div>
+                  ) : organizationId ? (
+                    <StripeCardForm
+                      email={customerInfo.email}
+                      customerName={customerInfo.name}
+                      organizationId={organizationId}
+                      showHoldOption={false}
+                      onCardSaved={(cardInfo) => {
+                        setCardSaved(true);
+                        toast.success(`Card saved: ${cardInfo.brand} ending in ${cardInfo.last4}`);
+                      }}
+                      onError={(error) => {
+                        toast.error(error);
+                      }}
+                    />
+                  ) : (
+                    <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+                      <p className="text-sm text-destructive">Unable to load payment form. Please try again.</p>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2">
+                    <Lock className="w-3.5 h-3.5" />
+                    <span>Your card info is encrypted and securely processed via Stripe. We never store raw card details.</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Price Summary */}
+              <Card className="bg-primary/5 border-primary/20">
+                <CardContent className="p-5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Estimated Total (charged after service)</p>
+                      <p className="text-3xl font-bold text-primary">${calculateTotal()}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium">{service?.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {selectedSqFtIndex !== null ? squareFootageRanges[selectedSqFtIndex].label : ''}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Step 5: Confirmation */}
+          {step === 5 && (
             <div className="animate-fade-in space-y-6">
               <div className="text-center mb-8">
                 <div className="w-16 h-16 rounded-full bg-success/20 flex items-center justify-center mx-auto mb-4">
@@ -800,14 +776,14 @@ export default function PublicBookingPage() {
 
           {/* Navigation Buttons */}
           <div className="flex items-center justify-between mt-8">
-            {step > 1 && step < 4 && (
+            {step > 1 && step < 5 && (
               <Button variant="outline" onClick={handleBack} className="gap-2">
                 <ArrowLeft className="w-4 h-4" />
                 Back
               </Button>
             )}
             {step === 1 && <div />}
-            {step < 4 && (
+            {step < 5 && (
               <Button onClick={handleNext} disabled={!canProceed() || isSubmitting} className="gap-2 ml-auto">
                 {isSubmitting ? (
                   <>
@@ -816,14 +792,14 @@ export default function PublicBookingPage() {
                   </>
                 ) : (
                   <>
-                    {step === 3 ? 'Confirm Booking' : 'Continue'}
+                    {step === 4 ? 'Confirm Booking' : 'Continue'}
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
               </Button>
             )}
-            {step === 4 && (
-              <Button onClick={() => setStep(1)} className="mx-auto">
+            {step === 5 && (
+              <Button onClick={() => { setStep(1); setCardSaved(false); }} className="mx-auto">
                 Book Another Service
               </Button>
             )}

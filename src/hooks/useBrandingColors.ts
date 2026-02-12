@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useOrganization } from '@/contexts/OrganizationContext';
 
@@ -31,16 +31,26 @@ function adjustLightness(hsl: string, amount: number): string {
   const parts = hsl.match(/(\d+)\s+(\d+)%\s+(\d+)%/);
   if (!parts) return hsl;
   const h = parseInt(parts[1]);
-  const s = parseInt(parts[2]);
-  const l = Math.min(100, Math.max(0, parseInt(parts[3]) + amount));
-  return `${h} ${s}% ${l}%`;
+  const sv = parseInt(parts[2]);
+  const lv = Math.min(100, Math.max(0, parseInt(parts[3]) + amount));
+  return `${h} ${sv}% ${lv}%`;
 }
 
+// Cache to avoid redundant DOM mutations
+let lastAppliedPrimary = '';
+let lastAppliedAccent = '';
+
 function applyBranding(primaryHex: string, accentHex: string) {
+  // Skip if nothing changed
+  if (primaryHex === lastAppliedPrimary && accentHex === lastAppliedAccent) return;
+  lastAppliedPrimary = primaryHex;
+  lastAppliedAccent = accentHex;
+
   const primaryHSL = hexToHSL(primaryHex);
   const accentHSL = hexToHSL(accentHex);
   const root = document.documentElement;
 
+  // Batch style updates
   root.style.setProperty('--primary', primaryHSL);
   root.style.setProperty('--primary-foreground', '210 40% 98%');
   root.style.setProperty('--primary-glow', adjustLightness(primaryHSL, 7));
@@ -54,17 +64,25 @@ function applyBranding(primaryHex: string, accentHex: string) {
 
 export function useBrandingColors() {
   const { organization } = useOrganization();
-  const [refreshKey, setRefreshKey] = useState(0);
+  const fetchedOrgId = useRef<string | null>(null);
 
   // Listen for branding changes from settings save
   useEffect(() => {
-    const handler = () => setRefreshKey(k => k + 1);
+    const handler = () => {
+      // Reset cache so next fetch applies
+      lastAppliedPrimary = '';
+      lastAppliedAccent = '';
+      fetchedOrgId.current = null;
+    };
     window.addEventListener('branding-updated', handler);
     return () => window.removeEventListener('branding-updated', handler);
   }, []);
 
   useEffect(() => {
-    if (!organization?.id) return;
+    const orgId = organization?.id;
+    if (!orgId) return;
+    // Already fetched for this org (and no branding-updated event fired)
+    if (fetchedOrgId.current === orgId) return;
 
     let cancelled = false;
 
@@ -72,11 +90,12 @@ export function useBrandingColors() {
       const { data } = await supabase
         .from('business_settings')
         .select('primary_color, accent_color')
-        .eq('organization_id', organization.id)
+        .eq('organization_id', orgId)
         .maybeSingle();
 
       if (cancelled) return;
 
+      fetchedOrgId.current = orgId;
       const primaryHex = data?.primary_color || '#3b82f6';
       const accentHex = data?.accent_color || '#14b8a6';
       applyBranding(primaryHex, accentHex);
@@ -87,5 +106,19 @@ export function useBrandingColors() {
     return () => {
       cancelled = true;
     };
-  }, [organization?.id, refreshKey]);
+  }, [organization?.id]);
+}
+
+// Standalone function for public pages that receive colors directly
+export function applyPublicBranding(primaryHex: string | null, accentHex: string | null) {
+  if (!primaryHex && !accentHex) return;
+  applyBranding(primaryHex || '#3b82f6', accentHex || primaryHex || '#14b8a6');
+}
+
+export function clearPublicBranding() {
+  lastAppliedPrimary = '';
+  lastAppliedAccent = '';
+  const root = document.documentElement;
+  const props = ['--primary', '--primary-foreground', '--primary-glow', '--ring', '--accent', '--accent-foreground', '--accent-glow', '--sidebar-primary', '--sidebar-ring'];
+  props.forEach(p => root.style.removeProperty(p));
 }
