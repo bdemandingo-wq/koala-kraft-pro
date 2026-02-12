@@ -81,6 +81,7 @@ export function InvoiceFormDialog({
   const [remindersOpen, setRemindersOpen] = useState(false);
   const [dueDateOpen, setDueDateOpen] = useState(false);
   const [sendScheduleOpen, setSendScheduleOpen] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const [formData, setFormData] = useState({
     customer_id: '',
@@ -296,6 +297,7 @@ export function InvoiceFormDialog({
       if (validLineItems.length > 0) {
         const itemsToInsert = validLineItems.map((item, index) => ({
           invoice_id: invoiceId,
+          organization_id: organizationId,
           service_id: item.service_id && item.service_id !== '__custom__' ? item.service_id : null,
           description: item.description,
           quantity: item.quantity,
@@ -358,9 +360,14 @@ export function InvoiceFormDialog({
     onError: (error: any) => toast.error(error.message || 'Failed to save invoice'),
   });
 
+  
+
   const handlePreview = () => {
-    // TODO: Implement invoice preview
-    toast.info('Invoice preview coming soon');
+    if (!selectedCustomer || lineItems.length === 0) {
+      toast.error('Please add a customer and at least one item');
+      return;
+    }
+    setPreviewOpen(true);
   };
 
   const handleSend = () => {
@@ -898,6 +905,104 @@ export function InvoiceFormDialog({
           scheduled_time: time 
         })}
       />
+
+      {/* Invoice Preview Dialog */}
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <div className="space-y-6 p-2">
+            {/* Header */}
+            <div className="text-center border-b pb-4">
+              <h2 className="text-2xl font-bold">INVOICE</h2>
+              <p className="text-sm text-muted-foreground mt-1">Preview</p>
+            </div>
+
+            {/* Customer Info */}
+            {selectedCustomer && (
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">Bill To:</p>
+                <p className="font-semibold">
+                  {formData.customer_type === 'customer' 
+                    ? `${selectedCustomer.first_name} ${selectedCustomer.last_name}` 
+                    : selectedCustomer.name}
+                </p>
+                {selectedCustomer.email && <p className="text-sm text-muted-foreground">{selectedCustomer.email}</p>}
+                {selectedCustomer.phone && <p className="text-sm text-muted-foreground">{selectedCustomer.phone}</p>}
+                {formData.address && <p className="text-sm text-muted-foreground">{formData.address}</p>}
+              </div>
+            )}
+
+            {/* Due Date */}
+            {formData.due_date && formData.due_label !== 'Upon receipt' && (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Due Date:</span>
+                <span className="font-medium">{format(new Date(formData.due_date), 'MMM d, yyyy')}</span>
+              </div>
+            )}
+            {formData.due_label === 'Upon receipt' && (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Due:</span>
+                <span className="font-medium">Upon receipt</span>
+              </div>
+            )}
+
+            {/* Line Items Table */}
+            <div className="border rounded-lg overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-muted/50">
+                    <th className="text-left p-3 font-medium">Description</th>
+                    <th className="text-right p-3 font-medium">Qty</th>
+                    <th className="text-right p-3 font-medium">Rate</th>
+                    <th className="text-right p-3 font-medium">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {lineItems.filter(i => i.description).map((item, idx) => (
+                    <tr key={idx} className="border-t">
+                      <td className="p-3">{item.description}</td>
+                      <td className="p-3 text-right">{item.quantity}</td>
+                      <td className="p-3 text-right">${item.unit_price.toFixed(2)}</td>
+                      <td className="p-3 text-right">${item.total.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Totals */}
+            <div className="space-y-2 border-t pt-4">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Subtotal</span>
+                <span>${subtotal.toFixed(2)}</span>
+              </div>
+              {showDiscount && discountAmount > 0 && (
+                <div className="flex justify-between text-sm text-green-600">
+                  <span>Discount ({discountPercent}%)</span>
+                  <span>-${discountAmount.toFixed(2)}</span>
+                </div>
+              )}
+              {showTax && taxAmount > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Tax ({taxPercent}%)</span>
+                  <span>${taxAmount.toFixed(2)}</span>
+                </div>
+              )}
+              <div className="flex justify-between font-bold text-lg pt-2 border-t">
+                <span>Total Due</span>
+                <span>${totalAmount.toFixed(2)}</span>
+              </div>
+            </div>
+
+            {/* Notes */}
+            {formData.notes && (
+              <div className="border-t pt-4">
+                <p className="text-sm font-medium text-muted-foreground mb-1">Notes</p>
+                <p className="text-sm">{formData.notes}</p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
