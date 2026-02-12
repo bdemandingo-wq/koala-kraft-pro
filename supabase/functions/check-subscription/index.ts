@@ -30,6 +30,11 @@ const MANUAL_TRIAL_OVERRIDES: Record<
     trial_start_iso: "2026-01-22T00:00:00.000Z",
     trial_end_iso: "2026-03-22T00:00:00.000Z",
   },
+  // Free for 2 months starting 2026-02-12
+  "cleancastillocompany@gmail.com": {
+    trial_start_iso: "2026-02-12T00:00:00.000Z",
+    trial_end_iso: "2026-04-12T00:00:00.000Z",
+  },
 };
 
 serve(async (req) => {
