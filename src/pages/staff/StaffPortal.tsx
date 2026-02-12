@@ -174,7 +174,6 @@ export default function StaffPortal() {
         `)
         .eq('staff_id', staffInfo.id)
         .in('status', ['pending', 'confirmed', 'in_progress'])
-        .gte('scheduled_at', new Date().toISOString())
         .order('scheduled_at', { ascending: true });
 
       if (directError) throw directError;
@@ -201,8 +200,7 @@ export default function StaffPortal() {
         ?.filter(ta => {
           const booking = ta.booking as any;
           return booking && 
-            ['pending', 'confirmed', 'in_progress'].includes(booking.status) &&
-            new Date(booking.scheduled_at) >= new Date();
+            ['pending', 'confirmed', 'in_progress'].includes(booking.status);
         })
         .map(ta => ({
           ...(ta.booking as any),
