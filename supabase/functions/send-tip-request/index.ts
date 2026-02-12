@@ -1,0 +1,189 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { logAudit, AuditActions } from "../_shared/audit-log.ts";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
+};
+
+interface SendTipRequest {
+  bookingId: string;
+  organizationId: string;
+}
+
+const handler = async (req: Request): Promise<Response> => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const appUrl = Deno.env.get("APP_URL") || req.headers.get("origin") || "";
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Server configuration error" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const { bookingId, organizationId } = await req.json() as SendTipRequest;
+
+    if (!bookingId || !organizationId) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Missing bookingId or organizationId" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Fetch booking with customer info
+    const { data: booking, error: bookingError } = await supabase
+      .from('bookings')
+      .select(`
+        id, booking_number, organization_id,
+        customer:customers(first_name, last_name, phone)
+      `)
+      .eq('id', bookingId)
+      .eq('organization_id', organizationId)
+      .single();
+
+    if (bookingError || !booking) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Booking not found" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const customerData = booking.customer as unknown;
+    const customer = Array.isArray(customerData) ? customerData[0] : customerData;
+    const typedCustomer = customer as { first_name: string; last_name: string; phone: string | null } | null;
+
+    if (!typedCustomer?.phone) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Customer has no phone number" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Create tip record
+    const { data: tip, error: tipError } = await supabase
+      .from('tips')
+      .insert({
+        booking_id: bookingId,
+        organization_id: organizationId,
+        customer_name: `${typedCustomer.first_name} ${typedCustomer.last_name}`,
+        customer_phone: typedCustomer.phone,
+      })
+      .select('id, token')
+      .single();
+
+    if (tipError || !tip) {
+      console.error("[send-tip-request] Failed to create tip record:", tipError);
+      return new Response(
+        JSON.stringify({ success: false, error: "Failed to create tip request" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Build tip link
+    const tipLink = `${appUrl}/tip/${tip.token}`;
+
+    // Get business settings for company name
+    const { data: businessSettings } = await supabase
+      .from('business_settings')
+      .select('company_name')
+      .eq('organization_id', organizationId)
+      .maybeSingle();
+
+    const companyName = businessSettings?.company_name || 'Your cleaning service';
+
+    // Build SMS message
+    const message = `Hi ${typedCustomer.first_name}! 😊 We're glad you enjoyed our service from ${companyName}! If you'd like to leave a tip for your cleaner, you can do so here:\n\n${tipLink}\n\nThank you for your support! 💚`;
+
+    // Fetch SMS settings
+    const { data: smsSettings } = await supabase
+      .from('organization_sms_settings')
+      .select('openphone_api_key, openphone_phone_number_id, sms_enabled')
+      .eq('organization_id', organizationId)
+      .maybeSingle();
+
+    if (!smsSettings?.sms_enabled || !smsSettings.openphone_api_key || !smsSettings.openphone_phone_number_id) {
+      return new Response(
+        JSON.stringify({ success: false, error: "SMS not configured for this organization" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Format phone number
+    let formattedPhone = typedCustomer.phone.replace(/\D/g, '');
+    if (formattedPhone.length === 10) {
+      formattedPhone = `+1${formattedPhone}`;
+    } else if (!formattedPhone.startsWith('+')) {
+      formattedPhone = `+${formattedPhone}`;
+    }
+
+    // Extract phone number ID
+    let phoneNumberId = smsSettings.openphone_phone_number_id;
+    if (phoneNumberId.includes('/') || phoneNumberId.includes('openphone')) {
+      const pnMatch = phoneNumberId.match(/(PN[A-Za-z0-9]+)/);
+      if (pnMatch) phoneNumberId = pnMatch[1];
+    }
+
+    const authHeader = smsSettings.openphone_api_key.trim().replace(/^Bearer\s+/i, '');
+
+    // Send SMS
+    const response = await fetch("https://api.openphone.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Authorization": authHeader,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: phoneNumberId,
+        to: [formattedPhone],
+        content: message,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("[send-tip-request] SMS failed:", response.status, errorText);
+      return new Response(
+        JSON.stringify({ success: false, error: "Failed to send tip SMS" }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Update tip record with sms_sent_at
+    await supabase
+      .from('tips')
+      .update({ sms_sent_at: new Date().toISOString() })
+      .eq('id', tip.id);
+
+    logAudit({
+      action: 'sms.tip_request',
+      organizationId,
+      resourceType: 'booking',
+      resourceId: bookingId,
+      success: true,
+      details: { tipId: tip.id, customerPhone: formattedPhone },
+    });
+
+    return new Response(
+      JSON.stringify({ success: true, tipId: tip.id }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error("[send-tip-request] Error:", errorMessage);
+    return new Response(
+      JSON.stringify({ success: false, error: errorMessage }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+};
+
+serve(handler);
