@@ -193,11 +193,7 @@ export default function ReviewPage() {
             <span className="text-3xl">✨</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-800">How was your cleaning?</h1>
-          <p className="text-gray-600 mt-2">
-            {googleUrl
-              ? 'Tap a star — 4-5 stars takes you straight to Google Reviews!'
-              : 'Your feedback helps us serve you better'}
-          </p>
+          <p className="text-gray-600 mt-2">Your feedback helps us serve you better</p>
         </div>
 
         {/* Star Rating */}
