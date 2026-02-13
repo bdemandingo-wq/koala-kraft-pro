@@ -94,7 +94,7 @@ const handler = async (req: Request): Promise<Response> => {
     const token = crypto.randomUUID();
     
     // Get the review page URL - use environment variable or fallback
-    const projectUrl = Deno.env.get("PROJECT_URL") || "https://slwfkaqczvwvvvavkgpr.lovable.app";
+    const projectUrl = (Deno.env.get("PROJECT_URL") || "https://www.jointidywise.com").replace(/\/+$/, '');
     const reviewPageUrl = `${projectUrl}/review/${token}`;
 
     // Get staff_id and staff name from booking to associate review with cleaner
