@@ -104,6 +104,7 @@ const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage"));
 const RedirectPage = lazy(() => import("./pages/RedirectPage"));
 const CardSavedPage = lazy(() => import("./pages/CardSavedPage"));
 const TipPage = lazy(() => import("./pages/TipPage"));
+const DepositPage = lazy(() => import("./pages/DepositPage"));
 
 // Optimized QueryClient with stale time and caching
 const queryClient = new QueryClient({
@@ -154,6 +155,7 @@ const App = () => (
                       <Route path="/c/:code" element={<RedirectPage />} />
                       <Route path="/card-saved" element={<CardSavedPage />} />
                       <Route path="/tip/:token" element={<TipPage />} />
+                      <Route path="/deposit/:token" element={<DepositPage />} />
                       <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
                       <Route path="/onboarding" element={<OnboardingPage />} />
                       <Route path="/review/:token" element={<ReviewPage />} />
@@ -246,6 +248,7 @@ const App = () => (
                     <Route path="/c/:code" element={<RedirectPage />} />
                     <Route path="/card-saved" element={<CardSavedPage />} />
                     <Route path="/tip/:token" element={<TipPage />} />
+                    <Route path="/deposit/:token" element={<DepositPage />} />
                     <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
                     <Route path="/onboarding" element={<OnboardingPage />} />
                     <Route path="/review/:token" element={<ReviewPage />} />

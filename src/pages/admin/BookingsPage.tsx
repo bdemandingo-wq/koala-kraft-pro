@@ -60,7 +60,8 @@ import {
   Star,
   PlusCircle,
   RotateCcw,
-  Heart
+  Heart,
+  Banknote
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { handleSmsError } from '@/lib/smsErrorHandler';
@@ -165,6 +166,9 @@ export default function BookingsPage() {
   const [refundType, setRefundType] = useState<'full' | 'partial'>('full');
   const [refundAmount, setRefundAmount] = useState('');
   const [processingRefund, setProcessingRefund] = useState(false);
+  const [depositDialogBooking, setDepositDialogBooking] = useState<BookingWithDetails | null>(null);
+  const [depositAmount, setDepositAmount] = useState('');
+  const [sendingDepositRequest, setSendingDepositRequest] = useState(false);
 
   const { data: bookings = [], isLoading, error } = useBookings();
   const { data: staffList = [] } = useStaff();
@@ -1034,7 +1038,44 @@ export default function BookingsPage() {
     }
   };
 
-  // Notify all cleaners about their upcoming bookings for the week
+  const handleSendDepositRequest = async () => {
+    if (!depositDialogBooking || !depositAmount || !organization?.id) return;
+    const amount = parseFloat(depositAmount);
+    if (isNaN(amount) || amount <= 0) {
+      toast({ title: "Error", description: "Please enter a valid deposit amount", variant: "destructive" });
+      return;
+    }
+    if (!depositDialogBooking.customer?.phone) {
+      toast({ title: "Error", description: "Customer has no phone number", variant: "destructive" });
+      return;
+    }
+
+    setSendingDepositRequest(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('send-deposit-request', {
+        body: {
+          bookingId: depositDialogBooking.id,
+          organizationId: organization.id,
+          amount,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.success) {
+        toast({ title: "Deposit Link Sent", description: `Deposit request of $${amount.toFixed(2)} sent to ${depositDialogBooking.customer.first_name}` });
+        setDepositDialogBooking(null);
+        setDepositAmount('');
+      } else {
+        toast({ title: "Error", description: data?.error || "Failed to send deposit request", variant: "destructive" });
+      }
+    } catch (error: any) {
+      console.error('Failed to send deposit request:', error);
+      toast({ title: "Error", description: error.message || "Failed to send deposit request", variant: "destructive" });
+    } finally {
+      setSendingDepositRequest(false);
+    }
+  };
+
   const handleBulkNotifyWeekCleaners = async () => {
     const now = new Date();
     const weekEnd = addDays(now, 7);
@@ -1895,6 +1936,17 @@ export default function BookingsPage() {
                                   {sendingTipRequest === booking.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Heart className="w-3 h-3" />}
                                   Send Tip Link
                                 </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  className="gap-2 cursor-pointer text-blue-600" 
+                                  onClick={() => {
+                                    setDepositDialogBooking(booking);
+                                    setDepositAmount('');
+                                  }}
+                                  disabled={!booking.customer?.phone}
+                                >
+                                  <Banknote className="w-3 h-3" />
+                                  Send Deposit Link
+                                </DropdownMenuItem>
                               </div>
                             </div>
                           </DropdownMenuContent>
@@ -2221,6 +2273,53 @@ export default function BookingsPage() {
           }}
         />
       )}
+
+      {/* Deposit Request Dialog */}
+      <AlertDialog open={!!depositDialogBooking} onOpenChange={(open) => { if (!open) setDepositDialogBooking(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Send Deposit Link</AlertDialogTitle>
+            <AlertDialogDescription>
+              Send a deposit payment link to {depositDialogBooking?.customer?.first_name} {depositDialogBooking?.customer?.last_name} for Booking #{depositDialogBooking?.booking_number}.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="py-4 space-y-4">
+            <div>
+              <Label className="text-sm font-medium">Deposit Amount ($)</Label>
+              <Input
+                type="number"
+                min="1"
+                step="0.01"
+                placeholder="Enter deposit amount..."
+                value={depositAmount}
+                onChange={(e) => setDepositAmount(e.target.value)}
+                className="mt-2"
+              />
+            </div>
+            <div className="text-xs text-muted-foreground">
+              Customer will receive an SMS with a secure payment link for this amount.
+              <br />Phone: {depositDialogBooking?.customer?.phone || 'N/A'}
+            </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => { setDepositDialogBooking(null); setDepositAmount(''); }}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={sendingDepositRequest || !depositAmount || parseFloat(depositAmount) <= 0}
+              onClick={handleSendDepositRequest}
+              className="bg-primary hover:bg-primary/90"
+            >
+              {sendingDepositRequest ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  Sending...
+                </>
+              ) : (
+                `Send $${depositAmount ? parseFloat(depositAmount).toFixed(2) : '0.00'} Deposit Link`
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
     </AdminLayout>
   );

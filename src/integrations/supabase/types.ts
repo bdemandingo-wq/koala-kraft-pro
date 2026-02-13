@@ -1724,6 +1724,69 @@ export type Database = {
           },
         ]
       }
+      deposit_requests: {
+        Row: {
+          amount: number
+          booking_id: string
+          created_at: string
+          customer_name: string
+          customer_phone: string | null
+          id: string
+          organization_id: string
+          paid_at: string | null
+          payment_intent_id: string | null
+          sms_sent_at: string | null
+          status: string
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          booking_id: string
+          created_at?: string
+          customer_name: string
+          customer_phone?: string | null
+          id?: string
+          organization_id: string
+          paid_at?: string | null
+          payment_intent_id?: string | null
+          sms_sent_at?: string | null
+          status?: string
+          token?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          booking_id?: string
+          created_at?: string
+          customer_name?: string
+          customer_phone?: string | null
+          id?: string
+          organization_id?: string
+          paid_at?: string | null
+          payment_intent_id?: string | null
+          sms_sent_at?: string | null
+          status?: string
+          token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deposit_requests_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deposit_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       discounts: {
         Row: {
           code: string
