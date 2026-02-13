@@ -155,3 +155,15 @@ verify_jwt = false
 
 [functions.confirm-tip-payment]
 verify_jwt = false
+
+[functions.send-deposit-request]
+verify_jwt = false
+
+[functions.get-deposit-details]
+verify_jwt = false
+
+[functions.process-deposit]
+verify_jwt = false
+
+[functions.confirm-deposit-payment]
+verify_jwt = false
