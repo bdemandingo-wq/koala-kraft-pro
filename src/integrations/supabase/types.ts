@@ -754,6 +754,7 @@ export type Database = {
         Row: {
           accent_color: string | null
           allow_online_booking: boolean | null
+          app_url: string | null
           booking_buffer_minutes: number | null
           cancellation_policy: string | null
           cancellation_window_hours: number | null
@@ -790,6 +791,7 @@ export type Database = {
         Insert: {
           accent_color?: string | null
           allow_online_booking?: boolean | null
+          app_url?: string | null
           booking_buffer_minutes?: number | null
           cancellation_policy?: string | null
           cancellation_window_hours?: number | null
@@ -826,6 +828,7 @@ export type Database = {
         Update: {
           accent_color?: string | null
           allow_online_booking?: boolean | null
+          app_url?: string | null
           booking_buffer_minutes?: number | null
           cancellation_policy?: string | null
           cancellation_window_hours?: number | null

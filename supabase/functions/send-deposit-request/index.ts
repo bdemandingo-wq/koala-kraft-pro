@@ -21,7 +21,6 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    const appUrl = (Deno.env.get("PROJECT_URL") || req.headers.get("origin") || "https://jointidywise.lovable.app").replace(/\/+$/, '');
 
     if (!supabaseUrl || !supabaseServiceKey) {
       return new Response(
@@ -93,14 +92,15 @@ const handler = async (req: Request): Promise<Response> => {
     // Build deposit link
     const fullDepositLink = `${appUrl}/deposit/${deposit.token}`;
 
-    // Get business settings for company name
+    // Get business settings for company name and org-specific app URL
     const { data: businessSettings } = await supabase
       .from('business_settings')
-      .select('company_name')
+      .select('company_name, app_url')
       .eq('organization_id', organizationId)
       .maybeSingle();
 
     const companyName = businessSettings?.company_name || 'Your cleaning service';
+    const appUrl = (businessSettings?.app_url || Deno.env.get("PROJECT_URL") || req.headers.get("origin") || "https://jointidywise.lovable.app").replace(/\/+$/, '');
 
     // Shorten the deposit link
     const shortCode = Math.random().toString(36).substring(2, 8).toUpperCase();

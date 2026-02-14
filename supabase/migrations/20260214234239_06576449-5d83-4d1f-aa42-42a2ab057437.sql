@@ -1,0 +1,1 @@
+ALTER TABLE public.business_settings ADD COLUMN app_url TEXT DEFAULT NULL;
