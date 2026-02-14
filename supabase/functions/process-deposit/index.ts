@@ -21,7 +21,6 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    const appUrl = (Deno.env.get("PROJECT_URL") || req.headers.get("origin") || "https://jointidywise.lovable.app").replace(/\/+$/, '');
 
     if (!supabaseUrl || !supabaseServiceKey) {
       return new Response(
@@ -54,6 +53,15 @@ const handler = async (req: Request): Promise<Response> => {
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // Get org-specific app URL
+    const { data: businessSettings } = await supabase
+      .from('business_settings')
+      .select('app_url')
+      .eq('organization_id', deposit.organization_id)
+      .maybeSingle();
+
+    const appUrl = (businessSettings?.app_url || Deno.env.get("PROJECT_URL") || req.headers.get("origin") || "https://jointidywise.lovable.app").replace(/\/+$/, '');
 
     // Get org Stripe client
     const stripeResult = await getOrgStripeClient(deposit.organization_id);
