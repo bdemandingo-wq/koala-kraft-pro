@@ -21,7 +21,7 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    const appUrl = (Deno.env.get("PROJECT_URL") || req.headers.get("origin") || "").replace(/\/+$/, '');
+    const appUrl = (Deno.env.get("PROJECT_URL") || req.headers.get("origin") || "https://jointidywise.lovable.app").replace(/\/+$/, '');
 
     if (!supabaseUrl || !supabaseServiceKey) {
       return new Response(
