@@ -50,6 +50,7 @@ interface BookingFormState {
   bedrooms: string;
   bathrooms: string;
   frequency: string;
+  customFrequencyDays: number | null;
   selectedExtras: string[];
   
   // New pricing fields
@@ -120,6 +121,7 @@ interface BookingFormContextType extends BookingFormState {
   setBedrooms: (bedrooms: string) => void;
   setBathrooms: (bathrooms: string) => void;
   setFrequency: (frequency: string) => void;
+  setCustomFrequencyDays: (days: number | null) => void;
   toggleExtra: (extraId: string) => void;
   setPricingMode: (mode: 'sqft' | 'bedroom') => void;
   setHomeCondition: (condition: number) => void;
@@ -198,6 +200,7 @@ export function BookingFormProvider({
   const [bedrooms, setBedrooms] = useState('1');
   const [bathrooms, setBathrooms] = useState('1');
   const [frequency, setFrequency] = useState('one_time');
+  const [customFrequencyDays, setCustomFrequencyDays] = useState<number | null>(null);
   const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
   
   // New pricing fields
@@ -392,6 +395,7 @@ export function BookingFormProvider({
     setState('');
     setZipCode('');
     setFrequency('one_time');
+    setCustomFrequencyDays(null);
     setBedrooms('1');
     setBathrooms('1');
     setSquareFootage('');
@@ -434,6 +438,7 @@ export function BookingFormProvider({
     setState(booking.state || '');
     setZipCode(booking.zip_code || '');
     setFrequency(booking.frequency || 'one_time');
+    setCustomFrequencyDays((booking as any).custom_frequency_days || null);
     setBedrooms(booking.bedrooms || '1');
     setBathrooms(booking.bathrooms || '1');
     setSquareFootage(booking.square_footage || '');
@@ -517,6 +522,7 @@ export function BookingFormProvider({
       bedrooms,
       bathrooms,
       frequency,
+      customFrequencyDays,
       selectedExtras,
       pricingMode,
       homeCondition,
@@ -571,6 +577,7 @@ export function BookingFormProvider({
       setBedrooms,
       setBathrooms,
       setFrequency,
+      setCustomFrequencyDays,
       toggleExtra,
       setPricingMode,
       setHomeCondition,

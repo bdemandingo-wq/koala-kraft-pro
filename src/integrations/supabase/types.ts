@@ -508,6 +508,7 @@ export type Database = {
           cleaner_wage: number | null
           cleaner_wage_type: string | null
           created_at: string
+          custom_frequency_days: number | null
           customer_id: string | null
           deposit_paid: number | null
           discount_amount: number | null
@@ -551,6 +552,7 @@ export type Database = {
           cleaner_wage?: number | null
           cleaner_wage_type?: string | null
           created_at?: string
+          custom_frequency_days?: number | null
           customer_id?: string | null
           deposit_paid?: number | null
           discount_amount?: number | null
@@ -594,6 +596,7 @@ export type Database = {
           cleaner_wage?: number | null
           cleaner_wage_type?: string | null
           created_at?: string
+          custom_frequency_days?: number | null
           customer_id?: string | null
           deposit_paid?: number | null
           discount_amount?: number | null
@@ -1524,6 +1527,44 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "client_tier_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_frequencies: {
+        Row: {
+          created_at: string
+          id: string
+          interval_days: number
+          is_active: boolean
+          name: string
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          interval_days: number
+          is_active?: boolean
+          name: string
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          interval_days?: number
+          is_active?: boolean
+          name?: string
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_frequencies_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"

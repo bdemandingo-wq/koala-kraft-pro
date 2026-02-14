@@ -1,9 +1,10 @@
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Settings2, AlertTriangle } from 'lucide-react';
+import { Plus, Settings2, AlertTriangle, CalendarClock } from 'lucide-react';
 import { ServicePricingEditor } from '@/components/admin/ServicePricingEditor';
 import { CustomServicesManager } from '@/components/admin/CustomServicesManager';
+import { CustomFrequenciesManager } from '@/components/admin/CustomFrequenciesManager';
 
 import { ExtrasPricingManager } from '@/components/admin/ExtrasPricingManager';
 
@@ -24,6 +25,10 @@ export default function ServicesPage() {
             Service Pricing
           </TabsTrigger>
           <TabsTrigger value="extras">Add-On Extras</TabsTrigger>
+          <TabsTrigger value="frequencies" className="flex items-center gap-2">
+            <CalendarClock className="w-4 h-4" />
+            Frequencies
+          </TabsTrigger>
         </TabsList>
 
         {/* Custom Services Management */}
@@ -58,6 +63,10 @@ export default function ServicesPage() {
               <ExtrasPricingManager />
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="frequencies" className="space-y-6">
+          <CustomFrequenciesManager />
         </TabsContent>
       </Tabs>
     </AdminLayout>

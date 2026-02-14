@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -47,6 +47,8 @@ export function ServiceStep() {
     setBathrooms,
     frequency,
     setFrequency,
+    customFrequencyDays,
+    setCustomFrequencyDays,
     selectedExtras,
     toggleExtra,
     extrasTotal,
@@ -69,6 +71,23 @@ export function ServiceStep() {
   // Use service-specific pricing
   const { getServicePricing, loading: pricingLoading } = useServicePricing();
   const { settings: orgSettings } = useOrganizationSettings();
+  const [showCustomInput, setShowCustomInput] = useState(false);
+
+  // Fetch custom frequencies for this organization
+  const { data: customFrequencies = [] } = useQuery({
+    queryKey: ['custom-frequencies', organization?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('custom_frequencies')
+        .select('*')
+        .eq('organization_id', organization?.id)
+        .eq('is_active', true)
+        .order('interval_days', { ascending: true });
+      if (error) throw error;
+      return data as { id: string; name: string; interval_days: number }[];
+    },
+    enabled: !!organization?.id,
+  });
   
   // Fetch active checklist templates
   const { data: checklistTemplates = [] } = useQuery({
@@ -343,9 +362,27 @@ export function ServiceStep() {
           )}
 
           {showFrequency && (
-            <div>
+            <div className="space-y-2">
               <Label className="text-sm font-medium">Frequency</Label>
-              <Select value={frequency} onValueChange={setFrequency}>
+              <Select 
+                value={showCustomInput ? '__custom__' : frequency} 
+                onValueChange={(val) => {
+                  if (val === '__custom__') {
+                    setShowCustomInput(true);
+                    setFrequency('custom');
+                  } else if (val.startsWith('custom_')) {
+                    // Custom preset from DB
+                    const days = parseInt(val.replace('custom_', ''));
+                    setFrequency('custom');
+                    setCustomFrequencyDays(days);
+                    setShowCustomInput(false);
+                  } else {
+                    setFrequency(val);
+                    setCustomFrequencyDays(null);
+                    setShowCustomInput(false);
+                  }
+                }}
+              >
                 <SelectTrigger className="mt-2 h-11 bg-secondary/30 border-border/50">
                   <SelectValue />
                 </SelectTrigger>
@@ -355,8 +392,39 @@ export function ServiceStep() {
                       {opt.label} {opt.discount > 0 && `(${opt.discount * 100}% off)`}
                     </SelectItem>
                   ))}
+                  {customFrequencies.length > 0 && (
+                    <>
+                      <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-t mt-1 pt-2">
+                        Custom Presets
+                      </div>
+                      {customFrequencies.map((cf) => (
+                        <SelectItem key={cf.id} value={`custom_${cf.interval_days}`}>
+                          {cf.name} (Every {cf.interval_days} day{cf.interval_days !== 1 ? 's' : ''})
+                        </SelectItem>
+                      ))}
+                    </>
+                  )}
+                  <div className="border-t mt-1 pt-1">
+                    <SelectItem value="__custom__">
+                      Custom interval...
+                    </SelectItem>
+                  </div>
                 </SelectContent>
               </Select>
+              {showCustomInput && (
+                <div className="flex items-center gap-2 mt-2">
+                  <Label className="text-sm whitespace-nowrap">Every</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    placeholder="e.g. 4"
+                    value={customFrequencyDays ?? ''}
+                    onChange={(e) => setCustomFrequencyDays(e.target.value ? parseInt(e.target.value) : null)}
+                    className="w-20 h-9"
+                  />
+                  <Label className="text-sm whitespace-nowrap">days</Label>
+                </div>
+              )}
             </div>
           )}
         </CardContent>

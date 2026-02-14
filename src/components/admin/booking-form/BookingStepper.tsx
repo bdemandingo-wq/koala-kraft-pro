@@ -247,6 +247,7 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
     bedrooms,
     bathrooms,
     frequency,
+    customFrequencyDays,
     selectedExtras,
     selectedDate,
     selectedTime,
@@ -467,6 +468,7 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
       state: state || null,
       zip_code: zipCode || null,
       frequency: frequency,
+      custom_frequency_days: customFrequencyDays,
       bedrooms: bedrooms,
       bathrooms: bathrooms,
       square_footage: squareFootage || null,
@@ -487,7 +489,10 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
     
     for (let i = 1; i <= numBookings; i++) {
       let nextDate: Date;
-      if (frequency === 'weekly') {
+      if (frequency === 'custom' && customFrequencyDays) {
+        nextDate = new Date(baseDate);
+        nextDate.setDate(nextDate.getDate() + customFrequencyDays * i);
+      } else if (frequency === 'weekly') {
         nextDate = addWeeks(baseDate, i);
       } else if (frequency === 'biweekly') {
         nextDate = addWeeks(baseDate, i * 2);
@@ -816,7 +821,10 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
 
         if (!isDraft && frequency !== 'one_time') {
           await createRecurringBookings(finalBookingData);
-          toast.success(`Booking created with ${frequency} recurring schedule`);
+          const freqLabel = frequency === 'custom' && customFrequencyDays 
+            ? `every ${customFrequencyDays} days` 
+            : frequency;
+          toast.success(`Booking created with ${freqLabel} recurring schedule`);
         } else {
           toast.success(isDraft ? 'Draft quote saved' : 'Booking created successfully');
         }
@@ -1143,6 +1151,8 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
                 {frequency === 'weekly' && 'Weekly Recurring'}
                 {frequency === 'biweekly' && 'Bi-Weekly Recurring'}
                 {frequency === 'monthly' && 'Monthly Recurring'}
+                {frequency === 'triweekly' && 'Tri-Weekly Recurring'}
+                {frequency === 'custom' && customFrequencyDays && `Every ${customFrequencyDays} Day${customFrequencyDays !== 1 ? 's' : ''} Recurring`}
               </Badge>
             )}
           </div>
