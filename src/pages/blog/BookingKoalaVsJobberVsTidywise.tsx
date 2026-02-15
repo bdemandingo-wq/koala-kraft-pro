@@ -33,6 +33,7 @@ export default function BookingKoalaVsJobberVsTidywise() {
         title="Booking Koala vs Jobber vs TIDYWISE (2026) | Best Cleaning Business Software Comparison"
         description="Detailed comparison of Booking Koala vs Jobber vs TIDYWISE. Find the best maid service software, house cleaning CRM, and janitorial scheduling app for your business."
         canonicalPath="/blog/booking-koala-vs-jobber-vs-tidywise"
+        ogImage="/images/tidywise-og.png"
       />
 
       {/* Navigation */}

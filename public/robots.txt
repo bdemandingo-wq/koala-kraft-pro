@@ -3,11 +3,9 @@
 
 User-agent: Googlebot
 Allow: /
-Crawl-delay: 1
 
 User-agent: Bingbot
 Allow: /
-Crawl-delay: 1
 
 User-agent: Twitterbot
 Allow: /
@@ -20,22 +18,29 @@ Allow: /
 
 User-agent: *
 Allow: /
-
-# Block admin, staff, and private routes from indexing
 Disallow: /dashboard/
 Disallow: /admin/
 Disallow: /staff/
 Disallow: /onboarding
 Disallow: /book/
+Disallow: /card-saved
+Disallow: /tip/
+Disallow: /deposit/
+Disallow: /c/
+Disallow: /review/
+Disallow: /portal/dashboard
+Disallow: /portal/request
 
 # Allow public marketing pages
 Allow: /
-Allow: /auth
+Allow: /login
+Allow: /signup
 Allow: /blog
 Allow: /blog/*
 Allow: /compare/*
 Allow: /features/*
 Allow: /privacy-policy
+Allow: /portal
 
 # Sitemap
 Sitemap: https://www.jointidywise.com/sitemap.xml

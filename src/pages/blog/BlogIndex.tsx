@@ -144,6 +144,7 @@ export default function BlogIndex() {
         title="Cleaning Business Resources & Guides | TIDYWISE Blog"
         description="Expert guides on starting and growing a cleaning business. Learn about automated payroll software for maid services, inventory management, scheduling tips, and more."
         canonicalPath="/blog"
+        ogImage="/images/tidywise-og.png"
       />
 
       {/* Navigation */}
