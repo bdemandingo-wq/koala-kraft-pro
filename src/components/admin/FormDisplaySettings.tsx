@@ -196,14 +196,18 @@ export function FormDisplaySettings() {
               const placeholder = localSettings.booking_form_theme === 'dark' ? opt.defaultDark : opt.defaultLight;
               return (
                 <div key={opt.key} className="flex items-center gap-3 p-3 rounded-lg border bg-secondary/20">
-                  <div className="relative shrink-0">
+                  <label className="relative shrink-0 cursor-pointer">
+                    <div
+                      className="w-10 h-10 rounded-lg border border-border"
+                      style={{ backgroundColor: currentValue || placeholder }}
+                    />
                     <input
                       type="color"
                       value={currentValue || placeholder}
                       onChange={(e) => setLocalSettings(prev => ({ ...prev, [opt.key]: e.target.value }))}
-                      className="w-10 h-10 rounded-lg border border-border cursor-pointer bg-transparent [&::-webkit-color-swatch-wrapper]:p-1 [&::-webkit-color-swatch]:rounded"
+                      className="sr-only"
                     />
-                  </div>
+                  </label>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium">{opt.label}</p>
                     <p className="text-xs text-muted-foreground">{opt.description}</p>
