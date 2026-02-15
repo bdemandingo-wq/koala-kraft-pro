@@ -103,7 +103,7 @@ serve(async (req: Request) => {
         .maybeSingle(),
       supabase
         .from("organization_pricing_settings")
-        .select("booking_form_theme")
+        .select("booking_form_theme, show_sqft_on_booking, show_bed_bath_on_booking, show_addons_on_booking, show_frequency_discount, show_pet_options, show_home_condition")
         .eq("organization_id", org.id)
         .maybeSingle(),
     ]);
@@ -128,6 +128,8 @@ serve(async (req: Request) => {
       `[public-booking-data] Loaded org=${org.id}, services=${servicesRes.data?.length ?? 0}, pricingRows=${pricingRes.data?.length ?? 0}`,
     );
 
+    const displaySettings = pricingSettingsRes.data || {};
+
     return new Response(
       JSON.stringify({
         success: true,
@@ -138,7 +140,15 @@ serve(async (req: Request) => {
           primary_color: brandRes.data.primary_color || '#3b82f6',
           accent_color: brandRes.data.accent_color || '#14b8a6',
         } : null,
-        bookingFormTheme: pricingSettingsRes.data?.booking_form_theme || 'dark',
+        bookingFormTheme: displaySettings.booking_form_theme || 'dark',
+        displaySettings: {
+          show_sqft_on_booking: displaySettings.show_sqft_on_booking ?? true,
+          show_bed_bath_on_booking: displaySettings.show_bed_bath_on_booking ?? true,
+          show_addons_on_booking: displaySettings.show_addons_on_booking ?? true,
+          show_frequency_discount: displaySettings.show_frequency_discount ?? true,
+          show_pet_options: displaySettings.show_pet_options ?? true,
+          show_home_condition: displaySettings.show_home_condition ?? true,
+        },
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
