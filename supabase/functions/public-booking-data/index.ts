@@ -103,7 +103,7 @@ serve(async (req: Request) => {
         .maybeSingle(),
       supabase
         .from("organization_pricing_settings")
-        .select("booking_form_theme, show_sqft_on_booking, show_bed_bath_on_booking, show_addons_on_booking, show_frequency_discount, show_pet_options, show_home_condition, form_bg_color, form_card_color, form_text_color, form_button_color, form_button_text_color")
+        .select("booking_form_theme, show_sqft_on_booking, show_bed_bath_on_booking, show_addons_on_booking, show_frequency_discount, show_pet_options, show_home_condition, form_bg_color, form_card_color, form_text_color, form_button_color, form_button_text_color, form_accent_color")
         .eq("organization_id", org.id)
         .maybeSingle(),
     ]);
@@ -147,6 +147,7 @@ serve(async (req: Request) => {
           text: displaySettings.form_text_color || null,
           button: displaySettings.form_button_color || null,
           buttonText: displaySettings.form_button_text_color || null,
+          accent: displaySettings.form_accent_color || null,
         },
         displaySettings: {
           show_sqft_on_booking: displaySettings.show_sqft_on_booking ?? true,

@@ -96,11 +96,14 @@ export default function PublicBookingPage() {
 
   // Apply org branding colors once when loaded (no re-renders)
   useEffect(() => {
-    if (primaryColor || accentColor) {
-      applyPublicBranding(primaryColor, accentColor);
+    // If a custom accent color is set via form colors, use it as the primary branding color
+    const effectivePrimary = formColors.accent || primaryColor;
+    const effectiveAccent = formColors.accent || accentColor;
+    if (effectivePrimary || effectiveAccent) {
+      applyPublicBranding(effectivePrimary, effectiveAccent);
     }
     return () => clearPublicBranding();
-  }, [primaryColor, accentColor]);
+  }, [primaryColor, accentColor, formColors.accent]);
 
   // Track abandoned bookings - save progress when user has contact info
   const sessionTokenRef = useState(() => crypto.randomUUID())[0];
@@ -350,6 +353,9 @@ export default function PublicBookingPage() {
   }
   if (formColors.buttonText) {
     (baseThemeStyles as any)['--form-button-text'] = formColors.buttonText;
+  }
+  if (formColors.accent) {
+    (baseThemeStyles as any)['--form-accent'] = formColors.accent;
   }
 
   return (

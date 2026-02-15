@@ -3056,6 +3056,7 @@ export type Database = {
           booking_form_theme: string
           created_at: string
           demo_mode_enabled: boolean | null
+          form_accent_color: string | null
           form_bg_color: string | null
           form_button_color: string | null
           form_button_text_color: string | null
@@ -3077,6 +3078,7 @@ export type Database = {
           booking_form_theme?: string
           created_at?: string
           demo_mode_enabled?: boolean | null
+          form_accent_color?: string | null
           form_bg_color?: string | null
           form_button_color?: string | null
           form_button_text_color?: string | null
@@ -3098,6 +3100,7 @@ export type Database = {
           booking_form_theme?: string
           created_at?: string
           demo_mode_enabled?: boolean | null
+          form_accent_color?: string | null
           form_bg_color?: string | null
           form_button_color?: string | null
           form_button_text_color?: string | null
