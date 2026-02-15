@@ -114,6 +114,7 @@ interface DraggableBookingProps {
   index: number;
   onClick: () => void;
   staffList: { id: string; name: string; calendar_color?: string | null }[];
+  teamStaffIds?: string[];
 }
 
 interface DroppableDayProps {
@@ -147,11 +148,16 @@ const formatCustomerName = (customer: { first_name: string; last_name: string } 
   return `${firstName} ${lastInitial}`.trim();
 };
 
-function DraggableBooking({ booking, index, onClick, staffList }: DraggableBookingProps) {
+function DraggableBooking({ booking, index, onClick, staffList, teamStaffIds = [] }: DraggableBookingProps) {
   const color = getStaffColor(booking.staff_id, staffList);
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: booking.id,
   });
+
+  // Get team member colors (excluding primary)
+  const teamColors = teamStaffIds
+    .filter(id => id !== booking.staff_id)
+    .map(id => getStaffColor(id, staffList));
 
   return (
     <div
@@ -174,6 +180,13 @@ function DraggableBooking({ booking, index, onClick, staffList }: DraggableBooki
       <div className="flex items-center gap-1">
         <GripVertical className="w-3 h-3 opacity-0 group-hover:opacity-50 shrink-0" />
         <span className="truncate font-medium">{formatCustomerName(booking.customer)}</span>
+        {teamColors.length > 0 && (
+          <div className="flex items-center gap-0.5 ml-auto shrink-0">
+            {teamColors.map((tc, i) => (
+              <div key={i} className="w-2 h-2 rounded-full" style={{ backgroundColor: tc }} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -210,6 +223,32 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
     },
     enabled: !!selectedBooking?.id,
   });
+
+  // Fetch all team assignments for calendar display
+  const { data: allTeamAssignments = [] } = useQuery({
+    queryKey: ['all-team-assignments', organization?.id],
+    queryFn: async () => {
+      if (!organization?.id) return [];
+      const { data, error } = await supabase
+        .from('booking_team_assignments')
+        .select('booking_id, staff_id')
+        .eq('organization_id', organization.id);
+      if (error) return [];
+      return data || [];
+    },
+    enabled: !!organization?.id,
+  });
+
+  // Build a map of booking_id -> staff_ids for team assignments
+  const teamAssignmentMap = useMemo(() => {
+    const map = new Map<string, string[]>();
+    for (const a of allTeamAssignments) {
+      const existing = map.get(a.booking_id) || [];
+      existing.push(a.staff_id);
+      map.set(a.booking_id, existing);
+    }
+    return map;
+  }, [allTeamAssignments]);
   const updateBooking = useUpdateBooking();
 
   // Fetch staff for color consistency
@@ -690,6 +729,7 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
                               index={0}
                               onClick={() => setSelectedBooking(dayBookings[0])}
                               staffList={staffList}
+                              teamStaffIds={teamAssignmentMap.get(dayBookings[0].id)}
                             />
                           ) : dayBookings.length >= 2 ? (
                             <button
@@ -708,6 +748,7 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
                               index={bIndex}
                               onClick={() => setSelectedBooking(booking)}
                               staffList={staffList}
+                              teamStaffIds={teamAssignmentMap.get(booking.id)}
                             />
                           ))
                         )}
