@@ -3056,6 +3056,11 @@ export type Database = {
           booking_form_theme: string
           created_at: string
           demo_mode_enabled: boolean | null
+          form_bg_color: string | null
+          form_button_color: string | null
+          form_button_text_color: string | null
+          form_card_color: string | null
+          form_text_color: string | null
           id: string
           loyalty_program_enabled: boolean
           organization_id: string
@@ -3072,6 +3077,11 @@ export type Database = {
           booking_form_theme?: string
           created_at?: string
           demo_mode_enabled?: boolean | null
+          form_bg_color?: string | null
+          form_button_color?: string | null
+          form_button_text_color?: string | null
+          form_card_color?: string | null
+          form_text_color?: string | null
           id?: string
           loyalty_program_enabled?: boolean
           organization_id: string
@@ -3088,6 +3098,11 @@ export type Database = {
           booking_form_theme?: string
           created_at?: string
           demo_mode_enabled?: boolean | null
+          form_bg_color?: string | null
+          form_button_color?: string | null
+          form_button_text_color?: string | null
+          form_card_color?: string | null
+          form_text_color?: string | null
           id?: string
           loyalty_program_enabled?: boolean
           organization_id?: string

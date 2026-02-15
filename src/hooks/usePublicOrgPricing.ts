@@ -49,6 +49,14 @@ export interface HomeConditionOption {
   price: number;
 }
 
+export interface FormColors {
+  bg: string | null;
+  card: string | null;
+  text: string | null;
+  button: string | null;
+  buttonText: string | null;
+}
+
 export interface PublicOrgData {
   organizationId: string | null;
   organizationName: string;
@@ -56,6 +64,7 @@ export interface PublicOrgData {
   primaryColor: string | null;
   accentColor: string | null;
   bookingFormTheme: 'light' | 'dark';
+  formColors: FormColors;
   services: PublicService[];
   extras: PublicExtra[];
   displaySettings: PublicDisplaySettings;
@@ -74,6 +83,7 @@ type PublicBookingDataResponse = {
   servicePricing?: any[];
   branding?: { primary_color: string; accent_color: string } | null;
   bookingFormTheme?: string;
+  formColors?: FormColors;
   displaySettings?: PublicDisplaySettings;
 };
 
@@ -98,6 +108,7 @@ export function usePublicOrgPricing(orgSlug: string | undefined): PublicOrgData 
   const [primaryColor, setPrimaryColor] = useState<string | null>(null);
   const [accentColor, setAccentColor] = useState<string | null>(null);
   const [bookingFormTheme, setBookingFormTheme] = useState<'light' | 'dark'>('dark');
+  const [formColors, setFormColors] = useState<FormColors>({ bg: null, card: null, text: null, button: null, buttonText: null });
   const [services, setServices] = useState<PublicService[]>([]);
   const [extras, setExtras] = useState<PublicExtra[]>([]);
   const [displaySettings, setDisplaySettings] = useState<PublicDisplaySettings>({
@@ -150,6 +161,7 @@ export function usePublicOrgPricing(orgSlug: string | undefined): PublicOrgData 
           setAccentColor(data.branding.accent_color);
         }
         setBookingFormTheme((data.bookingFormTheme === 'light' ? 'light' : 'dark'));
+        if (data.formColors) setFormColors(data.formColors);
         if (data.displaySettings) setDisplaySettings(data.displaySettings);
 
         // Extract pricing details from first service pricing entry
@@ -238,6 +250,7 @@ export function usePublicOrgPricing(orgSlug: string | undefined): PublicOrgData 
     primaryColor,
     accentColor,
     bookingFormTheme,
+    formColors,
     services,
     extras,
     displaySettings,
