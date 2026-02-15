@@ -53,6 +53,11 @@ export default function PublicBookingPage() {
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectedSqFtIndex, setSelectedSqFtIndex] = useState<number | null>(null);
   const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
+  const [selectedBedrooms, setSelectedBedrooms] = useState<string | null>(null);
+  const [selectedBathrooms, setSelectedBathrooms] = useState<string | null>(null);
+  const [selectedPetOption, setSelectedPetOption] = useState<string | null>(null);
+  const [selectedHomeCondition, setSelectedHomeCondition] = useState<string | null>(null);
+  const [selectedFrequency, setSelectedFrequency] = useState<string>('one-time');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -79,6 +84,10 @@ export default function PublicBookingPage() {
     primaryColor,
     accentColor,
     bookingFormTheme,
+    displaySettings,
+    bedroomPricing,
+    petOptions,
+    homeConditionOptions,
     loading: pricingLoading 
   } = usePublicOrgPricing(orgSlug);
 
@@ -143,15 +152,46 @@ export default function PublicBookingPage() {
 
   const calculateTotal = () => {
     let total = 0;
-    if (service && selectedSqFtIndex !== null) {
+    
+    // Bedroom-based pricing takes priority if bed/bath selected
+    if (selectedBedrooms && selectedBathrooms && bedroomPricing.length > 0) {
+      const match = bedroomPricing.find(
+        bp => bp.bedrooms === Number(selectedBedrooms) && bp.bathrooms === Number(selectedBathrooms)
+      );
+      if (match) total = match.basePrice;
+    } else if (service && selectedSqFtIndex !== null) {
       total = service.prices[selectedSqFtIndex] || service.minimumPrice;
+    } else if (service) {
+      total = service.minimumPrice;
     }
+
+    // Add extras
     const extrasTotal = selectedExtras.reduce((sum, extraId) => {
       const extra = extras.find(e => e.id === extraId);
       return sum + (extra?.price || 0);
     }, 0);
     total += extrasTotal;
-    return total;
+
+    // Add pet fee
+    if (selectedPetOption && petOptions.length > 0) {
+      const pet = petOptions.find(p => p.id === selectedPetOption);
+      if (pet) total += pet.price;
+    }
+
+    // Add home condition fee
+    if (selectedHomeCondition && homeConditionOptions.length > 0) {
+      const condition = homeConditionOptions.find(c => String(c.id) === selectedHomeCondition);
+      if (condition) total += condition.price;
+    }
+
+    // Apply frequency discount
+    if (selectedFrequency !== 'one-time') {
+      const discounts: Record<string, number> = { weekly: 0.20, 'bi-weekly': 0.15, monthly: 0.10 };
+      const discount = discounts[selectedFrequency] || 0;
+      total = total * (1 - discount);
+    }
+
+    return Math.round(total);
   };
 
   const buildScheduledAt = () => {
@@ -195,7 +235,7 @@ export default function PublicBookingPage() {
             scheduled_at: scheduledAt,
             duration: service ? 120 : 120,
             total_amount: calculateTotal(),
-            frequency: 'one-time',
+            frequency: selectedFrequency,
             notes: customerInfo.notes || undefined,
             extras: selectedExtras.length > 0 ? { names: extraNames } : undefined,
             organization_id: organizationId || undefined,
@@ -242,7 +282,7 @@ export default function PublicBookingPage() {
 
   const canProceed = () => {
     switch (step) {
-      case 1: return selectedService !== null && selectedSqFtIndex !== null;
+      case 1: return selectedService !== null;
       case 2: return selectedDate !== undefined && selectedTime !== null;
       case 3: return customerInfo.name && customerInfo.email && customerInfo.phone && customerInfo.address;
       case 4: return cardSaved;
@@ -373,33 +413,82 @@ export default function PublicBookingPage() {
           {step === 1 && (
             <div className="animate-fade-in space-y-6">
               {/* Square Footage Selection */}
-              <div>
-                <h2 className="text-2xl font-bold mb-2">Home Size</h2>
-                <p className="text-muted-foreground mb-4">Select your home's square footage</p>
-                <Card>
-                  <CardContent className="p-5">
-                    <div className="flex items-center gap-3 mb-4">
-                      <Ruler className="w-5 h-5 text-primary" />
-                      <Label className="text-base">Square Footage</Label>
-                    </div>
-                    <Select 
-                      value={selectedSqFtIndex?.toString() ?? ''} 
-                      onValueChange={(val) => setSelectedSqFtIndex(parseInt(val))}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select your home size" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {squareFootageRanges.map((range, index) => (
-                          <SelectItem key={index} value={index.toString()}>
-                            {range.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </CardContent>
-                </Card>
-              </div>
+              {displaySettings.show_sqft_on_booking && (
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Home Size</h2>
+                  <p className="text-muted-foreground mb-4">Select your home's square footage</p>
+                  <Card>
+                    <CardContent className="p-5">
+                      <div className="flex items-center gap-3 mb-4">
+                        <Ruler className="w-5 h-5 text-primary" />
+                        <Label className="text-base">Square Footage</Label>
+                      </div>
+                      <Select 
+                        value={selectedSqFtIndex?.toString() ?? ''} 
+                        onValueChange={(val) => setSelectedSqFtIndex(parseInt(val))}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select your home size" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {squareFootageRanges.map((range, index) => (
+                            <SelectItem key={index} value={index.toString()}>
+                              {range.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+
+              {/* Bed & Bath Selection */}
+              {displaySettings.show_bed_bath_on_booking && bedroomPricing.length > 0 && (
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Bedrooms & Bathrooms</h2>
+                  <p className="text-muted-foreground mb-4">Select your home layout</p>
+                  <Card>
+                    <CardContent className="p-5 space-y-4">
+                      <div>
+                        <Label className="text-base mb-2 block">Bedrooms</Label>
+                        <div className="flex flex-wrap gap-2">
+                          {[...new Set(bedroomPricing.map(bp => bp.bedrooms))].sort((a, b) => a - b).map(bed => (
+                            <Button
+                              key={bed}
+                              type="button"
+                              variant={selectedBedrooms === String(bed) ? 'default' : 'outline'}
+                              onClick={() => setSelectedBedrooms(String(bed))}
+                              className="min-w-[60px]"
+                            >
+                              {bed}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-base mb-2 block">Bathrooms</Label>
+                        <div className="flex flex-wrap gap-2">
+                          {[...new Set(bedroomPricing
+                            .filter(bp => !selectedBedrooms || bp.bedrooms === Number(selectedBedrooms))
+                            .map(bp => bp.bathrooms)
+                          )].sort((a, b) => a - b).map(bath => (
+                            <Button
+                              key={bath}
+                              type="button"
+                              variant={selectedBathrooms === String(bath) ? 'default' : 'outline'}
+                              onClick={() => setSelectedBathrooms(String(bath))}
+                              className="min-w-[60px]"
+                            >
+                              {bath}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
 
               {/* Service Selection */}
               <div>
@@ -454,8 +543,8 @@ export default function PublicBookingPage() {
                 </div>
               </div>
 
-              {/* Extras - Only show if NOT Deep Clean */}
-              {service && !service.name.toLowerCase().includes('deep') && (
+              {/* Extras */}
+              {displaySettings.show_addons_on_booking && service && !service.name.toLowerCase().includes('deep') && (
                 <div>
                   <h2 className="text-2xl font-bold mb-2">Add Extras</h2>
                   <p className="text-muted-foreground mb-4">Optional add-on services</p>
@@ -482,6 +571,94 @@ export default function PublicBookingPage() {
                   </Card>
                 </div>
               )}
+
+              {/* Frequency Discount */}
+              {displaySettings.show_frequency_discount && (
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Service Frequency</h2>
+                  <p className="text-muted-foreground mb-4">Save with recurring service</p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {[
+                      { id: 'one-time', label: 'One-Time', discount: null },
+                      { id: 'weekly', label: 'Weekly', discount: '20% off' },
+                      { id: 'bi-weekly', label: 'Bi-Weekly', discount: '15% off' },
+                      { id: 'monthly', label: 'Monthly', discount: '10% off' },
+                    ].map((freq) => (
+                      <Card
+                        key={freq.id}
+                        className={cn(
+                          'cursor-pointer transition-all hover:shadow-md text-center',
+                          selectedFrequency === freq.id && 'ring-2 ring-primary'
+                        )}
+                        onClick={() => setSelectedFrequency(freq.id)}
+                      >
+                        <CardContent className="p-4">
+                          <p className="font-semibold">{freq.label}</p>
+                          {freq.discount && (
+                            <Badge variant="secondary" className="mt-1 text-success">
+                              {freq.discount}
+                            </Badge>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Pet Options */}
+              {displaySettings.show_pet_options && petOptions.length > 0 && (
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Pets</h2>
+                  <p className="text-muted-foreground mb-4">Do you have any pets?</p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {petOptions.map((pet) => (
+                      <Card
+                        key={pet.id}
+                        className={cn(
+                          'cursor-pointer transition-all hover:shadow-md text-center',
+                          selectedPetOption === pet.id && 'ring-2 ring-primary'
+                        )}
+                        onClick={() => setSelectedPetOption(pet.id)}
+                      >
+                        <CardContent className="p-4">
+                          <p className="font-semibold text-sm">{pet.label}</p>
+                          {pet.price > 0 && (
+                            <p className="text-primary font-semibold text-sm mt-1">+${pet.price}</p>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Home Condition */}
+              {displaySettings.show_home_condition && homeConditionOptions.length > 0 && (
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Home Condition</h2>
+                  <p className="text-muted-foreground mb-4">Rate your home's current condition</p>
+                  <div className="space-y-2">
+                    {homeConditionOptions.map((condition) => (
+                      <Card
+                        key={String(condition.id)}
+                        className={cn(
+                          'cursor-pointer transition-all hover:shadow-md',
+                          selectedHomeCondition === String(condition.id) && 'ring-2 ring-primary'
+                        )}
+                        onClick={() => setSelectedHomeCondition(String(condition.id))}
+                      >
+                        <CardContent className="p-4 flex items-center justify-between">
+                          <span className="font-medium text-sm">{condition.label}</span>
+                          {condition.price > 0 && (
+                            <span className="text-primary font-semibold text-sm">+${condition.price}</span>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
               
               {service && service.description && (
                 <div className="p-4 bg-primary/10 border border-primary/20 rounded-lg">
@@ -492,19 +669,26 @@ export default function PublicBookingPage() {
               )}
 
               {/* Price Summary */}
-              {selectedService && selectedSqFtIndex !== null && (
+              {selectedService && (
                 <Card className="bg-primary/5 border-primary/20">
                   <CardContent className="p-5">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm text-muted-foreground">Estimated Total</p>
                         <p className="text-3xl font-bold text-primary">${calculateTotal()}</p>
+                        {selectedFrequency !== 'one-time' && (
+                          <p className="text-xs text-success font-medium mt-1">
+                            {selectedFrequency} discount applied
+                          </p>
+                        )}
                       </div>
                       <div className="text-right">
                         <p className="font-medium">{service?.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {squareFootageRanges[selectedSqFtIndex].label}
-                        </p>
+                        {selectedSqFtIndex !== null && (
+                          <p className="text-sm text-muted-foreground">
+                            {squareFootageRanges[selectedSqFtIndex].label}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </CardContent>

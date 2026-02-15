@@ -22,6 +22,33 @@ export interface PublicExtra {
   note?: string;
 }
 
+export interface PublicDisplaySettings {
+  show_sqft_on_booking: boolean;
+  show_bed_bath_on_booking: boolean;
+  show_addons_on_booking: boolean;
+  show_frequency_discount: boolean;
+  show_pet_options: boolean;
+  show_home_condition: boolean;
+}
+
+export interface BedroomPricing {
+  bedrooms: number;
+  bathrooms: number;
+  basePrice: number;
+}
+
+export interface PetOption {
+  id: string;
+  label: string;
+  price: number;
+}
+
+export interface HomeConditionOption {
+  id: string | number;
+  label: string;
+  price: number;
+}
+
 export interface PublicOrgData {
   organizationId: string | null;
   organizationName: string;
@@ -31,6 +58,10 @@ export interface PublicOrgData {
   bookingFormTheme: 'light' | 'dark';
   services: PublicService[];
   extras: PublicExtra[];
+  displaySettings: PublicDisplaySettings;
+  bedroomPricing: BedroomPricing[];
+  petOptions: PetOption[];
+  homeConditionOptions: HomeConditionOption[];
   loading: boolean;
   error: string | null;
 }
@@ -43,6 +74,7 @@ type PublicBookingDataResponse = {
   servicePricing?: any[];
   branding?: { primary_color: string; accent_color: string } | null;
   bookingFormTheme?: string;
+  displaySettings?: PublicDisplaySettings;
 };
 
 function getDefaultPayload() {
@@ -68,6 +100,13 @@ export function usePublicOrgPricing(orgSlug: string | undefined): PublicOrgData 
   const [bookingFormTheme, setBookingFormTheme] = useState<'light' | 'dark'>('dark');
   const [services, setServices] = useState<PublicService[]>([]);
   const [extras, setExtras] = useState<PublicExtra[]>([]);
+  const [displaySettings, setDisplaySettings] = useState<PublicDisplaySettings>({
+    show_sqft_on_booking: true, show_bed_bath_on_booking: true, show_addons_on_booking: true,
+    show_frequency_discount: true, show_pet_options: true, show_home_condition: true,
+  });
+  const [bedroomPricing, setBedroomPricing] = useState<BedroomPricing[]>([]);
+  const [petOptions, setPetOptions] = useState<PetOption[]>([]);
+  const [homeConditionOptions, setHomeConditionOptions] = useState<HomeConditionOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -111,7 +150,15 @@ export function usePublicOrgPricing(orgSlug: string | undefined): PublicOrgData 
           setAccentColor(data.branding.accent_color);
         }
         setBookingFormTheme((data.bookingFormTheme === 'light' ? 'light' : 'dark'));
+        if (data.displaySettings) setDisplaySettings(data.displaySettings);
 
+        // Extract pricing details from first service pricing entry
+        const firstPricingEntry = (data.servicePricing || [])[0];
+        if (firstPricingEntry) {
+          if (Array.isArray(firstPricingEntry.bedroom_pricing)) setBedroomPricing(firstPricingEntry.bedroom_pricing);
+          if (Array.isArray(firstPricingEntry.pet_options)) setPetOptions(firstPricingEntry.pet_options);
+          if (Array.isArray(firstPricingEntry.home_condition_options)) setHomeConditionOptions(firstPricingEntry.home_condition_options);
+        }
         const pricingMap = new Map<string, any>();
         (data.servicePricing || []).forEach((p: any) => pricingMap.set(p.service_id, p));
 
@@ -193,6 +240,10 @@ export function usePublicOrgPricing(orgSlug: string | undefined): PublicOrgData 
     bookingFormTheme,
     services,
     extras,
+    displaySettings,
+    bedroomPricing,
+    petOptions,
+    homeConditionOptions,
     loading,
     error,
   };
