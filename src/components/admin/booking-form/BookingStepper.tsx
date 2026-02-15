@@ -845,7 +845,7 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
               scheduledAt: bookingData.scheduled_at,
               formattedDate: formattedDateStr,
               formattedTime: formattedTimeStr,
-              totalAmount,
+              totalAmount: totalAmount > 0 ? totalAmount : calculatedPrice,
               address,
               organizationId: organizationId ?? undefined,
             }
