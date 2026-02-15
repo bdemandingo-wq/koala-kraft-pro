@@ -24,6 +24,7 @@ import {
   Search,
   Edit,
   GripVertical,
+  Users,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -194,6 +195,21 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
   const { organization } = useOrganization();
 
   const { data: allBookings = [], isLoading } = useBookings();
+
+  // Fetch team assignments for the selected booking
+  const { data: teamMembers = [] } = useQuery({
+    queryKey: ['booking-team-assignments', selectedBooking?.id],
+    queryFn: async () => {
+      if (!selectedBooking?.id) return [];
+      const { data, error } = await supabase
+        .from('booking_team_assignments')
+        .select('staff_id, staff:staff(id, name)')
+        .eq('booking_id', selectedBooking.id);
+      if (error) return [];
+      return (data || []).map((a: any) => a.staff).filter(Boolean);
+    },
+    enabled: !!selectedBooking?.id,
+  });
   const updateBooking = useUpdateBooking();
 
   // Fetch staff for color consistency
@@ -803,6 +819,26 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
                     <div className="flex items-center gap-3 text-sm">
                       <MapPin className="w-4 h-4 text-muted-foreground" />
                       <p>{maskAddress(getFullAddress(selectedBooking))}</p>
+                    </div>
+                  )}
+
+                  {/* Staff / Team Assignments */}
+                  {(selectedBooking.staff || teamMembers.length > 0) && (
+                    <div className="flex items-start gap-3 text-sm">
+                      <Users className="w-4 h-4 text-muted-foreground mt-0.5" />
+                      <div>
+                        <p className="font-medium">Assigned Staff</p>
+                        {selectedBooking.staff && (
+                          <p className="text-muted-foreground">
+                            {maskName(selectedBooking.staff.name)}{teamMembers.length > 0 ? ' (Primary)' : ''}
+                          </p>
+                        )}
+                        {teamMembers.map((member: any) => (
+                          <p key={member.id} className="text-muted-foreground">
+                            {maskName(member.name)} (Team)
+                          </p>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
