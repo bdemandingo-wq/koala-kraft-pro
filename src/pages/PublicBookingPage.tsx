@@ -84,6 +84,7 @@ export default function PublicBookingPage() {
     primaryColor,
     accentColor,
     bookingFormTheme,
+    formColors,
     displaySettings,
     bedroomPricing,
     petOptions,
@@ -313,30 +314,48 @@ export default function PublicBookingPage() {
     );
   }
 
+  // Build custom style overrides from formColors
+  const customColorStyles: React.CSSProperties = {};
+  if (formColors.bg) customColorStyles.backgroundColor = formColors.bg;
+  if (formColors.text) customColorStyles.color = formColors.text;
+
+  const baseThemeStyles: React.CSSProperties = isLight ? {
+    '--background': '0 0% 100%',
+    '--foreground': '222 47% 11%',
+    '--card': '220 20% 97%',
+    '--card-foreground': '222 47% 11%',
+    '--popover': '0 0% 100%',
+    '--popover-foreground': '222 47% 11%',
+    '--primary': '221 83% 46%',
+    '--primary-foreground': '210 40% 98%',
+    '--secondary': '220 20% 93%',
+    '--secondary-foreground': '222 47% 11%',
+    '--muted': '220 14% 90%',
+    '--muted-foreground': '215 20% 40%',
+    '--accent': '220 16% 90%',
+    '--accent-foreground': '222 47% 11%',
+    '--border': '220 20% 82%',
+    '--input': '220 20% 82%',
+    '--ring': '221 83% 46%',
+    '--success': '142 76% 30%',
+    '--success-foreground': '0 0% 100%',
+  } as React.CSSProperties : {};
+
+  // Merge custom card/button colors as CSS custom properties
+  if (formColors.card) {
+    (baseThemeStyles as any)['--form-card-bg'] = formColors.card;
+  }
+  if (formColors.button) {
+    (baseThemeStyles as any)['--form-button-bg'] = formColors.button;
+  }
+  if (formColors.buttonText) {
+    (baseThemeStyles as any)['--form-button-text'] = formColors.buttonText;
+  }
+
   return (
     <div
       className={cn("min-h-screen", isLight ? "bg-white text-gray-900" : "bg-background")}
-      style={isLight ? {
-        '--background': '0 0% 100%',
-        '--foreground': '222 47% 11%',
-        '--card': '220 20% 97%',
-        '--card-foreground': '222 47% 11%',
-        '--popover': '0 0% 100%',
-        '--popover-foreground': '222 47% 11%',
-        '--primary': '221 83% 46%',
-        '--primary-foreground': '210 40% 98%',
-        '--secondary': '220 20% 93%',
-        '--secondary-foreground': '222 47% 11%',
-        '--muted': '220 14% 90%',
-        '--muted-foreground': '215 20% 40%',
-        '--accent': '220 16% 90%',
-        '--accent-foreground': '222 47% 11%',
-        '--border': '220 20% 82%',
-        '--input': '220 20% 82%',
-        '--ring': '221 83% 46%',
-        '--success': '142 76% 30%',
-        '--success-foreground': '0 0% 100%',
-      } as React.CSSProperties : undefined}
+      style={{ ...baseThemeStyles, ...customColorStyles }}
     >
       {/* Header */}
       <header className={cn(isLight ? "bg-secondary border-b border-border" : "bg-sidebar text-sidebar-foreground")}>
@@ -1030,7 +1049,16 @@ export default function PublicBookingPage() {
             )}
             {step === 1 && <div />}
             {step < 5 && (
-              <Button onClick={handleNext} disabled={!canProceed() || isSubmitting} className="gap-2 ml-auto">
+              <Button 
+                onClick={handleNext} 
+                disabled={!canProceed() || isSubmitting} 
+                className="gap-2 ml-auto"
+                style={formColors.button ? {
+                  backgroundColor: formColors.button,
+                  color: formColors.buttonText || '#ffffff',
+                  borderColor: formColors.button,
+                } : undefined}
+              >
                 {isSubmitting ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />

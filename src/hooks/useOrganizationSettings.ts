@@ -15,6 +15,11 @@ export interface OrganizationPricingSettings {
   demo_mode_enabled: boolean;
   loyalty_program_enabled: boolean;
   booking_form_theme: string;
+  form_bg_color: string | null;
+  form_card_color: string | null;
+  form_text_color: string | null;
+  form_button_color: string | null;
+  form_button_text_color: string | null;
 }
 
 const defaultSettings: Omit<OrganizationPricingSettings, 'organization_id'> = {
@@ -28,6 +33,11 @@ const defaultSettings: Omit<OrganizationPricingSettings, 'organization_id'> = {
   demo_mode_enabled: false,
   loyalty_program_enabled: true,
   booking_form_theme: 'dark',
+  form_bg_color: null,
+  form_card_color: null,
+  form_text_color: null,
+  form_button_color: null,
+  form_button_text_color: null,
 };
 
 export function useOrganizationSettings() {
@@ -61,6 +71,11 @@ export function useOrganizationSettings() {
           demo_mode_enabled: data.demo_mode_enabled ?? false,
           loyalty_program_enabled: (data as any).loyalty_program_enabled ?? true,
           booking_form_theme: (data as any).booking_form_theme ?? 'dark',
+          form_bg_color: (data as any).form_bg_color ?? null,
+          form_card_color: (data as any).form_card_color ?? null,
+          form_text_color: (data as any).form_text_color ?? null,
+          form_button_color: (data as any).form_button_color ?? null,
+          form_button_text_color: (data as any).form_button_text_color ?? null,
         });
       } else {
         // Create default settings
@@ -96,6 +111,11 @@ export function useOrganizationSettings() {
         demo_mode_enabled: updates.demo_mode_enabled ?? settings?.demo_mode_enabled ?? false,
         loyalty_program_enabled: updates.loyalty_program_enabled ?? settings?.loyalty_program_enabled ?? true,
         booking_form_theme: updates.booking_form_theme ?? settings?.booking_form_theme ?? 'dark',
+        form_bg_color: updates.form_bg_color !== undefined ? updates.form_bg_color : (settings?.form_bg_color ?? null),
+        form_card_color: updates.form_card_color !== undefined ? updates.form_card_color : (settings?.form_card_color ?? null),
+        form_text_color: updates.form_text_color !== undefined ? updates.form_text_color : (settings?.form_text_color ?? null),
+        form_button_color: updates.form_button_color !== undefined ? updates.form_button_color : (settings?.form_button_color ?? null),
+        form_button_text_color: updates.form_button_text_color !== undefined ? updates.form_button_text_color : (settings?.form_button_text_color ?? null),
       };
 
       const { data, error } = await supabase
@@ -122,6 +142,11 @@ export function useOrganizationSettings() {
         demo_mode_enabled: data.demo_mode_enabled ?? false,
         loyalty_program_enabled: (data as any).loyalty_program_enabled ?? true,
         booking_form_theme: (data as any).booking_form_theme ?? 'dark',
+        form_bg_color: (data as any).form_bg_color ?? null,
+        form_card_color: (data as any).form_card_color ?? null,
+        form_text_color: (data as any).form_text_color ?? null,
+        form_button_color: (data as any).form_button_color ?? null,
+        form_button_text_color: (data as any).form_button_text_color ?? null,
       });
 
       return true;

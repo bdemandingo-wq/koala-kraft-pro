@@ -3,7 +3,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Loader2, Save, Eye, EyeOff, Sun, Moon } from 'lucide-react';
+import { Loader2, Save, Eye, EyeOff, Sun, Moon, Palette, RotateCcw } from 'lucide-react';
 import { useOrganizationSettings } from '@/hooks/useOrganizationSettings';
 import { toast } from 'sonner';
 import { useState, useEffect } from 'react';
@@ -21,6 +21,11 @@ export function FormDisplaySettings() {
     show_bed_bath_on_booking: true,
     sales_tax_percent: 0,
     booking_form_theme: 'dark' as string,
+    form_bg_color: null as string | null,
+    form_card_color: null as string | null,
+    form_text_color: null as string | null,
+    form_button_color: null as string | null,
+    form_button_text_color: null as string | null,
   });
 
   useEffect(() => {
@@ -34,6 +39,11 @@ export function FormDisplaySettings() {
         show_bed_bath_on_booking: settings.show_bed_bath_on_booking,
         sales_tax_percent: settings.sales_tax_percent,
         booking_form_theme: settings.booking_form_theme || 'dark',
+        form_bg_color: settings.form_bg_color,
+        form_card_color: settings.form_card_color,
+        form_text_color: settings.form_text_color,
+        form_button_color: settings.form_button_color,
+        form_button_text_color: settings.form_button_text_color,
       });
     }
   }, [settings]);
@@ -48,6 +58,27 @@ export function FormDisplaySettings() {
       toast.error('Failed to save settings');
     }
   };
+
+  const hasCustomColors = localSettings.form_bg_color || localSettings.form_card_color || localSettings.form_text_color || localSettings.form_button_color || localSettings.form_button_text_color;
+
+  const resetCustomColors = () => {
+    setLocalSettings(prev => ({
+      ...prev,
+      form_bg_color: null,
+      form_card_color: null,
+      form_text_color: null,
+      form_button_color: null,
+      form_button_text_color: null,
+    }));
+  };
+
+  const colorOptions = [
+    { key: 'form_bg_color' as const, label: 'Background', description: 'Page background color', defaultDark: '#0a0f1a', defaultLight: '#ffffff' },
+    { key: 'form_card_color' as const, label: 'Cards', description: 'Card and section backgrounds', defaultDark: '#111827', defaultLight: '#f5f5f5' },
+    { key: 'form_text_color' as const, label: 'Text', description: 'Main text and headings', defaultDark: '#f1f5f9', defaultLight: '#1a1a2e' },
+    { key: 'form_button_color' as const, label: 'Buttons', description: 'Primary action buttons', defaultDark: '#3b82f6', defaultLight: '#2563eb' },
+    { key: 'form_button_text_color' as const, label: 'Button Text', description: 'Text on buttons', defaultDark: '#ffffff', defaultLight: '#ffffff' },
+  ];
 
   const toggleOptions = [
     {
@@ -140,6 +171,84 @@ export function FormDisplaySettings() {
               <span className="text-sm font-medium">Light</span>
             </button>
           </div>
+        </div>
+
+        {/* Custom Form Colors */}
+        <div className="border-t border-border/50 pt-4">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <Label className="text-sm font-medium flex items-center gap-2">
+                <Palette className="h-4 w-4" />
+                Custom Form Colors
+              </Label>
+              <p className="text-xs text-muted-foreground mt-1">Override default theme colors with your brand palette</p>
+            </div>
+            {hasCustomColors && (
+              <Button variant="ghost" size="sm" onClick={resetCustomColors} className="text-xs gap-1">
+                <RotateCcw className="h-3 w-3" />
+                Reset
+              </Button>
+            )}
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {colorOptions.map((opt) => {
+              const currentValue = localSettings[opt.key];
+              const placeholder = localSettings.booking_form_theme === 'dark' ? opt.defaultDark : opt.defaultLight;
+              return (
+                <div key={opt.key} className="flex items-center gap-3 p-3 rounded-lg border bg-secondary/20">
+                  <div className="relative">
+                    <input
+                      type="color"
+                      value={currentValue || placeholder}
+                      onChange={(e) => setLocalSettings(prev => ({ ...prev, [opt.key]: e.target.value }))}
+                      className="w-10 h-10 rounded-lg border border-border cursor-pointer bg-transparent"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium">{opt.label}</p>
+                    <p className="text-xs text-muted-foreground">{opt.description}</p>
+                    {currentValue && (
+                      <p className="text-xs font-mono text-primary mt-0.5">{currentValue}</p>
+                    )}
+                  </div>
+                  {currentValue && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 shrink-0"
+                      onClick={() => setLocalSettings(prev => ({ ...prev, [opt.key]: null }))}
+                    >
+                      <RotateCcw className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Live Preview */}
+          {hasCustomColors && (
+            <div className="mt-4 p-4 rounded-xl border" style={{
+              backgroundColor: localSettings.form_bg_color || (localSettings.booking_form_theme === 'dark' ? '#0a0f1a' : '#ffffff'),
+              color: localSettings.form_text_color || (localSettings.booking_form_theme === 'dark' ? '#f1f5f9' : '#1a1a2e'),
+            }}>
+              <p className="text-xs font-medium mb-2 opacity-60">Preview</p>
+              <div className="p-3 rounded-lg mb-2" style={{
+                backgroundColor: localSettings.form_card_color || (localSettings.booking_form_theme === 'dark' ? '#111827' : '#f5f5f5'),
+              }}>
+                <p className="text-sm font-semibold" style={{ color: localSettings.form_text_color || undefined }}>
+                  Sample Card Title
+                </p>
+                <p className="text-xs mt-1 opacity-70">This is how your form cards will look</p>
+              </div>
+              <button className="px-4 py-2 rounded-lg text-sm font-medium" style={{
+                backgroundColor: localSettings.form_button_color || (localSettings.booking_form_theme === 'dark' ? '#3b82f6' : '#2563eb'),
+                color: localSettings.form_button_text_color || '#ffffff',
+              }}>
+                Continue →
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="border-t border-border/50" />
