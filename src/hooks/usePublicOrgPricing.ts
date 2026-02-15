@@ -55,6 +55,7 @@ export interface FormColors {
   text: string | null;
   button: string | null;
   buttonText: string | null;
+  accent: string | null;
 }
 
 export interface PublicOrgData {
@@ -108,7 +109,7 @@ export function usePublicOrgPricing(orgSlug: string | undefined): PublicOrgData 
   const [primaryColor, setPrimaryColor] = useState<string | null>(null);
   const [accentColor, setAccentColor] = useState<string | null>(null);
   const [bookingFormTheme, setBookingFormTheme] = useState<'light' | 'dark'>('dark');
-  const [formColors, setFormColors] = useState<FormColors>({ bg: null, card: null, text: null, button: null, buttonText: null });
+  const [formColors, setFormColors] = useState<FormColors>({ bg: null, card: null, text: null, button: null, buttonText: null, accent: null });
   const [services, setServices] = useState<PublicService[]>([]);
   const [extras, setExtras] = useState<PublicExtra[]>([]);
   const [displaySettings, setDisplaySettings] = useState<PublicDisplaySettings>({

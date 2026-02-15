@@ -26,6 +26,7 @@ export function FormDisplaySettings() {
     form_text_color: null as string | null,
     form_button_color: null as string | null,
     form_button_text_color: null as string | null,
+    form_accent_color: null as string | null,
   });
 
   useEffect(() => {
@@ -44,6 +45,7 @@ export function FormDisplaySettings() {
         form_text_color: settings.form_text_color,
         form_button_color: settings.form_button_color,
         form_button_text_color: settings.form_button_text_color,
+        form_accent_color: settings.form_accent_color,
       });
     }
   }, [settings]);
@@ -59,7 +61,7 @@ export function FormDisplaySettings() {
     }
   };
 
-  const hasCustomColors = localSettings.form_bg_color || localSettings.form_card_color || localSettings.form_text_color || localSettings.form_button_color || localSettings.form_button_text_color;
+  const hasCustomColors = localSettings.form_bg_color || localSettings.form_card_color || localSettings.form_text_color || localSettings.form_button_color || localSettings.form_button_text_color || localSettings.form_accent_color;
 
   const resetCustomColors = () => {
     setLocalSettings(prev => ({
@@ -69,6 +71,7 @@ export function FormDisplaySettings() {
       form_text_color: null,
       form_button_color: null,
       form_button_text_color: null,
+      form_accent_color: null,
     }));
   };
 
@@ -78,6 +81,7 @@ export function FormDisplaySettings() {
     { key: 'form_text_color' as const, label: 'Text', description: 'Main text and headings', defaultDark: '#f1f5f9', defaultLight: '#1a1a2e' },
     { key: 'form_button_color' as const, label: 'Buttons', description: 'Primary action buttons', defaultDark: '#3b82f6', defaultLight: '#2563eb' },
     { key: 'form_button_text_color' as const, label: 'Button Text', description: 'Text on buttons', defaultDark: '#ffffff', defaultLight: '#ffffff' },
+    { key: 'form_accent_color' as const, label: 'Accent', description: 'Headings, borders, icons & highlights', defaultDark: '#22d3ee', defaultLight: '#0891b2' },
   ];
 
   const toggleOptions = [

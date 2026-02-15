@@ -20,6 +20,7 @@ export interface OrganizationPricingSettings {
   form_text_color: string | null;
   form_button_color: string | null;
   form_button_text_color: string | null;
+  form_accent_color: string | null;
 }
 
 const defaultSettings: Omit<OrganizationPricingSettings, 'organization_id'> = {
@@ -38,6 +39,7 @@ const defaultSettings: Omit<OrganizationPricingSettings, 'organization_id'> = {
   form_text_color: null,
   form_button_color: null,
   form_button_text_color: null,
+  form_accent_color: null,
 };
 
 export function useOrganizationSettings() {
@@ -76,6 +78,7 @@ export function useOrganizationSettings() {
           form_text_color: (data as any).form_text_color ?? null,
           form_button_color: (data as any).form_button_color ?? null,
           form_button_text_color: (data as any).form_button_text_color ?? null,
+          form_accent_color: (data as any).form_accent_color ?? null,
         });
       } else {
         // Create default settings
@@ -116,6 +119,7 @@ export function useOrganizationSettings() {
         form_text_color: updates.form_text_color !== undefined ? updates.form_text_color : (settings?.form_text_color ?? null),
         form_button_color: updates.form_button_color !== undefined ? updates.form_button_color : (settings?.form_button_color ?? null),
         form_button_text_color: updates.form_button_text_color !== undefined ? updates.form_button_text_color : (settings?.form_button_text_color ?? null),
+        form_accent_color: updates.form_accent_color !== undefined ? updates.form_accent_color : (settings?.form_accent_color ?? null),
       };
 
       const { data, error } = await supabase
@@ -147,6 +151,7 @@ export function useOrganizationSettings() {
         form_text_color: (data as any).form_text_color ?? null,
         form_button_color: (data as any).form_button_color ?? null,
         form_button_text_color: (data as any).form_button_text_color ?? null,
+        form_accent_color: (data as any).form_accent_color ?? null,
       });
 
       return true;
