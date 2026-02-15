@@ -2,7 +2,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 
-const IDLE_TIMEOUT_MS = 2 * 60 * 1000; // 2 minutes of inactivity = idle
+const IDLE_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes of inactivity = idle
 const UPDATE_INTERVAL_MS = 30 * 1000; // Update session every 30 seconds
 
 export function useSessionTracker() {
