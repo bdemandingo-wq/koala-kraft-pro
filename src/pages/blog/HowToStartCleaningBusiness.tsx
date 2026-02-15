@@ -21,6 +21,7 @@ export default function HowToStartCleaningBusiness() {
         title="How to Start a Cleaning Business in 2026 | Complete Guide - TIDYWISE"
         description="Learn how to start a profitable cleaning business in 2026. Covers automated payroll software for maid services, cleaning business inventory management tool, scheduling, leads, and more."
         canonicalPath="/blog/how-to-start-a-cleaning-business"
+        ogImage="/images/tidywise-og.png"
       />
 
       {/* Navigation */}

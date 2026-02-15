@@ -168,6 +168,7 @@ export default function CleaningBusinessCRM() {
         title="Best CRM for Cleaning Business (2026) | #1 Maid Service Software"
         description="Find the best CRM for your cleaning business. Compare top cleaning business CRM software with scheduling, invoicing, GPS tracking, customer management & automation. Start your 60-day free trial today."
         canonicalPath="/blog/crm-for-cleaning-business"
+        ogImage="/images/tidywise-og.png"
       />
 
       {/* Navigation */}

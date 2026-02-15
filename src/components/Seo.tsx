@@ -58,8 +58,9 @@ export function Seo({ title, description, canonicalPath, noIndex, ogImage, ogTyp
     if (ogImage) {
       const imageUrl = ogImage.startsWith("http") ? ogImage : `${PRODUCTION_DOMAIN}${ogImage}`;
       setMetaTag("og:image", imageUrl, true);
-      setMetaTag("og:image:width", "1200", true);
-      setMetaTag("og:image:height", "630", true);
+      setMetaTag("og:image:width", "1920", true);
+      setMetaTag("og:image:height", "1080", true);
+      setMetaTag("og:image:type", "image/png", true);
       // Twitter
       setMetaTag("twitter:card", "summary_large_image");
       setMetaTag("twitter:image", imageUrl);

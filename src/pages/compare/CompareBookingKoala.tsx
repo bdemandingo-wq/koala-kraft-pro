@@ -75,7 +75,8 @@ export default function CompareBookingKoala() {
       <Seo 
         title="TIDYWISE vs BookingKoala 2026 | Best BookingKoala Alternative"
         description="Compare TIDYWISE vs BookingKoala for cleaning businesses. Get automated payroll, P&L reports, and AI tools for $50/mo vs BookingKoala's $79-$379/mo. Switch today."
-        canonicalPath="/compare/bookingkoala"
+        canonicalPath="/compare/booking-koala"
+        ogImage="/images/tidywise-og.png"
       />
 
       {/* Navigation */}

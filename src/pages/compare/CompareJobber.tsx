@@ -81,6 +81,7 @@ export default function CompareJobber() {
         title="TIDYWISE vs Jobber 2026 | Best Jobber Alternative for Cleaning Businesses"
         description="Compare TIDYWISE vs Jobber for cleaning businesses. TIDYWISE offers automated payroll, P&L reports, and flat $50/mo pricing vs Jobber's $69-$349/month. Switch today."
         canonicalPath="/compare/jobber"
+        ogImage="/images/tidywise-og.png"
       />
 
       {/* Navigation */}
