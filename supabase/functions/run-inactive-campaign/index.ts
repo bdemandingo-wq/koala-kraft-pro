@@ -46,6 +46,23 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`[run-inactive-campaign] Starting for org: ${organizationId}, days: ${daysInactive}`);
 
+    // Check if winback automation is enabled (for automated 60-day campaigns)
+    if (daysInactive >= 60) {
+      const { data: automationSetting } = await supabase
+        .from('organization_automations')
+        .select('is_enabled')
+        .eq('organization_id', organizationId)
+        .eq('automation_type', 'winback_60day')
+        .maybeSingle();
+
+      if (automationSetting && !automationSetting.is_enabled) {
+        return new Response(
+          JSON.stringify({ success: false, error: "Win-back automation disabled for this organization" }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
     // Get organization SMS settings
     const { data: smsSettings, error: smsError } = await supabase
       .from('organization_sms_settings')

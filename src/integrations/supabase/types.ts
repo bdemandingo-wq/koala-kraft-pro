@@ -3025,6 +3025,44 @@ export type Database = {
           },
         ]
       }
+      organization_automations: {
+        Row: {
+          automation_type: string
+          created_at: string
+          description: string | null
+          id: string
+          is_enabled: boolean
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          automation_type: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_enabled?: boolean
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          automation_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_enabled?: boolean
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_automations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_email_settings: {
         Row: {
           created_at: string

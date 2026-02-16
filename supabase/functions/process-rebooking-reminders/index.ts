@@ -47,8 +47,24 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`[process-rebooking-reminders] Processing ${readyItems.length} items`);
     let sentCount = 0;
 
+    // Pre-fetch automation settings
+    const orgIds = [...new Set(readyItems.map(i => i.organization_id))];
+    const { data: automationSettings } = await supabase
+      .from("organization_automations")
+      .select("organization_id, is_enabled")
+      .in("organization_id", orgIds)
+      .eq("automation_type", "rebooking_reminder");
+    const automationMap = new Map((automationSettings || []).map(a => [a.organization_id, a.is_enabled]));
+
     for (const item of readyItems) {
       try {
+        // Check if automation is enabled for this org
+        if (automationMap.has(item.organization_id) && !automationMap.get(item.organization_id)) {
+          await supabase.from("rebooking_reminder_queue")
+            .update({ cancelled: true, cancelled_reason: "Automation disabled" })
+            .eq("id", item.id);
+          continue;
+        }
         // 1. Check if customer already has a future booking
         const { data: futureBookings } = await supabase
           .from("bookings")
