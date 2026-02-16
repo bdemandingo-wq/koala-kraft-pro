@@ -294,15 +294,12 @@ const handler = async (req: Request): Promise<Response> => {
 
       // --- CLIENT REMINDER ---
       if (booking.customer?.phone) {
-        const customerName = booking.customer.first_name || "there";
-        const staffName = booking.staff?.name;
+        const customerName = `${booking.customer.first_name || ""} ${booking.customer.last_name || ""}`.trim() || "there";
 
         const clientMsg =
-          `⏰ Reminder: Your ${serviceName} with ${companyName} is tomorrow!\n\n` +
-          `📅 ${formattedDate} at ${formattedTime}\n` +
-          `${address ? `📍 ${address}\n` : ""}` +
-          `${staffName ? `👤 Cleaner: ${staffName}\n` : ""}` +
-          `\nPlease ensure access to the property. Reply with any questions!`;
+          `Hi ${customerName}! Your ${serviceName} appointment is confirmed for ${formattedDate} at ${formattedTime}.` +
+          `${address ? ` Address: ${address}.` : ""}` +
+          ` Reply to this message with any questions!`;
 
         const clientResult = await sendAndLog(
           booking.customer.phone,
