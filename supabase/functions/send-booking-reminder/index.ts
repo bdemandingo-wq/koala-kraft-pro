@@ -92,6 +92,21 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
+    // Check if appointment_reminder automation is enabled for this org
+    const { data: automationSetting } = await supabase
+      .from("organization_automations")
+      .select("is_enabled")
+      .eq("organization_id", organizationId)
+      .eq("automation_type", "appointment_reminder")
+      .maybeSingle();
+
+    if (automationSetting && !automationSetting.is_enabled) {
+      console.log("[send-booking-reminder] Automation disabled for org:", organizationId);
+      return new Response(JSON.stringify({ success: false, error: "Appointment reminder automation disabled" }), {
+        status: 200, headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
     // Get business settings
     const { data: businessSettings } = await supabase
       .from("business_settings")

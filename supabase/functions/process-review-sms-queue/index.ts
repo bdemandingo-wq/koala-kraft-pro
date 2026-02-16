@@ -40,8 +40,24 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`Processing ${pendingItems.length} review SMS requests`);
     let successCount = 0;
 
+    // Pre-fetch automation settings
+    const orgIds = [...new Set(pendingItems.map(i => i.organization_id))];
+    const { data: automationSettings } = await supabase
+      .from("organization_automations")
+      .select("organization_id, is_enabled")
+      .in("organization_id", orgIds)
+      .eq("automation_type", "review_request");
+    const automationMap = new Map((automationSettings || []).map(a => [a.organization_id, a.is_enabled]));
+
     for (const item of pendingItems) {
       try {
+        // Check if automation is enabled for this org
+        if (automationMap.has(item.organization_id) && !automationMap.get(item.organization_id)) {
+          await supabase.from("automated_review_sms_queue")
+            .update({ sent: true, sent_at: new Date().toISOString(), error: "Automation disabled" })
+            .eq("id", item.id);
+          continue;
+        }
         // Get customer details
         const { data: customer } = await supabase
           .from("customers")

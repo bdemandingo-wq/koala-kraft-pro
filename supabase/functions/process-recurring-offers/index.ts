@@ -46,8 +46,24 @@ serve(async (req: Request) => {
     console.log(`[process-recurring-offers] Processing ${readyItems.length} items`);
     let sentCount = 0;
 
+    // Pre-fetch automation settings
+    const orgIds = [...new Set(readyItems.map(i => i.organization_id))];
+    const { data: automationSettings } = await supabase
+      .from("organization_automations")
+      .select("organization_id, is_enabled")
+      .in("organization_id", orgIds)
+      .eq("automation_type", "recurring_upsell");
+    const automationMap = new Map((automationSettings || []).map(a => [a.organization_id, a.is_enabled]));
+
     for (const item of readyItems) {
       try {
+        // Check if automation is enabled for this org
+        if (automationMap.has(item.organization_id) && !automationMap.get(item.organization_id)) {
+          await supabase.from("recurring_offer_queue")
+            .update({ cancelled: true, cancelled_reason: "Automation disabled" })
+            .eq("id", item.id);
+          continue;
+        }
         // 1. Re-check if customer now has active recurring service
         const { data: activeRecurring } = await supabase
           .from("recurring_bookings")
