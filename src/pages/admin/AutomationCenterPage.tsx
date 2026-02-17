@@ -3,6 +3,7 @@ import { Seo } from '@/components/Seo';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from '@/contexts/OrganizationContext';
@@ -13,7 +14,7 @@ import {
   HelpCircle, Home, Calendar, ClipboardList, Users, Target,
   MessageSquare, Briefcase, UserCircle, CheckSquare, Package, DollarSign,
   Receipt, BarChart3, Sparkles, CreditCard, Tag, MapPin, Globe, Brain,
-  Activity, Lightbulb,
+  Activity, Lightbulb, Send,
 } from 'lucide-react';
 import { AutomationHealthMonitor } from '@/components/admin/automation/AutomationHealthMonitor';
 import { CRMSuggestionsPanel } from '@/components/admin/automation/CRMSuggestionsPanel';
@@ -171,7 +172,7 @@ export default function AutomationCenterPage() {
                             <div>
                               <CardTitle className="text-base">{formatName(auto.automation_type)}</CardTitle>
                               <Badge variant={auto.is_enabled ? 'default' : 'secondary'} className="mt-1 text-xs">
-                                {auto.is_enabled ? 'Active' : 'Disabled'}
+                                {auto.is_enabled ? 'Auto' : 'Manual Only'}
                               </Badge>
                             </div>
                           </div>
@@ -194,6 +195,17 @@ export default function AutomationCenterPage() {
                           <Sparkles className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
                           <span className="text-muted-foreground">{meta.benefit}</span>
                         </div>
+                        {!auto.is_enabled && (
+                          <div className="pt-2 border-t">
+                            <p className="text-xs text-muted-foreground mb-2">
+                              Automatic sending is off. You can still trigger this manually from the relevant page (Bookings, Customers, etc.).
+                            </p>
+                            <Badge variant="outline" className="text-xs gap-1">
+                              <Send className="w-3 h-3" />
+                              Manual mode — send from booking/customer actions
+                            </Badge>
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                   );
