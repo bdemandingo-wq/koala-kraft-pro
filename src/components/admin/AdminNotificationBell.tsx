@@ -116,12 +116,14 @@ export function AdminNotificationBell() {
         });
       }
 
-      // Add weekly booking reminder notification (Monday)
+      // Add weekly booking reminder notification (Monday) — only if not dismissed
       const today = new Date();
       const dayOfWeek = today.getDay(); // 0=Sunday, 1=Monday
       const weeklyReminders: AdminNotification[] = [];
+      const weeklyKey = `weekly-reminder-dismissed-${organizationId}-${today.toISOString().split('T')[0]}`;
+      const wasDismissed = localStorage.getItem(weeklyKey) === 'true';
       
-      if (dayOfWeek === 1) { // Monday
+      if (dayOfWeek === 1 && !wasDismissed) { // Monday and not dismissed
         // Check how many upcoming bookings this week
         const weekEnd = new Date(today);
         weekEnd.setDate(weekEnd.getDate() + 7);
@@ -286,9 +288,17 @@ export function AdminNotificationBell() {
           .eq('organization_id', organizationId)
           .eq('is_read', false);
       }
+
+      // Dismiss weekly reminder so it doesn't reappear
+      const today = new Date().toISOString().split('T')[0];
+      localStorage.setItem(`weekly-reminder-dismissed-${organizationId}-${today}`, 'true');
     } else {
       // Clear all notifications if all are already read
       setNotifications([]);
+      
+      // Also dismiss weekly reminder on clear all
+      const today = new Date().toISOString().split('T')[0];
+      localStorage.setItem(`weekly-reminder-dismissed-${organizationId}-${today}`, 'true');
     }
     setIsOpen(false);
   };

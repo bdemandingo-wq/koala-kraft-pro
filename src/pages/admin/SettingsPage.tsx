@@ -642,7 +642,6 @@ export default function SettingsPage() {
         {/* Pricing Settings */}
         <TabsContent value="pricing" className="space-y-6">
           <PricingSettingsCard />
-          <FormDisplaySettings />
         </TabsContent>
 
         {/* Loyalty Settings */}

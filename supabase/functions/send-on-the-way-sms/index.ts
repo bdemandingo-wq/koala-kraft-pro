@@ -42,6 +42,22 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    // Deduplication: Check if an "on the way" SMS was already sent for this booking
+    const { data: existingLog } = await supabase
+      .from('booking_reminder_log')
+      .select('id')
+      .eq('booking_id', bookingId)
+      .eq('reminder_type', 'on_the_way')
+      .limit(1);
+
+    if (existingLog && existingLog.length > 0) {
+      console.log(`[send-on-the-way-sms] Already sent for booking ${bookingId}, skipping duplicate`);
+      return new Response(
+        JSON.stringify({ success: true, deduplicated: true, message: "On-the-way notification already sent for this booking" }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Fetch booking with customer info
     const { data: booking, error: bookingError } = await supabase
       .from('bookings')
@@ -251,6 +267,14 @@ const handler = async (req: Request): Promise<Response> => {
     } else {
       console.log(`[send-on-the-way-sms] No admin phone configured, skipping admin notification`);
     }
+
+    // Log to prevent duplicates (e.g. second cleaner pressing "on the way")
+    await supabase.from('booking_reminder_log').insert({
+      booking_id: bookingId,
+      organization_id: booking.organization_id,
+      recipient_phone: formattedCustomerPhone,
+      reminder_type: 'on_the_way',
+    });
 
     // Audit log
     logAudit({
