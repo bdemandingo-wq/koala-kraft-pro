@@ -79,11 +79,12 @@ const handler = async (req: Request): Promise<Response> => {
 
     const { data: orgStripeSettings } = await supabase
       .from("org_stripe_settings")
-      .select("stripe_secret_key")
+      .select("stripe_secret_key, stripe_publishable_key")
       .eq("organization_id", organizationId)
       .maybeSingle();
 
     const stripeSecretKey = orgStripeSettings?.stripe_secret_key;
+    const stripePublishableKey = orgStripeSettings?.stripe_publishable_key;
     
     if (!stripeSecretKey) {
       return new Response(
@@ -145,6 +146,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(JSON.stringify({ 
       clientSecret: setupIntent.client_secret,
       customerId: customerId,
+      publishableKey: stripePublishableKey || null,
     }), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
