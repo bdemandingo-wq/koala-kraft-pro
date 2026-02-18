@@ -243,6 +243,8 @@ export function useCreateBooking() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['booking-team-assignments'] });
+      queryClient.invalidateQueries({ queryKey: ['all-team-assignments'] });
       toast.success('Booking created successfully');
     },
     onError: (error: Error) => {
@@ -272,6 +274,8 @@ export function useUpdateBooking() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['booking-team-assignments'] });
+      queryClient.invalidateQueries({ queryKey: ['all-team-assignments'] });
       toast.success('Booking updated successfully');
     },
     onError: (error: Error) => {

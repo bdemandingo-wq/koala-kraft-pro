@@ -485,11 +485,14 @@ export function BookingFormProvider({
             if (booking.staff && !memberIds.includes(booking.staff.id)) {
               memberIds.unshift(booking.staff.id);
             }
-            // Only enable team mode if there are MULTIPLE people assigned
+          // Only enable team mode if there are MULTIPLE people assigned
             const isActualTeam = memberIds.length > 1;
             setIsTeamMode(isActualTeam);
             if (isActualTeam) {
               setSelectedTeamMembers(memberIds);
+            } else {
+              // Reset team members when not in team mode to prevent stale state
+              setSelectedTeamMembers([]);
             }
             // Load pay shares
             const payMap: Record<string, number> = {};
