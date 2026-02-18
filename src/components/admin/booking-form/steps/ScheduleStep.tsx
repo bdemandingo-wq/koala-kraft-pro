@@ -374,7 +374,7 @@ export function ScheduleStep({ currentBookingId }: { currentBookingId?: string }
               <Select value={selectedStaffId || "unassigned"} onValueChange={(val) => setSelectedStaffId(val === "unassigned" ? "" : val)}>
                 <SelectTrigger className="h-12 bg-secondary/30 border-border/50">
                   <SelectValue placeholder="Select a cleaner (optional)">
-                    {selectedStaffId && availableStaff.find(s => s.id === selectedStaffId)?.name}
+                    {selectedStaffId && (staff?.find(s => s.id === selectedStaffId)?.name || availableStaff.find(s => s.id === selectedStaffId)?.name)}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="bg-popover border-border">
