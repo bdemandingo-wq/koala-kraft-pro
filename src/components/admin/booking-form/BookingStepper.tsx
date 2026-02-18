@@ -627,6 +627,38 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
       if (isExistingBooking) {
         await updateBooking.mutateAsync({ id: booking.id, ...bookingData });
 
+        // ALWAYS sync team assignments on update to prevent stale/duplicate entries
+        // Delete all existing team assignments for this booking first
+        await supabase
+          .from('booking_team_assignments')
+          .delete()
+          .eq('booking_id', booking.id);
+
+        // Re-insert based on current form state
+        if (isTeamMode && selectedTeamMembers.length > 1) {
+          // Multiple staff → team mode assignments
+          for (let i = 0; i < selectedTeamMembers.length; i++) {
+            const staffId = selectedTeamMembers[i];
+            let payShare = teamMemberPay[staffId] ?? 0;
+            await supabase.from('booking_team_assignments').insert({
+              booking_id: booking.id,
+              staff_id: staffId,
+              pay_share: payShare,
+              is_primary: i === 0,
+              organization_id: organizationId,
+            });
+          }
+        } else if (bookingData.staff_id) {
+          // Single staff → one primary assignment
+          await supabase.from('booking_team_assignments').insert({
+            booking_id: booking.id,
+            staff_id: bookingData.staff_id,
+            pay_share: cleanerWage ? parseFloat(cleanerWage) : 0,
+            is_primary: true,
+            organization_id: organizationId,
+          });
+        }
+
         // Update checklist if a checklist template was selected during edit
         if (selectedChecklistId) {
           try {
@@ -734,43 +766,54 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
 
         const newBooking = await createBooking.mutateAsync(finalBookingData);
 
-        // Save team assignments if in team mode
-        if (isTeamMode && selectedTeamMembers.length > 0 && newBooking?.id) {
-          for (let i = 0; i < selectedTeamMembers.length; i++) {
-            const staffId = selectedTeamMembers[i];
-            
-            // Use the manually entered pay from teamMemberPay, or fall back to calculation
-            let payShare = teamMemberPay[staffId];
-            
-            if (payShare === undefined || payShare === 0) {
-              // Fall back to calculation if no manual entry
-              const staffMember = staff?.find(s => s.id === staffId);
-              const jobTotal = totalAmount > 0 ? totalAmount : calculatedPrice;
-              const teamSize = selectedTeamMembers.length;
-              const wageToUse = cleanerWage ? parseFloat(cleanerWage) : null;
+        // Save team assignments based on mode
+        if (newBooking?.id) {
+          if (isTeamMode && selectedTeamMembers.length > 1) {
+            // Multiple staff → full team mode
+            for (let i = 0; i < selectedTeamMembers.length; i++) {
+              const staffId = selectedTeamMembers[i];
               
-              if (wageToUse) {
-                if (cleanerWageType === 'flat') {
-                  payShare = wageToUse / teamSize;
-                } else if (cleanerWageType === 'percentage') {
-                  payShare = (jobTotal * wageToUse / 100) / teamSize;
+              let payShare = teamMemberPay[staffId];
+              
+              if (payShare === undefined || payShare === 0) {
+                const staffMember = staff?.find(s => s.id === staffId);
+                const jobTotal = totalAmount > 0 ? totalAmount : calculatedPrice;
+                const teamSize = selectedTeamMembers.length;
+                const wageToUse = cleanerWage ? parseFloat(cleanerWage) : null;
+                
+                if (wageToUse) {
+                  if (cleanerWageType === 'flat') {
+                    payShare = wageToUse / teamSize;
+                  } else if (cleanerWageType === 'percentage') {
+                    payShare = (jobTotal * wageToUse / 100) / teamSize;
+                  } else {
+                    payShare = wageToUse * 2;
+                  }
+                } else if (staffMember?.percentage_rate) {
+                  payShare = (jobTotal * staffMember.percentage_rate / 100) / teamSize;
+                } else if (staffMember?.hourly_rate) {
+                  payShare = staffMember.hourly_rate * 2;
                 } else {
-                  payShare = wageToUse * 2;
+                  payShare = 0;
                 }
-              } else if (staffMember?.percentage_rate) {
-                payShare = (jobTotal * staffMember.percentage_rate / 100) / teamSize;
-              } else if (staffMember?.hourly_rate) {
-                payShare = staffMember.hourly_rate * 2;
-              } else {
-                payShare = 0;
               }
-            }
 
+              await supabase.from('booking_team_assignments').insert({
+                booking_id: newBooking.id,
+                staff_id: staffId,
+                pay_share: payShare,
+                is_primary: i === 0,
+                organization_id: organizationId,
+              });
+            }
+          } else if (bookingData.staff_id) {
+            // Single staff → one primary assignment only
             await supabase.from('booking_team_assignments').insert({
               booking_id: newBooking.id,
-              staff_id: staffId,
-              pay_share: payShare,
-              is_primary: i === 0,
+              staff_id: bookingData.staff_id,
+              pay_share: cleanerWage ? parseFloat(cleanerWage) : 0,
+              is_primary: true,
+              organization_id: organizationId,
             });
           }
         }
