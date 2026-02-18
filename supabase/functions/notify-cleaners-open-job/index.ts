@@ -1,9 +1,9 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+const OPENPHONE_API_KEY = Deno.env.get("OPENPHONE_API_KEY");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,7 +11,6 @@ const corsHeaders = {
 };
 
 interface NotifyCleanersRequest {
-  staffEmails?: string[];
   jobDetails: {
     booking_id: string;
     booking_number: number;
@@ -23,7 +22,7 @@ interface NotifyCleanersRequest {
     total_amount: number;
   };
   companyName: string;
-  organizationId?: string;
+  organizationId: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -34,33 +33,45 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
 
-    const { staffEmails, jobDetails, companyName: providedCompanyName, organizationId }: NotifyCleanersRequest = await req.json();
+    const { jobDetails, companyName: providedCompanyName, organizationId }: NotifyCleanersRequest = await req.json();
 
-    console.log("Notifying cleaners about new job:", jobDetails);
-
-    // Fetch business settings for sender email and company name
-    // Default to Resend's verified domain for other organizations
-    let senderEmail = "onboarding@resend.dev";
-    let companyName = providedCompanyName || "TidyWise";
-    
-    const settingsQuery = organizationId 
-      ? supabase.from('business_settings').select('company_email, company_name').eq('organization_id', organizationId).maybeSingle()
-      : supabase.from('business_settings').select('company_email, company_name').order('updated_at', { ascending: false }).limit(1).maybeSingle();
-    
-    const { data: settings } = await settingsQuery;
-    
-    if (settings?.company_email) {
-      senderEmail = settings.company_email;
-      console.log("Using custom sender email:", senderEmail);
+    // organizationId is required — block if missing to prevent cross-org leakage
+    if (!organizationId) {
+      console.error("organizationId is required");
+      return new Response(
+        JSON.stringify({ error: "organizationId is required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
+
+    console.log(`Notifying cleaners for org ${organizationId} about job #${jobDetails.booking_number}`);
+
+    // Fetch org-specific OpenPhone settings
+    const { data: phoneSettings } = await supabase
+      .from("org_phone_settings")
+      .select("openphone_number_id, openphone_api_key")
+      .eq("organization_id", organizationId)
+      .maybeSingle();
+
+    const orgOpenPhoneApiKey = phoneSettings?.openphone_api_key || OPENPHONE_API_KEY;
+    const orgPhoneNumberId = phoneSettings?.openphone_number_id;
+
+    // Get company name from business settings
+    let companyName = providedCompanyName || "Your Cleaning Company";
+    const { data: settings } = await supabase
+      .from("business_settings")
+      .select("company_name")
+      .eq("organization_id", organizationId)
+      .maybeSingle();
     if (settings?.company_name) {
       companyName = settings.company_name;
     }
 
-    // Get all active staff members with their rates
+    // CRITICAL: Filter staff by organization_id — never notify staff from other orgs
     const { data: staffMembers, error: staffError } = await supabase
       .from("staff")
-      .select("id, name, email, hourly_rate, percentage_rate")
+      .select("id, name, email, phone, hourly_rate, percentage_rate")
+      .eq("organization_id", organizationId)
       .eq("is_active", true);
 
     if (staffError) {
@@ -69,18 +80,17 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     if (!staffMembers || staffMembers.length === 0) {
-      console.log("No active staff members to notify");
+      console.log("No active staff members to notify for this organization");
       return new Response(
         JSON.stringify({ success: true, message: "No staff to notify" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log(`Found ${staffMembers.length} active staff members`);
+    console.log(`Found ${staffMembers.length} active staff members for org ${organizationId}`);
 
-    // Create in-app notifications for all staff
+    // Create in-app notifications for org staff only
     const notifications = staffMembers.map((staff) => {
-      // Calculate potential earnings for this staff member
       const totalAmount = Number(jobDetails.total_amount) || 0;
       const percentageRate = Number(staff.percentage_rate) || 0;
       const hourlyRate = Number(staff.hourly_rate) || 0;
@@ -88,12 +98,13 @@ const handler = async (req: Request): Promise<Response> => {
       if (percentageRate > 0) {
         potentialPay = (totalAmount * percentageRate) / 100;
       } else if (hourlyRate > 0) {
-        potentialPay = hourlyRate * 5; // Default 5 hours
+        potentialPay = hourlyRate * 5;
       }
 
       return {
         staff_id: staff.id,
         booking_id: jobDetails.booking_id,
+        organization_id: organizationId,
         title: "New Job Available!",
         message: `${jobDetails.service_name} on ${jobDetails.scheduled_date} at ${jobDetails.scheduled_time}. Location: ${jobDetails.address}. Potential pay: $${potentialPay.toFixed(2)}`,
         type: "new_job",
@@ -105,19 +116,19 @@ const handler = async (req: Request): Promise<Response> => {
       .insert(notifications);
 
     if (notifError) {
-      console.error("Error creating notifications:", notifError);
+      console.error("Error creating in-app notifications:", notifError);
       throw notifError;
     }
 
     console.log(`Created ${notifications.length} in-app notifications`);
 
-    // Send email notifications if Resend is configured
-    let emailsSent = 0;
-    let emailsFailed = 0;
+    // Send SMS via OpenPhone to staff with phone numbers
+    let smsSent = 0;
+    let smsFailed = 0;
 
-    if (RESEND_API_KEY) {
-      const emailPromises = staffMembers
-        .filter(staff => staff.email)
+    if (orgOpenPhoneApiKey && orgPhoneNumberId) {
+      const smsPromises = staffMembers
+        .filter((staff) => staff.phone)
         .map(async (staff) => {
           const totalAmount = Number(jobDetails.total_amount) || 0;
           const percentageRate = Number(staff.percentage_rate) || 0;
@@ -129,114 +140,59 @@ const handler = async (req: Request): Promise<Response> => {
             potentialPay = hourlyRate * 5;
           }
 
-          const emailHtml = `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 20px; background-color: #f9fafb;">
-  <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-    <div style="background: linear-gradient(135deg, #10b981, #059669); padding: 30px; text-align: center;">
-      <h1 style="margin: 0; color: white; font-size: 24px;">🎉 New Job Available!</h1>
-      <p style="margin: 10px 0 0; color: rgba(255,255,255,0.9); font-size: 14px;">A cleaning job is waiting for you</p>
-    </div>
-    
-    <div style="padding: 30px;">
-      <div style="background: #f0fdf4; border: 2px solid #86efac; border-radius: 12px; padding: 20px; margin-bottom: 24px; text-align: center;">
-        <p style="margin: 0 0 8px; color: #166534; font-size: 14px; font-weight: 600;">POTENTIAL EARNINGS</p>
-        <p style="margin: 0; color: #166534; font-size: 36px; font-weight: bold;">$${potentialPay.toFixed(2)}</p>
-      </div>
+          // Normalize phone to E.164
+          let phone = staff.phone.replace(/\D/g, "");
+          if (phone.length === 10) phone = `+1${phone}`;
+          else if (!phone.startsWith("+")) phone = `+${phone}`;
 
-      <h2 style="margin: 0 0 16px; color: #111827; font-size: 18px;">Job Details</h2>
-      
-      <table style="width: 100%; border-collapse: collapse;">
-        <tr>
-          <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; color: #6b7280; width: 40%;">Booking #</td>
-          <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; color: #111827; font-weight: 500;">${jobDetails.booking_number}</td>
-        </tr>
-        <tr>
-          <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; color: #6b7280;">Service</td>
-          <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; color: #111827; font-weight: 500;">${jobDetails.service_name}</td>
-        </tr>
-        <tr>
-          <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; color: #6b7280;">Date</td>
-          <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; color: #111827; font-weight: 500;">${jobDetails.scheduled_date}</td>
-        </tr>
-        <tr>
-          <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; color: #6b7280;">Time</td>
-          <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; color: #111827; font-weight: 500;">${jobDetails.scheduled_time}</td>
-        </tr>
-        <tr>
-          <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; color: #6b7280;">Duration</td>
-          <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; color: #111827; font-weight: 500;">${jobDetails.duration} minutes</td>
-        </tr>
-        <tr>
-          <td style="padding: 12px 0; color: #6b7280;">Location</td>
-          <td style="padding: 12px 0; color: #111827; font-weight: 500;">${jobDetails.address}</td>
-        </tr>
-      </table>
-
-      <div style="margin-top: 30px; text-align: center;">
-        <p style="color: #6b7280; font-size: 14px; margin-bottom: 16px;">First come, first served! Log in to the Staff Portal to claim this job.</p>
-      </div>
-    </div>
-
-    <div style="background: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
-      <p style="margin: 0; color: #9ca3af; font-size: 12px;">
-        Sent by ${companyName}<br>
-        You're receiving this because you're registered as a cleaner
-      </p>
-    </div>
-  </div>
-</body>
-</html>`;
+          const smsBody =
+            `🎉 New Job Available! ${jobDetails.service_name} on ${jobDetails.scheduled_date} at ${jobDetails.scheduled_time}. ` +
+            `Location: ${jobDetails.address}. Potential pay: $${potentialPay.toFixed(2)}. ` +
+            `Log in to the Staff Portal to claim it. - ${companyName}`;
 
           try {
-            const response = await fetch("https://api.resend.com/emails", {
+            const response = await fetch("https://api.openphone.com/v1/messages", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${RESEND_API_KEY}`,
+                Authorization: orgOpenPhoneApiKey,
               },
               body: JSON.stringify({
-                from: `${companyName} <${senderEmail}>`,
-                to: [staff.email],
-                subject: `🎉 New Job Available - $${potentialPay.toFixed(2)} Potential Earnings`,
-                html: emailHtml,
+                from: orgPhoneNumberId,
+                to: [phone],
+                content: smsBody,
               }),
             });
 
             if (response.ok) {
-              console.log(`Email sent to ${staff.email}`);
+              console.log(`SMS sent to staff ${staff.name} (${phone})`);
               return { success: true };
             } else {
-              console.error(`Failed to send email to ${staff.email}`);
+              const errBody = await response.text();
+              console.error(`Failed SMS to ${staff.name}: ${response.status} ${errBody}`);
               return { success: false };
             }
-          } catch (error) {
-            console.error(`Error sending email to ${staff.email}:`, error);
+          } catch (err) {
+            console.error(`Error sending SMS to ${staff.name}:`, err);
             return { success: false };
           }
         });
 
-      const results = await Promise.all(emailPromises);
-      emailsSent = results.filter(r => r.success).length;
-      emailsFailed = results.filter(r => !r.success).length;
-
-      console.log(`Emails sent: ${emailsSent}, failed: ${emailsFailed}`);
+      const results = await Promise.all(smsPromises);
+      smsSent = results.filter((r) => r.success).length;
+      smsFailed = results.filter((r) => !r.success).length;
+      console.log(`SMS sent: ${smsSent}, failed: ${smsFailed}`);
     } else {
-      console.log("Resend API key not configured, skipping email notifications");
+      console.log("OpenPhone not configured for this org — skipping SMS, in-app notifications still created");
     }
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
+      JSON.stringify({
+        success: true,
         notifications: notifications.length,
-        emailsSent,
-        emailsFailed,
-        message: `Notified ${staffMembers.length} cleaner(s)` 
+        smsSent,
+        smsFailed,
+        message: `Notified ${staffMembers.length} cleaner(s) for org ${organizationId}`,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
