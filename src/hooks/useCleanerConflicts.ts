@@ -115,21 +115,29 @@ export function useCleanerConflicts(
   }, [selectedDate?.toDateString()]);
 
   // Check if staff is within their working hours for the selected date/time
+  // Returns false ONLY if the staff has working hours configured AND the day is explicitly blocked/unavailable
+  // If no working hours configured at all → show the staff (don't hide)
+  // If no schedule for this specific day → show the staff (don't hide due to missing config)
+  // Only hide if the day is explicitly marked is_available = false
   const isStaffWithinWorkingHours = useCallback((staffId: string): boolean => {
     if (!selectedDate || !selectedTime) return true; // Assume available if no date/time
 
     const dayOfWeek = getDay(selectedDate); // 0 = Sunday, 6 = Saturday
     const staffWorkingHours = workingHours.filter(wh => wh.staff_id === staffId);
     
-    // If no working hours configured, assume available
+    // If no working hours configured at all, always show (assume available)
     if (staffWorkingHours.length === 0) return true;
 
     const daySchedule = staffWorkingHours.find(wh => wh.day_of_week === dayOfWeek);
     
-    // If no schedule for this day or explicitly marked unavailable
-    if (!daySchedule || !daySchedule.is_available) return false;
+    // If no schedule entry for this specific day, don't hide the staff
+    // They may simply not have configured this day - default to showing them
+    if (!daySchedule) return true;
 
-    // Check if the selected time falls within working hours
+    // Only hide if the day is EXPLICITLY marked as unavailable
+    if (!daySchedule.is_available) return false;
+
+    // Day is marked available - check if selected time falls within working hours
     const [selectedHour, selectedMinute] = selectedTime.split(':').map(Number);
     const selectedMinutes = selectedHour * 60 + selectedMinute;
 
@@ -138,10 +146,12 @@ export function useCleanerConflicts(
     const startMinutes = startHour * 60 + startMin;
     const endMinutes = endHour * 60 + endMin;
 
-    // Also check if the booking would end after working hours
-    const bookingEndMinutes = selectedMinutes + duration;
+    // If start/end times are both 0 (not properly configured), don't hide
+    if (startMinutes === 0 && endMinutes === 0) return true;
 
-    return selectedMinutes >= startMinutes && bookingEndMinutes <= endMinutes;
+    // Check if the booking START time falls within working hours
+    // We don't block on booking end time going over - admin can override that
+    return selectedMinutes >= startMinutes && selectedMinutes < endMinutes;
   }, [selectedDate, selectedTime, duration, workingHours]);
 
   // Check conflicts for a specific staff member
