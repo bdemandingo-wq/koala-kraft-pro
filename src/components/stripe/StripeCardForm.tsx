@@ -7,6 +7,7 @@ import { toast } from '@/hooks/use-toast';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import type { Stripe } from '@stripe/stripe-js';
 
 type StripeReact = typeof import('@stripe/react-stripe-js');
 
@@ -42,8 +43,12 @@ const CARD_ELEMENT_OPTIONS = {
 
 function CardFormInnerDynamic({
   stripeReact,
+  onPublishableKeyReceived,
   ...props
-}: CardFormProps & { stripeReact: StripeReact }) {
+}: CardFormProps & {
+  stripeReact: StripeReact;
+  onPublishableKeyReceived?: (key: string) => void;
+}) {
   const {
     email,
     customerName,
@@ -90,8 +95,27 @@ function CardFormInnerDynamic({
         throw new Error(setupError?.message || 'Failed to create setup intent');
       }
 
-      // Confirm the SetupIntent with the card details
-      const { error: confirmError, setupIntent } = await stripe.confirmCardSetup(setupData.clientSecret, {
+      // CRITICAL FIX: The clientSecret is created using the org's Stripe secret key.
+      // We MUST confirm using the matching org-specific publishable key — NOT the platform default.
+      // This prevents the "No such setupintent" error when orgs use their own Stripe accounts.
+      let stripeInstance: Stripe | null = stripe;
+      if (setupData.publishableKey && setupData.publishableKey !== '') {
+        // Notify parent to update future Stripe Elements with the org key
+        onPublishableKeyReceived?.(setupData.publishableKey);
+        // Load a Stripe instance scoped to the org's publishable key
+        const { loadStripe } = await import('@stripe/stripe-js');
+        const orgStripe = await loadStripe(setupData.publishableKey);
+        if (orgStripe) {
+          stripeInstance = orgStripe;
+        }
+      }
+
+      if (!stripeInstance) {
+        throw new Error('Failed to initialize Stripe for this organization');
+      }
+
+      // Confirm the SetupIntent with the card details using the correct Stripe account
+      const { error: confirmError, setupIntent } = await stripeInstance.confirmCardSetup(setupData.clientSecret, {
         payment_method: {
           card: cardElement,
           billing_details: {
@@ -237,13 +261,41 @@ function CardFormInnerDynamic({
   );
 }
 
+// Inner wrapper that manages the Stripe Elements provider with an org-specific key
+function StripeCardFormWithReact({
+  stripeReact,
+  stripePromise,
+  setStripePromise,
+  ...props
+}: CardFormProps & {
+  stripeReact: StripeReact;
+  stripePromise: Promise<Stripe | null> | null;
+  setStripePromise: (p: Promise<Stripe | null>) => void;
+}) {
+  // Use a stable placeholder promise until we learn the org's publishable key
+  const placeholderPromise = useMemo(() => getStripePromise(), []);
+  const effectivePromise = stripePromise ?? placeholderPromise;
+
+  return (
+    <stripeReact.Elements stripe={effectivePromise}>
+      <CardFormInnerDynamic
+        stripeReact={stripeReact}
+        onPublishableKeyReceived={(key) => {
+          // Switch to the org-specific key for future renders
+          setStripePromise(getStripePromise(key));
+        }}
+        {...props}
+      />
+    </stripeReact.Elements>
+  );
+}
+
 export function StripeCardForm(props: CardFormProps) {
-  // Lazily load Stripe.js only when this component is actually rendered.
-  const stripePromise = useMemo(() => getStripePromise(), []);
+  // stripePromise is updated once we discover the org's publishable key
+  const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [stripeReact, setStripeReact] = useState<StripeReact | null>(getCachedStripeReact);
 
   useEffect(() => {
-    // If already cached, no need to load again
     if (stripeReact) return;
     
     let cancelled = false;
@@ -251,7 +303,7 @@ export function StripeCardForm(props: CardFormProps) {
       .then((m) => {
         if (!cancelled) {
           setStripeReact(m);
-          setCachedStripeReact(m); // Cache for future use
+          setCachedStripeReact(m);
         }
       })
       .catch((err) => {
@@ -274,8 +326,11 @@ export function StripeCardForm(props: CardFormProps) {
   }
 
   return (
-    <stripeReact.Elements stripe={stripePromise}>
-      <CardFormInnerDynamic stripeReact={stripeReact} {...props} />
-    </stripeReact.Elements>
+    <StripeCardFormWithReact
+      stripeReact={stripeReact}
+      stripePromise={stripePromise}
+      setStripePromise={setStripePromise}
+      {...props}
+    />
   );
 }
