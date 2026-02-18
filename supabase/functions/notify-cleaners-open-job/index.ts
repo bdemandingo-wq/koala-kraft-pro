@@ -81,11 +81,14 @@ const handler = async (req: Request): Promise<Response> => {
     // Create in-app notifications for all staff
     const notifications = staffMembers.map((staff) => {
       // Calculate potential earnings for this staff member
+      const totalAmount = Number(jobDetails.total_amount) || 0;
+      const percentageRate = Number(staff.percentage_rate) || 0;
+      const hourlyRate = Number(staff.hourly_rate) || 0;
       let potentialPay = 0;
-      if (staff.percentage_rate && staff.percentage_rate > 0) {
-        potentialPay = (jobDetails.total_amount * staff.percentage_rate) / 100;
-      } else if (staff.hourly_rate && staff.hourly_rate > 0) {
-        potentialPay = staff.hourly_rate * 5; // Default 5 hours
+      if (percentageRate > 0) {
+        potentialPay = (totalAmount * percentageRate) / 100;
+      } else if (hourlyRate > 0) {
+        potentialPay = hourlyRate * 5; // Default 5 hours
       }
 
       return {
@@ -116,11 +119,14 @@ const handler = async (req: Request): Promise<Response> => {
       const emailPromises = staffMembers
         .filter(staff => staff.email)
         .map(async (staff) => {
+          const totalAmount = Number(jobDetails.total_amount) || 0;
+          const percentageRate = Number(staff.percentage_rate) || 0;
+          const hourlyRate = Number(staff.hourly_rate) || 0;
           let potentialPay = 0;
-          if (staff.percentage_rate && staff.percentage_rate > 0) {
-            potentialPay = (jobDetails.total_amount * staff.percentage_rate) / 100;
-          } else if (staff.hourly_rate && staff.hourly_rate > 0) {
-            potentialPay = staff.hourly_rate * 5;
+          if (percentageRate > 0) {
+            potentialPay = (totalAmount * percentageRate) / 100;
+          } else if (hourlyRate > 0) {
+            potentialPay = hourlyRate * 5;
           }
 
           const emailHtml = `
