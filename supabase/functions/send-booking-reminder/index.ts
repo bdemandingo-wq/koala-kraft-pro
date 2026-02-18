@@ -122,6 +122,33 @@ const handler = async (req: Request): Promise<Response> => {
 
     const companyName = businessSettings?.company_name || "Your cleaning service";
 
+    // Fetch timezone for this org (stored in business_settings)
+    const { data: tzSettings } = await supabase
+      .from("business_settings")
+      .select("timezone")
+      .eq("organization_id", organizationId)
+      .maybeSingle();
+    const orgTimezone = tzSettings?.timezone || "America/New_York";
+
+    // Helper: format a UTC date string in the org's local timezone
+    const formatLocalDate = (utcDate: Date): string => {
+      return new Intl.DateTimeFormat("en-US", {
+        timeZone: orgTimezone,
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      }).format(utcDate);
+    };
+
+    const formatLocalTime = (utcDate: Date): string => {
+      return new Intl.DateTimeFormat("en-US", {
+        timeZone: orgTimezone,
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      }).format(utcDate);
+    };
+
     // Extract phone number ID
     let phoneNumberId = smsSettings.openphone_phone_number_id;
     if (phoneNumberId.includes("openphone.com")) {
@@ -237,11 +264,13 @@ const handler = async (req: Request): Promise<Response> => {
 
     // ============ MANUAL SEND ============
     if (isManualSend) {
+      // Prefer pre-formatted values from the caller (already in local time)
+      // Fall back to formatting using the org timezone
       const formattedDate = payload?.formattedDate || (payload?.scheduledAt
-        ? new Date(payload.scheduledAt).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
+        ? formatLocalDate(new Date(payload.scheduledAt))
         : "your scheduled date");
       const formattedTime = payload?.formattedTime || (payload?.scheduledAt
-        ? new Date(payload.scheduledAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })
+        ? formatLocalTime(new Date(payload.scheduledAt))
         : "your scheduled time");
 
       const customerName = payload?.customerName || "there";
@@ -302,8 +331,8 @@ const handler = async (req: Request): Promise<Response> => {
 
     for (const booking of bookings || []) {
       const scheduledDate = new Date(booking.scheduled_at);
-      const formattedDate = scheduledDate.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
-      const formattedTime = scheduledDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+      const formattedDate = formatLocalDate(scheduledDate);
+      const formattedTime = formatLocalTime(scheduledDate);
       const address = [booking.address, booking.city].filter(Boolean).join(", ");
       const serviceName = booking.service?.name || "cleaning";
 
