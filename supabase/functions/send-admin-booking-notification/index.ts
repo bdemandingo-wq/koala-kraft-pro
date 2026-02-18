@@ -80,32 +80,39 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Get business settings for branding
     let companyName = emailSettings.from_name;
+    let orgTimezone = "America/New_York";
     
     if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
       const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
       const { data: settings } = await supabase
         .from('business_settings')
-        .select('company_name')
+        .select('company_name, timezone')
         .eq('organization_id', organizationId)
         .maybeSingle();
       
       if (settings?.company_name) {
         companyName = settings.company_name;
       }
+      if (settings?.timezone) {
+        orgTimezone = settings.timezone;
+      }
     }
 
     const bookingDate = new Date(scheduledAt);
-    const formattedDate = bookingDate.toLocaleDateString('en-US', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
-    const formattedTime = bookingDate.toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
-      minute: '2-digit', 
-      hour12: true 
-    });
+    // Use org timezone to avoid UTC shift in Deno runtime
+    const formattedDate = new Intl.DateTimeFormat('en-US', {
+      timeZone: orgTimezone,
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }).format(bookingDate);
+    const formattedTime = new Intl.DateTimeFormat('en-US', {
+      timeZone: orgTimezone,
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    }).format(bookingDate);
 
     const { data, error: sendError } = await resend.emails.send({
       from: senderFrom,
