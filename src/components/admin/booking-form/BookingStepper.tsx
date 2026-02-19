@@ -439,8 +439,28 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
     let customerId = selectedCustomerId;
 
     if (customerTab === 'new') {
-      const customer = await createCustomer.mutateAsync(newCustomer);
+      // Merge property address into new customer if customer address fields are empty
+      const customerData = { ...newCustomer };
+      if (!customerData.address && address) customerData.address = address;
+      if (!customerData.city && city) customerData.city = city;
+      if (!customerData.state && state) customerData.state = state;
+      if (!customerData.zip_code && zipCode) customerData.zip_code = zipCode;
+      const customer = await createCustomer.mutateAsync(customerData);
       customerId = customer.id;
+    }
+
+    // Sync property address back to existing customer record so it shows in Customers tab
+    if (customerTab === 'existing' && customerId && address && organizationId) {
+      await supabase
+        .from('customers')
+        .update({
+          address: address || null,
+          city: city || null,
+          state: state || null,
+          zip_code: zipCode || null,
+        })
+        .eq('id', customerId)
+        .eq('organization_id', organizationId);
     }
 
     // Parse 24h time format (HH:mm)
