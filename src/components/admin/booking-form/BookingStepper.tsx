@@ -650,10 +650,11 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
           }
         } else if (bookingData.staff_id) {
           // Single staff → one primary assignment
+          // Use null (not 0) when no wage is set, so cleaner_actual_payment remains the source of truth
           await supabase.from('booking_team_assignments').insert({
             booking_id: booking.id,
             staff_id: bookingData.staff_id,
-            pay_share: cleanerWage ? parseFloat(cleanerWage) : 0,
+            pay_share: cleanerWage ? parseFloat(cleanerWage) : null,
             is_primary: true,
             organization_id: organizationId,
           });
@@ -808,10 +809,11 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
             }
           } else if (bookingData.staff_id) {
             // Single staff → one primary assignment only
+            // Use null (not 0) when no wage is set, so cleaner_actual_payment remains the source of truth
             await supabase.from('booking_team_assignments').insert({
               booking_id: newBooking.id,
               staff_id: bookingData.staff_id,
-              pay_share: cleanerWage ? parseFloat(cleanerWage) : 0,
+              pay_share: cleanerWage ? parseFloat(cleanerWage) : null,
               is_primary: true,
               organization_id: organizationId,
             });
