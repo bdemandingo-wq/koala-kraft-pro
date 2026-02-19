@@ -174,6 +174,34 @@ export default function PayrollPage() {
     enabled: !!organizationId,
   });
 
+  // Fetch team assignments for the date range bookings (to capture team member pay)
+  const { data: teamAssignments = [] } = useQuery({
+    queryKey: ['team-assignments-payroll', dateRange, organizationId],
+    queryFn: async () => {
+      if (!organizationId) return [];
+      const toEndOfDay = new Date(dateRange.to);
+      toEndOfDay.setHours(23, 59, 59, 999);
+      // Get all team assignments for bookings in the date range
+      const { data: bookingIds } = await supabase
+        .from('bookings')
+        .select('id')
+        .eq('organization_id', organizationId)
+        .eq('status', 'completed')
+        .gte('scheduled_at', dateRange.from.toISOString())
+        .lte('scheduled_at', toEndOfDay.toISOString());
+      if (!bookingIds?.length) return [];
+      const ids = bookingIds.map((b: any) => b.id);
+      const { data, error } = await supabase
+        .from('booking_team_assignments')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .in('booking_id', ids);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!organizationId,
+  });
+
   // Fetch YTD bookings for 1099 threshold
   const { data: ytdBookings = [] } = useQuery({
     queryKey: ['bookings-ytd', organizationId],
@@ -191,9 +219,45 @@ export default function PayrollPage() {
     },
   });
 
+  // Fetch YTD team assignments for 1099 threshold
+  const { data: ytdTeamAssignments = [] } = useQuery({
+    queryKey: ['team-assignments-ytd', organizationId],
+    queryFn: async () => {
+      if (!organizationId) return [];
+      const yearStart = startOfYear(new Date());
+      const { data: bookingIds } = await supabase
+        .from('bookings')
+        .select('id')
+        .eq('organization_id', organizationId)
+        .eq('status', 'completed')
+        .gte('scheduled_at', yearStart.toISOString());
+      if (!bookingIds?.length) return [];
+      const ids = bookingIds.map((b: any) => b.id);
+      const { data, error } = await supabase
+        .from('booking_team_assignments')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .in('booking_id', ids);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!organizationId,
+  });
+
   // Wage calculation uses shared utility from lib/wageCalculation.ts
   // to ensure portal and payroll always match.
-  const calcWage = (booking: any, staffMember: any) => {
+  const calcWage = (booking: any, staffMember: any, overrideActualPay?: number | null) => {
+    // If a team-level pay_share override is provided, use it directly
+    if (overrideActualPay != null) {
+      const hoursWorked = (booking.cleaner_override_hours) || staffMember?.default_hours || (booking.duration / 60);
+      return {
+        calculatedPay: Number(overrideActualPay),
+        actualPay: Number(overrideActualPay),
+        wageType: 'actual',
+        wageRate: Number(overrideActualPay),
+        hoursWorked,
+      };
+    }
     const result = calculateBookingWage(booking, staffMember);
     return {
       calculatedPay: result.calculatedPay,
@@ -204,15 +268,69 @@ export default function PayrollPage() {
     };
   };
 
+  // Helper: get all pay entries for a staff member across primary + team roles
+  const getStaffPayEntries = (staffId: string, bookingList: any[], assignmentList: any[]) => {
+    const entries: { booking: any; pay: number; hours: number }[] = [];
+    const staffMember = staff.find((s) => s.id === staffId);
+
+    // Primary staff bookings (staff_id on booking)
+    const primaryBookings = bookingList.filter((b: any) => b.staff_id === staffId && b.status === 'completed');
+    for (const b of primaryBookings) {
+      // Check if there's a team assignment for this staff on this booking
+      const assignment = assignmentList.find((a: any) => a.booking_id === b.id && a.staff_id === staffId);
+      // If assignment exists and has a pay_share set, use it; otherwise use booking-level wage calc
+      const payShareOverride = assignment?.pay_share != null ? Number(assignment.pay_share) : null;
+      const wageInfo = calcWage(b, staffMember, payShareOverride);
+      entries.push({ booking: b, pay: wageInfo.calculatedPay, hours: wageInfo.hoursWorked });
+    }
+
+    // Team member bookings (not primary, assigned via booking_team_assignments)
+    const teamEntries = assignmentList.filter((a: any) => a.staff_id === staffId && !primaryBookings.find((b: any) => b.id === a.booking_id));
+    for (const a of teamEntries) {
+      const booking = bookingList.find((b: any) => b.id === a.booking_id && b.status === 'completed');
+      if (!booking) continue;
+      const payShareOverride = a.pay_share != null ? Number(a.pay_share) : null;
+      const wageInfo = calcWage(booking, staffMember, payShareOverride);
+      entries.push({ booking, pay: wageInfo.calculatedPay, hours: wageInfo.hoursWorked });
+    }
+
+    return entries;
+  };
+
   // Detailed booking payroll breakdown
   const bookingPayrollDetails: BookingPayrollDetail[] = useMemo(() => {
-    return bookings
-      .filter((b: any) => b.status === 'completed' && b.staff_id)
-      .map((b: any) => {
-        const staffMember = staff.find((s) => s.id === b.staff_id);
+    const details: BookingPayrollDetail[] = [];
+    const completedBookings = bookings.filter((b: any) => b.status === 'completed' && b.staff_id);
+
+    for (const b of completedBookings) {
+      const staffMember = staff.find((s) => s.id === b.staff_id);
+      // Find team assignments for this booking
+      const assignments = teamAssignments.filter((a: any) => a.booking_id === b.id);
+
+      if (assignments.length > 0) {
+        // Add a row per team member
+        for (const a of assignments) {
+          const member = staff.find((s) => s.id === a.staff_id);
+          const payShareOverride = a.pay_share != null ? Number(a.pay_share) : null;
+          const wageInfo = calcWage(b, member, payShareOverride);
+          details.push({
+            id: `${b.id}-${a.staff_id}`,
+            booking_number: b.booking_number,
+            customer_name: b.customer ? `${b.customer.first_name} ${b.customer.last_name}` : 'Unknown',
+            scheduled_at: b.scheduled_at,
+            duration: b.duration,
+            hours_worked: wageInfo.hoursWorked,
+            wage_type: wageInfo.wageType,
+            wage_rate: wageInfo.wageRate,
+            calculated_pay: wageInfo.calculatedPay,
+            actual_pay: wageInfo.actualPay,
+            staff_name: member?.name || staffMember?.name || 'Unassigned',
+          });
+        }
+      } else {
+        // Single cleaner
         const wageInfo = calcWage(b, staffMember);
-        
-        return {
+        details.push({
           id: b.id,
           booking_number: b.booking_number,
           customer_name: b.customer ? `${b.customer.first_name} ${b.customer.last_name}` : 'Unknown',
@@ -224,44 +342,37 @@ export default function PayrollPage() {
           calculated_pay: wageInfo.calculatedPay,
           actual_pay: wageInfo.actualPay,
           staff_name: staffMember?.name || 'Unassigned',
-        };
-      });
-  }, [bookings, staff]);
+        });
+      }
+    }
+    return details;
+  }, [bookings, staff, teamAssignments]);
 
   // Calculate payroll data - include ALL staff, even those without bookings
+  // Correctly accounts for both primary staff and team member assignments
   const payrollData: StaffWithPayroll[] = useMemo(() => {
     return staff.map((s) => {
-      // Filter completed bookings for this staff member in date range
-      const staffBookings = bookings.filter((b: any) => b.staff_id === s.id && b.status === 'completed');
-      
-      // Calculate totals
-      let totalHours = 0;
-      let totalPay = 0;
-      
-      staffBookings.forEach((b: any) => {
-        const wageInfo = calcWage(b, s);
-        totalHours += wageInfo.hoursWorked;
-        totalPay += wageInfo.calculatedPay;
-      });
+      const entries = getStaffPayEntries(s.id, bookings, teamAssignments);
+      const totalHours = entries.reduce((sum, e) => sum + e.hours, 0);
+      const totalPay = entries.reduce((sum, e) => sum + e.pay, 0);
 
-      // Calculate YTD earnings from completed bookings
-      const ytdStaffBookings = ytdBookings.filter((b: any) => b.staff_id === s.id);
-      let ytdEarnings = 0;
-      ytdStaffBookings.forEach((b: any) => {
-        const wageInfo = calcWage(b, s);
-        ytdEarnings += wageInfo.calculatedPay;
-      });
+      // YTD: same logic using ytd data
+      const ytdEntries = getStaffPayEntries(s.id, ytdBookings, ytdTeamAssignments);
+      const ytdEarnings = ytdEntries.reduce((sum, e) => sum + e.pay, 0);
 
-      // Count upcoming bookings for this staff
-      const upcomingBookings = bookings.filter((b: any) => 
-        b.staff_id === s.id && 
-        !['completed', 'cancelled', 'no_show'].includes(b.status)
+      // Count upcoming bookings for this staff (primary or team)
+      const upcomingPrimary = bookings.filter((b: any) =>
+        b.staff_id === s.id && !['completed', 'cancelled', 'no_show'].includes(b.status)
       ).length;
+      const upcomingTeam = teamAssignments.filter((a: any) => {
+        if (a.staff_id !== s.id) return false;
+        const b = bookings.find((bk: any) => bk.id === a.booking_id);
+        return b && !['completed', 'cancelled', 'no_show'].includes(b.status);
+      }).length;
+      const upcomingBookings = upcomingPrimary + upcomingTeam;
 
-      // Check if 1099 and over $600 threshold
       const requiresTaxFiling = s.tax_classification === '1099' && ytdEarnings >= 600;
-
-      const completedCleans = staffBookings.length;
+      const completedCleans = entries.length;
       const avgPayPerClean = completedCleans > 0 ? totalPay / completedCleans : 0;
 
       return {
@@ -280,7 +391,7 @@ export default function PayrollPage() {
         avgPayPerClean: Math.round(avgPayPerClean * 100) / 100,
       };
     });
-  }, [staff, bookings, ytdBookings]);
+  }, [staff, bookings, ytdBookings, teamAssignments, ytdTeamAssignments]);
 
   // Summary stats
   const totalPayroll = payrollData.reduce((sum, s) => sum + s.totalPay, 0);
