@@ -556,12 +556,12 @@ export function AdjustPaymentDialog({
   const updateBooking = useUpdateBooking();
   const { organizationId } = useOrgId();
 
-  // Primary staff payment (stored on booking)
-  const [primaryPayment, setPrimaryPayment] = useState<string>("");
-  // Team member payments: { staffId -> amount string }
+  // Single cleaner payment (used when no team assignments)
+  const [singlePayment, setSinglePayment] = useState<string>("");
+  // Per-cleaner payments keyed by staff_id (used for team bookings)
   const [teamPayments, setTeamPayments] = useState<Record<string, string>>({});
-  // Team members fetched from booking_team_assignments
-  const [teamMembers, setTeamMembers] = useState<{ id: string; name: string; pay_share: number | null }[]>([]);
+  // All team members from booking_team_assignments
+  const [teamMembers, setTeamMembers] = useState<{ id: string; name: string; pay_share: number | null; is_primary: boolean }[]>([]);
   const [loadingTeam, setLoadingTeam] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -570,46 +570,59 @@ export function AdjustPaymentDialog({
   useEffect(() => {
     if (!open || !booking) return;
 
-    // Reset primary payment
-    setPrimaryPayment(bookingAny?.cleaner_actual_payment != null ? String(bookingAny.cleaner_actual_payment) : "");
+    // Reset single payment from booking record
+    setSinglePayment(bookingAny?.cleaner_actual_payment != null ? String(bookingAny.cleaner_actual_payment) : "");
+    setTeamMembers([]);
+    setTeamPayments({});
 
-    // Fetch team assignments for this booking (org-scoped)
     const fetchTeam = async () => {
       if (!organizationId) return;
       setLoadingTeam(true);
+
       const { data } = await supabase
         .from('booking_team_assignments')
-        .select('staff_id, pay_share, staff:staff(id, name)')
+        .select('staff_id, pay_share, is_primary, staff:staff(id, name)')
         .eq('booking_id', booking.id)
         .eq('organization_id', organizationId);
 
-      if (data && data.length > 0) {
+      if (data && data.length >= 2) {
+        // Truly a team booking — show ALL members individually
         const members = data.map((a: any) => ({
           id: a.staff_id,
           name: a.staff?.name || 'Unknown',
           pay_share: a.pay_share,
+          is_primary: a.is_primary ?? false,
         }));
+
+        // Sort: primary first
+        members.sort((a, b) => (b.is_primary ? 1 : 0) - (a.is_primary ? 1 : 0));
         setTeamMembers(members);
+
         const payments: Record<string, string> = {};
         members.forEach(m => {
-          payments[m.id] = m.pay_share != null ? String(m.pay_share) : "";
+          // For the primary, prefer cleaner_actual_payment from booking if pay_share is null
+          if (m.is_primary && m.pay_share == null && bookingAny?.cleaner_actual_payment != null) {
+            payments[m.id] = String(bookingAny.cleaner_actual_payment);
+          } else {
+            payments[m.id] = m.pay_share != null ? String(m.pay_share) : "";
+          }
         });
         setTeamPayments(payments);
-      } else {
+      } else if (data && data.length === 1) {
+        // Only 1 assignment — treat as single cleaner, keep singlePayment
         setTeamMembers([]);
-        setTeamPayments({});
       }
       setLoadingTeam(false);
     };
 
     fetchTeam();
-  }, [open, booking, organizationId]);
+  }, [open, booking?.id, organizationId]);
 
   if (!booking) return null;
 
-  const isTeamBooking = teamMembers.length > 0;
+  // True team = 2+ members in booking_team_assignments
+  const isTeamBooking = teamMembers.length >= 2;
 
-  // Calculate estimated pay for reference (primary cleaner)
   const calculateEstimatedPay = () => {
     const wage = bookingAny?.cleaner_wage;
     if (!wage) return null;
@@ -626,14 +639,8 @@ export function AdjustPaymentDialog({
     try {
       setSaving(true);
 
-      // Always save primary cleaner payment on the booking record
-      await updateBooking.mutateAsync({
-        id: booking.id,
-        cleaner_actual_payment: primaryPayment ? parseFloat(primaryPayment) : null,
-      });
-
-      // Save individual pay_share for each team member
       if (isTeamBooking && organizationId) {
+        // Save each cleaner's individual pay to booking_team_assignments.pay_share
         for (const member of teamMembers) {
           const amount = teamPayments[member.id];
           await supabase
@@ -643,6 +650,22 @@ export function AdjustPaymentDialog({
             .eq('staff_id', member.id)
             .eq('organization_id', organizationId);
         }
+
+        // Also save primary cleaner's pay to booking.cleaner_actual_payment for payroll parity
+        const primaryMember = teamMembers.find(m => m.is_primary);
+        if (primaryMember) {
+          const primaryAmount = teamPayments[primaryMember.id];
+          await updateBooking.mutateAsync({
+            id: booking.id,
+            cleaner_actual_payment: primaryAmount ? parseFloat(primaryAmount) : null,
+          });
+        }
+      } else {
+        // Single cleaner — save directly on booking
+        await updateBooking.mutateAsync({
+          id: booking.id,
+          cleaner_actual_payment: singlePayment ? parseFloat(singlePayment) : null,
+        });
       }
 
       toast({ title: "Saved", description: "Cleaner payments adjusted successfully" });
@@ -665,6 +688,7 @@ export function AdjustPaymentDialog({
           <DialogTitle>Adjust Cleaner Payment</DialogTitle>
           <DialogDescription>
             Booking #{booking.booking_number}
+            {isTeamBooking ? ` · ${teamMembers.length} cleaners` : booking.staff?.name ? ` · ${booking.staff.name}` : ''}
           </DialogDescription>
         </DialogHeader>
 
@@ -676,7 +700,7 @@ export function AdjustPaymentDialog({
             </div>
             {estimatedPay !== null && !isTeamBooking && (
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Estimated Cleaner Pay:</span>
+                <span className="text-muted-foreground">Estimated Pay:</span>
                 <span className="font-medium">${estimatedPay.toFixed(2)}</span>
               </div>
             )}
@@ -687,49 +711,30 @@ export function AdjustPaymentDialog({
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
             </div>
           ) : isTeamBooking ? (
-            // TEAM BOOKING: individual payment fields per cleaner
+            // TEAM: one field per cleaner, all from booking_team_assignments
             <div className="space-y-3">
-              <p className="text-sm font-semibold">Team Payments</p>
-
-              {/* Primary cleaner */}
-              {booking.staff && (
-                <div className="space-y-1">
-                  <Label className="text-sm text-muted-foreground">
-                    {booking.staff.name} {teamMembers.some(m => m.id === booking.staff?.id) ? '' : '(Primary)'}
+              <p className="text-sm font-semibold">Individual Cleaner Pay</p>
+              {teamMembers.map(member => (
+                <div key={member.id} className="space-y-1">
+                  <Label className="text-sm font-medium">
+                    {member.name}
+                    {member.is_primary && (
+                      <span className="ml-2 text-xs text-muted-foreground font-normal">(Primary)</span>
+                    )}
                   </Label>
                   <div className="relative">
                     <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                       type="number"
-                      value={primaryPayment}
-                      onChange={(e) => setPrimaryPayment(e.target.value)}
+                      value={teamPayments[member.id] ?? ""}
+                      onChange={(e) => setTeamPayments(prev => ({ ...prev, [member.id]: e.target.value }))}
                       placeholder="0.00"
                       className="pl-9"
                       inputMode="decimal"
                     />
                   </div>
                 </div>
-              )}
-
-              {/* Additional team members (exclude primary if already listed) */}
-              {teamMembers
-                .filter(m => m.id !== booking.staff?.id)
-                .map(member => (
-                  <div key={member.id} className="space-y-1">
-                    <Label className="text-sm text-muted-foreground">{member.name}</Label>
-                    <div className="relative">
-                      <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        type="number"
-                        value={teamPayments[member.id] ?? ""}
-                        onChange={(e) => setTeamPayments(prev => ({ ...prev, [member.id]: e.target.value }))}
-                        placeholder="0.00"
-                        className="pl-9"
-                        inputMode="decimal"
-                      />
-                    </div>
-                  </div>
-                ))}
+              ))}
               <p className="text-xs text-muted-foreground">
                 Enter the amount paid to each cleaner individually.
               </p>
@@ -744,8 +749,8 @@ export function AdjustPaymentDialog({
                 <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   type="number"
-                  value={primaryPayment}
-                  onChange={(e) => setPrimaryPayment(e.target.value)}
+                  value={singlePayment}
+                  onChange={(e) => setSinglePayment(e.target.value)}
                   placeholder={estimatedPay ? estimatedPay.toFixed(2) : "0.00"}
                   className="pl-9 text-lg"
                   inputMode="decimal"
