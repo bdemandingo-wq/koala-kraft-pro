@@ -246,22 +246,35 @@ export default function PayrollPage() {
 
   // Wage calculation uses shared utility from lib/wageCalculation.ts
   // to ensure portal and payroll always match.
-  const calcWage = (booking: any, staffMember: any, overrideActualPay?: number | null) => {
-    // If a team-level pay_share override is provided, use it directly
-    if (overrideActualPay != null) {
-      const hoursWorked = (booking.cleaner_override_hours) || staffMember?.default_hours || (booking.duration / 60);
+  // Priority: cleaner_actual_payment (booking-level override) > pay_share (team assignment) > wage formula
+  const calcWage = (booking: any, staffMember: any, payShareOverride?: number | null) => {
+    // 1. booking-level actual payment always wins (matches cleaner portal exactly)
+    if (booking.cleaner_actual_payment != null) {
+      const result = calculateBookingWage(booking, staffMember);
       return {
-        calculatedPay: Number(overrideActualPay),
-        actualPay: Number(overrideActualPay),
-        wageType: 'actual',
-        wageRate: Number(overrideActualPay),
-        hoursWorked,
+        calculatedPay: result.calculatedPay,
+        actualPay: Number(booking.cleaner_actual_payment),
+        wageType: result.wageType,
+        wageRate: result.wageRate,
+        hoursWorked: result.hoursWorked,
       };
     }
+    // 2. team-level pay_share override (set via "Adjust Pay" on team assignments)
+    if (payShareOverride != null) {
+      const result = calculateBookingWage(booking, staffMember);
+      return {
+        calculatedPay: Number(payShareOverride),
+        actualPay: Number(payShareOverride),
+        wageType: 'actual',
+        wageRate: Number(payShareOverride),
+        hoursWorked: result.hoursWorked,
+      };
+    }
+    // 3. standard formula (hourly/flat/percentage) — same as cleaner portal
     const result = calculateBookingWage(booking, staffMember);
     return {
       calculatedPay: result.calculatedPay,
-      actualPay: booking.cleaner_actual_payment ? Number(booking.cleaner_actual_payment) : null,
+      actualPay: null,
       wageType: result.wageType,
       wageRate: result.wageRate,
       hoursWorked: result.hoursWorked,
