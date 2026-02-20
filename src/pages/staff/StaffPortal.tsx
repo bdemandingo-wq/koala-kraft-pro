@@ -64,6 +64,7 @@ interface StaffInfo {
   home_address: string | null;
   home_latitude: number | null;
   home_longitude: number | null;
+  organization_id: string | null;
 }
 
 export default function StaffPortal() {
@@ -81,7 +82,7 @@ export default function StaffPortal() {
 
       const { data, error } = await supabase
         .from('staff')
-        .select('id, name, email, phone, bio, avatar_url, hourly_rate, base_wage, percentage_rate, tax_classification, default_hours, home_address, home_latitude, home_longitude')
+        .select('id, name, email, phone, bio, avatar_url, hourly_rate, base_wage, percentage_rate, tax_classification, default_hours, home_address, home_latitude, home_longitude, organization_id')
         .eq('user_id', user.id)
         .single();
 
@@ -261,10 +262,11 @@ export default function StaffPortal() {
     enabled: !!staffInfo?.id,
   });
 
-  // Fetch unassigned bookings
+  // Fetch unassigned bookings - scoped to staff's organization
   const { data: unassignedBookings = [], isLoading: loadingUnassigned } = useQuery({
-    queryKey: ['staff-bookings', 'unassigned'],
+    queryKey: ['staff-bookings', 'unassigned', staffInfo?.organization_id],
     queryFn: async () => {
+      if (!staffInfo?.organization_id) return [];
       const { data, error } = await supabase
         .from('bookings')
         .select(`
@@ -274,16 +276,17 @@ export default function StaffPortal() {
           customer:customers(first_name, last_name, phone),
           service:services(name)
         `)
+        .eq('organization_id', staffInfo.organization_id)
         .is('staff_id', null)
         .in('status', ['pending', 'confirmed'])
         .gte('scheduled_at', new Date().toISOString())
         .order('scheduled_at', { ascending: true });
 
       if (error) throw error;
-      setNewJobAlert(false); // Clear alert when data refreshes
+      setNewJobAlert(false);
       return data as Booking[];
     },
-    enabled: !!staffInfo?.id,
+    enabled: !!staffInfo?.id && !!staffInfo?.organization_id,
   });
 
   // Fetch job history (completed, cancelled, no_show)
