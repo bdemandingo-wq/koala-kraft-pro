@@ -1,4 +1,5 @@
 import { ReactNode, Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
+import AdminHelpChat from './AdminHelpChat';
 import { AdminSidebar } from './AdminSidebar';
 import { AdminHeader } from './AdminHeader';
 import { OfflineIndicator } from './OfflineIndicator';
@@ -114,6 +115,7 @@ export function AdminLayout({ children, title, subtitle, actions }: AdminLayoutP
       )}
       
       <OfflineIndicator />
+      <AdminHelpChat />
     </div>
   );
 }
