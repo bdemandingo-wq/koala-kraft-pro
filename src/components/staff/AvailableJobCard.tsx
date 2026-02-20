@@ -61,39 +61,19 @@ export function AvailableJobCard({ booking, staffInfo, onAssign, isAssigning, cl
   const isClaimingThisJob = isAssigning && claimingBookingId === booking.id;
 
   // Calculate potential earnings based on staff pay type
+  // Priority: staff's own rate type wins over booking-level wage type
   const calculatePotentialEarnings = (): { amount: number; type: string } => {
     const defaultHours = staffInfo.default_hours || 5;
-    
-    // If booking has specific cleaner wage set
-    if (booking.cleaner_wage && booking.cleaner_wage_type) {
-      if (booking.cleaner_wage_type === 'percentage') {
-        return {
-          amount: (booking.total_amount * booking.cleaner_wage) / 100,
-          type: 'Based on job value',
-        };
-      } else if (booking.cleaner_wage_type === 'flat') {
-        return {
-          amount: booking.cleaner_wage,
-          type: 'Flat rate',
-        };
-      } else {
-        // Hourly wage from booking
-        return {
-          amount: booking.cleaner_wage * defaultHours,
-          type: `$${booking.cleaner_wage}/hr × ${defaultHours}hrs`,
-        };
-      }
-    }
 
-    // Fall back to staff's default rates - check percentage first (most common)
+    // Staff percentage rate takes priority — even if booking says "flat"
     if (staffInfo.percentage_rate && staffInfo.percentage_rate > 0) {
       return {
         amount: (booking.total_amount * staffInfo.percentage_rate) / 100,
-        type: 'Based on job value',
+        type: `${staffInfo.percentage_rate}% of job value`,
       };
     }
 
-    // Then check hourly rate
+    // Staff hourly rate takes priority — even if booking says "flat"
     if (staffInfo.hourly_rate && staffInfo.hourly_rate > 0) {
       return {
         amount: staffInfo.hourly_rate * defaultHours,
@@ -101,11 +81,27 @@ export function AvailableJobCard({ booking, staffInfo, onAssign, isAssigning, cl
       };
     }
 
-    // Default estimate if no wage info
-    return {
-      amount: 0,
-      type: 'TBD',
-    };
+    // No staff-level rate set — fall back to booking-level wage
+    if (booking.cleaner_wage && booking.cleaner_wage_type) {
+      if (booking.cleaner_wage_type === 'percentage') {
+        return {
+          amount: (booking.total_amount * booking.cleaner_wage) / 100,
+          type: `${booking.cleaner_wage}% of job value`,
+        };
+      } else if (booking.cleaner_wage_type === 'flat') {
+        return {
+          amount: booking.cleaner_wage,
+          type: 'Flat rate',
+        };
+      } else {
+        return {
+          amount: booking.cleaner_wage * defaultHours,
+          type: `$${booking.cleaner_wage}/hr × ${defaultHours}hrs`,
+        };
+      }
+    }
+
+    return { amount: 0, type: 'TBD' };
   };
 
   const earnings = calculatePotentialEarnings();
