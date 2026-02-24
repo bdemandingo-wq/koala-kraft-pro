@@ -68,68 +68,89 @@ const TIME_SLOTS = Array.from({ length: 19 }, (_, i) => {
   return `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`;
 });
 
-function computeNextDate(booking: RecurringBooking): Date | null {
+/**
+ * Compute the next date for a recurring booking based on the client's
+ * actual latest booking (anchor), NOT from "today".
+ *
+ * @param booking - the recurring template
+ * @param latestBookingDate - the latest existing booking date for this customer+service (or null)
+ * @param existingBookingDates - set of ISO date strings (YYYY-MM-DD) already booked for this customer
+ */
+function computeNextDate(
+  booking: RecurringBooking,
+  latestBookingDate: Date | null,
+  existingBookingDates?: Set<string>
+): Date | null {
   if (booking.frequency === 'anyday') return null;
 
-  // Use the last generated date as base; fall back to today
-  const base = booking.next_scheduled_at
-    ? startOfDay(new Date(booking.next_scheduled_at))
-    : startOfDay(new Date());
+  const now = new Date();
 
-  const selectedDays = (booking.recurring_days_of_week || []).filter(
-    (d) => Number.isInteger(d) && d >= 0 && d <= 6
-  );
-
-  // If we already have a stored next_scheduled_at that's in the future, use it
-  if (booking.next_scheduled_at) {
-    const stored = new Date(booking.next_scheduled_at);
-    if (!isBefore(stored, new Date())) {
-      return stored;
-    }
-    // Stored date is in the past — compute next from it
-  }
-
-  // Multi-day schedule: find the soonest upcoming weekday after base
-  if (selectedDays.length > 0) {
-    let nearest: Date | null = null;
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const searchStart = startOfDay(isBefore(base, tomorrow) ? tomorrow : base);
-
-    for (const dayIndex of selectedDays) {
-      let cursor = new Date(searchStart);
-      let safety = 0;
-      while (cursor.getDay() !== dayIndex && safety < 8) {
-        cursor.setDate(cursor.getDate() + 1);
-        safety++;
-      }
-      if (!nearest || isBefore(cursor, nearest)) {
-        nearest = cursor;
-      }
-    }
-    return nearest;
-  }
-
-  // Single-frequency: advance from base by the correct interval
-  let nextDate = new Date(base);
-  if (booking.frequency === 'weekly') {
-    nextDate = addWeeks(nextDate, 1);
-  } else if (booking.frequency === 'biweekly') {
-    nextDate = addWeeks(nextDate, 2);
-  } else if (booking.frequency === 'triweekly') {
-    nextDate = addWeeks(nextDate, 3);
+  // Determine the anchor: latest actual booking > stored next_scheduled_at > created_at
+  let anchor: Date;
+  if (latestBookingDate) {
+    anchor = startOfDay(latestBookingDate);
+  } else if (booking.next_scheduled_at) {
+    anchor = startOfDay(new Date(booking.next_scheduled_at));
   } else {
-    nextDate = addMonths(nextDate, 1);
+    anchor = startOfDay(new Date(booking.created_at));
   }
 
-  // Ensure it lands on the preferred day
-  if (booking.preferred_day !== null) {
-    while (nextDate.getDay() !== booking.preferred_day) {
+  const intervalAdder = getIntervalAdder(booking.frequency);
+  const preferredDay = booking.preferred_day;
+
+  // Advance from anchor by interval, then align to preferred day
+  let nextDate = intervalAdder(anchor);
+
+  // Align to preferred weekday
+  if (preferredDay !== null) {
+    // Find the nearest occurrence of preferredDay on or after nextDate
+    while (nextDate.getDay() !== preferredDay) {
       nextDate = addDays(nextDate, 1);
     }
   }
 
+  // Keep advancing until we're past the latest existing booking AND in the future
+  const mustBeAfter = latestBookingDate ? startOfDay(latestBookingDate) : startOfDay(now);
+  let safety = 0;
+  while ((isBefore(nextDate, mustBeAfter) || isBefore(nextDate, startOfDay(now))) && safety < 200) {
+    nextDate = intervalAdder(nextDate);
+    if (preferredDay !== null) {
+      while (nextDate.getDay() !== preferredDay) {
+        nextDate = addDays(nextDate, 1);
+      }
+    }
+    safety++;
+  }
+
+  // Conflict protection: skip dates that already have a booking
+  if (existingBookingDates) {
+    let conflictSafety = 0;
+    while (existingBookingDates.has(formatDateKey(nextDate)) && conflictSafety < 52) {
+      nextDate = intervalAdder(nextDate);
+      if (preferredDay !== null) {
+        while (nextDate.getDay() !== preferredDay) {
+          nextDate = addDays(nextDate, 1);
+        }
+      }
+      conflictSafety++;
+    }
+  }
+
   return nextDate;
+}
+
+function getIntervalAdder(frequency: string): (d: Date) => Date {
+  switch (frequency) {
+    case 'weekly': return (d) => addWeeks(d, 1);
+    case 'biweekly': return (d) => addWeeks(d, 2);
+    case 'triweekly': return (d) => addWeeks(d, 3);
+    case 'monthly': return (d) => addMonths(d, 1);
+    default: return (d) => addMonths(d, 1);
+  }
+}
+
+function formatDateKey(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
 export default function RecurringBookingsPage() {
@@ -161,6 +182,39 @@ export default function RecurringBookingsPage() {
     },
     enabled: !!organization?.id,
   });
+
+  // Fetch ALL bookings for this org to find each recurring client's latest booking
+  const { data: allOrgBookings = [] } = useQuery({
+    queryKey: ['all-bookings-for-recurring', organization?.id],
+    queryFn: async () => {
+      if (!organization?.id) return [];
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('id, customer_id, service_id, scheduled_at, status')
+        .eq('organization_id', organization.id)
+        .neq('status', 'cancelled')
+        .order('scheduled_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!organization?.id,
+    staleTime: 1000 * 60 * 2,
+  });
+
+  // Build lookup maps: latest booking date + existing date sets per customer+service
+  const latestBookingMap = new Map<string, Date>();
+  const existingDatesMap = new Map<string, Set<string>>();
+  for (const b of allOrgBookings) {
+    const key = `${b.customer_id}__${b.service_id}`;
+    const bDate = new Date(b.scheduled_at);
+    if (!latestBookingMap.has(key) || bDate > latestBookingMap.get(key)!) {
+      latestBookingMap.set(key, bDate);
+    }
+    if (!existingDatesMap.has(key)) {
+      existingDatesMap.set(key, new Set());
+    }
+    existingDatesMap.get(key)!.add(formatDateKey(startOfDay(bDate)));
+  }
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -233,10 +287,6 @@ export default function RecurringBookingsPage() {
       return;
     }
 
-    const selectedDays = (recurring.recurring_days_of_week || []).filter(
-      (d) => Number.isInteger(d) && d >= 0 && d <= 6
-    );
-
     const applyTime = (date: Date) => {
       if (recurring.preferred_time) {
         const [time, period] = recurring.preferred_time.split(' ');
@@ -266,61 +316,36 @@ export default function RecurringBookingsPage() {
       recurring_days_of_week: recurring.recurring_days_of_week,
     };
 
-    const bookingsToInsert: any[] = [];
+    // Use the same anchor logic as computeNextDate
+    const key = `${recurring.customer_id}__${recurring.service_id}`;
+    const latestDate = latestBookingMap.get(key) || null;
+    const existingDates = existingDatesMap.get(key);
+    const nextDate = computeNextDate(recurring, latestDate, existingDates);
 
-    if (selectedDays.length > 0) {
-      // Generate next occurrence for EACH selected weekday
-      const today = new Date();
-      for (const dayIndex of selectedDays) {
-        let cursor = new Date(today);
-        cursor.setDate(cursor.getDate() + 1); // start from tomorrow
-        let safety = 0;
-        while (cursor.getDay() !== dayIndex && safety < 8) {
-          cursor.setDate(cursor.getDate() + 1);
-          safety++;
-        }
-        bookingsToInsert.push({
-          ...baseBooking,
-          scheduled_at: applyTime(new Date(cursor)).toISOString(),
-        });
-      }
-    } else {
-      // Original single-booking logic
-      let nextDate = new Date();
-      if (recurring.frequency === 'weekly') {
-        nextDate = addWeeks(nextDate, 1);
-      } else if (recurring.frequency === 'biweekly') {
-        nextDate = addWeeks(nextDate, 2);
-      } else if (recurring.frequency === 'triweekly') {
-        nextDate = addWeeks(nextDate, 3);
-      } else {
-        nextDate = addMonths(nextDate, 1);
-      }
-      if (recurring.preferred_day !== null) {
-        while (nextDate.getDay() !== recurring.preferred_day) {
-          nextDate = addDays(nextDate, 1);
-        }
-      }
-      bookingsToInsert.push({
-        ...baseBooking,
-        scheduled_at: applyTime(new Date(nextDate)).toISOString(),
-      });
+    if (!nextDate) {
+      toast.error('Could not compute next date');
+      return;
     }
 
-    const { error } = await supabase.from('bookings').insert(bookingsToInsert);
+    const scheduledAt = applyTime(new Date(nextDate)).toISOString();
+
+    const { error } = await supabase.from('bookings').insert([{
+      ...baseBooking,
+      scheduled_at: scheduledAt,
+    }]);
 
     if (error) {
-      toast.error('Failed to generate booking(s)');
+      toast.error('Failed to generate booking');
     } else {
-      const lastDate = bookingsToInsert[bookingsToInsert.length - 1].scheduled_at;
       await supabase.from('recurring_bookings').update({
         last_generated_at: new Date().toISOString(),
-        next_scheduled_at: lastDate,
+        next_scheduled_at: scheduledAt,
       }).eq('id', recurring.id);
       
       queryClient.invalidateQueries({ queryKey: ['recurring-bookings'] });
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
-      toast.success(`${bookingsToInsert.length} booking(s) generated`);
+      queryClient.invalidateQueries({ queryKey: ['all-bookings-for-recurring'] });
+      toast.success('Booking generated');
     }
   };
 
@@ -427,7 +452,10 @@ export default function RecurringBookingsPage() {
                     </TableCell>
                     <TableCell>
                       {(() => {
-                        const nextDate = computeNextDate(booking);
+                        const key = `${booking.customer_id}__${booking.service_id}`;
+                        const latestDate = latestBookingMap.get(key) || null;
+                        const existingDates = existingDatesMap.get(key);
+                        const nextDate = computeNextDate(booking, latestDate, existingDates);
                         return nextDate ? (
                           format(nextDate, 'MMM d, yyyy')
                         ) : (
