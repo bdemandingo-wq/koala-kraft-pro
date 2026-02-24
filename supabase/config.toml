@@ -185,3 +185,6 @@ verify_jwt = false
 
 [functions.process-migration-import]
 verify_jwt = false
+
+[functions.check-availability]
+verify_jwt = false

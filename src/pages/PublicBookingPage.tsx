@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,6 +27,7 @@ import {
   Gift,
   CreditCard,
   Lock,
+  Globe,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
@@ -36,16 +37,20 @@ import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { applyPublicBranding, clearPublicBranding } from '@/hooks/useBrandingColors';
 import { StripeCardForm } from '@/components/stripe/StripeCardForm';
+import { selectedDateTimeToUTCISO } from '@/lib/timezoneUtils';
 
-// Generate 30-minute time slots from 8:00 AM to 5:00 PM in 12-hour format
-const timeSlots = Array.from({ length: 19 }, (_, i) => {
-  const totalMinutes = 8 * 60 + i * 30;
-  const hour = Math.floor(totalMinutes / 60);
-  const minute = totalMinutes % 60;
-  const period = hour >= 12 ? 'PM' : 'AM';
-  const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-  return `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`;
-});
+interface AvailabilitySlot {
+  time: string; // "HH:mm" in org timezone
+  available: boolean;
+}
+
+// Format 24h time to 12h display
+function formatTime24to12(time24: string): string {
+  const [h, m] = time24.split(':').map(Number);
+  const period = h >= 12 ? 'PM' : 'AM';
+  const displayHour = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  return `${displayHour}:${String(m).padStart(2, '0')} ${period}`;
+}
 
 export default function PublicBookingPage() {
   const { orgSlug } = useParams<{ orgSlug: string }>();
@@ -59,10 +64,14 @@ export default function PublicBookingPage() {
   const [selectedHomeCondition, setSelectedHomeCondition] = useState<string | null>(null);
   const [selectedFrequency, setSelectedFrequency] = useState<string>('one-time');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [selectedTime, setSelectedTime] = useState<string | null>(null); // "HH:mm" 24h format
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmationNumber, setConfirmationNumber] = useState<string>('');
   const [cardSaved, setCardSaved] = useState(false);
+  const [availableSlots, setAvailableSlots] = useState<AvailabilitySlot[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [orgTimezone, setOrgTimezone] = useState<string>('America/New_York');
+  const [customerTimezone] = useState<string>(() => Intl.DateTimeFormat().resolvedOptions().timeZone);
   const [customerInfo, setCustomerInfo] = useState({
     name: '',
     email: '',
@@ -95,6 +104,36 @@ export default function PublicBookingPage() {
   const isLight = bookingFormTheme === 'light';
 
   // Apply org branding colors once when loaded (no re-renders)
+  // Fetch availability when date or service changes
+  const fetchAvailability = useCallback(async () => {
+    if (!selectedDate || !organizationId) return;
+    setLoadingSlots(true);
+    setSelectedTime(null);
+    try {
+      // Format date as YYYY-MM-DD in customer's local perspective
+      const y = selectedDate.getFullYear();
+      const m = String(selectedDate.getMonth() + 1).padStart(2, '0');
+      const d = String(selectedDate.getDate()).padStart(2, '0');
+      const dateStr = `${y}-${m}-${d}`;
+
+      const { data, error } = await supabase.functions.invoke('check-availability', {
+        body: { organization_id: organizationId, date: dateStr, service_id: selectedService },
+      });
+
+      if (error) throw error;
+      setAvailableSlots(data?.slots || []);
+      if (data?.timezone) setOrgTimezone(data.timezone);
+    } catch (err) {
+      console.error('Failed to fetch availability:', err);
+      setAvailableSlots([]);
+    } finally {
+      setLoadingSlots(false);
+    }
+  }, [selectedDate, organizationId, selectedService]);
+
+  useEffect(() => {
+    fetchAvailability();
+  }, [fetchAvailability]);
   useEffect(() => {
     // If a custom accent color is set via form colors, use it as the primary branding color
     const effectivePrimary = formColors.accent || primaryColor;
@@ -200,17 +239,8 @@ export default function PublicBookingPage() {
 
   const buildScheduledAt = () => {
     if (!selectedDate || !selectedTime) return new Date().toISOString();
-    const date = new Date(selectedDate);
-    const match = selectedTime.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
-    if (match) {
-      let hour = parseInt(match[1]);
-      const minute = parseInt(match[2]);
-      const period = match[3].toUpperCase();
-      if (period === 'PM' && hour !== 12) hour += 12;
-      if (period === 'AM' && hour === 12) hour = 0;
-      date.setHours(hour, minute, 0, 0);
-    }
-    return date.toISOString();
+    // selectedTime is "HH:mm" in org timezone, convert to UTC
+    return selectedDateTimeToUTCISO(selectedDate, selectedTime, orgTimezone);
   };
 
   const handleNext = async () => {
@@ -237,7 +267,7 @@ export default function PublicBookingPage() {
             zip_code: customerInfo.zipCode,
             service_name: service?.name || '',
             scheduled_at: scheduledAt,
-            duration: service ? 120 : 120,
+            duration: service?.duration || 120,
             total_amount: calculateTotal(),
             frequency: selectedFrequency,
             notes: customerInfo.notes || undefined,
@@ -250,7 +280,14 @@ export default function PublicBookingPage() {
 
         if (webhookError) {
           console.error('Booking creation error:', webhookError);
-          toast.error('Failed to create booking. Please try again.');
+          // Check for conflict (double-booking)
+          if (webhookResult?.conflict) {
+            toast.error("That time was just booked — pick another time.");
+            setStep(2);
+            fetchAvailability(); // Refresh slots
+          } else {
+            toast.error('Failed to create booking. Please try again.');
+          }
           setIsSubmitting(false);
           return;
         }
@@ -736,35 +773,48 @@ export default function PublicBookingPage() {
                 </Card>
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Select Time</CardTitle>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      Select Time
+                      <span className="text-xs font-normal text-muted-foreground flex items-center gap-1">
+                        <Globe className="w-3 h-3" />
+                        {orgTimezone.replace(/_/g, ' ')}
+                      </span>
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {selectedDate ? (
-                      <div className="grid grid-cols-2 gap-2 max-h-[400px] overflow-y-auto pr-1">
-                        {timeSlots.map((time) => {
-                          const available = true;
-                          return (
-                            <Button
-                              key={time}
-                              variant={selectedTime === time ? 'default' : 'outline'}
-                              className={cn(
-                                'h-12 transition-all duration-200',
-                                selectedTime === time && 'ring-2 ring-primary/30 shadow-md',
-                                !available && 'opacity-50 cursor-not-allowed'
-                              )}
-                              disabled={!available}
-                              onClick={() => setSelectedTime(time)}
-                            >
-                              <Clock className="w-4 h-4 mr-2" />
-                              {time}
-                            </Button>
-                          );
-                        })}
-                      </div>
-                    ) : (
+                    {!selectedDate ? (
                       <p className="text-muted-foreground text-center py-8">
                         Please select a date first
                       </p>
+                    ) : loadingSlots ? (
+                      <div className="flex items-center justify-center py-8 gap-2">
+                        <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                        <span className="text-muted-foreground">Loading availability...</span>
+                      </div>
+                    ) : availableSlots.length === 0 ? (
+                      <div className="text-center py-8">
+                        <p className="text-muted-foreground mb-2">No available time slots for this date.</p>
+                        <p className="text-sm text-muted-foreground">Please select a different date.</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-2 max-h-[400px] overflow-y-auto pr-1">
+                        {availableSlots.map((slot) => (
+                          <Button
+                            key={slot.time}
+                            variant={selectedTime === slot.time ? 'default' : 'outline'}
+                            className={cn(
+                              'h-12 transition-all duration-200',
+                              selectedTime === slot.time && 'ring-2 ring-primary/30 shadow-md',
+                              !slot.available && 'opacity-40 cursor-not-allowed line-through'
+                            )}
+                            disabled={!slot.available}
+                            onClick={() => setSelectedTime(slot.time)}
+                          >
+                            <Clock className="w-4 h-4 mr-2" />
+                            {formatTime24to12(slot.time)}
+                          </Button>
+                        ))}
+                      </div>
                     )}
                   </CardContent>
                 </Card>
@@ -1011,7 +1061,7 @@ export default function PublicBookingPage() {
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Time</p>
-                      <p className="font-medium">{selectedTime}</p>
+                      <p className="font-medium">{selectedTime ? formatTime24to12(selectedTime) : ''}</p>
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Customer</p>

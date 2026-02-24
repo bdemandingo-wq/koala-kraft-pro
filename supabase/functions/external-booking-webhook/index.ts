@@ -161,6 +161,83 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
+    // --- Server-side availability re-check to prevent double-booking ---
+    try {
+      const scheduledDate = new Date(payload.scheduled_at);
+
+      // Get org timezone
+      const { data: bizSettings } = await supabase
+        .from('business_settings')
+        .select('timezone, booking_buffer_minutes')
+        .eq('organization_id', organizationId)
+        .maybeSingle();
+
+      const orgTimezone = bizSettings?.timezone || 'America/New_York';
+      const bufferMinutes = bizSettings?.booking_buffer_minutes || 0;
+
+      // Get service duration
+      let serviceDuration = 120;
+      if (serviceId) {
+        const { data: svcData } = await supabase
+          .from('services')
+          .select('duration')
+          .eq('id', serviceId)
+          .maybeSingle();
+        if (svcData?.duration) serviceDuration = svcData.duration;
+      }
+
+      // Check for overlapping bookings with any staff
+      const slotStart = scheduledDate;
+      const slotEnd = new Date(scheduledDate.getTime() + serviceDuration * 60000);
+
+      // Find bookings that overlap with this slot
+      const { data: conflictingBookings } = await supabase
+        .from('bookings')
+        .select('id, staff_id, scheduled_at, duration')
+        .eq('organization_id', organizationId)
+        .in('status', ['pending', 'confirmed'])
+        .gte('scheduled_at', new Date(slotStart.getTime() - 24 * 60 * 60000).toISOString())
+        .lte('scheduled_at', new Date(slotEnd.getTime() + 24 * 60 * 60000).toISOString());
+
+      // Get all active staff
+      const { data: activeStaff } = await supabase
+        .from('staff')
+        .select('id')
+        .eq('organization_id', organizationId)
+        .eq('is_active', true);
+
+      const staffIds = (activeStaff || []).map((s: any) => s.id);
+
+      // Check if ANY staff is available for this slot
+      const slotStartMs = slotStart.getTime();
+      const slotEndMs = slotEnd.getTime();
+
+      const busyStaff = new Set<string>();
+      for (const cb of (conflictingBookings || [])) {
+        const cbStart = new Date(cb.scheduled_at).getTime();
+        const cbEnd = cbStart + ((cb.duration || 120) + bufferMinutes) * 60000;
+        if (slotStartMs < cbEnd && slotEndMs > cbStart) {
+          if (cb.staff_id) busyStaff.add(cb.staff_id);
+        }
+      }
+
+      const availableStaff = staffIds.filter(id => !busyStaff.has(id));
+      if (staffIds.length > 0 && availableStaff.length === 0) {
+        console.log("[external-booking-webhook] Slot conflict detected, no available staff");
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: "That time was just booked—pick another time.",
+            conflict: true 
+          }),
+          { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    } catch (conflictErr) {
+      console.error("[external-booking-webhook] Conflict check error (non-blocking):", conflictErr);
+      // Non-blocking - continue with booking creation
+    }
+
     // Create the booking
     const { data: booking, error: bookingError } = await supabase
       .from('bookings')
