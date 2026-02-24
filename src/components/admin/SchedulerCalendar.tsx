@@ -26,6 +26,7 @@ import {
   GripVertical,
   Users,
   Copy,
+  Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,10 +37,20 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
-import { useBookings, useUpdateBooking, BookingWithDetails } from '@/hooks/useBookings';
+import { useBookings, useUpdateBooking, useDeleteBooking, BookingWithDetails } from '@/hooks/useBookings';
 import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, addMonths, subMonths, startOfMonth, endOfMonth, addDays, isSameDay, setHours, setMinutes, parseISO } from 'date-fns';
 import { AddBookingDialog } from './AddBookingDialog';
 import { useTestMode } from '@/contexts/TestModeContext';
@@ -139,6 +150,26 @@ function DroppableDay({ id, disabled, className, children }: DroppableDayProps) 
       )}
     >
       {children}
+    </div>
+  );
+}
+
+function TrashDropZone({ visible }: { visible: boolean }) {
+  const { isOver, setNodeRef } = useDroppable({ id: 'trash-zone' });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn(
+        'flex items-center gap-2 px-4 py-2 rounded-lg border-2 border-dashed transition-all duration-300',
+        visible ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none h-0 py-0 overflow-hidden',
+        isOver
+          ? 'border-destructive bg-destructive/10 text-destructive scale-110'
+          : 'border-muted-foreground/30 text-muted-foreground'
+      )}
+    >
+      <Trash2 className={cn('w-5 h-5 transition-transform', isOver && 'animate-bounce')} />
+      <span className="text-sm font-medium">Drop here to delete</span>
     </div>
   );
 }
@@ -255,7 +286,8 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
     return map;
   }, [allTeamAssignments]);
   const updateBooking = useUpdateBooking();
-
+  const deleteBooking = useDeleteBooking();
+  const [trashConfirmBooking, setTrashConfirmBooking] = useState<BookingWithDetails | null>(null);
   // Fetch staff for color consistency
   const { data: staffList = [] } = useQuery({
     queryKey: ['staff-for-calendar', organization?.id],
@@ -388,13 +420,21 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
     if (!over) return;
 
     const bookingId = active.id as string;
-    const targetDateStr = over.id as string;
+    const targetId = over.id as string;
+    const booking = allBookings.find(b => b.id === bookingId);
+    if (!booking) return;
 
-    if (!targetDateStr.startsWith('day-')) return;
+    // Handle trash drop
+    if (targetId === 'trash-zone') {
+      setActiveBooking(null);
+      setTrashConfirmBooking(booking);
+      return;
+    }
+
+    if (!targetId.startsWith('day-')) return;
 
     // Parse the date string properly to avoid timezone offset issues
-    const targetDate = parseISO(targetDateStr.replace('day-', ''));
-    const booking = allBookings.find(b => b.id === bookingId);
+    const targetDate = parseISO(targetId.replace('day-', ''));
 
     if (!booking) return;
 
@@ -665,6 +705,7 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
               <Plus className="w-4 h-4" />
               Add Booking
             </Button>
+            <TrashDropZone visible={!!activeBooking} />
           </div>
         </div>
 
@@ -969,6 +1010,45 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
             }, 100);
           }}
         />
+
+        {/* Trash Confirmation Dialog */}
+        <AlertDialog open={!!trashConfirmBooking} onOpenChange={(open) => !open && setTrashConfirmBooking(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Booking</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete the booking for{' '}
+                <span className="font-semibold text-foreground">
+                  {trashConfirmBooking?.customer
+                    ? `${trashConfirmBooking.customer.first_name} ${trashConfirmBooking.customer.last_name}`
+                    : 'Unknown Customer'}
+                </span>
+                {trashConfirmBooking?.scheduled_at && (
+                  <> on {formatInTimezone(trashConfirmBooking.scheduled_at, orgTimezone, { weekday: 'long', month: 'long', day: 'numeric' })}</>
+                )}
+                ? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={async () => {
+                  if (!trashConfirmBooking) return;
+                  try {
+                    await deleteBooking.mutateAsync(trashConfirmBooking.id);
+                    setTrashConfirmBooking(null);
+                  } catch (err) {
+                    console.error('Delete failed:', err);
+                  }
+                }}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </DndContext>
   );
