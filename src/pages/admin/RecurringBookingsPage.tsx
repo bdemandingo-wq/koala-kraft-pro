@@ -32,7 +32,7 @@ import { Plus, Calendar, RefreshCw, Pause, Play, Trash2, Edit } from 'lucide-rea
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
-import { format, addDays, addWeeks, addMonths } from 'date-fns';
+import { format, addDays, addWeeks, addMonths, isBefore, startOfDay } from 'date-fns';
 import { useCustomers, useServices, useStaff } from '@/hooks/useBookings';
 import { useOrganization } from '@/contexts/OrganizationContext';
 
@@ -67,6 +67,51 @@ const TIME_SLOTS = Array.from({ length: 19 }, (_, i) => {
   const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
   return `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`;
 });
+
+function computeNextDate(booking: RecurringBooking): Date | null {
+  const today = startOfDay(new Date());
+  const selectedDays = (booking.recurring_days_of_week || []).filter(
+    (d) => Number.isInteger(d) && d >= 0 && d <= 6
+  );
+
+  if (booking.frequency === 'anyday') return null;
+
+  // If multi-day schedule, find the soonest upcoming weekday
+  if (selectedDays.length > 0) {
+    let nearest: Date | null = null;
+    for (const dayIndex of selectedDays) {
+      let cursor = new Date(today);
+      // Find next occurrence of this weekday (today or later)
+      let safety = 0;
+      while (cursor.getDay() !== dayIndex && safety < 8) {
+        cursor.setDate(cursor.getDate() + 1);
+        safety++;
+      }
+      if (!nearest || isBefore(cursor, nearest)) {
+        nearest = cursor;
+      }
+    }
+    return nearest;
+  }
+
+  // Single-day frequency logic
+  let nextDate = new Date(today);
+  if (booking.frequency === 'weekly') {
+    nextDate = addWeeks(nextDate, 1);
+  } else if (booking.frequency === 'biweekly') {
+    nextDate = addWeeks(nextDate, 2);
+  } else if (booking.frequency === 'triweekly') {
+    nextDate = addWeeks(nextDate, 3);
+  } else {
+    nextDate = addMonths(nextDate, 1);
+  }
+  if (booking.preferred_day !== null) {
+    while (nextDate.getDay() !== booking.preferred_day) {
+      nextDate = addDays(nextDate, 1);
+    }
+  }
+  return nextDate;
+}
 
 export default function RecurringBookingsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -362,11 +407,14 @@ export default function RecurringBookingsPage() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {booking.next_scheduled_at ? (
-                        format(new Date(booking.next_scheduled_at), 'MMM d, yyyy')
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
+                      {(() => {
+                        const nextDate = computeNextDate(booking);
+                        return nextDate ? (
+                          format(nextDate, 'MMM d, yyyy')
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        );
+                      })()}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
