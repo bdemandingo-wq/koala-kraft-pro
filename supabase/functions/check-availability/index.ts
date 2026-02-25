@@ -123,9 +123,9 @@ serve(async (req: Request) => {
 
     const { data: existingBookings } = await supabase
       .from('bookings')
-      .select('staff_id, scheduled_at, duration')
+      .select('id, staff_id, scheduled_at, duration')
       .eq('organization_id', organization_id)
-      .in('status', ['pending', 'confirmed'])
+      .in('status', ['pending', 'confirmed', 'in_progress'])
       .gte('scheduled_at', startOfDayUTC)
       .lte('scheduled_at', endOfDayUTC);
 
