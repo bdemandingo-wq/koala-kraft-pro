@@ -102,7 +102,7 @@ export function LeadPipelineBoard({
   const totalValue = leads.length;
 
   return (
-    <div className="flex gap-4 overflow-x-auto pb-4" data-no-swipe>
+    <div className="flex gap-3 overflow-x-auto pb-4 snap-x snap-mandatory md:snap-none" data-no-swipe>
       {PIPELINE_COLUMNS.map((column) => {
         const columnLeads = getColumnLeads(column.id);
         const isDragOver = dragOverColumn === column.id;
@@ -110,7 +110,7 @@ export function LeadPipelineBoard({
         return (
           <div
             key={column.id}
-            className="flex-shrink-0 w-[280px] min-h-[500px]"
+            className="flex-shrink-0 w-[260px] sm:w-[280px] min-h-[400px] sm:min-h-[500px] snap-start"
             onDragOver={(e) => handleDragOver(e, column.id)}
             onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, column.id)}
@@ -124,9 +124,14 @@ export function LeadPipelineBoard({
                     {columnLeads.length}
                   </Badge>
                 </div>
-                <span className="text-xs font-medium text-muted-foreground">
-                  ${columnLeads.reduce((sum, l) => sum + (l.estimated_value || 0), 0).toLocaleString()}
-                </span>
+                {(() => {
+                  const total = columnLeads.reduce((sum, l) => sum + (l.estimated_value || 0), 0);
+                  return total > 0 ? (
+                    <span className="text-xs font-medium text-muted-foreground">
+                      ${total.toLocaleString()}
+                    </span>
+                  ) : null;
+                })()}
               </div>
             </div>
 
