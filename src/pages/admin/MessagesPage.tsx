@@ -44,9 +44,14 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Checkbox } from '@/components/ui/checkbox';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
+import { SwipeableRow } from '@/components/mobile/SwipeableRow';
 import { handleSmsError } from '@/lib/smsErrorHandler';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { MessageTemplatesPicker } from '@/components/admin/MessageTemplatesPicker';
+import { EmailTemplateLibrary } from '@/components/admin/EmailTemplateLibrary';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
+import { PullToRefreshIndicator } from '@/components/admin/PullToRefreshIndicator';
+import { BookOpen, Filter } from 'lucide-react';
 
 interface Conversation {
   id: string;
@@ -74,6 +79,7 @@ interface Contact {
 }
 
 type ConversationTab = 'all' | 'clients' | 'cleaners';
+type UnreadFilter = 'all' | 'unread';
 
 export default function MessagesPage() {
   const { organizationId } = useOrgId();
@@ -107,10 +113,17 @@ export default function MessagesPage() {
   const [linkUrl, setLinkUrl] = useState('');
   const [linkText, setLinkText] = useState('');
   const [linkPopoverOpen, setLinkPopoverOpen] = useState(false);
+  const [unreadFilter, setUnreadFilter] = useState<UnreadFilter>('all');
+  const [templateLibraryOpen, setTemplateLibraryOpen] = useState(false);
   const emailBodyRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
+
+  // Pull-to-refresh for conversations
+  const { refreshing, pullDistance, handlers: pullHandlers } = usePullToRefresh(async () => {
+    await fetchConversations();
+  });
 
   // Fetch contacts (customers and staff) for the contact picker
   const fetchContacts = async () => {
@@ -478,10 +491,12 @@ export default function MessagesPage() {
     const matchesSearch = conv.customer_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       conv.customer_phone.includes(searchQuery);
     
-    if (activeTab === 'all') return matchesSearch;
-    if (activeTab === 'clients') return matchesSearch && conv.conversation_type !== 'cleaner';
-    if (activeTab === 'cleaners') return matchesSearch && conv.conversation_type === 'cleaner';
-    return matchesSearch;
+    const matchesUnread = unreadFilter === 'all' || conv.unread_count > 0;
+    
+    if (activeTab === 'all') return matchesSearch && matchesUnread;
+    if (activeTab === 'clients') return matchesSearch && matchesUnread && conv.conversation_type !== 'cleaner';
+    if (activeTab === 'cleaners') return matchesSearch && matchesUnread && conv.conversation_type === 'cleaner';
+    return matchesSearch && matchesUnread;
   });
 
   const handleSendEmail = async () => {
@@ -606,14 +621,25 @@ export default function MessagesPage() {
             </TabsTrigger>
           </TabsList>
         </Tabs>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search conversations..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
-          />
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search conversations..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <Button
+            variant={unreadFilter === 'unread' ? 'default' : 'outline'}
+            size="icon"
+            className="h-10 w-10 shrink-0"
+            onClick={() => setUnreadFilter(prev => prev === 'all' ? 'unread' : 'all')}
+            title={unreadFilter === 'unread' ? 'Show all' : 'Show unread only'}
+          >
+            <Filter className="h-4 w-4" />
+          </Button>
         </div>
       </div>
       
@@ -654,7 +680,8 @@ export default function MessagesPage() {
         </div>
       )}
       
-      <ScrollArea className="flex-1">
+      <div className="flex-1 overflow-y-auto" {...pullHandlers}>
+        <PullToRefreshIndicator pullDistance={pullDistance} refreshing={refreshing} />
         {loading ? (
           <div className="flex items-center justify-center p-8">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -668,10 +695,17 @@ export default function MessagesPage() {
         ) : (
           <div className="divide-y">
             {filteredConversations.map((conv) => (
-              <div
+              <SwipeableRow
                 key={conv.id}
+                rightAction={{
+                  label: 'Delete',
+                  variant: 'destructive',
+                  onAction: () => handleDeleteConversation(conv.id),
+                }}
+              >
+              <div
                 className={cn(
-                  "w-full p-3 text-left hover:bg-muted/50 transition-colors flex items-start gap-2",
+                  "w-full p-3 text-left hover:bg-muted/50 transition-colors flex items-start gap-2 bg-card",
                   selectedConversation?.id === conv.id && "bg-muted"
                 )}
               >
@@ -753,10 +787,11 @@ export default function MessagesPage() {
                   </div>
                 </button>
               </div>
+              </SwipeableRow>
             ))}
           </div>
         )}
-      </ScrollArea>
+      </div>
     </div>
   );
 
@@ -903,6 +938,12 @@ export default function MessagesPage() {
               <DialogHeader>
                 <DialogTitle>Compose Email</DialogTitle>
               </DialogHeader>
+              <div className="flex justify-end -mt-2">
+                <Button variant="outline" size="sm" className="gap-2" onClick={() => setTemplateLibraryOpen(true)}>
+                  <BookOpen className="h-4 w-4" />
+                  Templates
+                </Button>
+              </div>
               <div className="space-y-4 pt-2">
                 <div>
                   <Label>To</Label>
@@ -1031,6 +1072,15 @@ export default function MessagesPage() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
+          <EmailTemplateLibrary
+            open={templateLibraryOpen}
+            onOpenChange={setTemplateLibraryOpen}
+            onSelectTemplate={(subject, body) => {
+              setEmailSubject(subject);
+              setEmailBody(body);
+              if (emailBodyRef.current) emailBodyRef.current.innerText = body;
+            }}
+          />
         </div>
       }
     >

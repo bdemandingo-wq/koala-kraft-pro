@@ -2,9 +2,28 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { User } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { User, RotateCcw, Loader2 } from 'lucide-react';
 import { CustomerSearchInput } from '@/components/admin/CustomerSearchInput';
 import { useBookingForm } from '../BookingFormContext';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
+import { useOrgId } from '@/hooks/useOrgId';
+import { toast } from 'sonner';
+
+interface LastBookingInfo {
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  zip_code: string | null;
+  bedrooms: string | null;
+  bathrooms: string | null;
+  service_name: string | null;
+  service_id: string | null;
+  total_amount: number | null;
+  scheduled_at: string | null;
+}
 
 export function CustomerStep() {
   const {
@@ -15,7 +34,73 @@ export function CustomerStep() {
     newCustomer,
     updateNewCustomer,
     customers,
+    setAddress,
+    setCity,
+    setState,
+    setZipCode,
+    setBedrooms,
+    setBathrooms,
+    setSelectedServiceId,
+    setTotalAmount,
   } = useBookingForm();
+
+  const { organizationId } = useOrgId();
+  const [lastBooking, setLastBooking] = useState<LastBookingInfo | null>(null);
+  const [loadingLast, setLoadingLast] = useState(false);
+
+  // Fetch last booking when customer changes
+  useEffect(() => {
+    if (!selectedCustomerId || !organizationId) {
+      setLastBooking(null);
+      return;
+    }
+
+    const fetchLast = async () => {
+      setLoadingLast(true);
+      const { data } = await supabase
+        .from('bookings')
+        .select('address, city, state, zip_code, bedrooms, bathrooms, service_id, total_amount, scheduled_at, services:service_id(name)')
+        .eq('customer_id', selectedCustomerId)
+        .eq('organization_id', organizationId)
+        .in('status', ['completed', 'confirmed'])
+        .order('scheduled_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (data) {
+        setLastBooking({
+          address: data.address,
+          city: data.city,
+          state: data.state,
+          zip_code: data.zip_code,
+          bedrooms: data.bedrooms,
+          bathrooms: data.bathrooms,
+          service_name: (data.services as any)?.name || null,
+          service_id: data.service_id,
+          total_amount: data.total_amount,
+          scheduled_at: data.scheduled_at,
+        });
+      } else {
+        setLastBooking(null);
+      }
+      setLoadingLast(false);
+    };
+
+    fetchLast();
+  }, [selectedCustomerId, organizationId]);
+
+  const handleAutoFill = () => {
+    if (!lastBooking) return;
+    if (lastBooking.address) setAddress(lastBooking.address);
+    if (lastBooking.city) setCity(lastBooking.city);
+    if (lastBooking.state) setState(lastBooking.state);
+    if (lastBooking.zip_code) setZipCode(lastBooking.zip_code);
+    if (lastBooking.bedrooms) setBedrooms(lastBooking.bedrooms);
+    if (lastBooking.bathrooms) setBathrooms(lastBooking.bathrooms);
+    if (lastBooking.service_id) setSelectedServiceId(lastBooking.service_id);
+    if (lastBooking.total_amount) setTotalAmount(lastBooking.total_amount);
+    toast.success('Auto-filled from last booking');
+  };
 
   return (
     <div className="space-y-6">
@@ -47,13 +132,48 @@ export function CustomerStep() {
               </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="existing" className="mt-6">
+            <TabsContent value="existing" className="mt-6 space-y-4">
               <CustomerSearchInput
                 customers={customers || []}
                 selectedCustomerId={selectedCustomerId}
                 onSelectCustomer={setSelectedCustomerId}
                 placeholder="Type to search customers..."
               />
+
+              {/* Auto-fill from last booking */}
+              {selectedCustomerId && lastBooking && (
+                <div className="p-3 rounded-lg border border-border/50 bg-muted/30 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Last Booking</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 gap-1.5 text-xs"
+                      onClick={handleAutoFill}
+                    >
+                      <RotateCcw className="h-3 w-3" />
+                      Auto-fill
+                    </Button>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {lastBooking.service_name && (
+                      <Badge variant="secondary" className="text-xs">{lastBooking.service_name}</Badge>
+                    )}
+                    {lastBooking.address && (
+                      <Badge variant="outline" className="text-xs">{lastBooking.address}</Badge>
+                    )}
+                    {lastBooking.total_amount && (
+                      <Badge variant="outline" className="text-xs">${lastBooking.total_amount.toFixed(2)}</Badge>
+                    )}
+                  </div>
+                </div>
+              )}
+              {selectedCustomerId && loadingLast && (
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Loading last booking...
+                </div>
+              )}
             </TabsContent>
             
             <TabsContent value="new" className="mt-6 space-y-4">
