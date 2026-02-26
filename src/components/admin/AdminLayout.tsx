@@ -48,8 +48,26 @@ export function AdminLayout({ children, title, subtitle, actions }: AdminLayoutP
     swipeStart.current = null;
   }, [location.pathname]);
 
+  const isInsideScrollableContainer = (target: EventTarget | null): boolean => {
+    let el = target as HTMLElement | null;
+    while (el && el !== document.body) {
+      const overflowX = window.getComputedStyle(el).overflowX;
+      if ((overflowX === 'auto' || overflowX === 'scroll') && el.scrollWidth > el.clientWidth) {
+        return true;
+      }
+      // Also check for table wrappers or explicitly scrollable containers
+      if (el.tagName === 'TABLE' || el.closest('table') || el.closest('[data-no-swipe]')) {
+        return true;
+      }
+      el = el.parentElement;
+    }
+    return false;
+  };
+
   const onTouchStart = (e: React.TouchEvent) => {
     if (window.matchMedia('(min-width: 768px)').matches) return;
+    // Don't intercept swipes inside horizontally scrollable containers (tables, etc.)
+    if (isInsideScrollableContainer(e.target)) return;
     const t = e.touches[0];
     swipeStart.current = { x: t.clientX, y: t.clientY };
     swipeHandled.current = false;

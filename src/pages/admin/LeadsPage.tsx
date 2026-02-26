@@ -460,7 +460,7 @@ export default function LeadsPage() {
 
       {/* Table */}
       <Card>
-        <CardContent className="p-0">
+        <CardContent className="p-0 overflow-x-auto" data-no-swipe>
           <Table>
             <TableHeader>
               <TableRow>
@@ -488,9 +488,9 @@ export default function LeadsPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredLeads.map((lead) => (
-                  <TableRow key={lead.id}>
-                    <TableCell className="font-medium">{maskName(lead.name)}</TableCell>
+              filteredLeads.map((lead) => (
+                  <TableRow key={lead.id} className="[&>td]:py-3 @[pointer:coarse]:min-h-[52px]">
+                    <TableCell className="font-medium min-h-[44px]">{maskName(lead.name)}</TableCell>
                     <TableCell>
                       <div className="space-y-1">
                         <div className="flex items-center gap-1 text-sm">

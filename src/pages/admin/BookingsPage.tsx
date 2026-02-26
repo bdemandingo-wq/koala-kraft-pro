@@ -1570,7 +1570,7 @@ export default function BookingsPage() {
             </Button>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto" data-no-swipe>
             <Table>
               <TableHeader>
                 <TableRow className="bg-secondary/30 hover:bg-secondary/30">
