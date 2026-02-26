@@ -38,6 +38,7 @@ import {
   Mail,
   Link,
   Paperclip,
+  ChevronLeft,
 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -1033,24 +1034,43 @@ export default function MessagesPage() {
         </div>
       }
     >
-      <div className="flex h-[calc(100vh-12rem)] border rounded-lg overflow-hidden bg-card">
+      <div className="flex h-[calc(100vh-12rem)] border rounded-lg overflow-hidden bg-card relative">
         {/* Conversation List - Hidden on mobile, shown in sheet */}
         {isMobile ? (
-          <Sheet open={showConversationList} onOpenChange={setShowConversationList}>
-            <SheetTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="absolute top-4 left-4 z-10 md:hidden"
+          <>
+            {/* Floating button to open conversation list on mobile */}
+            {!selectedConversation && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8 z-0">
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                  <MessageSquare className="h-8 w-8 text-primary" />
+                </div>
+                <h3 className="text-lg font-medium mb-2">Your Messages</h3>
+                <p className="text-sm text-muted-foreground max-w-sm mb-4">
+                  View your conversations or start a new one.
+                </p>
+                <Button onClick={() => setShowConversationList(true)} className="gap-2">
+                  <MessageSquare className="h-4 w-4" />
+                  View Conversations
+                </Button>
+              </div>
+            )}
+            {selectedConversation && !showConversationList && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute top-2 left-2 z-20 h-8 px-2 bg-background/80 backdrop-blur-sm border shadow-sm"
+                onClick={() => setShowConversationList(true)}
               >
-                <MessageSquare className="h-4 w-4 mr-2" />
-                Conversations
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Back
               </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[320px] p-0">
-              {renderConversationList()}
-            </SheetContent>
-          </Sheet>
+            )}
+            <Sheet open={showConversationList} onOpenChange={setShowConversationList}>
+              <SheetContent side="left" className="w-[320px] p-0">
+                {renderConversationList()}
+              </SheetContent>
+            </Sheet>
+          </>
         ) : (
           <div className={cn(
             "border-r flex flex-col transition-all duration-300 relative",
@@ -1085,7 +1105,7 @@ export default function MessagesPage() {
           {selectedConversation ? (
             <>
               {/* Chat Header */}
-              <div className="p-4 border-b flex items-center justify-between">
+              <div className="p-4 pl-20 sm:pl-4 border-b flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">
                     <AvatarFallback className={cn(
@@ -1180,13 +1200,13 @@ export default function MessagesPage() {
                     <div
                       key={msg.id}
                       className={cn(
-                        "flex",
+                        "flex animate-message-in",
                         msg.direction === 'outbound' ? 'justify-end' : 'justify-start'
                       )}
                     >
                       <div
                         className={cn(
-                          "max-w-[70%] rounded-lg px-4 py-2",
+                          "max-w-[85%] sm:max-w-[70%] rounded-2xl px-4 py-2.5 shadow-sm",
                           msg.direction === 'outbound'
                             ? 'bg-primary text-primary-foreground'
                             : 'bg-muted'
@@ -1225,7 +1245,7 @@ export default function MessagesPage() {
                         handleSendMessage();
                       }
                     }}
-                    className="min-h-[44px] max-h-32 resize-none"
+                    className="min-h-[44px] max-h-32 resize-none text-base sm:text-sm"
                     rows={1}
                   />
                   <Button 
@@ -1243,7 +1263,7 @@ export default function MessagesPage() {
                 </div>
               </div>
             </>
-          ) : (
+          ) : !isMobile ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
               <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                 <MessageSquare className="h-8 w-8 text-primary" />
@@ -1253,7 +1273,7 @@ export default function MessagesPage() {
                 Choose a conversation from the list or start a new one to begin messaging your customers.
               </p>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     </AdminLayout>
