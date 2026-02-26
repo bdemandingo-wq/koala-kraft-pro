@@ -1082,6 +1082,7 @@ export type Database = {
           review_sms_template: string | null
           timezone: string | null
           updated_at: string
+          zapier_webhook_url: string | null
         }
         Insert: {
           accent_color?: string | null
@@ -1119,6 +1120,7 @@ export type Database = {
           review_sms_template?: string | null
           timezone?: string | null
           updated_at?: string
+          zapier_webhook_url?: string | null
         }
         Update: {
           accent_color?: string | null
@@ -1156,6 +1158,7 @@ export type Database = {
           review_sms_template?: string | null
           timezone?: string | null
           updated_at?: string
+          zapier_webhook_url?: string | null
         }
         Relationships: [
           {
