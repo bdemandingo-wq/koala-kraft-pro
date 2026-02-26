@@ -63,8 +63,17 @@ export function DomainVerificationCard() {
   };
 
   const addDomain = async () => {
-    const domain = newDomain.trim().toLowerCase();
+    let domain = newDomain.trim().toLowerCase();
     if (!domain) return;
+
+    // If user entered an email address, extract just the domain part
+    if (domain.includes('@')) {
+      domain = domain.split('@').pop() || '';
+    }
+    if (!domain) {
+      toast.error('Please enter a valid domain name (e.g. yourdomain.com)');
+      return;
+    }
 
     setAdding(true);
     try {
@@ -174,7 +183,7 @@ export function DomainVerificationCard() {
             <Label htmlFor="newDomain" className="sr-only">Domain name</Label>
             <Input
               id="newDomain"
-              placeholder="yourdomain.com"
+              placeholder="yourdomain.com (domain only, not email)"
               value={newDomain}
               onChange={(e) => setNewDomain(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && addDomain()}
