@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { format, setHours, setMinutes } from "date-fns";
 import { ArrowLeft, Calendar as CalendarIcon, Clock, Loader2, MapPin, Send, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
@@ -57,17 +57,19 @@ const TIME_SLOTS = [
 ];
 
 export default function PortalRequestPage() {
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user, customer, loading } = useClientPortal();
   const [services, setServices] = useState<Service[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedTime, setSelectedTime] = useState<string>("");
-  const [selectedService, setSelectedService] = useState<string>("");
+  const [selectedService, setSelectedService] = useState<string>(searchParams.get("service") || "");
   const [selectedLocation, setSelectedLocation] = useState<string>("");
-  const [notes, setNotes] = useState("");
+  const [notes, setNotes] = useState(searchParams.get("notes") || "");
   const [isTurnover, setIsTurnover] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const isReschedule = searchParams.get("reschedule") === "true";
 
   const isAirbnb = customer?.property_type === 'airbnb';
 
@@ -200,9 +202,9 @@ export default function PortalRequestPage() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-lg font-bold">Request a Booking</h1>
+            <h1 className="text-lg font-bold">{isReschedule ? "Reschedule Booking" : "Request a Booking"}</h1>
             <p className="text-sm text-muted-foreground">
-              Choose your preferred date
+              {isReschedule ? "Pick a new date and time" : "Choose your preferred date"}
             </p>
           </div>
         </div>
@@ -211,9 +213,9 @@ export default function PortalRequestPage() {
       <div className="container mx-auto px-4 py-6 max-w-md">
         <Card>
           <CardHeader>
-            <CardTitle>New Booking Request</CardTitle>
+            <CardTitle>{isReschedule ? "Reschedule Request" : "New Booking Request"}</CardTitle>
             <CardDescription>
-              Submit a request and we'll confirm your appointment within 24 hours.
+              {isReschedule ? "Submit a reschedule request and we'll confirm within 24 hours." : "Submit a request and we'll confirm your appointment within 24 hours."}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">

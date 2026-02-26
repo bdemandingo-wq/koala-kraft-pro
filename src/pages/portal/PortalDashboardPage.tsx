@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { format } from "date-fns";
+import { format, isPast, isFuture, isToday, isTomorrow } from "date-fns";
 import { 
   CalendarDays, 
   Clock, 
@@ -17,7 +17,9 @@ import {
   Settings,
   User,
   Trash2,
-  X
+  X,
+  RotateCcw,
+  CalendarClock
 } from "lucide-react";
 import {
   AlertDialog,
@@ -49,6 +51,7 @@ interface Booking {
   total_amount: number;
   address: string | null;
   service: { name: string } | null;
+  service_id: string | null;
 }
 
 interface BookingRequest {
@@ -93,11 +96,9 @@ export default function PortalDashboardPage() {
     const fetchData = async () => {
       setLoadingData(true);
 
-      // Fetch bookings using the secure RPC function
       const { data: bookingsData } = await supabase
         .rpc("get_client_portal_bookings", { p_customer_id: user.customer_id });
 
-      // Transform data to match expected interface
       const transformedBookings = (bookingsData || []).map((b: any) => ({
         id: b.id,
         booking_number: b.booking_number,
@@ -106,17 +107,16 @@ export default function PortalDashboardPage() {
         total_amount: b.total_amount,
         address: b.address,
         service: b.service_name ? { name: b.service_name } : null,
+        service_id: b.service_id || null,
       }));
 
       setBookings(transformedBookings);
 
-      // Fetch booking requests using secure RPC
       const { data: requestsData } = await supabase
         .rpc("get_client_portal_requests", { p_client_user_id: user.id });
 
       setRequests((requestsData || []) as BookingRequest[]);
 
-      // Fetch notifications using secure RPC
       const { data: notificationsData } = await supabase
         .rpc("get_client_portal_notifications", { p_client_user_id: user.id });
 
@@ -135,12 +135,10 @@ export default function PortalDashboardPage() {
 
   const markNotificationRead = async (id: string) => {
     if (!user) return;
-
     await supabase.rpc("mark_client_notification_read", {
       p_notification_id: id,
       p_client_user_id: user.id,
     });
-
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
     );
@@ -149,12 +147,10 @@ export default function PortalDashboardPage() {
   const deleteNotification = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!user) return;
-
     const { data } = await supabase.rpc("delete_client_portal_notification", {
       p_notification_id: id,
       p_client_user_id: user.id,
     });
-
     if (data) {
       setNotifications((prev) => prev.filter((n) => n.id !== id));
       toast.success("Notification deleted");
@@ -163,12 +159,10 @@ export default function PortalDashboardPage() {
 
   const deleteRequest = async (id: string) => {
     if (!user) return;
-
     const { data } = await supabase.rpc("delete_client_booking_request", {
       p_request_id: id,
       p_client_user_id: user.id,
     });
-
     if (data) {
       setRequests((prev) => prev.filter((r) => r.id !== id));
       toast.success("Request deleted");
@@ -182,33 +176,25 @@ export default function PortalDashboardPage() {
 
   const confirmCancelBooking = async () => {
     if (!user || !bookingToCancel) return;
-
     setCancelling(true);
     try {
       const { data, error } = await supabase.rpc("client_cancel_booking" as any, {
         p_booking_id: bookingToCancel.id,
         p_customer_id: user.customer_id,
       });
-
       if (error) {
         toast.error("Failed to cancel booking");
         return;
       }
-
       const result = data as { success: boolean; error?: string; within_48_hours?: boolean } | null;
-
       if (!result?.success) {
         if (result?.within_48_hours) {
-          toast.error(result.error || "Same day or next day cancellations may incur a fee. Please contact us directly.", {
-            duration: 6000,
-          });
+          toast.error(result.error || "Same day or next day cancellations may incur a fee. Please contact us directly.", { duration: 6000 });
         } else {
           toast.error(result?.error || "Unable to cancel booking");
         }
         return;
       }
-
-      // Update local state
       setBookings((prev) =>
         prev.map((b) =>
           b.id === bookingToCancel.id ? { ...b, status: "cancelled" } : b
@@ -222,6 +208,21 @@ export default function PortalDashboardPage() {
       setCancelDialogOpen(false);
       setBookingToCancel(null);
     }
+  };
+
+  const handleRebook = (booking: Booking) => {
+    const params = new URLSearchParams();
+    if (booking.service_id) params.set("service", booking.service_id);
+    if (booking.address) params.set("notes", `Same address: ${booking.address}`);
+    navigate(`/portal/request?${params.toString()}`);
+  };
+
+  const handleReschedule = (booking: Booking) => {
+    const params = new URLSearchParams();
+    if (booking.service_id) params.set("service", booking.service_id);
+    params.set("notes", `Reschedule of booking #${booking.booking_number}${booking.address ? ` at ${booking.address}` : ""}`);
+    params.set("reschedule", "true");
+    navigate(`/portal/request?${params.toString()}`);
   };
 
   if (loading || !user || !customer) {
@@ -240,40 +241,40 @@ export default function PortalDashboardPage() {
     (b) => new Date(b.scheduled_at) < new Date() || b.status === "cancelled"
   );
 
-  // Show loyalty with default 0 points if no record exists yet
   const displayLoyalty = loyalty || { points: 0, lifetime_points: 0, tier: "bronze" };
 
   const getTierColor = (tier: string) => {
     switch (tier?.toLowerCase()) {
-      case "platinum":
-        return "bg-purple-500";
-      case "gold":
-        return "bg-yellow-500";
-      case "silver":
-        return "bg-gray-400";
-      default:
-        return "bg-amber-700";
+      case "platinum": return "bg-purple-500";
+      case "gold": return "bg-yellow-500";
+      case "silver": return "bg-gray-400";
+      default: return "bg-amber-700";
     }
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "pending":
-        return <Badge variant="secondary">Pending</Badge>;
-      case "approved":
-        return <Badge variant="default" className="bg-primary">Approved</Badge>;
-      case "rejected":
-        return <Badge variant="destructive">Rejected</Badge>;
-      case "confirmed":
-        return <Badge variant="default">Confirmed</Badge>;
-      case "completed":
-        return <Badge variant="default" className="bg-primary">Completed</Badge>;
-      case "cancelled":
-        return <Badge variant="destructive">Cancelled</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
+      case "pending": return <Badge variant="secondary">Pending</Badge>;
+      case "approved": return <Badge variant="default" className="bg-primary">Approved</Badge>;
+      case "rejected": return <Badge variant="destructive">Rejected</Badge>;
+      case "confirmed": return <Badge variant="default">Confirmed</Badge>;
+      case "completed": return <Badge variant="default" className="bg-primary">Completed</Badge>;
+      case "cancelled": return <Badge variant="destructive">Cancelled</Badge>;
+      default: return <Badge variant="outline">{status}</Badge>;
     }
   };
+
+  const getDateLabel = (dateStr: string) => {
+    const d = new Date(dateStr);
+    if (isToday(d)) return "Today";
+    if (isTomorrow(d)) return "Tomorrow";
+    return format(d, "EEE, MMM d");
+  };
+
+  // Next upcoming booking for hero card
+  const nextBooking = upcomingBookings.length > 0
+    ? upcomingBookings.sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime())[0]
+    : null;
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5">
@@ -293,12 +294,7 @@ export default function PortalDashboardPage() {
             <p className="text-sm text-muted-foreground">Client Portal</p>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative"
-              onClick={() => {}}
-            >
+            <Button variant="ghost" size="icon" className="relative" onClick={() => {}}>
               <Bell className="h-5 w-5" />
               {unreadCount > 0 && (
                 <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive text-xs text-destructive-foreground flex items-center justify-center">
@@ -314,46 +310,76 @@ export default function PortalDashboardPage() {
       </header>
 
       <div className="container mx-auto px-4 py-6 space-y-6">
-        {/* Loyalty Card - Always show, with 0 points default */}
-        <Card className="overflow-hidden">
-          <div className={`h-2 ${getTierColor(displayLoyalty.tier)}`} />
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Trophy className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg capitalize">
-                  {displayLoyalty.tier} Member
-                </CardTitle>
+        {/* Next Booking Hero Card */}
+        {nextBooking && (
+          <Card className="overflow-hidden border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5">
+            <CardContent className="p-4">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Next Appointment</p>
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="font-semibold text-lg">{nextBooking.service?.name || "Service"}</p>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Calendar className="h-4 w-4 text-primary" />
+                    <span className="font-medium text-foreground">{getDateLabel(nextBooking.scheduled_at)}</span>
+                    <span>at {format(new Date(nextBooking.scheduled_at), "h:mm a")}</span>
+                  </div>
+                  {nextBooking.address && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <MapPin className="h-4 w-4" />
+                      {nextBooking.address}
+                    </div>
+                  )}
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1 text-xs"
+                    onClick={() => handleReschedule(nextBooking)}
+                  >
+                    <CalendarClock className="h-3.5 w-3.5" />
+                    Reschedule
+                  </Button>
+                </div>
               </div>
-              <Badge variant="outline" className="text-lg px-3 py-1">
-                {displayLoyalty.points} pts
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Lifetime points: {displayLoyalty.lifetime_points}
-            </p>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
-        {/* Request Booking Button */}
-        <Button
-          className="w-full gap-2"
-          size="lg"
-          onClick={() => navigate("/portal/request")}
-        >
-          <Plus className="h-5 w-5" />
-          Request a Booking
-        </Button>
+        {/* Loyalty + Request Row */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Card className="overflow-hidden">
+            <div className={`h-1.5 ${getTierColor(displayLoyalty.tier)}`} />
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Trophy className="h-5 w-5 text-primary" />
+                  <span className="font-semibold capitalize">{displayLoyalty.tier}</span>
+                </div>
+                <Badge variant="outline" className="text-sm px-2.5 py-0.5">
+                  {displayLoyalty.points} pts
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Button
+            className="w-full gap-2 h-auto py-4"
+            size="lg"
+            onClick={() => navigate("/portal/request")}
+          >
+            <Plus className="h-5 w-5" />
+            Request a Booking
+          </Button>
+        </div>
 
         {/* Tabs */}
         <Tabs defaultValue="upcoming" className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-            <TabsTrigger value="requests">Requests</TabsTrigger>
-            <TabsTrigger value="history">History</TabsTrigger>
-            <TabsTrigger value="notifications" className="relative">
+          <TabsList className="w-full overflow-x-auto flex justify-start gap-1 h-auto p-1">
+            <TabsTrigger value="upcoming" className="text-xs sm:text-sm shrink-0">Upcoming</TabsTrigger>
+            <TabsTrigger value="requests" className="text-xs sm:text-sm shrink-0">Requests</TabsTrigger>
+            <TabsTrigger value="history" className="text-xs sm:text-sm shrink-0">History</TabsTrigger>
+            <TabsTrigger value="notifications" className="relative text-xs sm:text-sm shrink-0">
               Alerts
               {unreadCount > 0 && (
                 <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] text-destructive-foreground flex items-center justify-center">
@@ -361,10 +387,10 @@ export default function PortalDashboardPage() {
                 </span>
               )}
             </TabsTrigger>
-            <TabsTrigger value="profile">
+            <TabsTrigger value="profile" className="text-xs sm:text-sm shrink-0">
               <User className="h-4 w-4" />
             </TabsTrigger>
-            <TabsTrigger value="settings">
+            <TabsTrigger value="settings" className="text-xs sm:text-sm shrink-0">
               <Settings className="h-4 w-4" />
             </TabsTrigger>
           </TabsList>
@@ -379,11 +405,7 @@ export default function PortalDashboardPage() {
               <Card className="p-8 text-center">
                 <CalendarDays className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
                 <p className="text-muted-foreground">No upcoming bookings</p>
-                <Button
-                  variant="link"
-                  className="mt-2"
-                  onClick={() => navigate("/portal/request")}
-                >
+                <Button variant="link" className="mt-2" onClick={() => navigate("/portal/request")}>
                   Request a booking
                 </Button>
               </Card>
@@ -392,12 +414,10 @@ export default function PortalDashboardPage() {
                 <Card key={booking.id} className="p-4">
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
-                      <p className="font-medium">
-                        {booking.service?.name || "Service"}
-                      </p>
+                      <p className="font-medium">{booking.service?.name || "Service"}</p>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Calendar className="h-4 w-4" />
-                        {format(new Date(booking.scheduled_at), "MMM d, yyyy")}
+                        {getDateLabel(booking.scheduled_at)}
                       </div>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Clock className="h-4 w-4" />
@@ -412,18 +432,26 @@ export default function PortalDashboardPage() {
                     </div>
                     <div className="text-right flex flex-col items-end gap-2">
                       {getStatusBadge(booking.status)}
-                      <p className="text-lg font-semibold">
-                        ${booking.total_amount}
-                      </p>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                        onClick={() => handleCancelClick(booking)}
-                      >
-                        <X className="h-4 w-4 mr-1" />
-                        Cancel
-                      </Button>
+                      <p className="text-lg font-semibold">${booking.total_amount}</p>
+                      <div className="flex gap-1.5">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs gap-1 h-7"
+                          onClick={() => handleReschedule(booking)}
+                        >
+                          <CalendarClock className="h-3 w-3" />
+                          Reschedule
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs text-destructive hover:text-destructive hover:bg-destructive/10 h-7"
+                          onClick={() => handleCancelClick(booking)}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </Card>
@@ -447,22 +475,16 @@ export default function PortalDashboardPage() {
                 <Card key={request.id} className="p-4">
                   <div className="flex items-start justify-between">
                     <div className="space-y-1 flex-1 min-w-0">
-                      <p className="font-medium">
-                        {request.service_name || "Service Request"}
-                      </p>
+                      <p className="font-medium">{request.service_name || "Service Request"}</p>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Calendar className="h-4 w-4" />
                         Requested: {format(new Date(request.requested_date), "MMM d, yyyy 'at' h:mm a")}
                       </div>
                       {request.notes && (
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {request.notes}
-                        </p>
+                        <p className="text-sm text-muted-foreground mt-1">{request.notes}</p>
                       )}
                       {request.admin_response_note && (
-                        <p className="text-sm text-primary mt-1">
-                          Response: {request.admin_response_note}
-                        </p>
+                        <p className="text-sm text-primary mt-1">Response: {request.admin_response_note}</p>
                       )}
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">
@@ -502,19 +524,32 @@ export default function PortalDashboardPage() {
                 <Card key={booking.id} className="p-4">
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
-                      <p className="font-medium">
-                        {booking.service?.name || "Service"}
-                      </p>
+                      <p className="font-medium">{booking.service?.name || "Service"}</p>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Calendar className="h-4 w-4" />
                         {format(new Date(booking.scheduled_at), "MMM d, yyyy")}
                       </div>
+                      {booking.address && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <MapPin className="h-4 w-4" />
+                          {booking.address}
+                        </div>
+                      )}
                     </div>
-                    <div className="text-right">
+                    <div className="text-right flex flex-col items-end gap-2">
                       {getStatusBadge(booking.status)}
-                      <p className="text-lg font-semibold mt-2">
-                        ${booking.total_amount}
-                      </p>
+                      <p className="text-lg font-semibold">${booking.total_amount}</p>
+                      {booking.status === "completed" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs gap-1 h-7"
+                          onClick={() => handleRebook(booking)}
+                        >
+                          <RotateCcw className="h-3 w-3" />
+                          Rebook
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </Card>
@@ -552,9 +587,7 @@ export default function PortalDashboardPage() {
                     )}
                     <div className="flex-1 min-w-0">
                       <p className="font-medium">{notification.title}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {notification.message}
-                      </p>
+                      <p className="text-sm text-muted-foreground">{notification.message}</p>
                       <p className="text-xs text-muted-foreground mt-1">
                         {format(new Date(notification.created_at), "MMM d, h:mm a")}
                       </p>
