@@ -424,8 +424,15 @@ export default function StaffPortal() {
             calculatedPayment = staff.hourly_rate * actualHours;
           }
           
-          // Only set if payment wasn't already manually set
-          if (calculatedPayment > 0) {
+          // Only set if payment wasn't already manually set by admin
+          // Check current booking to see if cleaner_actual_payment is already set
+          const { data: currentBooking } = await supabase
+            .from('bookings')
+            .select('cleaner_actual_payment')
+            .eq('id', bookingId)
+            .single();
+          
+          if (currentBooking?.cleaner_actual_payment == null && calculatedPayment > 0) {
             updateData.cleaner_actual_payment = Math.round(calculatedPayment * 100) / 100;
           }
         }
