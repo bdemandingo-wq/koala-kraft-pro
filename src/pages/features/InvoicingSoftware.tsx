@@ -251,7 +251,6 @@ export default function InvoicingSoftware() {
           "applicationCategory": "BusinessApplication",
           "operatingSystem": "Web, iOS, Android",
           "offers": { "@type": "Offer", "price": "50", "priceCurrency": "USD" },
-          "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "ratingCount": "2450" },
           "description": "Invoicing software for cleaning businesses. Create professional invoices, accept online payments, and automate payment reminders."
         })
       }} />

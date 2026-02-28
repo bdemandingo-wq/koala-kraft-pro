@@ -251,7 +251,6 @@ export default function RouteOptimization() {
           "applicationCategory": "BusinessApplication",
           "operatingSystem": "Web, iOS, Android",
           "offers": { "@type": "Offer", "price": "50", "priceCurrency": "USD" },
-          "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "ratingCount": "2450" },
           "description": "Route optimization software for cleaning businesses. AI-powered routing saves 25% on fuel and reduces drive time by 30%."
         })
       }} />

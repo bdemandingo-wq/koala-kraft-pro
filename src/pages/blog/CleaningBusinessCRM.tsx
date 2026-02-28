@@ -635,13 +635,6 @@ export default function CleaningBusinessCRM() {
                   "price": "50",
                   "priceCurrency": "USD",
                   "priceValidUntil": "2026-12-31"
-                },
-                "aggregateRating": {
-                  "@type": "AggregateRating",
-                  "ratingValue": "4.9",
-                  "ratingCount": "127",
-                  "bestRating": "5",
-                  "worstRating": "1"
                 }
               },
               {

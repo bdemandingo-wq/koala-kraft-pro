@@ -237,7 +237,6 @@ export default function SMSNotifications() {
           "applicationCategory": "BusinessApplication",
           "operatingSystem": "Web, iOS, Android",
           "offers": { "@type": "Offer", "price": "50", "priceCurrency": "USD" },
-          "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "ratingCount": "2450" },
           "description": "Automated SMS client notifications for cleaning businesses with reminders and review requests."
         })
       }} />

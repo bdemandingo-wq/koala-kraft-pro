@@ -241,7 +241,6 @@ export default function PaymentProcessing() {
           "applicationCategory": "BusinessApplication",
           "operatingSystem": "Web, iOS, Android",
           "offers": { "@type": "Offer", "price": "50", "priceCurrency": "USD" },
-          "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "ratingCount": "2450" },
           "description": "Integrated credit card processing for cleaning businesses with Stripe, automatic charging, and invoicing."
         })
       }} />
