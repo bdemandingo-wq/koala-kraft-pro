@@ -330,11 +330,6 @@ export default function CompareHousecallPro() {
             "priceCurrency": "USD",
             "priceValidUntil": "2027-12-31"
           },
-          "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "4.9",
-            "ratingCount": "2450"
-          },
           "description": "The best Housecall Pro alternative for cleaning businesses. Cleaning-specific features, automated payroll, and flat $50/month pricing."
         })
       }} />

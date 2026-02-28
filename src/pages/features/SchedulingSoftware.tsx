@@ -252,7 +252,6 @@ export default function SchedulingSoftware() {
           "applicationCategory": "BusinessApplication",
           "operatingSystem": "Web, iOS, Android",
           "offers": { "@type": "Offer", "price": "50", "priceCurrency": "USD" },
-          "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "ratingCount": "2450" },
           "description": "Cleaning scheduling software with visual calendar, recurring bookings, online booking portal, and automatic SMS reminders."
         })
       }} />

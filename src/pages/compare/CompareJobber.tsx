@@ -335,11 +335,6 @@ export default function CompareJobber() {
             "priceCurrency": "USD",
             "priceValidUntil": "2026-12-31"
           },
-          "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "4.9",
-            "ratingCount": "2450"
-          },
           "description": "The best Jobber alternative for cleaning businesses. Automated payroll, P&L reports, and flat $50/month pricing."
         })
       }} />
