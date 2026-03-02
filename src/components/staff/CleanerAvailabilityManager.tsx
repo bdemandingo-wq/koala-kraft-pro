@@ -33,9 +33,10 @@ const TIME_OPTIONS = Array.from({ length: 48 }, (_, i) => {
 
 interface Props {
   staffId: string;
+  onSaved?: () => void;
 }
 
-export function CleanerAvailabilityManager({ staffId }: Props) {
+export function CleanerAvailabilityManager({ staffId, onSaved }: Props) {
   const queryClient = useQueryClient();
   const { organization } = useOrganization();
   const organizationId = organization?.id;
@@ -110,6 +111,7 @@ export function CleanerAvailabilityManager({ staffId }: Props) {
       queryClient.invalidateQueries({ queryKey: ['working-hours', staffId, organizationId] });
       toast.success('Availability saved!');
       setHasChanges(false);
+      onSaved?.();
     },
     onError: (error) => {
       console.error('Error saving availability:', error);
