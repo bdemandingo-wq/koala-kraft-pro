@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { LogOut, Briefcase, CalendarCheck, Clock, DollarSign, Bell, History, Sparkles, Calendar, User, Star } from 'lucide-react';
+import { LogOut, Briefcase, CalendarCheck, Clock, DollarSign, Bell, History, Sparkles, Calendar, User, Star, FileText } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { MyJobCard } from '@/components/staff/MyJobCard';
 import { AvailableJobCard } from '@/components/staff/AvailableJobCard';
@@ -19,6 +19,7 @@ import { CleanerCalendar } from '@/components/staff/CleanerCalendar';
 import { NotificationBell } from '@/components/staff/NotificationBell';
 import { CleanerReviews } from '@/components/staff/CleanerReviews';
 import { BookingChecklist } from '@/components/staff/BookingChecklist';
+import { StaffDocumentUpload } from '@/components/staff/StaffDocumentUpload';
 
 interface Booking {
   id: string;
@@ -74,6 +75,7 @@ export default function StaffPortal() {
   const [staffInfo, setStaffInfo] = useState<StaffInfo | null>(null);
   const [newJobAlert, setNewJobAlert] = useState(false);
   const [claimingBookingId, setClaimingBookingId] = useState<string | null>(null);
+  const [hasSetAvailability, setHasSetAvailability] = useState<boolean | null>(null);
 
   // Get staff record for current user
   useEffect(() => {
@@ -93,9 +95,16 @@ export default function StaffPortal() {
       }
 
       setStaffInfo(data);
-    };
 
-    fetchStaffRecord();
+      // Check if staff has set their availability
+      const client: any = supabase;
+      const { data: hours } = await client
+        .from('working_hours')
+        .select('id')
+        .eq('staff_id', data.id)
+        .limit(1);
+      setHasSetAvailability(hours && hours.length > 0);
+    };
   }, [user]);
 
   // Real-time subscription for new unassigned bookings
@@ -550,7 +559,13 @@ export default function StaffPortal() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-4">
-        <Tabs defaultValue="my-jobs" className="space-y-4">
+        {hasSetAvailability === false && (
+          <div className="mb-4 p-4 rounded-lg border border-warning bg-warning/10 text-warning-foreground">
+            <p className="font-semibold">⚠️ Set Your Availability First</p>
+            <p className="text-sm text-muted-foreground">You must set your working hours before you can view or claim jobs.</p>
+          </div>
+        )}
+        <Tabs defaultValue={hasSetAvailability === false ? 'availability' : 'my-jobs'} className="space-y-4">
           <TabsList className="flex flex-wrap justify-start gap-1 h-auto p-1">
             <TabsTrigger value="my-jobs" className="gap-2">
               <Briefcase className="w-4 h-4 hidden sm:inline" />
@@ -594,6 +609,10 @@ export default function StaffPortal() {
             <TabsTrigger value="profile" className="gap-2">
               <User className="w-4 h-4 hidden sm:inline" />
               Profile
+            </TabsTrigger>
+            <TabsTrigger value="documents" className="gap-2">
+              <FileText className="w-4 h-4 hidden sm:inline" />
+              Documents
             </TabsTrigger>
           </TabsList>
 
@@ -695,7 +714,10 @@ export default function StaffPortal() {
           {/* Availability Tab */}
           <TabsContent value="availability" className="space-y-4">
             {staffInfo?.id ? (
-              <CleanerAvailabilityManager staffId={staffInfo.id} />
+              <CleanerAvailabilityManager
+                staffId={staffInfo.id}
+                onSaved={() => setHasSetAvailability(true)}
+              />
             ) : (
               <p className="text-muted-foreground">Loading availability settings...</p>
             )}
@@ -734,6 +756,15 @@ export default function StaffPortal() {
               <CleanerProfile staffInfo={staffInfo} userId={user.id} />
             ) : (
               <p className="text-muted-foreground">Loading profile...</p>
+            )}
+          </TabsContent>
+
+          {/* Documents Tab */}
+          <TabsContent value="documents" className="space-y-4">
+            {staffInfo?.id && staffInfo?.organization_id ? (
+              <StaffDocumentUpload staffId={staffInfo.id} organizationId={staffInfo.organization_id} />
+            ) : (
+              <p className="text-muted-foreground">Loading documents...</p>
             )}
           </TabsContent>
         </Tabs>
