@@ -767,19 +767,8 @@ export default function MessagesPage() {
         ) : (
           <div className="divide-y">
             {filteredConversations.map((conv) => (
-              <SwipeableRow
-                key={conv.id}
-                rightAction={
-                  isMobile
-                    ? undefined
-                    : {
-                        label: 'Delete',
-                        variant: 'destructive',
-                        onAction: () => handleDeleteConversation(conv.id),
-                      }
-                }
-              >
               <div
+                key={conv.id}
                 className={cn(
                   "w-full p-3 text-left hover:bg-muted/50 transition-colors flex items-start gap-2 bg-card",
                   selectedConversation?.id === conv.id && "bg-muted"
@@ -863,7 +852,6 @@ export default function MessagesPage() {
                   </div>
                 </button>
               </div>
-              </SwipeableRow>
             ))}
           </div>
         )}
@@ -1012,11 +1000,12 @@ export default function MessagesPage() {
                   .eq('organization_id', organizationId)
                   .not('email', 'is', null)
                   .order('first_name');
-                setEmailContacts(
-                  (data || [])
+                const allContacts = (data || [])
                     .filter(c => c.email)
-                    .map(c => ({ email: c.email!, name: `${c.first_name || ''} ${c.last_name || ''}`.trim() }))
-                );
+                    .map(c => ({ email: c.email!, name: `${c.first_name || ''} ${c.last_name || ''}`.trim() }));
+                // Deduplicate by email
+                const unique = Array.from(new Map(allContacts.map(c => [c.email.toLowerCase(), c])).values());
+                setEmailContacts(unique);
                 // Auto-select from active conversation
                 if (!emailTo && selectedConversation?.customer_id) {
                   const match = (data || []).find(c => c.email);
