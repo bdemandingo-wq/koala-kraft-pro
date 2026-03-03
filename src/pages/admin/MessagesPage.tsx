@@ -999,7 +999,17 @@ export default function MessagesPage() {
               </div>
             </DialogContent>
           </Dialog>
-          <Dialog open={emailOpen} onOpenChange={setEmailOpen}>
+          <Dialog open={emailOpen} onOpenChange={async (open) => {
+              setEmailOpen(open);
+              if (open && !emailTo && selectedConversation?.customer_id && organizationId) {
+                const { data } = await supabase
+                  .from('customers')
+                  .select('email')
+                  .eq('id', selectedConversation.customer_id)
+                  .maybeSingle();
+                if (data?.email) setEmailTo(data.email);
+              }
+            }}>
             <DialogTrigger asChild>
               <Button variant="outline">
                 <Mail className="h-4 w-4 mr-2" />
