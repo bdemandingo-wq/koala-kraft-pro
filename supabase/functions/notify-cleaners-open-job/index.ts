@@ -17,6 +17,7 @@ interface NotifyCleanersRequest {
     scheduled_date: string;
     scheduled_time: string;
     address: string;
+    square_footage: string;
     duration: number;
     total_amount: number;
   };
@@ -109,7 +110,7 @@ const handler = async (req: Request): Promise<Response> => {
         booking_id: jobDetails.booking_id,
         organization_id: organizationId,
         title: "New Job Available!",
-        message: `${jobDetails.service_name} on ${jobDetails.scheduled_date} at ${jobDetails.scheduled_time}. Location: ${jobDetails.address}. Potential pay: $${potentialPay.toFixed(2)}`,
+        message: `${jobDetails.service_name} on ${jobDetails.scheduled_date} at ${jobDetails.scheduled_time}. Address: ${jobDetails.address}.${jobDetails.square_footage ? ` Sq Ft: ${jobDetails.square_footage}.` : ''} Potential pay: $${potentialPay.toFixed(2)}`,
         type: "new_job",
       };
     });
@@ -148,10 +149,14 @@ const handler = async (req: Request): Promise<Response> => {
           if (phone.length === 10) phone = `+1${phone}`;
           else if (!phone.startsWith("+")) phone = `+${phone}`;
 
+          const sqftInfo = jobDetails.square_footage ? ` | Sq Ft: ${jobDetails.square_footage}` : '';
           const smsBody =
-            `🎉 New Job Available! ${jobDetails.service_name} on ${jobDetails.scheduled_date} at ${jobDetails.scheduled_time}. ` +
-            `Location: ${jobDetails.address}. Potential pay: $${potentialPay.toFixed(2)}. ` +
-            `Log in to the Staff Portal to claim it. - ${companyName}`;
+            `🎉 New Job Available!\n\n` +
+            `Service: ${jobDetails.service_name}\n` +
+            `Date: ${jobDetails.scheduled_date} at ${jobDetails.scheduled_time}\n` +
+            `Address: ${jobDetails.address}${sqftInfo}\n` +
+            `Potential pay: $${potentialPay.toFixed(2)}\n\n` +
+            `Log in to the Staff Portal to claim it.\n- ${companyName}`;
 
           try {
             // OpenPhone expects the raw API key without "Bearer" prefix

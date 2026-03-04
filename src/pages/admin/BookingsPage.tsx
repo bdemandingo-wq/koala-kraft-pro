@@ -967,6 +967,7 @@ export default function BookingsPage() {
             scheduled_date: format(scheduledDate, 'MMMM d, yyyy'),
             scheduled_time: format(scheduledDate, 'h:mm a'),
             address: fullAddress || 'Address not provided',
+            square_footage: booking.square_footage || '',
             duration: booking.duration,
             total_amount: booking.total_amount,
           },
