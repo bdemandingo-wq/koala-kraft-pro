@@ -41,10 +41,7 @@ interface BookingProfit {
 
 export function ProfitMarginReport({ bookings }: ProfitMarginReportProps) {
   const { organizationId } = useOrgId();
-  const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: startOfMonth(subMonths(new Date(), 2)),
-    to: endOfMonth(new Date()),
-  });
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const { isTestMode, maskName, maskAmount } = useTestMode();
 
   const completedBookingIds = useMemo(() => {
@@ -128,11 +125,8 @@ export function ProfitMarginReport({ bookings }: ProfitMarginReportProps) {
         if (b.status !== 'completed') return false;
         if (!dateRange?.from) return true;
 
-        const interval = {
-          start: dateRange.from,
-          end: dateRange.to || dateRange.from,
-        };
-        return isWithinInterval(b.scheduledAt, interval);
+        const end = dateRange.to || dateRange.from;
+        return isWithinInterval(b.scheduledAt, { start: dateRange.from, end });
       })
       .sort((a, b) => b.marginPercent - a.marginPercent);
   }, [bookings, dateRange, teamPaysByBooking]);
@@ -214,7 +208,7 @@ export function ProfitMarginReport({ bookings }: ProfitMarginReportProps) {
                   format(dateRange.from, 'MMM d, yyyy')
                 )
               ) : (
-                'Select date range'
+                'All Time'
               )}
             </Button>
           </PopoverTrigger>

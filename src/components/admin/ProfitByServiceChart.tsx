@@ -1,10 +1,13 @@
 import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { BookingWithDetails } from '@/hooks/useBookings';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/lib/supabase';
+import { useOrgId } from '@/hooks/useOrgId';
 
 interface ProfitByServiceChartProps {
   bookings: BookingWithDetails[];
@@ -14,6 +17,39 @@ const COLORS = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4'
 const REFUND_COLOR = '#ef4444'; // Red for refunds
 
 export function ProfitByServiceChart({ bookings }: ProfitByServiceChartProps) {
+  const { organizationId } = useOrgId();
+
+  const completedBookingIds = useMemo(() => {
+    return bookings
+      .filter((b) => b.status === 'completed')
+      .map((b) => b.id);
+  }, [bookings]);
+
+  // Fetch team assignment pay_share for accurate labor cost
+  const { data: teamPaysByBooking = new Map<string, number>() } = useQuery({
+    queryKey: ['profit-service-team-pay', organizationId, completedBookingIds.join(',')],
+    queryFn: async () => {
+      if (!organizationId || completedBookingIds.length === 0) return new Map<string, number>();
+
+      const { data, error } = await supabase
+        .from('booking_team_assignments')
+        .select('booking_id, pay_share')
+        .eq('organization_id', organizationId)
+        .in('booking_id', completedBookingIds);
+      if (error) throw error;
+
+      const map = new Map<string, number>();
+      for (const row of data || []) {
+        const pay = Number((row as any).pay_share);
+        if (!Number.isFinite(pay) || pay <= 0) continue;
+        map.set(String((row as any).booking_id), (map.get(String((row as any).booking_id)) || 0) + pay);
+      }
+      return map;
+    },
+    enabled: !!organizationId && completedBookingIds.length > 0,
+    staleTime: 1000 * 60 * 10,
+  });
+
   const serviceData = useMemo(() => {
     const serviceMap = new Map<string, { 
       name: string; 
@@ -30,8 +66,12 @@ export function ProfitByServiceChart({ bookings }: ProfitByServiceChartProps) {
         const revenue = Number(booking.total_amount || 0);
         const bookingAny = booking as any;
         
+        // Use team pay_share if available, then fall back to individual wage
+        const teamPay = teamPaysByBooking.get(booking.id);
         let cleanerPay = 0;
-        if (bookingAny.cleaner_actual_payment) {
+        if (teamPay != null && teamPay > 0) {
+          cleanerPay = teamPay;
+        } else if (bookingAny.cleaner_actual_payment != null && Number(bookingAny.cleaner_actual_payment) > 0) {
           cleanerPay = Number(bookingAny.cleaner_actual_payment);
         } else if (bookingAny.cleaner_wage) {
           const wage = Number(bookingAny.cleaner_wage);
@@ -70,7 +110,7 @@ export function ProfitByServiceChart({ bookings }: ProfitByServiceChartProps) {
         avgProfit: service.count > 0 ? service.profit / service.count : 0,
       }))
       .sort((a, b) => b.profit - a.profit);
-  }, [bookings]);
+  }, [bookings, teamPaysByBooking]);
 
   const totalProfit = serviceData.reduce((sum, s) => sum + s.profit, 0);
 
