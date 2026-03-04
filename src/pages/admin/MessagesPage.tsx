@@ -135,12 +135,12 @@ export default function MessagesPage() {
     let totalInserted = 0;
     let pageToken: string | null = null;
     let runCount = 0;
-    const MAX_RUNS = 10; // Safety limit
+    const MAX_RUNS = 50; // Each run processes ~50 conversations
 
     try {
+      toast.info('Starting message sync...');
       do {
         runCount++;
-        toast.info(`Syncing messages${runCount > 1 ? ` (batch ${runCount})` : ''}...`);
         
         const { data, error } = await supabase.functions.invoke('backfill-openphone-messages', {
           body: { organizationId, pageToken },
@@ -154,11 +154,15 @@ export default function MessagesPage() {
         totalInserted += data.inserted || 0;
         pageToken = data.nextPageToken || null;
 
-        // If there's more data, continue automatically
+        // Show progress every batch
+        if (data.inserted > 0) {
+          toast.info(`Synced ${totalInserted} messages so far (batch ${runCount})...`);
+        }
+
         if (!data.hasMore) break;
       } while (pageToken && runCount < MAX_RUNS);
 
-      toast.success(`Synced ${totalInserted} new messages`);
+      toast.success(`Done! Synced ${totalInserted} new messages in ${runCount} batch${runCount > 1 ? 'es' : ''}`);
       await fetchConversations();
       if (selectedConversation) {
         await fetchMessages(selectedConversation.id);
