@@ -80,6 +80,29 @@ export default function FinancePage() {
     enabled: !!organizationId,
   });
 
+  // Fetch team assignment pay for accurate labor costs
+  const bookingIds = useMemo(() => bookings.map((b: any) => b.id), [bookings]);
+  const { data: teamPaysByBooking = new Map<string, number>() } = useQuery({
+    queryKey: ['finance-team-pay', organizationId, bookingIds.join(',')],
+    queryFn: async () => {
+      if (!organizationId || bookingIds.length === 0) return new Map<string, number>();
+      const { data, error } = await supabase
+        .from('booking_team_assignments')
+        .select('booking_id, pay_share')
+        .eq('organization_id', organizationId)
+        .in('booking_id', bookingIds);
+      if (error) throw error;
+      const map = new Map<string, number>();
+      for (const row of data || []) {
+        const pay = Number((row as any).pay_share);
+        if (!Number.isFinite(pay) || pay <= 0) continue;
+        map.set(String((row as any).booking_id), (map.get(String((row as any).booking_id)) || 0) + pay);
+      }
+      return map;
+    },
+    enabled: !!organizationId && bookingIds.length > 0,
+  });
+
   // Fetch expenses for the date range - scoped to organization
   const { data: expenses = [] } = useQuery({
     queryKey: ['expenses-finance', organizationId, dateRange],
@@ -105,9 +128,12 @@ export default function FinancePage() {
       const processingFee = (grossAmount * 0.029) + 0.30;
       const netAmount = grossAmount - processingFee;
       
-      // Calculate cleaner pay
+      // Calculate cleaner pay - use team pay first, then individual wage
+      const teamPay = teamPaysByBooking.get(b.id);
       let cleanerPay = 0;
-      if (b.cleaner_actual_payment) {
+      if (teamPay != null && teamPay > 0) {
+        cleanerPay = teamPay;
+      } else if (b.cleaner_actual_payment != null && Number(b.cleaner_actual_payment) > 0) {
         cleanerPay = Number(b.cleaner_actual_payment);
       } else if (b.cleaner_wage) {
         const wage = Number(b.cleaner_wage);
@@ -137,7 +163,7 @@ export default function FinancePage() {
         payment_status: b.payment_status,
       };
     });
-  }, [bookings]);
+  }, [bookings, teamPaysByBooking]);
 
   // Calculate P&L metrics - exclude cancelled bookings
   const metrics = useMemo(() => {
