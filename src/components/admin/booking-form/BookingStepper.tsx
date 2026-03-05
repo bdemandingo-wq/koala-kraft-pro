@@ -932,10 +932,12 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
           
           for (const futureBooking of futureBookings) {
             const updateData: Record<string, any> = { id: futureBooking.id };
+            let staffChanged = false;
             
             for (const change of changedFields) {
               if (change.key === 'staff_id') {
                 updateData.staff_id = bookingData.staff_id;
+                staffChanged = true;
               }
               if (change.key === 'total_amount') {
                 updateData.total_amount = bookingData.total_amount;
@@ -954,6 +956,37 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
             }
             
             await updateBooking.mutateAsync(updateData as { id: string } & Partial<typeof bookingData>);
+
+            // Sync team assignments for future bookings when staff changed
+            if (staffChanged && bookingData.staff_id) {
+              // Delete existing team assignments
+              await supabase
+                .from('booking_team_assignments')
+                .delete()
+                .eq('booking_id', futureBooking.id);
+
+              if (isTeamMode && selectedTeamMembers.length > 1) {
+                for (let i = 0; i < selectedTeamMembers.length; i++) {
+                  const staffId = selectedTeamMembers[i];
+                  const payShare = teamMemberPay[staffId] ?? 0;
+                  await supabase.from('booking_team_assignments').insert({
+                    booking_id: futureBooking.id,
+                    staff_id: staffId,
+                    pay_share: payShare,
+                    is_primary: i === 0,
+                    organization_id: organizationId,
+                  });
+                }
+              } else {
+                await supabase.from('booking_team_assignments').insert({
+                  booking_id: futureBooking.id,
+                  staff_id: bookingData.staff_id,
+                  pay_share: (bookingData as any).cleaner_pay_expected ?? null,
+                  is_primary: true,
+                  organization_id: organizationId,
+                });
+              }
+            }
           }
           toast.success(`Booking updated and ${changedFields.length} change(s) applied to ${futureBookings.length} future booking(s)`);
         } else {
