@@ -76,6 +76,7 @@ export default function PayrollPage() {
     to: endOfMonth(new Date()),
   });
   const [showMissingPayOnly, setShowMissingPayOnly] = useState(false);
+  const [activePayrollTab, setActivePayrollTab] = useState('summary');
   const [staffFilterId, setStaffFilterId] = useState<string>('all');
   const { isTestMode, maskName, maskEmail } = useTestMode();
   const { organizationId } = useOrgId();
@@ -933,7 +934,7 @@ export default function PayrollPage() {
                 variant="outline"
                 size="sm"
                 className="shrink-0"
-                onClick={() => setShowMissingPayOnly(true)}
+                onClick={() => { setShowMissingPayOnly(true); setActivePayrollTab('details'); }}
               >
                 <ExternalLink className="w-3 h-3 mr-1" />
                 View
@@ -965,7 +966,7 @@ export default function PayrollPage() {
       )}
 
       {/* Tabs for Summary and Details */}
-      <Tabs defaultValue="summary" className="space-y-4">
+      <Tabs value={activePayrollTab} onValueChange={setActivePayrollTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="summary">Staff Summary</TabsTrigger>
           <TabsTrigger value="details">Booking Details</TabsTrigger>
