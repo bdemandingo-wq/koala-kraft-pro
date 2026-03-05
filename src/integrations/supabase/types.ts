@@ -3737,6 +3737,50 @@ export type Database = {
           },
         ]
       }
+      payroll_audit_log: {
+        Row: {
+          action: string
+          affected_booking_ids: string[] | null
+          created_at: string
+          details: Json | null
+          id: string
+          organization_id: string
+          period_end: string
+          period_start: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          affected_booking_ids?: string[] | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+          organization_id: string
+          period_end: string
+          period_start: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          affected_booking_ids?: string[] | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+          organization_id?: string
+          period_end?: string
+          period_start?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_audit_log_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payroll_payments: {
         Row: {
           amount: number | null
