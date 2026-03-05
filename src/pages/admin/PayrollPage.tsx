@@ -19,13 +19,23 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { supabase } from '@/lib/supabase';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format, startOfMonth, endOfMonth, startOfYear, startOfWeek } from 'date-fns';
-import { CalendarIcon, Download, AlertTriangle, DollarSign, Clock, Calculator, Briefcase, Check, AlertCircle, ExternalLink, TrendingUp, TrendingDown, Percent, BarChart3 } from 'lucide-react';
+import { CalendarIcon, Download, AlertTriangle, DollarSign, Clock, Calculator, Briefcase, Check, AlertCircle, ExternalLink, TrendingUp, TrendingDown, Percent, BarChart3, Lock, Unlock, Shield, History } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTestMode } from '@/contexts/TestModeContext';
 import { useOrgId } from '@/hooks/useOrgId';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { calculateBookingWage } from '@/lib/wageCalculation';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 interface StaffWithPayroll {
   id: string;
   name: string;
@@ -71,6 +81,9 @@ export default function PayrollPage() {
   const { organizationId } = useOrgId();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+
+  const [showLockConfirm, setShowLockConfirm] = useState(false);
+  const [lockAction, setLockAction] = useState<'lock' | 'unlock'>('lock');
 
   // Calculate week start for current date range (for weekly reset)
   const weekStart = format(startOfWeek(dateRange.from, { weekStartsOn: 1 }), 'yyyy-MM-dd');
@@ -251,7 +264,85 @@ export default function PayrollPage() {
     enabled: !!organizationId,
   });
 
-  // Wage calculation: booking.cleaner_pay_expected is the single source of truth.
+  // --- Pay Lock ---
+  // Count how many bookings in the period are locked
+  const lockedBookingIds = useMemo(() => {
+    return bookings.filter((b: any) => b.pay_locked === true && b.status !== 'cancelled').map((b: any) => b.id);
+  }, [bookings]);
+
+  const totalLockableBookings = bookings.filter((b: any) => b.status !== 'cancelled' && b.staff_id).length;
+  const isFullyLocked = totalLockableBookings > 0 && lockedBookingIds.length === totalLockableBookings;
+  const isPartiallyLocked = lockedBookingIds.length > 0 && !isFullyLocked;
+
+  // Lock/Unlock period mutation
+  const lockPeriodMutation = useMutation({
+    mutationFn: async (action: 'lock' | 'unlock') => {
+      if (!organizationId || !user) throw new Error('Missing context');
+      const toEndOfDay = new Date(dateRange.to);
+      toEndOfDay.setHours(23, 59, 59, 999);
+      const targetIds = bookings
+        .filter((b: any) => b.status !== 'cancelled' && b.staff_id)
+        .map((b: any) => b.id);
+      if (targetIds.length === 0) throw new Error('No bookings to lock');
+
+      // Update all bookings in the period
+      const { error } = await supabase
+        .from('bookings')
+        .update({ pay_locked: action === 'lock' })
+        .eq('organization_id', organizationId)
+        .in('id', targetIds);
+      if (error) throw error;
+
+      // Log the action
+      const { error: logError } = await supabase
+        .from('payroll_audit_log')
+        .insert({
+          organization_id: organizationId,
+          user_id: user.id,
+          action: action === 'lock' ? 'period_locked' : 'period_unlocked',
+          period_start: format(dateRange.from, 'yyyy-MM-dd'),
+          period_end: format(dateRange.to, 'yyyy-MM-dd'),
+          details: {
+            booking_count: targetIds.length,
+            total_payroll: totalPayroll,
+            total_revenue: totalRevenue,
+          },
+          affected_booking_ids: targetIds,
+        });
+      if (logError) console.error('Audit log error:', logError);
+
+      return { action, count: targetIds.length };
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['bookings-payroll'] });
+      queryClient.invalidateQueries({ queryKey: ['payroll-audit-log'] });
+      toast.success(
+        data.action === 'lock'
+          ? `🔒 Period locked — ${data.count} booking(s) frozen`
+          : `🔓 Period unlocked — ${data.count} booking(s) editable`
+      );
+    },
+    onError: () => toast.error('Failed to update lock status'),
+  });
+
+  // Audit log query
+  const { data: auditLog = [] } = useQuery({
+    queryKey: ['payroll-audit-log', organizationId],
+    queryFn: async () => {
+      if (!organizationId) return [];
+      const { data, error } = await supabase
+        .from('payroll_audit_log')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .order('created_at', { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!organizationId,
+  });
+
+
   // Priority (highest to lowest):
   //  1. pay_share on team assignment — per-person override (team bookings)
   //  2. booking.cleaner_pay_expected — snapshot computed on save
@@ -551,10 +642,24 @@ export default function PayrollPage() {
       title="Payroll Report"
       subtitle="Staff wages and 1099 tracking"
       actions={
-        <Button onClick={exportCSV} className="gap-2">
-          <Download className="w-4 h-4" />
-          Export CSV
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant={isFullyLocked ? 'destructive' : 'outline'}
+            onClick={() => {
+              setLockAction(isFullyLocked ? 'unlock' : 'lock');
+              setShowLockConfirm(true);
+            }}
+            className="gap-2"
+            disabled={totalLockableBookings === 0 || lockPeriodMutation.isPending}
+          >
+            {isFullyLocked ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+            {isFullyLocked ? 'Unlock Period' : 'Lock Period'}
+          </Button>
+          <Button onClick={exportCSV} className="gap-2">
+            <Download className="w-4 h-4" />
+            Export CSV
+          </Button>
+        </div>
       }
     >
       <SubscriptionGate feature="Payroll">
@@ -782,12 +887,37 @@ export default function PayrollPage() {
         </Card>
       )}
 
+      {/* Pay Lock Status Banner */}
+      {(isFullyLocked || isPartiallyLocked) && (
+        <Card className={cn("mb-6", isFullyLocked ? "border-primary/50 bg-primary/5" : "border-amber-300 bg-amber-50 dark:bg-amber-950/20")}>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <Shield className={cn("w-5 h-5", isFullyLocked ? "text-primary" : "text-amber-600")} />
+              <div className="flex-1">
+                <h3 className={cn("font-semibold", isFullyLocked ? "text-primary" : "text-amber-700 dark:text-amber-400")}>
+                  {isFullyLocked ? '🔒 Payroll Period Locked' : '⚠️ Partially Locked Period'}
+                </h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {isFullyLocked
+                    ? `All ${lockedBookingIds.length} booking(s) in this period are frozen. Pay data cannot be modified.`
+                    : `${lockedBookingIds.length} of ${totalLockableBookings} booking(s) are locked.`}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Tabs for Summary and Details */}
       <Tabs defaultValue="summary" className="space-y-4">
         <TabsList>
           <TabsTrigger value="summary">Staff Summary</TabsTrigger>
           <TabsTrigger value="details">Booking Details</TabsTrigger>
           <TabsTrigger value="profitability">Job Profitability</TabsTrigger>
+          <TabsTrigger value="audit" className="gap-1">
+            <History className="w-3.5 h-3.5" />
+            Audit Trail
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="summary">
@@ -944,10 +1074,16 @@ export default function PayrollPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredBookingPayrollDetails.map((b) => (
-                    <TableRow key={b.id} className={b.missingPay ? 'bg-destructive/5' : ''}>
+                  {filteredBookingPayrollDetails.map((b) => {
+                    const bookingId = b.id.includes('-') ? b.id.split('-')[0] : b.id;
+                    const isLocked = lockedBookingIds.includes(bookingId);
+                    return (
+                    <TableRow key={b.id} className={cn(b.missingPay ? 'bg-destructive/5' : '', isLocked ? 'opacity-75' : '')}>
                       <TableCell className="whitespace-nowrap">
-                        {format(new Date(b.scheduled_at), 'MMM d, yyyy')}
+                        <div className="flex items-center gap-1">
+                          {isLocked && <Lock className="w-3 h-3 text-muted-foreground" />}
+                          {format(new Date(b.scheduled_at), 'MMM d, yyyy')}
+                        </div>
                       </TableCell>
                       <TableCell>#{b.booking_number}</TableCell>
                       <TableCell className="font-medium">{maskName(b.staff_name)}</TableCell>
@@ -980,7 +1116,8 @@ export default function PayrollPage() {
                         )}
                       </TableCell>
                     </TableRow>
-                  ))}
+                  );
+                  })}
                   {filteredBookingPayrollDetails.length === 0 && (
                     <TableRow>
                       <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
@@ -1048,7 +1185,93 @@ export default function PayrollPage() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="audit">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <History className="w-5 h-5" />
+                Payroll Audit Trail
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date & Time</TableHead>
+                    <TableHead>Action</TableHead>
+                    <TableHead>Period</TableHead>
+                    <TableHead className="text-right">Bookings</TableHead>
+                    <TableHead className="text-right">Payroll</TableHead>
+                    <TableHead className="text-right">Revenue</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {auditLog.map((entry: any) => (
+                    <TableRow key={entry.id}>
+                      <TableCell className="whitespace-nowrap text-sm">
+                        {format(new Date(entry.created_at), 'MMM d, yyyy h:mm a')}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={entry.action === 'period_locked' ? 'default' : 'secondary'} className="gap-1">
+                          {entry.action === 'period_locked' ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
+                          {entry.action === 'period_locked' ? 'Locked' : 'Unlocked'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {format(new Date(entry.period_start), 'MMM d')} - {format(new Date(entry.period_end), 'MMM d, yyyy')}
+                      </TableCell>
+                      <TableCell className="text-right text-sm">
+                        {entry.details?.booking_count || '-'}
+                      </TableCell>
+                      <TableCell className="text-right text-sm">
+                        {isTestMode ? '$X,XXX' : entry.details?.total_payroll != null ? `$${Number(entry.details.total_payroll).toFixed(2)}` : '-'}
+                      </TableCell>
+                      <TableCell className="text-right text-sm">
+                        {isTestMode ? '$X,XXX' : entry.details?.total_revenue != null ? `$${Number(entry.details.total_revenue).toFixed(2)}` : '-'}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {auditLog.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                        No audit entries yet. Lock a payroll period to create the first entry.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
+
+      {/* Lock/Unlock Confirmation Dialog */}
+      <AlertDialog open={showLockConfirm} onOpenChange={setShowLockConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              {lockAction === 'lock' ? <Lock className="w-5 h-5" /> : <Unlock className="w-5 h-5" />}
+              {lockAction === 'lock' ? 'Lock Payroll Period?' : 'Unlock Payroll Period?'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {lockAction === 'lock'
+                ? `This will freeze pay data for ${totalLockableBookings} booking(s) from ${format(dateRange.from, 'MMM d')} to ${format(dateRange.to, 'MMM d, yyyy')}. No pay changes can be made until unlocked.`
+                : `This will make pay data editable again for ${lockedBookingIds.length} booking(s). This action will be logged.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => lockPeriodMutation.mutate(lockAction)}
+              className={lockAction === 'unlock' ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90' : ''}
+            >
+              {lockAction === 'lock' ? '🔒 Lock Period' : '🔓 Unlock Period'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       </SubscriptionGate>
     </AdminLayout>
   );
