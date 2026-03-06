@@ -150,6 +150,8 @@ interface BookingFormContextType extends BookingFormState {
   setCleanerOverrideHours: (hours: string) => void;
   setSendConfirmationEmail: (send: boolean) => void;
   setSendConfirmationSms: (send: boolean) => void;
+  setSendQuoteSms: (send: boolean) => void;
+  setSendQuoteEmail: (send: boolean) => void;
   setCardInfo: (info: CardInfo | null) => void;
   setAppliedDiscount: (discount: AppliedDiscount | null) => void;
   setSelectedChecklistId: (id: string | null) => void;
