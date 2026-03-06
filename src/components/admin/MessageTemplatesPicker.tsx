@@ -13,11 +13,13 @@ interface SmsTemplate {
   id: string;
   name: string;
   content: string;
+  subject?: string | null;
 }
 
 interface MessageTemplatesPickerProps {
   organizationId: string;
-  onSelect: (content: string) => void;
+  onSelect: (content: string, subject?: string | null) => void;
+  showSubject?: boolean;
 }
 
 export function MessageTemplatesPicker({ organizationId, onSelect }: MessageTemplatesPickerProps) {
