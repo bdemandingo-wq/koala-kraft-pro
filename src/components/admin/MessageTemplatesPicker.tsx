@@ -189,6 +189,16 @@ export function MessageTemplatesPicker({ organizationId, onSelect, showSubject =
                 onChange={(e) => setName(e.target.value)}
               />
             </div>
+            {showSubject && (
+              <div>
+                <Label>Subject (for emails)</Label>
+                <Input
+                  placeholder="e.g. Welcome to our service!"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                />
+              </div>
+            )}
             <div>
               <Label>Message Content</Label>
               <Textarea
