@@ -22,7 +22,7 @@ interface MessageTemplatesPickerProps {
   showSubject?: boolean;
 }
 
-export function MessageTemplatesPicker({ organizationId, onSelect }: MessageTemplatesPickerProps) {
+export function MessageTemplatesPicker({ organizationId, onSelect, showSubject = false }: MessageTemplatesPickerProps) {
   const [templates, setTemplates] = useState<SmsTemplate[]>([]);
   const [loading, setLoading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
