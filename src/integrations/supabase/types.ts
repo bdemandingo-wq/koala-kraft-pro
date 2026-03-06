@@ -83,6 +83,42 @@ export type Database = {
           },
         ]
       }
+      account_deletion_requests: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string
+          organization_name: string | null
+          processed_at: string | null
+          processed_by: string | null
+          reason: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          organization_name?: string | null
+          processed_at?: string | null
+          processed_by?: string | null
+          reason?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          organization_name?: string | null
+          processed_at?: string | null
+          processed_by?: string | null
+          reason?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       additional_charges: {
         Row: {
           booking_id: string

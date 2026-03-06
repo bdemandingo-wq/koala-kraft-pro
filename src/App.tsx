@@ -105,6 +105,7 @@ const SchedulingSoftware = lazy(() => import("./pages/features/SchedulingSoftwar
 const CompareHousecallPro = lazy(() => import("./pages/compare/CompareHousecallPro"));
 const PricingPage = lazy(() => import("./pages/PricingPage"));
 const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage"));
+const DeleteAccountPage = lazy(() => import("./pages/DeleteAccountPage"));
 const RedirectPage = lazy(() => import("./pages/RedirectPage"));
 const CardSavedPage = lazy(() => import("./pages/CardSavedPage"));
 const TipPage = lazy(() => import("./pages/TipPage"));
@@ -161,6 +162,7 @@ const App = () => (
                       <Route path="/tip/:token" element={<TipPage />} />
                       <Route path="/deposit/:token" element={<DepositPage />} />
                       <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                      <Route path="/delete-account" element={<DeleteAccountPage />} />
                       <Route path="/pricing" element={<LoginPage />} />
                       <Route path="/onboarding" element={<OnboardingPage />} />
                       <Route path="/review/:token" element={<ReviewPage />} />
@@ -257,8 +259,9 @@ const App = () => (
                     <Route path="/card-saved" element={<CardSavedPage />} />
                     <Route path="/tip/:token" element={<TipPage />} />
                     <Route path="/deposit/:token" element={<DepositPage />} />
-                    <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-                    <Route path="/pricing" element={<PricingPage />} />
+                     <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                     <Route path="/delete-account" element={<DeleteAccountPage />} />
+                     <Route path="/pricing" element={<PricingPage />} />
                     <Route path="/onboarding" element={<OnboardingPage />} />
                     <Route path="/review/:token" element={<ReviewPage />} />
                     <Route path="/blog" element={<BlogIndex />} />
