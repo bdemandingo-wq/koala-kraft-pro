@@ -362,14 +362,32 @@ export default function PayrollPage() {
         hoursWorked: baseResult.hoursWorked,
       };
     }
-    // 2. booking-level cleaner_pay_expected snapshot (single source of truth)
+    // 2. booking-level cleaner_pay_expected snapshot
+    //    For hourly wage types, recalculate from rate × current hours to avoid stale snapshots
     if (booking.cleaner_pay_expected != null && Number(booking.cleaner_pay_expected) > 0) {
+      const snapshotWageType = booking.cleaner_wage_type || 'hourly';
+      const snapshotHours = booking.cleaner_override_hours || baseResult.hoursWorked;
+      const snapshotRate = booking.cleaner_wage || staffMember?.hourly_rate || staffMember?.base_wage || 0;
+      
+      // For hourly, recalculate using current hours × rate to stay accurate
+      if (snapshotWageType === 'hourly' && snapshotRate > 0) {
+        const recalcPay = Math.round(Number(snapshotRate) * snapshotHours * 100) / 100;
+        return {
+          calculatedPay: recalcPay,
+          actualPay: recalcPay,
+          wageType: snapshotWageType,
+          wageRate: Number(snapshotRate),
+          hoursWorked: snapshotHours,
+        };
+      }
+      
+      // For flat/percentage, trust the snapshot
       return {
         calculatedPay: Number(booking.cleaner_pay_expected),
         actualPay: Number(booking.cleaner_pay_expected),
-        wageType: booking.cleaner_wage_type || 'hourly',
+        wageType: snapshotWageType,
         wageRate: booking.cleaner_wage || Number(booking.cleaner_pay_expected),
-        hoursWorked: booking.cleaner_override_hours || baseResult.hoursWorked,
+        hoursWorked: snapshotHours,
       };
     }
     // 3. booking-level cleaner_actual_payment (admin override)
