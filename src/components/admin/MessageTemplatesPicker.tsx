@@ -81,7 +81,7 @@ export function MessageTemplatesPicker({ organizationId, onSelect, showSubject =
       } else {
         const { error } = await supabase
           .from('sms_templates')
-          .insert({ organization_id: organizationId, name: name.trim(), content: content.trim() });
+          .insert({ organization_id: organizationId, name: name.trim(), content: content.trim(), subject: subject.trim() || null });
         if (error) throw error;
         toast.success('Template created');
       }
