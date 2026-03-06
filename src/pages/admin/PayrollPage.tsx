@@ -357,8 +357,6 @@ export default function PayrollPage() {
   const calcWage = (booking: any, staffMember: any, payShareOverride?: number | null) => {
     const baseResult = calculateBookingWage(booking, staffMember);
     // CRITICAL: cleaner_pay_expected on the booking is the ULTIMATE source of truth.
-    // Only use payShareOverride for true multi-cleaner team splits where pay differs per member.
-    // For single-cleaner bookings (even with a team assignment row), prefer cleaner_pay_expected.
     if (booking.cleaner_pay_expected != null) {
       return { calculatedPay: Number(booking.cleaner_pay_expected), actualPay: Number(booking.cleaner_pay_expected), wageType: baseResult.wageType, wageRate: baseResult.wageRate, hoursWorked: baseResult.hoursWorked, isMissingPay: false };
     }
