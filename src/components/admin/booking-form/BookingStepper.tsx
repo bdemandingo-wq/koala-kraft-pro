@@ -1290,6 +1290,21 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
                 </Label>
               </div>
 
+              <div className="flex items-center gap-2 p-2 bg-secondary/30 rounded-lg">
+                <Checkbox
+                  id="sendConfirmationEmail"
+                  checked={sendConfirmationEmail}
+                  onCheckedChange={(checked) => setSendConfirmationEmail(checked as boolean)}
+                />
+                <Label
+                  htmlFor="sendConfirmationEmail"
+                  className="text-sm cursor-pointer flex items-center gap-1.5"
+                >
+                  <Mail className="w-4 h-4 text-muted-foreground" />
+                  Send confirmation email
+                </Label>
+              </div>
+
               <Button 
                 variant="outline" 
                 size="sm"
@@ -1304,22 +1319,6 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
                   <MessageSquare className="mr-1.5 h-3.5 w-3.5" />
                 )}
                 Quote SMS
-              </Button>
-
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={handleSendConfirmationEmail} 
-                disabled={sendingConfirmationEmail}
-                className="h-9"
-                title="Send confirmation email to customer"
-              >
-                {sendingConfirmationEmail ? (
-                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <Mail className="mr-1.5 h-3.5 w-3.5" />
-                )}
-                Confirmation Email
               </Button>
 
               <Button 
