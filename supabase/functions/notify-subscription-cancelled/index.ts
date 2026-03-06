@@ -70,7 +70,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("[notify-subscription-cancelled] Using org email settings - from:", senderFrom, "to:", adminEmail);
 
-    const resend = new Resend(RESEND_API_KEY);
+    const resend = new Resend(emailSettings.resend_api_key || RESEND_API_KEY);
 
     // Send notification to the organization admin
     const emailResponse = await resend.emails.send({

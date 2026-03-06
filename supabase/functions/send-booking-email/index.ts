@@ -157,6 +157,8 @@ const handler = async (req: Request): Promise<Response> => {
     const emailSettings = emailSettingsResult.settings;
     const senderEmail = emailSettings.from_email;
     const companyName = emailSettings.from_name;
+    // Use org-specific Resend API key if configured, otherwise fall back to global
+    const resendApiKey = emailSettings.resend_api_key || RESEND_API_KEY;
 
     // Fetch branding from business_settings (colors, logo) for email templates
     let logoUrl = "";
@@ -354,7 +356,7 @@ const handler = async (req: Request): Promise<Response> => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${RESEND_API_KEY}`,
+        Authorization: `Bearer ${resendApiKey}`,
       },
       body: JSON.stringify({
         from: formatEmailFrom(emailSettings),
@@ -406,7 +408,7 @@ const handler = async (req: Request): Promise<Response> => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${RESEND_API_KEY}`,
+          Authorization: `Bearer ${resendApiKey}`,
         },
         body: JSON.stringify({
           from: `${companyName} Booking System <${senderEmail}>`,

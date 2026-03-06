@@ -88,6 +88,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const emailSettings = emailSettingsResult.settings;
     const companyName = emailSettings.from_name;
+    const resendApiKey = emailSettings.resend_api_key || RESEND_API_KEY;
     
     console.log("[send-invoice] Using org email settings - from:", emailSettings.from_email, "name:", companyName);
 
@@ -305,7 +306,7 @@ const handler = async (req: Request): Promise<Response> => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${RESEND_API_KEY}`,
+        Authorization: `Bearer ${resendApiKey}`,
       },
       body: JSON.stringify({
         from: formatEmailFrom(emailSettings),

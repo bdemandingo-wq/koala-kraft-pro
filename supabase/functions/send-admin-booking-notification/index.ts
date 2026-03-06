@@ -60,9 +60,6 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    const resend = new Resend(RESEND_API_KEY);
-    console.log("[send-admin-booking-notification] Sending notification for org:", organizationId);
-
     // Get email settings from organization_email_settings table
     const emailSettingsResult = await getOrgEmailSettings(organizationId);
     if (!emailSettingsResult.success || !emailSettingsResult.settings) {
@@ -72,6 +69,9 @@ const handler = async (req: Request): Promise<Response> => {
         { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }
+
+    const resend = new Resend(emailSettingsResult.settings.resend_api_key || RESEND_API_KEY);
+    console.log("[send-admin-booking-notification] Sending notification for org:", organizationId);
 
     const emailSettings = emailSettingsResult.settings;
     const senderFrom = formatEmailFrom(emailSettings);
