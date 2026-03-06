@@ -648,6 +648,8 @@ export function BookingFormProvider({
       setCleanerOverrideHours,
       setSendConfirmationEmail,
       setSendConfirmationSms,
+      setSendQuoteSms,
+      setSendQuoteEmail,
       setCardInfo,
       setAppliedDiscount,
       setSelectedChecklistId,
