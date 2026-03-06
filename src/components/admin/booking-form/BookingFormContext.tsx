@@ -79,6 +79,8 @@ interface BookingFormState {
   cleanerOverrideHours: string;
   sendConfirmationEmail: boolean;
   sendConfirmationSms: boolean;
+  sendQuoteSms: boolean;
+  sendQuoteEmail: boolean;
   
   // Card info
   cardInfo: CardInfo | null;
