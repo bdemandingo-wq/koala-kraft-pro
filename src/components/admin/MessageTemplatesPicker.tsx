@@ -108,7 +108,7 @@ export function MessageTemplatesPicker({ organizationId, onSelect, showSubject =
   };
 
   const handleSelect = (t: SmsTemplate) => {
-    onSelect(t.content);
+    onSelect(t.content, t.subject);
     setMenuOpen(false);
   };
 
