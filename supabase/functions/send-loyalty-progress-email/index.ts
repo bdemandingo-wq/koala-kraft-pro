@@ -88,37 +88,40 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Fetch business settings for the SPECIFIC organization only
-    let senderEmail = "";
-    let companyName = "";
+    // Fetch email settings from organization_email_settings table (SINGLE SOURCE OF TRUTH)
+    const emailSettingsResult = await getOrgEmailSettings(organizationId);
+    
+    if (!emailSettingsResult.success || !emailSettingsResult.settings) {
+      console.error("Failed to get email settings:", emailSettingsResult.error);
+      return new Response(JSON.stringify({ 
+        error: emailSettingsResult.error || "Email settings not configured" 
+      }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    const emailSettings = emailSettingsResult.settings;
+    const senderEmail = emailSettings.from_email;
+    const companyName = emailSettings.from_name;
+    const resendApiKey = emailSettings.resend_api_key || RESEND_API_KEY;
+    
+    // Fetch branding from business_settings
+    let primaryColor = "#1e5bb0";
+    let accentColor = "#14b8a6";
     
     if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
       const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-      
-      // ONLY query settings for the specific organization - NO FALLBACK
-      const { data: settings, error: settingsError } = await supabase
+      const { data: settings } = await supabase
         .from('business_settings')
-        .select('company_email, company_name')
+        .select('primary_color, accent_color')
         .eq('organization_id', organizationId)
         .maybeSingle();
-      
-      if (settingsError) {
-        console.error("Error fetching organization settings:", settingsError);
+      if (settings) {
+        primaryColor = settings.primary_color || primaryColor;
+        accentColor = settings.accent_color || accentColor;
       }
-      
-      if (!settings || !settings.company_email || !settings.company_name) {
-        console.error("Organization settings not configured for org:", organizationId);
-        return new Response(JSON.stringify({ 
-          error: "Organization email settings not configured. Please set up your company email and name in Settings." 
-        }), {
-          status: 400,
-          headers: { "Content-Type": "application/json", ...corsHeaders },
-        });
-      }
-      
-      senderEmail = settings.company_email;
-      companyName = settings.company_name;
-      
+    }
       console.log("Using organization settings - sender:", senderEmail, "company:", companyName);
     } else {
       return new Response(JSON.stringify({ error: "Database connection not configured" }), {
