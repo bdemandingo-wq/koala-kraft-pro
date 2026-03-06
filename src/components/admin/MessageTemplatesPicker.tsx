@@ -41,7 +41,7 @@ export function MessageTemplatesPicker({ organizationId, onSelect, showSubject =
     setLoading(true);
     const { data } = await supabase
       .from('sms_templates')
-      .select('id, name, content')
+      .select('id, name, content, subject')
       .eq('organization_id', organizationId)
       .order('name');
     setTemplates(data || []);
