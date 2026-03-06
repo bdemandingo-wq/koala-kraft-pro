@@ -238,6 +238,8 @@ export function BookingFormProvider({
   const [cleanerOverrideHours, setCleanerOverrideHours] = useState('');
   const [sendConfirmationEmail, setSendConfirmationEmail] = useState(false);
   const [sendConfirmationSms, setSendConfirmationSms] = useState(false);
+  const [sendQuoteSms, setSendQuoteSms] = useState(false);
+  const [sendQuoteEmail, setSendQuoteEmail] = useState(false);
   
   // Card state
   const [cardInfo, setCardInfo] = useState<CardInfo | null>(null);
