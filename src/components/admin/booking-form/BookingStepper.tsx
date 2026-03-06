@@ -271,6 +271,10 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
     setSendConfirmationEmail,
     sendConfirmationSms,
     setSendConfirmationSms,
+    sendQuoteSms,
+    setSendQuoteSms,
+    sendQuoteEmail,
+    setSendQuoteEmail,
     selectedService,
     selectedCustomer,
     customerEmail,
@@ -1145,9 +1149,38 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
             } else {
               toast.warning('No email address available for confirmation email');
             }
-          }
         }
       }
+
+          // Auto-send quote SMS if checked
+          if (sendQuoteSms) {
+            if (customerPhone) {
+              try {
+                await handleSendQuoteSms();
+              } catch (quoteError: any) {
+                console.error('Auto quote SMS error:', quoteError);
+                toast.error('Failed to send quote SMS');
+              }
+            } else {
+              toast.warning('No phone number available for quote SMS');
+            }
+          }
+
+          // Auto-send quote email if checked
+          if (sendQuoteEmail) {
+            const customerEmail = customerTab === 'existing' && selectedCustomer ? selectedCustomer.email : newCustomer.email;
+            if (customerEmail) {
+              try {
+                await handleSendQuoteEmail();
+              } catch (quoteError: any) {
+                console.error('Auto quote email error:', quoteError);
+                toast.error('Failed to send quote email');
+              }
+            } else {
+              toast.warning('No email address available for quote email');
+            }
+          }
+        }
 
       onClose();
       resetForm();
@@ -1320,37 +1353,35 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
                 </Label>
               </div>
 
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={handleSendQuoteSms} 
-                disabled={sendingQuoteSms || !customerPhone}
-                className="h-9"
-                title={!customerPhone ? 'Customer phone required' : 'Send quote to customer'}
-              >
-                {sendingQuoteSms ? (
-                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <MessageSquare className="mr-1.5 h-3.5 w-3.5" />
-                )}
-                Quote SMS
-              </Button>
+              <div className="flex items-center gap-2 p-2 bg-secondary/30 rounded-lg">
+                <Checkbox
+                  id="sendQuoteSms"
+                  checked={sendQuoteSms}
+                  onCheckedChange={(checked) => setSendQuoteSms(checked as boolean)}
+                />
+                <Label
+                  htmlFor="sendQuoteSms"
+                  className="text-sm cursor-pointer flex items-center gap-1.5"
+                >
+                  <MessageSquare className="w-4 h-4 text-muted-foreground" />
+                  Quote SMS
+                </Label>
+              </div>
 
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={handleSendQuoteEmail} 
-                disabled={sendingQuoteEmail}
-                className="h-9"
-                title="Send quote email to customer"
-              >
-                {sendingQuoteEmail ? (
-                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <Mail className="mr-1.5 h-3.5 w-3.5" />
-                )}
-                Quote Email
-              </Button>
+              <div className="flex items-center gap-2 p-2 bg-secondary/30 rounded-lg">
+                <Checkbox
+                  id="sendQuoteEmail"
+                  checked={sendQuoteEmail}
+                  onCheckedChange={(checked) => setSendQuoteEmail(checked as boolean)}
+                />
+                <Label
+                  htmlFor="sendQuoteEmail"
+                  className="text-sm cursor-pointer flex items-center gap-1.5"
+                >
+                  <Mail className="w-4 h-4 text-muted-foreground" />
+                  Quote Email
+                </Label>
+              </div>
             </div>
           )}
 

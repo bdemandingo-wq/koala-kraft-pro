@@ -79,6 +79,8 @@ interface BookingFormState {
   cleanerOverrideHours: string;
   sendConfirmationEmail: boolean;
   sendConfirmationSms: boolean;
+  sendQuoteSms: boolean;
+  sendQuoteEmail: boolean;
   
   // Card info
   cardInfo: CardInfo | null;
@@ -148,6 +150,8 @@ interface BookingFormContextType extends BookingFormState {
   setCleanerOverrideHours: (hours: string) => void;
   setSendConfirmationEmail: (send: boolean) => void;
   setSendConfirmationSms: (send: boolean) => void;
+  setSendQuoteSms: (send: boolean) => void;
+  setSendQuoteEmail: (send: boolean) => void;
   setCardInfo: (info: CardInfo | null) => void;
   setAppliedDiscount: (discount: AppliedDiscount | null) => void;
   setSelectedChecklistId: (id: string | null) => void;
@@ -234,6 +238,8 @@ export function BookingFormProvider({
   const [cleanerOverrideHours, setCleanerOverrideHours] = useState('');
   const [sendConfirmationEmail, setSendConfirmationEmail] = useState(false);
   const [sendConfirmationSms, setSendConfirmationSms] = useState(false);
+  const [sendQuoteSms, setSendQuoteSms] = useState(false);
+  const [sendQuoteEmail, setSendQuoteEmail] = useState(false);
   
   // Card state
   const [cardInfo, setCardInfo] = useState<CardInfo | null>(null);
@@ -584,6 +590,8 @@ export function BookingFormProvider({
       cleanerOverrideHours,
       sendConfirmationEmail,
       sendConfirmationSms,
+      sendQuoteSms,
+      sendQuoteEmail,
       cardInfo,
       loadingCard,
       selectedChecklistId,
@@ -640,6 +648,8 @@ export function BookingFormProvider({
       setCleanerOverrideHours,
       setSendConfirmationEmail,
       setSendConfirmationSms,
+      setSendQuoteSms,
+      setSendQuoteEmail,
       setCardInfo,
       setAppliedDiscount,
       setSelectedChecklistId,
