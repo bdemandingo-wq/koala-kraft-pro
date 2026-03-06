@@ -1131,6 +1131,21 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
               toast.warning('No phone number available for SMS');
             }
           }
+
+          // Auto-send confirmation email if checked
+          if (sendConfirmationEmail) {
+            const customerEmail = customerTab === 'existing' && selectedCustomer ? selectedCustomer.email : newCustomer.email;
+            if (customerEmail) {
+              try {
+                await handleSendConfirmationEmail();
+              } catch (emailError: any) {
+                console.error('Auto confirmation email error:', emailError);
+                toast.error('Failed to send confirmation email');
+              }
+            } else {
+              toast.warning('No email address available for confirmation email');
+            }
+          }
         }
       }
 
@@ -1290,6 +1305,21 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
                 </Label>
               </div>
 
+              <div className="flex items-center gap-2 p-2 bg-secondary/30 rounded-lg">
+                <Checkbox
+                  id="sendConfirmationEmail"
+                  checked={sendConfirmationEmail}
+                  onCheckedChange={(checked) => setSendConfirmationEmail(checked as boolean)}
+                />
+                <Label
+                  htmlFor="sendConfirmationEmail"
+                  className="text-sm cursor-pointer flex items-center gap-1.5"
+                >
+                  <Mail className="w-4 h-4 text-muted-foreground" />
+                  Send confirmation email
+                </Label>
+              </div>
+
               <Button 
                 variant="outline" 
                 size="sm"
@@ -1304,22 +1334,6 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
                   <MessageSquare className="mr-1.5 h-3.5 w-3.5" />
                 )}
                 Quote SMS
-              </Button>
-
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={handleSendConfirmationEmail} 
-                disabled={sendingConfirmationEmail}
-                className="h-9"
-                title="Send confirmation email to customer"
-              >
-                {sendingConfirmationEmail ? (
-                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <Mail className="mr-1.5 h-3.5 w-3.5" />
-                )}
-                Confirmation Email
               </Button>
 
               <Button 
