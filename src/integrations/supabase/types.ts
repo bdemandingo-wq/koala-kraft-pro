@@ -794,7 +794,6 @@ export type Database = {
           cleaner_checkin_lng: number | null
           cleaner_checkout_at: string | null
           cleaner_override_hours: number | null
-          cleaner_pay_expected: number | null
           cleaner_wage: number | null
           cleaner_wage_type: string | null
           created_at: string
@@ -812,8 +811,6 @@ export type Database = {
           location_id: string | null
           notes: string | null
           organization_id: string | null
-          pay_last_saved_at: string | null
-          pay_locked: boolean | null
           payment_intent_id: string | null
           payment_status: Database["public"]["Enums"]["payment_status"]
           recurring_days_of_week: number[] | null
@@ -842,7 +839,6 @@ export type Database = {
           cleaner_checkin_lng?: number | null
           cleaner_checkout_at?: string | null
           cleaner_override_hours?: number | null
-          cleaner_pay_expected?: number | null
           cleaner_wage?: number | null
           cleaner_wage_type?: string | null
           created_at?: string
@@ -860,8 +856,6 @@ export type Database = {
           location_id?: string | null
           notes?: string | null
           organization_id?: string | null
-          pay_last_saved_at?: string | null
-          pay_locked?: boolean | null
           payment_intent_id?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
           recurring_days_of_week?: number[] | null
@@ -890,7 +884,6 @@ export type Database = {
           cleaner_checkin_lng?: number | null
           cleaner_checkout_at?: string | null
           cleaner_override_hours?: number | null
-          cleaner_pay_expected?: number | null
           cleaner_wage?: number | null
           cleaner_wage_type?: string | null
           created_at?: string
@@ -908,8 +901,6 @@ export type Database = {
           location_id?: string | null
           notes?: string | null
           organization_id?: string | null
-          pay_last_saved_at?: string | null
-          pay_locked?: boolean | null
           payment_intent_id?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
           recurring_days_of_week?: number[] | null
@@ -3730,50 +3721,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "page_seo_metadata_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      payroll_audit_log: {
-        Row: {
-          action: string
-          affected_booking_ids: string[] | null
-          created_at: string
-          details: Json | null
-          id: string
-          organization_id: string
-          period_end: string
-          period_start: string
-          user_id: string
-        }
-        Insert: {
-          action: string
-          affected_booking_ids?: string[] | null
-          created_at?: string
-          details?: Json | null
-          id?: string
-          organization_id: string
-          period_end: string
-          period_start: string
-          user_id: string
-        }
-        Update: {
-          action?: string
-          affected_booking_ids?: string[] | null
-          created_at?: string
-          details?: Json | null
-          id?: string
-          organization_id?: string
-          period_end?: string
-          period_start?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "payroll_audit_log_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"

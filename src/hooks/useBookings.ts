@@ -27,9 +27,6 @@ export interface BookingWithDetails {
   square_footage: string | null;
   extras: Json | null;
   is_draft: boolean;
-  cleaner_pay_expected: number | null;
-  pay_locked: boolean;
-  pay_last_saved_at: string | null;
   created_at: string;
   updated_at: string;
   staff_id: string | null;
@@ -82,9 +79,6 @@ export interface CreateBookingData {
   cleaner_wage_type?: string | null;
   cleaner_override_hours?: number | null;
   cleaner_actual_payment?: number | null;
-  cleaner_pay_expected?: number | null;
-  pay_locked?: boolean;
-  pay_last_saved_at?: string | null;
 }
 
 export interface UpdateBookingData {
@@ -115,9 +109,6 @@ export interface UpdateBookingData {
   cleaner_wage_type?: string | null;
   cleaner_override_hours?: number | null;
   cleaner_actual_payment?: number | null;
-  cleaner_pay_expected?: number | null;
-  pay_locked?: boolean;
-  pay_last_saved_at?: string | null;
 }
 
 export interface NewCustomerData {

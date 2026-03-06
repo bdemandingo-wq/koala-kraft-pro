@@ -19,23 +19,13 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { supabase } from '@/lib/supabase';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format, startOfMonth, endOfMonth, startOfYear, startOfWeek } from 'date-fns';
-import { CalendarIcon, Download, AlertTriangle, DollarSign, Clock, Calculator, Briefcase, Check, AlertCircle, ExternalLink, TrendingUp, TrendingDown, Percent, BarChart3, Lock, Unlock, Shield, History, Trophy, Star } from 'lucide-react';
+import { CalendarIcon, Download, AlertTriangle, DollarSign, Clock, Calculator, Briefcase, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTestMode } from '@/contexts/TestModeContext';
 import { useOrgId } from '@/hooks/useOrgId';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { calculateBookingWage } from '@/lib/wageCalculation';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 interface StaffWithPayroll {
   id: string;
   name: string;
@@ -50,7 +40,6 @@ interface StaffWithPayroll {
   upcomingBookings: number;
   assignedCleans: number;
   avgPayPerClean: number;
-  missingPayCount: number;
 }
 
 interface BookingPayrollDetail {
@@ -66,8 +55,6 @@ interface BookingPayrollDetail {
   actual_pay: number | null;
   staff_id: string;
   staff_name: string;
-  missingPay: boolean;
-  missingHours: boolean;
 }
 
 export default function PayrollPage() {
@@ -75,16 +62,11 @@ export default function PayrollPage() {
     from: startOfMonth(new Date()),
     to: endOfMonth(new Date()),
   });
-  const [showMissingPayOnly, setShowMissingPayOnly] = useState(false);
-  const [activePayrollTab, setActivePayrollTab] = useState('summary');
   const [staffFilterId, setStaffFilterId] = useState<string>('all');
   const { isTestMode, maskName, maskEmail } = useTestMode();
   const { organizationId } = useOrgId();
   const { user } = useAuth();
   const queryClient = useQueryClient();
-
-  const [showLockConfirm, setShowLockConfirm] = useState(false);
-  const [lockAction, setLockAction] = useState<'lock' | 'unlock'>('lock');
 
   // Calculate week start for current date range (for weekly reset)
   const weekStart = format(startOfWeek(dateRange.from, { weekStartsOn: 1 }), 'yyyy-MM-dd');
@@ -265,90 +247,16 @@ export default function PayrollPage() {
     enabled: !!organizationId,
   });
 
-  // --- Pay Lock ---
-  // Count how many bookings in the period are locked
-  const lockedBookingIds = useMemo(() => {
-    return bookings.filter((b: any) => b.pay_locked === true && b.status !== 'cancelled').map((b: any) => b.id);
-  }, [bookings]);
-
-  const totalLockableBookings = bookings.filter((b: any) => b.status !== 'cancelled' && b.staff_id).length;
-  const isFullyLocked = totalLockableBookings > 0 && lockedBookingIds.length === totalLockableBookings;
-  const isPartiallyLocked = lockedBookingIds.length > 0 && !isFullyLocked;
-
-  // Lock/Unlock period mutation
-  const lockPeriodMutation = useMutation({
-    mutationFn: async (action: 'lock' | 'unlock') => {
-      if (!organizationId || !user) throw new Error('Missing context');
-      const toEndOfDay = new Date(dateRange.to);
-      toEndOfDay.setHours(23, 59, 59, 999);
-      const targetIds = bookings
-        .filter((b: any) => b.status !== 'cancelled' && b.staff_id)
-        .map((b: any) => b.id);
-      if (targetIds.length === 0) throw new Error('No bookings to lock');
-
-      // Update all bookings in the period
-      const { error } = await supabase
-        .from('bookings')
-        .update({ pay_locked: action === 'lock' })
-        .eq('organization_id', organizationId)
-        .in('id', targetIds);
-      if (error) throw error;
-
-      // Log the action
-      const { error: logError } = await supabase
-        .from('payroll_audit_log')
-        .insert({
-          organization_id: organizationId,
-          user_id: user.id,
-          action: action === 'lock' ? 'period_locked' : 'period_unlocked',
-          period_start: format(dateRange.from, 'yyyy-MM-dd'),
-          period_end: format(dateRange.to, 'yyyy-MM-dd'),
-          details: {
-            booking_count: targetIds.length,
-            total_payroll: totalPayroll,
-            total_revenue: totalRevenue,
-          },
-          affected_booking_ids: targetIds,
-        });
-      if (logError) console.error('Audit log error:', logError);
-
-      return { action, count: targetIds.length };
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['bookings-payroll'] });
-      queryClient.invalidateQueries({ queryKey: ['payroll-audit-log'] });
-      toast.success(
-        data.action === 'lock'
-          ? `🔒 Period locked — ${data.count} booking(s) frozen`
-          : `🔓 Period unlocked — ${data.count} booking(s) editable`
-      );
-    },
-    onError: () => toast.error('Failed to update lock status'),
-  });
-
-  // Audit log query
-  const { data: auditLog = [] } = useQuery({
-    queryKey: ['payroll-audit-log', organizationId],
-    queryFn: async () => {
-      if (!organizationId) return [];
-      const { data, error } = await supabase
-        .from('payroll_audit_log')
-        .select('*')
-        .eq('organization_id', organizationId)
-        .order('created_at', { ascending: false })
-        .limit(50);
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!organizationId,
-  });
-
-
+  // Wage calculation uses shared utility from lib/wageCalculation.ts
+  // to ensure portal and payroll always match.
+  //
   // Priority (highest to lowest):
-  //  1. pay_share on team assignment — per-person override (team bookings)
-  //  2. booking.cleaner_pay_expected — snapshot computed on save
-  //  3. booking.cleaner_actual_payment — admin override
-  //  4. standard wage formula via calculateBookingWage (fallback to staff defaults)
+  //  1. pay_share on team assignment — most specific per-person override (set via Adjust Pay on team bookings)
+  //  2. cleaner_actual_payment on booking — single-cleaner override
+  //  3. standard wage formula (hourly/flat/percentage)
+  //
+  // pay_share beats cleaner_actual_payment because team bookings save the primary cleaner's
+  // amount into cleaner_actual_payment, which must not overwrite a different team member's pay_share.
   const calcWage = (booking: any, staffMember: any, payShareOverride?: number | null) => {
     const baseResult = calculateBookingWage(booking, staffMember);
 
@@ -357,40 +265,12 @@ export default function PayrollPage() {
       return {
         calculatedPay: Number(payShareOverride),
         actualPay: Number(payShareOverride),
-        wageType: booking.cleaner_wage_type || 'actual',
-        wageRate: booking.cleaner_wage || Number(payShareOverride),
+        wageType: 'actual',
+        wageRate: Number(payShareOverride),
         hoursWorked: baseResult.hoursWorked,
       };
     }
-    // 2. booking-level cleaner_pay_expected snapshot
-    //    For hourly wage types, recalculate from rate × current hours to avoid stale snapshots
-    if (booking.cleaner_pay_expected != null && Number(booking.cleaner_pay_expected) > 0) {
-      const snapshotWageType = booking.cleaner_wage_type || 'hourly';
-      const snapshotHours = booking.cleaner_override_hours || baseResult.hoursWorked;
-      const snapshotRate = booking.cleaner_wage || staffMember?.hourly_rate || staffMember?.base_wage || 0;
-      
-      // For hourly, recalculate using current hours × rate to stay accurate
-      if (snapshotWageType === 'hourly' && snapshotRate > 0) {
-        const recalcPay = Math.round(Number(snapshotRate) * snapshotHours * 100) / 100;
-        return {
-          calculatedPay: recalcPay,
-          actualPay: recalcPay,
-          wageType: snapshotWageType,
-          wageRate: Number(snapshotRate),
-          hoursWorked: snapshotHours,
-        };
-      }
-      
-      // For flat/percentage, trust the snapshot
-      return {
-        calculatedPay: Number(booking.cleaner_pay_expected),
-        actualPay: Number(booking.cleaner_pay_expected),
-        wageType: snapshotWageType,
-        wageRate: booking.cleaner_wage || Number(booking.cleaner_pay_expected),
-        hoursWorked: snapshotHours,
-      };
-    }
-    // 3. booking-level cleaner_actual_payment (admin override)
+    // 2. booking-level cleaner_actual_payment (single cleaner adjusted pay)
     if (booking.cleaner_actual_payment != null) {
       return {
         calculatedPay: Number(booking.cleaner_actual_payment),
@@ -400,7 +280,7 @@ export default function PayrollPage() {
         hoursWorked: baseResult.hoursWorked,
       };
     }
-    // 4. standard formula — fallback to staff defaults
+    // 3. standard formula — same as cleaner portal
     return {
       calculatedPay: baseResult.calculatedPay,
       actualPay: null,
@@ -412,26 +292,28 @@ export default function PayrollPage() {
 
   // Helper: get all pay entries for a staff member across primary + team roles
   const getStaffPayEntries = (staffId: string, bookingList: any[], assignmentList: any[]) => {
-    const entries: { booking: any; pay: number; hours: number; missingPay: boolean }[] = [];
+    const entries: { booking: any; pay: number; hours: number }[] = [];
     const staffMember = staff.find((s) => s.id === staffId);
 
+    // Primary staff bookings (staff_id on booking) — all non-cancelled
     const primaryBookings = bookingList.filter((b: any) => b.staff_id === staffId && b.status !== 'cancelled');
     for (const b of primaryBookings) {
+      // Check if there's a team assignment for this staff on this booking
       const assignment = assignmentList.find((a: any) => a.booking_id === b.id && a.staff_id === staffId);
+      // If assignment exists and has a pay_share set, use it; otherwise use booking-level wage calc
       const payShareOverride = assignment?.pay_share != null ? Number(assignment.pay_share) : null;
       const wageInfo = calcWage(b, staffMember, payShareOverride);
-      const missingPay = wageInfo.calculatedPay === 0 && b.cleaner_pay_expected == null && b.cleaner_actual_payment == null;
-      entries.push({ booking: b, pay: wageInfo.calculatedPay, hours: wageInfo.hoursWorked, missingPay });
+      entries.push({ booking: b, pay: wageInfo.calculatedPay, hours: wageInfo.hoursWorked });
     }
 
+    // Team member bookings (not primary, assigned via booking_team_assignments)
     const teamEntries = assignmentList.filter((a: any) => a.staff_id === staffId && !primaryBookings.find((b: any) => b.id === a.booking_id));
     for (const a of teamEntries) {
       const booking = bookingList.find((b: any) => b.id === a.booking_id && b.status !== 'cancelled');
       if (!booking) continue;
       const payShareOverride = a.pay_share != null ? Number(a.pay_share) : null;
       const wageInfo = calcWage(booking, staffMember, payShareOverride);
-      const missingPay = wageInfo.calculatedPay === 0 && booking.cleaner_pay_expected == null && booking.cleaner_actual_payment == null;
-      entries.push({ booking, pay: wageInfo.calculatedPay, hours: wageInfo.hoursWorked, missingPay });
+      entries.push({ booking, pay: wageInfo.calculatedPay, hours: wageInfo.hoursWorked });
     }
 
     return entries;
@@ -453,45 +335,37 @@ export default function PayrollPage() {
           const member = staff.find((s) => s.id === a.staff_id);
           const payShareOverride = a.pay_share != null ? Number(a.pay_share) : null;
           const wageInfo = calcWage(b, member, payShareOverride);
-          const isMissingPay = wageInfo.calculatedPay === 0 && b.cleaner_pay_expected == null;
-          const isMissingHours = (b.cleaner_wage_type || wageInfo.wageType) === 'hourly' && !b.cleaner_override_hours && !b.cleaner_checkin_at;
           details.push({
             id: `${b.id}-${a.staff_id}`,
             booking_number: b.booking_number,
             customer_name: b.customer ? `${b.customer.first_name} ${b.customer.last_name}` : 'Unknown',
             scheduled_at: b.scheduled_at,
             duration: b.duration,
-            hours_worked: b.cleaner_override_hours || wageInfo.hoursWorked,
-            wage_type: b.cleaner_wage_type || wageInfo.wageType,
-            wage_rate: b.cleaner_wage || wageInfo.wageRate,
+            hours_worked: wageInfo.hoursWorked,
+            wage_type: wageInfo.wageType,
+            wage_rate: wageInfo.wageRate,
             calculated_pay: wageInfo.calculatedPay,
             actual_pay: wageInfo.actualPay,
             staff_id: a.staff_id,
             staff_name: member?.name || staffMember?.name || 'Unassigned',
-            missingPay: isMissingPay,
-            missingHours: isMissingHours,
           });
         }
       } else {
         // Single cleaner
         const wageInfo = calcWage(b, staffMember);
-        const isMissingPay = wageInfo.calculatedPay === 0 && b.cleaner_pay_expected == null;
-        const isMissingHours = (b.cleaner_wage_type || wageInfo.wageType) === 'hourly' && !b.cleaner_override_hours && !b.cleaner_checkin_at;
         details.push({
           id: b.id,
           booking_number: b.booking_number,
           customer_name: b.customer ? `${b.customer.first_name} ${b.customer.last_name}` : 'Unknown',
           scheduled_at: b.scheduled_at,
           duration: b.duration,
-          hours_worked: b.cleaner_override_hours || wageInfo.hoursWorked,
-          wage_type: b.cleaner_wage_type || wageInfo.wageType,
-          wage_rate: b.cleaner_wage || wageInfo.wageRate,
+          hours_worked: wageInfo.hoursWorked,
+          wage_type: wageInfo.wageType,
+          wage_rate: wageInfo.wageRate,
           calculated_pay: wageInfo.calculatedPay,
           actual_pay: wageInfo.actualPay,
           staff_id: b.staff_id,
           staff_name: staffMember?.name || 'Unassigned',
-          missingPay: isMissingPay,
-          missingHours: isMissingHours,
         });
       }
     }
@@ -499,15 +373,9 @@ export default function PayrollPage() {
   }, [bookings, staff, teamAssignments]);
 
   const filteredBookingPayrollDetails = useMemo(() => {
-    let filtered = bookingPayrollDetails;
-    if (staffFilterId !== 'all') {
-      filtered = filtered.filter((d) => d.staff_id === staffFilterId);
-    }
-    if (showMissingPayOnly) {
-      filtered = filtered.filter((d) => d.missingPay || d.missingHours);
-    }
-    return filtered;
-  }, [bookingPayrollDetails, staffFilterId, showMissingPayOnly]);
+    if (staffFilterId === 'all') return bookingPayrollDetails;
+    return bookingPayrollDetails.filter((d) => d.staff_id === staffFilterId);
+  }, [bookingPayrollDetails, staffFilterId]);
 
   // Calculate payroll data - include ALL staff, even those without bookings
   // Correctly accounts for both primary staff and team member assignments
@@ -535,7 +403,6 @@ export default function PayrollPage() {
       const requiresTaxFiling = s.tax_classification === '1099' && ytdEarnings >= 600;
       const assignedCleans = entries.length;
       const avgPayPerClean = assignedCleans > 0 ? totalPay / assignedCleans : 0;
-      const missingPayCount = entries.filter(e => e.missingPay).length;
 
       return {
         id: s.id,
@@ -551,7 +418,6 @@ export default function PayrollPage() {
         upcomingBookings,
         assignedCleans,
         avgPayPerClean: Math.round(avgPayPerClean * 100) / 100,
-        missingPayCount,
       };
     });
   }, [staff, bookings, ytdBookings, teamAssignments, ytdTeamAssignments]);
@@ -562,108 +428,6 @@ export default function PayrollPage() {
   const totalCleans = payrollData.reduce((sum, s) => sum + s.assignedCleans, 0);
   const contractorsNeedingFiling = payrollData.filter((s) => s.requiresTaxFiling).length;
   const avgPayPerClean = totalCleans > 0 ? totalPayroll / totalCleans : 0;
-  const totalMissingPay = bookingPayrollDetails.filter(d => d.missingPay).length;
-
-  // --- Financial Intelligence ---
-  const nonCancelledBookings = bookings.filter((b: any) => b.status !== 'cancelled');
-  const totalRevenue = nonCancelledBookings.reduce((sum: number, b: any) => sum + (Number(b.total_amount) || 0), 0);
-  const totalProfit = totalRevenue - totalPayroll;
-  const profitMarginPct = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0;
-  const laborCostPct = totalRevenue > 0 ? (totalPayroll / totalRevenue) * 100 : 0;
-  const isLowMargin = profitMarginPct < 30 && totalRevenue > 0;
-
-  // Per-booking profitability for the financial overview tab
-  const bookingProfitability = useMemo(() => {
-    return nonCancelledBookings
-      .filter((b: any) => b.staff_id)
-      .map((b: any) => {
-        const revenue = Number(b.total_amount) || 0;
-        // Sum all labor costs for this booking (team or single)
-        const assignments = teamAssignments.filter((a: any) => a.booking_id === b.id);
-        let laborCost = 0;
-        if (assignments.length > 0) {
-          for (const a of assignments) {
-            const member = staff.find((s) => s.id === a.staff_id);
-            const payShare = a.pay_share != null ? Number(a.pay_share) : null;
-            const wageInfo = calcWage(b, member, payShare);
-            laborCost += wageInfo.calculatedPay;
-          }
-        } else {
-          const staffMember = staff.find((s) => s.id === b.staff_id);
-          const wageInfo = calcWage(b, staffMember);
-          laborCost = wageInfo.calculatedPay;
-        }
-        const profit = revenue - laborCost;
-        const margin = revenue > 0 ? (profit / revenue) * 100 : 0;
-        return {
-          id: b.id,
-          booking_number: b.booking_number,
-          customer_name: b.customer ? `${b.customer.first_name} ${b.customer.last_name}` : 'Unknown',
-          scheduled_at: b.scheduled_at,
-          revenue,
-          laborCost,
-          profit,
-          margin,
-        };
-      })
-      .sort((a, b) => a.margin - b.margin);
-  }, [nonCancelledBookings, teamAssignments, staff]);
-
-  // --- Staff Efficiency Rankings ---
-  const staffEfficiency = useMemo(() => {
-    return staff
-      .map((s) => {
-        const entries = getStaffPayEntries(s.id, bookings, teamAssignments);
-        const totalHours = entries.reduce((sum, e) => sum + e.hours, 0);
-        const totalPay = entries.reduce((sum, e) => sum + e.pay, 0);
-        const cleans = entries.length;
-
-        // Revenue generated by this staff member's bookings
-        let totalRevGenerated = 0;
-        let totalLaborCost = 0;
-        for (const e of entries) {
-          const revenue = Number(e.booking.total_amount) || 0;
-          // For team bookings, attribute proportional revenue based on pay share
-          const bookingAssignments = teamAssignments.filter((a: any) => a.booking_id === e.booking.id);
-          if (bookingAssignments.length > 1) {
-            const totalTeamPay = bookingAssignments.reduce((sum: number, a: any) => {
-              const member = staff.find((st) => st.id === a.staff_id);
-              const ps = a.pay_share != null ? Number(a.pay_share) : null;
-              const w = calcWage(e.booking, member, ps);
-              return sum + w.calculatedPay;
-            }, 0);
-            const share = totalTeamPay > 0 ? e.pay / totalTeamPay : 1 / bookingAssignments.length;
-            totalRevGenerated += revenue * share;
-          } else {
-            totalRevGenerated += revenue;
-          }
-          totalLaborCost += e.pay;
-        }
-
-        const profitGenerated = totalRevGenerated - totalLaborCost;
-        const revenuePerHour = totalHours > 0 ? totalRevGenerated / totalHours : 0;
-        const profitPerClean = cleans > 0 ? profitGenerated / cleans : 0;
-        const profitMargin = totalRevGenerated > 0 ? (profitGenerated / totalRevGenerated) * 100 : 0;
-        const costPerHour = totalHours > 0 ? totalLaborCost / totalHours : 0;
-
-        return {
-          id: s.id,
-          name: s.name,
-          cleans,
-          totalHours,
-          totalPay,
-          totalRevGenerated,
-          profitGenerated,
-          revenuePerHour,
-          profitPerClean,
-          profitMargin,
-          costPerHour,
-        };
-      })
-      .filter((s) => s.cleans > 0)
-      .sort((a, b) => b.revenuePerHour - a.revenuePerHour);
-  }, [staff, bookings, teamAssignments]);
-
 
   const exportCSV = () => {
     const headers = ['Name', 'Email', 'Tax Classification', 'Base Wage', 'Hours', 'Assigned Cleans', 'Period Pay', 'Avg Pay/Clean', 'YTD Earnings'];
@@ -717,24 +481,10 @@ export default function PayrollPage() {
       title="Payroll Report"
       subtitle="Staff wages and 1099 tracking"
       actions={
-        <div className="flex items-center gap-2">
-          <Button
-            variant={isFullyLocked ? 'destructive' : 'outline'}
-            onClick={() => {
-              setLockAction(isFullyLocked ? 'unlock' : 'lock');
-              setShowLockConfirm(true);
-            }}
-            className="gap-2"
-            disabled={totalLockableBookings === 0 || lockPeriodMutation.isPending}
-          >
-            {isFullyLocked ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
-            {isFullyLocked ? 'Unlock Period' : 'Lock Period'}
-          </Button>
-          <Button onClick={exportCSV} className="gap-2">
-            <Download className="w-4 h-4" />
-            Export CSV
-          </Button>
-        </div>
+        <Button onClick={exportCSV} className="gap-2">
+          <Download className="w-4 h-4" />
+          Export CSV
+        </Button>
       }
     >
       <SubscriptionGate feature="Payroll">
@@ -766,7 +516,7 @@ export default function PayrollPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
@@ -783,8 +533,8 @@ export default function PayrollPage() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <Clock className="w-5 h-5 text-primary" />
+              <div className="p-2 rounded-lg bg-blue-500/10">
+                <Clock className="w-5 h-5 text-blue-500" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total Hours</p>
@@ -796,8 +546,8 @@ export default function PayrollPage() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10">
-                 <Briefcase className="w-5 h-5 text-primary" />
+              <div className="p-2 rounded-lg bg-green-500/10">
+                 <Briefcase className="w-5 h-5 text-green-500" />
                </div>
                <div>
                  <p className="text-sm text-muted-foreground">Assigned Cleans</p>
@@ -809,8 +559,8 @@ export default function PayrollPage() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <Calculator className="w-5 h-5 text-primary" />
+              <div className="p-2 rounded-lg bg-purple-500/10">
+                <Calculator className="w-5 h-5 text-purple-500" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Avg Pay/Clean</p>
@@ -824,11 +574,11 @@ export default function PayrollPage() {
             <div className="flex items-center gap-3">
               <div className={cn(
                 "p-2 rounded-lg",
-                contractorsNeedingFiling > 0 ? "bg-destructive/10" : "bg-muted"
+                contractorsNeedingFiling > 0 ? "bg-amber-500/10" : "bg-muted"
               )}>
                 <AlertTriangle className={cn(
                   "w-5 h-5",
-                  contractorsNeedingFiling > 0 ? "text-destructive" : "text-muted-foreground"
+                  contractorsNeedingFiling > 0 ? "text-amber-500" : "text-muted-foreground"
                 )} />
               </div>
               <div>
@@ -839,85 +589,6 @@ export default function PayrollPage() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Financial Intelligence Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-chart-1/10">
-                <BarChart3 className="w-5 h-5 text-chart-1" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Net Revenue</p>
-                <p className="text-xl font-bold">{isTestMode ? '$X,XXX' : `$${totalRevenue.toFixed(2)}`}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className={cn("p-2 rounded-lg", totalProfit >= 0 ? "bg-chart-2/10" : "bg-destructive/10")}>
-                {totalProfit >= 0 ? <TrendingUp className="w-5 h-5 text-chart-2" /> : <TrendingDown className="w-5 h-5 text-destructive" />}
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Total Profit</p>
-                <p className={cn("text-xl font-bold", totalProfit >= 0 ? "text-chart-2" : "text-destructive")}>
-                  {isTestMode ? '$X,XXX' : `$${totalProfit.toFixed(2)}`}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className={cn("p-2 rounded-lg", isLowMargin ? "bg-destructive/10" : "bg-chart-3/10")}>
-                <Percent className={cn("w-5 h-5", isLowMargin ? "text-destructive" : "text-chart-3")} />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Profit Margin</p>
-                <p className={cn("text-xl font-bold", isLowMargin ? "text-destructive" : "text-chart-3")}>
-                  {isTestMode ? 'XX%' : `${profitMarginPct.toFixed(1)}%`}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className={cn("p-2 rounded-lg", laborCostPct > 70 ? "bg-destructive/10" : "bg-chart-4/10")}>
-                <DollarSign className={cn("w-5 h-5", laborCostPct > 70 ? "text-destructive" : "text-chart-4")} />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Labor Cost %</p>
-                <p className={cn("text-xl font-bold", laborCostPct > 70 ? "text-destructive" : "text-chart-4")}>
-                  {isTestMode ? 'XX%' : `${laborCostPct.toFixed(1)}%`}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Margin Warning Banner */}
-      {isLowMargin && (
-        <Card className="mb-6 border-destructive/50 bg-destructive/5">
-          <CardContent className="p-4">
-            <div className="flex items-start gap-3">
-              <TrendingDown className="w-5 h-5 text-destructive mt-0.5" />
-              <div>
-                <h3 className="font-semibold text-destructive">Low Profit Margin Warning</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Your profit margin is {profitMarginPct.toFixed(1)}% — below the recommended 30% threshold. Review labor costs or adjust pricing.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* 1099 Alert Banner */}
       {contractorsNeedingFiling > 0 && (
@@ -936,67 +607,11 @@ export default function PayrollPage() {
         </Card>
       )}
 
-      {/* Missing Pay Alert Banner */}
-      {totalMissingPay > 0 && (
-        <Card className="mb-6 border-destructive/50 bg-destructive/5">
-          <CardContent className="p-4">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-destructive mt-0.5" />
-              <div className="flex-1">
-                <h3 className="font-semibold text-destructive">Missing Pay Data</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {totalMissingPay} booking(s) have assigned staff but no pay rate set.
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="shrink-0"
-                onClick={() => { setShowMissingPayOnly(true); setStaffFilterId('all'); setActivePayrollTab('details'); }}
-              >
-                <ExternalLink className="w-3 h-3 mr-1" />
-                View
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Pay Lock Status Banner */}
-      {(isFullyLocked || isPartiallyLocked) && (
-        <Card className={cn("mb-6", isFullyLocked ? "border-primary/50 bg-primary/5" : "border-amber-300 bg-amber-50 dark:bg-amber-950/20")}>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <Shield className={cn("w-5 h-5", isFullyLocked ? "text-primary" : "text-amber-600")} />
-              <div className="flex-1">
-                <h3 className={cn("font-semibold", isFullyLocked ? "text-primary" : "text-amber-700 dark:text-amber-400")}>
-                  {isFullyLocked ? '🔒 Payroll Period Locked' : '⚠️ Partially Locked Period'}
-                </h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {isFullyLocked
-                    ? `All ${lockedBookingIds.length} booking(s) in this period are frozen. Pay data cannot be modified.`
-                    : `${lockedBookingIds.length} of ${totalLockableBookings} booking(s) are locked.`}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Tabs for Summary and Details */}
-      <Tabs value={activePayrollTab} onValueChange={setActivePayrollTab} className="space-y-4">
+      <Tabs defaultValue="summary" className="space-y-4">
         <TabsList>
           <TabsTrigger value="summary">Staff Summary</TabsTrigger>
           <TabsTrigger value="details">Booking Details</TabsTrigger>
-          <TabsTrigger value="profitability">Job Profitability</TabsTrigger>
-          <TabsTrigger value="efficiency" className="gap-1">
-            <Trophy className="w-3.5 h-3.5" />
-            Staff Rankings
-          </TabsTrigger>
-          <TabsTrigger value="audit" className="gap-1">
-            <History className="w-3.5 h-3.5" />
-            Audit Trail
-          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="summary">
@@ -1040,16 +655,7 @@ export default function PayrollPage() {
                       <TableCell>
                         {isTestMode ? '$XX.XX/hr' : `$${(staff.base_wage || staff.hourly_rate || 0).toFixed(2)}/hr`}
                       </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          {isTestMode ? 'X' : staff.assignedCleans}
-                          {staff.missingPayCount > 0 && (
-                            <Badge variant="destructive" className="text-[10px] px-1 py-0 ml-1">
-                              {staff.missingPayCount} missing
-                            </Badge>
-                          )}
-                        </div>
-                      </TableCell>
+                      <TableCell className="text-right">{isTestMode ? 'X' : staff.assignedCleans}</TableCell>
                       <TableCell className="text-right">{isTestMode ? 'X.X' : staff.totalHours}</TableCell>
                       <TableCell className="text-right font-medium text-green-600">
                         {isTestMode ? '$XXX.XX' : `$${staff.totalPay.toFixed(2)}`}
@@ -1129,15 +735,6 @@ export default function PayrollPage() {
                     ))}
                   </SelectContent>
                 </Select>
-                <Button
-                  variant={showMissingPayOnly ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setShowMissingPayOnly(!showMissingPayOnly)}
-                  className="gap-1"
-                >
-                  <AlertCircle className="w-3 h-3" />
-                  Missing Pay {totalMissingPay > 0 && `(${totalMissingPay})`}
-                </Button>
               </div>
               <Table>
                 <TableHeader>
@@ -1153,28 +750,15 @@ export default function PayrollPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredBookingPayrollDetails.map((b) => {
-                    const bookingId = b.id.includes('-') ? b.id.split('-')[0] : b.id;
-                    const isLocked = lockedBookingIds.includes(bookingId);
-                    return (
-                    <TableRow key={b.id} className={cn(b.missingPay ? 'bg-destructive/5' : '', isLocked ? 'opacity-75' : '')}>
+                  {filteredBookingPayrollDetails.map((b) => (
+                    <TableRow key={b.id}>
                       <TableCell className="whitespace-nowrap">
-                        <div className="flex items-center gap-1">
-                          {isLocked && <Lock className="w-3 h-3 text-muted-foreground" />}
-                          {format(new Date(b.scheduled_at), 'MMM d, yyyy')}
-                        </div>
+                        {format(new Date(b.scheduled_at), 'MMM d, yyyy')}
                       </TableCell>
                       <TableCell>#{b.booking_number}</TableCell>
                       <TableCell className="font-medium">{maskName(b.staff_name)}</TableCell>
                       <TableCell>{maskName(b.customer_name)}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          {b.missingHours && (
-                            <span className="inline-block" aria-label="Hours estimated from duration"><AlertCircle className="w-3 h-3 text-amber-500" /></span>
-                          )}
-                          {isTestMode ? 'X.XX' : b.hours_worked.toFixed(2)}
-                        </div>
-                      </TableCell>
+                      <TableCell className="text-right">{isTestMode ? 'X.XX' : b.hours_worked.toFixed(2)}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className="capitalize">
                           {b.wage_type}
@@ -1183,78 +767,14 @@ export default function PayrollPage() {
                       <TableCell className="text-right">
                         {isTestMode ? '$XX.XX' : (b.wage_type === 'percentage' ? `${b.wage_rate}%` : `$${b.wage_rate.toFixed(2)}`)}
                       </TableCell>
-                      <TableCell className="text-right font-medium">
-                        {b.missingPay ? (
-                          <Badge variant="destructive" className="text-xs">
-                            Missing Pay
-                          </Badge>
-                        ) : (
-                          <span className="text-green-600">
-                            {isTestMode ? '$XXX.XX' : `$${b.calculated_pay.toFixed(2)}`}
-                          </span>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  );
-                  })}
-                  {filteredBookingPayrollDetails.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                        {showMissingPayOnly ? 'No bookings with missing pay 🎉' : 'No bookings with assigned staff for this period'}
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="profitability">
-          <Card>
-            <CardHeader>
-              <CardTitle>Job Profitability Breakdown</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Booking #</TableHead>
-                    <TableHead>Customer</TableHead>
-                    <TableHead className="text-right">Revenue</TableHead>
-                    <TableHead className="text-right">Labor Cost</TableHead>
-                    <TableHead className="text-right">Profit</TableHead>
-                    <TableHead className="text-right">Margin</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {bookingProfitability.map((b) => (
-                    <TableRow key={b.id} className={b.margin < 0 ? 'bg-destructive/5' : b.margin < 30 ? 'bg-amber-50 dark:bg-amber-950/10' : ''}>
-                      <TableCell className="whitespace-nowrap">
-                        {format(new Date(b.scheduled_at), 'MMM d, yyyy')}
-                      </TableCell>
-                      <TableCell>#{b.booking_number}</TableCell>
-                      <TableCell>{maskName(b.customer_name)}</TableCell>
-                      <TableCell className="text-right">
-                        {isTestMode ? '$XXX' : `$${b.revenue.toFixed(2)}`}
-                      </TableCell>
-                      <TableCell className="text-right text-muted-foreground">
-                        {isTestMode ? '$XXX' : `$${b.laborCost.toFixed(2)}`}
-                      </TableCell>
-                      <TableCell className={cn("text-right font-medium", b.profit >= 0 ? "text-chart-2" : "text-destructive")}>
-                        {isTestMode ? '$XXX' : `$${b.profit.toFixed(2)}`}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Badge variant={b.margin < 0 ? 'destructive' : b.margin < 30 ? 'secondary' : 'default'}>
-                          {isTestMode ? 'XX%' : `${b.margin.toFixed(0)}%`}
-                        </Badge>
+                      <TableCell className="text-right font-medium text-green-600">
+                        {isTestMode ? '$XXX.XX' : `$${b.calculated_pay.toFixed(2)}`}
                       </TableCell>
                     </TableRow>
                   ))}
-                  {bookingProfitability.length === 0 && (
+                  {bookingPayrollDetails.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                         No bookings with assigned staff for this period
                       </TableCell>
                     </TableRow>
@@ -1264,169 +784,7 @@ export default function PayrollPage() {
             </CardContent>
           </Card>
         </TabsContent>
-
-        <TabsContent value="efficiency">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Trophy className="w-5 h-5" />
-                Staff Efficiency Rankings
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-10">#</TableHead>
-                    <TableHead>Staff</TableHead>
-                    <TableHead className="text-right">Cleans</TableHead>
-                    <TableHead className="text-right">Hours</TableHead>
-                    <TableHead className="text-right">Revenue Generated</TableHead>
-                    <TableHead className="text-right">Rev/Hour</TableHead>
-                    <TableHead className="text-right">Profit/Clean</TableHead>
-                    <TableHead className="text-right">Cost/Hour</TableHead>
-                    <TableHead className="text-right">Margin</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {staffEfficiency.map((s, idx) => (
-                    <TableRow key={s.id}>
-                      <TableCell>
-                        {idx === 0 ? (
-                          <span className="flex items-center gap-1 text-amber-500 font-bold">
-                            <Star className="w-4 h-4 fill-amber-500" /> 1
-                          </span>
-                        ) : idx === 1 ? (
-                          <span className="flex items-center gap-1 text-muted-foreground font-bold">
-                            <Star className="w-4 h-4 fill-muted-foreground" /> 2
-                          </span>
-                        ) : idx === 2 ? (
-                          <span className="flex items-center gap-1 text-orange-400 font-bold">
-                            <Star className="w-4 h-4 fill-orange-400" /> 3
-                          </span>
-                        ) : (
-                          <span className="text-muted-foreground">{idx + 1}</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="font-medium">{maskName(s.name)}</TableCell>
-                      <TableCell className="text-right">{isTestMode ? 'X' : s.cleans}</TableCell>
-                      <TableCell className="text-right">{isTestMode ? 'X.X' : s.totalHours.toFixed(1)}</TableCell>
-                      <TableCell className="text-right">{isTestMode ? '$X,XXX' : `$${s.totalRevGenerated.toFixed(2)}`}</TableCell>
-                      <TableCell className="text-right font-semibold text-primary">
-                        {isTestMode ? '$XX' : `$${s.revenuePerHour.toFixed(2)}`}
-                      </TableCell>
-                      <TableCell className={cn("text-right font-semibold", s.profitPerClean >= 0 ? "text-chart-2" : "text-destructive")}>
-                        {isTestMode ? '$XX' : `$${s.profitPerClean.toFixed(2)}`}
-                      </TableCell>
-                      <TableCell className="text-right text-muted-foreground">
-                        {isTestMode ? '$XX' : `$${s.costPerHour.toFixed(2)}`}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Badge variant={s.profitMargin < 0 ? 'destructive' : s.profitMargin < 30 ? 'secondary' : 'default'}>
-                          {isTestMode ? 'XX%' : `${s.profitMargin.toFixed(0)}%`}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {staffEfficiency.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
-                        No staff with bookings in this period
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="audit">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <History className="w-5 h-5" />
-                Payroll Audit Trail
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date & Time</TableHead>
-                    <TableHead>Action</TableHead>
-                    <TableHead>Period</TableHead>
-                    <TableHead className="text-right">Bookings</TableHead>
-                    <TableHead className="text-right">Payroll</TableHead>
-                    <TableHead className="text-right">Revenue</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {auditLog.map((entry: any) => (
-                    <TableRow key={entry.id}>
-                      <TableCell className="whitespace-nowrap text-sm">
-                        {format(new Date(entry.created_at), 'MMM d, yyyy h:mm a')}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={entry.action === 'period_locked' ? 'default' : 'secondary'} className="gap-1">
-                          {entry.action === 'period_locked' ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
-                          {entry.action === 'period_locked' ? 'Locked' : 'Unlocked'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-sm">
-                        {format(new Date(entry.period_start), 'MMM d')} - {format(new Date(entry.period_end), 'MMM d, yyyy')}
-                      </TableCell>
-                      <TableCell className="text-right text-sm">
-                        {entry.details?.booking_count || '-'}
-                      </TableCell>
-                      <TableCell className="text-right text-sm">
-                        {isTestMode ? '$X,XXX' : entry.details?.total_payroll != null ? `$${Number(entry.details.total_payroll).toFixed(2)}` : '-'}
-                      </TableCell>
-                      <TableCell className="text-right text-sm">
-                        {isTestMode ? '$X,XXX' : entry.details?.total_revenue != null ? `$${Number(entry.details.total_revenue).toFixed(2)}` : '-'}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {auditLog.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                        No audit entries yet. Lock a payroll period to create the first entry.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
-
-      {/* Lock/Unlock Confirmation Dialog */}
-      <AlertDialog open={showLockConfirm} onOpenChange={setShowLockConfirm}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              {lockAction === 'lock' ? <Lock className="w-5 h-5" /> : <Unlock className="w-5 h-5" />}
-              {lockAction === 'lock' ? 'Lock Payroll Period?' : 'Unlock Payroll Period?'}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {lockAction === 'lock'
-                ? `This will freeze pay data for ${totalLockableBookings} booking(s) from ${format(dateRange.from, 'MMM d')} to ${format(dateRange.to, 'MMM d, yyyy')}. No pay changes can be made until unlocked.`
-                : `This will make pay data editable again for ${lockedBookingIds.length} booking(s). This action will be logged.`}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => lockPeriodMutation.mutate(lockAction)}
-              className={lockAction === 'unlock' ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90' : ''}
-            >
-              {lockAction === 'lock' ? '🔒 Lock Period' : '🔓 Unlock Period'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
       </SubscriptionGate>
     </AdminLayout>
   );
