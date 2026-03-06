@@ -62,6 +62,7 @@ export function MessageTemplatesPicker({ organizationId, onSelect, showSubject =
     setEditingTemplate(t);
     setName(t.name);
     setContent(t.content);
+    setSubject(t.subject || '');
     setDialogOpen(true);
     setMenuOpen(false);
   };
