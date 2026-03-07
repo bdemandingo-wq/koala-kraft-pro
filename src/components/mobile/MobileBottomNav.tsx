@@ -148,9 +148,9 @@ export function MobileBottomNav() {
               className={({ isActive }) =>
                 cn(
                   'flex flex-col items-center justify-center gap-0.5',
-                  'text-[11px] font-medium transition-all duration-200',
+                  'text-[10px] font-medium transition-all duration-200',
                   'active:scale-[0.96] will-change-transform min-w-[48px]',
-                  isNative ? 'h-16' : 'h-14',
+                  'h-14',
                   isActive
                     ? 'text-primary font-semibold'
                     : 'text-muted-foreground'
@@ -160,9 +160,9 @@ export function MobileBottomNav() {
               {({ isActive }) => (
                 <div className={cn(
                   'flex flex-col items-center justify-center gap-0.5 transition-all duration-200',
-                  isActive && isNative && 'bg-primary/10 rounded-xl px-3 py-1'
+                  isActive && isNative && 'bg-primary/8 rounded-lg px-2.5 py-1'
                 )}>
-                  <Icon className="h-5 w-5" aria-hidden="true" />
+                  <Icon className={cn("h-5 w-5", isNative && "h-[18px] w-[18px]")} aria-hidden="true" />
                   <span className="leading-none">{label}</span>
                 </div>
               )}
