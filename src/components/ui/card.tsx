@@ -35,7 +35,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         ref={ref}
         className={cn(
           cardVariants({ variant, className }),
-          isNative && "rounded-2xl"
+          isNative && "rounded-2xl shadow-none border-border/40"
         )}
         {...props}
       />

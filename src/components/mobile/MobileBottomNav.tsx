@@ -228,7 +228,7 @@ export function MobileBottomNav() {
 
         {overflowTabs.length === 0 && primaryTabs.length < 5 &&
           Array.from({ length: 5 - primaryTabs.length }).map((_, i) => (
-            <div key={`pad_${i}`} className={isNative ? 'h-16' : 'h-14'} />
+            <div key={`pad_${i}`} className="h-14" />
           ))}
       </div>
     </nav>

@@ -59,7 +59,7 @@ export function AdminLayout({ children, title, subtitle, actions }: AdminLayoutP
           className={cn(
             "animate-page-enter overflow-y-auto",
             isNative
-              ? "px-4 pt-4 pb-28"
+              ? "px-4 pt-3 pb-28"
               : "p-2 md:p-4 pt-2 md:pt-4 pb-24 md:pb-4"
           )}
         >

@@ -48,7 +48,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <Comp
         className={cn(
           buttonVariants({ variant, size, className }),
-          isNative && "min-h-[48px] rounded-xl text-base"
+          isNative && "min-h-[44px] rounded-xl text-sm font-medium"
         )}
         ref={ref}
         {...props}

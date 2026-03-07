@@ -415,7 +415,7 @@ export default function PortalDashboardPage() {
                     </div>
                     <div className="text-right flex flex-col items-end gap-2">
                       {getStatusBadge(booking.status)}
-                      <p className="text-lg font-semibold">${booking.total_amount}</p>
+                      <p className="text-sm font-semibold">${booking.total_amount}</p>
                       {booking.status === "completed" && (
                         <Button
                           variant="outline"
