@@ -132,7 +132,7 @@ export function MobileBottomNav() {
       className={cn(
         'fixed left-0 right-0 z-50',
         'bottom-0 pb-[env(safe-area-inset-bottom)]',
-        'bg-background/95 backdrop-blur-lg border-t border-border',
+        'bg-background/95 backdrop-blur-md border-t border-border/30',
         !isNative && 'md:hidden'
       )}
       aria-label="Primary"
