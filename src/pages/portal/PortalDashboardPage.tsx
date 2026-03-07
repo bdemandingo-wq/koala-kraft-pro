@@ -295,14 +295,14 @@ export default function PortalDashboardPage() {
         />
 
         {/* Native header */}
-        <div className="px-4 pt-[calc(env(safe-area-inset-top)+16px)] pb-2 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-foreground">
+        <div className="px-4 pt-[calc(env(safe-area-inset-top)+12px)] pb-2 flex items-center justify-between">
+          <h1 className="text-xl font-bold text-foreground">
             Hey {customer.first_name} 👋
           </h1>
           <Sheet>
             <SheetTrigger asChild>
-              <button className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
-                <Settings className="h-5 w-5 text-muted-foreground" />
+              <button className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
+                <Settings className="h-4 w-4 text-muted-foreground" />
               </button>
             </SheetTrigger>
             <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
@@ -321,17 +321,17 @@ export default function PortalDashboardPage() {
           </Sheet>
         </div>
 
-        <div className="px-4 pb-28 space-y-4">
+        <div className="px-4 pb-28 space-y-3">
           {/* Loyalty card */}
-          <Card className="rounded-2xl overflow-hidden shadow-sm">
-            <div className={`h-1.5 ${getTierColor(displayLoyalty.tier)}`} />
+          <Card className="rounded-2xl overflow-hidden shadow-none border-border/40">
+            <div className={`h-1 ${getTierColor(displayLoyalty.tier)}`} />
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <Trophy className="h-5 w-5 text-primary" />
-                  <span className="font-semibold capitalize">{displayLoyalty.tier} Member</span>
+                  <Trophy className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-semibold capitalize">{displayLoyalty.tier} Member</span>
                 </div>
-                <Badge variant="outline" className="text-sm px-2.5 py-0.5">
+                <Badge variant="outline" className="text-xs px-2 py-0.5">
                   {displayLoyalty.points} pts
                 </Badge>
               </div>
@@ -341,21 +341,21 @@ export default function PortalDashboardPage() {
 
           {/* Upcoming booking card */}
           {nextBooking ? (
-            <Card className="rounded-2xl overflow-hidden border-primary/20 shadow-sm">
+            <Card className="rounded-2xl overflow-hidden shadow-none border-border/40">
               <CardContent className="p-4">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Next Appointment</p>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">Next Appointment</p>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-semibold">{nextBooking.service?.name || "Service"}</p>
                     {getStatusBadge(nextBooking.status)}
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Calendar className="h-4 w-4 text-primary" />
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
                     <span className="font-medium text-foreground">{getDateLabel(nextBooking.scheduled_at)}</span>
                     <span>at {format(new Date(nextBooking.scheduled_at), "h:mm a")}</span>
                   </div>
                   {nextBooking.address && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <MapPin className="h-4 w-4" />
                       {nextBooking.address}
                     </div>
@@ -363,7 +363,7 @@ export default function PortalDashboardPage() {
                   <div className="flex gap-2 pt-1">
                     <Button
                       variant="outline"
-                      className="flex-1 gap-1 h-12 rounded-xl text-base"
+                      className="flex-1 gap-1 h-11 rounded-xl text-sm font-semibold"
                       onClick={() => handleReschedule(nextBooking)}
                     >
                       <CalendarClock className="h-4 w-4" />
@@ -374,24 +374,24 @@ export default function PortalDashboardPage() {
               </CardContent>
             </Card>
           ) : (
-            <Card className="rounded-2xl p-6 text-center shadow-sm">
-              <CalendarDays className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
-              <p className="text-muted-foreground">No upcoming bookings</p>
+            <Card className="rounded-2xl text-center shadow-none border-border/40 py-12">
+              <CalendarDays className="h-10 w-10 mx-auto text-muted-foreground/40 mb-2" />
+              <p className="text-sm text-muted-foreground">No upcoming bookings</p>
             </Card>
           )}
 
           {/* Action buttons */}
           <div className="grid grid-cols-2 gap-3">
             <Button
-              className="rounded-2xl h-14 text-base font-semibold gap-2"
+              className="rounded-xl h-11 text-sm font-semibold gap-2"
               onClick={() => navigate("/portal/request")}
             >
-              <Plus className="h-5 w-5" />
+              <Plus className="h-4 w-4" />
               Book Again
             </Button>
             <Button
               variant="outline"
-              className="rounded-2xl h-14 text-base font-semibold gap-2"
+              className="rounded-xl h-11 text-sm font-semibold gap-2 border-border"
               onClick={() => {/* scroll to past bookings below */}}
             >
               <CalendarDays className="h-4 w-4" />
@@ -402,13 +402,13 @@ export default function PortalDashboardPage() {
           {/* Past bookings */}
           {pastBookings.length > 0 && (
             <div className="space-y-3">
-              <h2 className="text-lg font-semibold text-foreground">Past Bookings</h2>
+              <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground mb-3">Past Bookings</h2>
               {pastBookings.map((booking) => (
-                <Card key={booking.id} className="rounded-2xl p-4 shadow-sm">
+                <Card key={booking.id} className="rounded-2xl p-4 shadow-none border-border/40">
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
-                      <p className="font-medium">{booking.service?.name || "Service"}</p>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <p className="text-sm font-medium">{booking.service?.name || "Service"}</p>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <Calendar className="h-4 w-4" />
                         {format(new Date(booking.scheduled_at), "MMM d, yyyy")}
                       </div>
