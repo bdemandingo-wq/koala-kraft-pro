@@ -346,7 +346,7 @@ export default function PortalDashboardPage() {
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Next Appointment</p>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <p className="font-semibold text-lg">{nextBooking.service?.name || "Service"}</p>
+                    <p className="text-sm font-semibold">{nextBooking.service?.name || "Service"}</p>
                     {getStatusBadge(nextBooking.status)}
                   </div>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
