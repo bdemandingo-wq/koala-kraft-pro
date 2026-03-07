@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { usePlatform } from "@/hooks/usePlatform";
 
 const cardVariants = cva(
-  "rounded-xl border bg-card text-card-foreground transition-all duration-300",
+  "rounded-xl border bg-card text-card-foreground transition-all duration-200",
   {
     variants: {
       variant: {
@@ -35,7 +35,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         ref={ref}
         className={cn(
           cardVariants({ variant, className }),
-          isNative && "rounded-2xl"
+          isNative && "rounded-2xl shadow-none border-border/40"
         )}
         {...props}
       />

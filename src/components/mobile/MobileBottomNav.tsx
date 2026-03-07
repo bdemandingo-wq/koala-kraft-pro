@@ -132,7 +132,7 @@ export function MobileBottomNav() {
       className={cn(
         'fixed left-0 right-0 z-50',
         'bottom-0 pb-[env(safe-area-inset-bottom)]',
-        'bg-background/95 backdrop-blur-lg border-t border-border',
+        'bg-background/95 backdrop-blur-md border-t border-border/30',
         !isNative && 'md:hidden'
       )}
       aria-label="Primary"
@@ -148,9 +148,9 @@ export function MobileBottomNav() {
               className={({ isActive }) =>
                 cn(
                   'flex flex-col items-center justify-center gap-0.5',
-                  'text-[11px] font-medium transition-all duration-200',
+                  'text-[10px] font-medium transition-all duration-200',
                   'active:scale-[0.96] will-change-transform min-w-[48px]',
-                  isNative ? 'h-16' : 'h-14',
+                  'h-14',
                   isActive
                     ? 'text-primary font-semibold'
                     : 'text-muted-foreground'
@@ -160,9 +160,9 @@ export function MobileBottomNav() {
               {({ isActive }) => (
                 <div className={cn(
                   'flex flex-col items-center justify-center gap-0.5 transition-all duration-200',
-                  isActive && isNative && 'bg-primary/10 rounded-xl px-3 py-1'
+                  isActive && isNative && 'bg-primary/8 rounded-lg px-2.5 py-1'
                 )}>
-                  <Icon className="h-5 w-5" aria-hidden="true" />
+                  <Icon className={cn("h-5 w-5", isNative && "h-[18px] w-[18px]")} aria-hidden="true" />
                   <span className="leading-none">{label}</span>
                 </div>
               )}
@@ -178,18 +178,18 @@ export function MobileBottomNav() {
                 onClick={triggerHaptic}
                 className={cn(
                   'flex flex-col items-center justify-center gap-0.5',
-                  'text-[11px] font-medium transition-all duration-200',
+                  'text-[10px] font-medium transition-all duration-200',
                   'active:scale-[0.96] will-change-transform min-w-[48px]',
-                  isNative ? 'h-16' : 'h-14',
+                  'h-14',
                   overflowActive ? 'text-primary font-semibold' : 'text-muted-foreground'
                 )}
                 aria-label="More"
               >
                 <div className={cn(
                   'flex flex-col items-center justify-center gap-0.5 transition-all duration-200',
-                  overflowActive && isNative && 'bg-primary/10 rounded-xl px-3 py-1'
+                  overflowActive && isNative && 'bg-primary/8 rounded-lg px-2.5 py-1'
                 )}>
-                  <MoreHorizontal className="h-5 w-5" aria-hidden="true" />
+                  <MoreHorizontal className={cn("h-5 w-5", isNative && "h-[18px] w-[18px]")} aria-hidden="true" />
                   <span className="leading-none">More</span>
                 </div>
               </button>
@@ -228,7 +228,7 @@ export function MobileBottomNav() {
 
         {overflowTabs.length === 0 && primaryTabs.length < 5 &&
           Array.from({ length: 5 - primaryTabs.length }).map((_, i) => (
-            <div key={`pad_${i}`} className={isNative ? 'h-16' : 'h-14'} />
+            <div key={`pad_${i}`} className="h-14" />
           ))}
       </div>
     </nav>
