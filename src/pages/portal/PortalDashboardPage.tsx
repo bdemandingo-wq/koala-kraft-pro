@@ -312,7 +312,7 @@ export default function PortalDashboardPage() {
               <div className="mt-4 space-y-6">
                 <PortalProfileTab />
                 <PortalSettingsTab />
-                <Button variant="outline" className="w-full gap-2 h-12 rounded-xl" onClick={handleSignOut}>
+                <Button variant="outline" className="w-full gap-2 h-11 rounded-xl text-sm" onClick={handleSignOut}>
                   <LogOut className="h-4 w-4" />
                   Sign Out
                 </Button>
