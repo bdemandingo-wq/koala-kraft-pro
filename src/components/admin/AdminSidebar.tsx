@@ -273,7 +273,7 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
   }, []);
 
   // Platform detection for App Store compliance
-  const { canShowPaymentFlows, isNative } = usePlatform();
+  const { canShowPaymentFlows } = usePlatform();
   
   // Items to hide on native apps (App Store compliance - no payment flows)
   const nativeHiddenItems = useMemo(() => {
