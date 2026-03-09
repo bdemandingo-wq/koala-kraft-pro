@@ -4,14 +4,11 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { TodayStats } from '@/components/admin/TodayStats';
 import { UpcomingBookings } from '@/components/admin/UpcomingBookings';
 import { useBookings, useCustomers, BookingWithDetails } from '@/hooks/useBookings';
-import { Loader2, Calendar, DollarSign, Users, ChevronRight, BarChart3 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { isToday } from 'date-fns';
 import { supabase } from '@/lib/supabase';
 import { useQueryClient } from '@tanstack/react-query';
 import { PageSkeleton, BookingCardSkeleton } from '@/components/ui/page-skeleton';
-import { usePlatform } from '@/hooks/usePlatform';
-import { useOrganization } from '@/contexts/OrganizationContext';
-import { Card } from '@/components/ui/card';
 
 // Lazy load the heavy ReportsOverview component
 const ReportsOverview = lazy(() => import('@/components/admin/ReportsOverview').then(m => ({ default: m.ReportsOverview })));
