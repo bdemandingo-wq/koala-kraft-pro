@@ -2,6 +2,7 @@ import { ReactNode, Suspense, lazy, useState } from 'react';
 import AdminHelpChat from './AdminHelpChat';
 import { AdminSidebar } from './AdminSidebar';
 import { AdminHeader } from './AdminHeader';
+import { NativeAdminHeader } from './NativeAdminHeader';
 import { OfflineIndicator } from './OfflineIndicator';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
