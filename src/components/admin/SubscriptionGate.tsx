@@ -116,9 +116,8 @@ export function useSubscriptionCheck() {
       callback();
     } else if (canShowPaymentFlows) {
       setShowSubscriptionDialog(true);
-    } else {
-      window.open(billingUrl, '_blank');
     }
+    // Guideline 3.1.1: On native, don't open external payment links
   };
 
   const isSubscribed = hasPaidSubscription ?? false;
