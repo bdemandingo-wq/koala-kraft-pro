@@ -1,5 +1,9 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { SwipeableRow } from '@/components/mobile/SwipeableRow';
+import { MobileFilterSheet } from '@/components/mobile/MobileFilterSheet';
+import { hapticImpact } from '@/lib/haptics';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -127,6 +131,7 @@ const getPaymentStatusInfo = (booking: BookingWithDetails) => {
 
 export default function BookingsPage() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -1427,6 +1432,64 @@ export default function BookingsPage() {
           </div>
 
       {/* Filters */}
+      {isMobile ? (
+        <div className="flex gap-2 mb-4 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Search bookings..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-11 h-11 bg-card border-border/50 rounded-xl"
+            />
+          </div>
+          <MobileFilterSheet
+            activeFilterCount={
+              (statusFilter !== 'all' ? 1 : 0) + (dateRange?.from ? 1 : 0)
+            }
+            onClearAll={() => {
+              setStatusFilter('all');
+              setDateRange(undefined);
+            }}
+          >
+            <div className="space-y-4">
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Status</Label>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-full h-11">
+                    <SelectValue placeholder="All Bookings" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Bookings</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Date Range</Label>
+                <CalendarComponent
+                  mode="range"
+                  selected={dateRange}
+                  onSelect={setDateRange}
+                  className="rounded-md border"
+                />
+                {dateRange && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full mt-2 gap-2"
+                    onClick={() => setDateRange(undefined)}
+                  >
+                    <X className="w-4 h-4" />
+                    Clear Date
+                  </Button>
+                )}
+              </div>
+            </div>
+          </MobileFilterSheet>
+        </div>
+      ) : (
       <div className="flex flex-col sm:flex-row gap-4 mb-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
         <div className="relative flex-1">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -1493,7 +1556,7 @@ export default function BookingsPage() {
           </Select>
           <Button 
             variant="outline" 
-            className="h-11 gap-2 rounded-xl text-blue-600 border-blue-200 hover:bg-blue-50"
+            className="h-11 gap-2 rounded-xl text-info border-info/30 hover:bg-info/10"
             onClick={handleBulkNotifyWeekCleaners}
             disabled={bulkNotifyingWeek}
           >
@@ -1502,7 +1565,7 @@ export default function BookingsPage() {
           </Button>
           <Button 
             variant="outline" 
-            className="h-11 gap-2 rounded-xl text-emerald-600 border-emerald-200 hover:bg-emerald-50"
+            className="h-11 gap-2 rounded-xl text-success border-success/30 hover:bg-success/10"
             onClick={handlePrepareWeeklyReminders}
           >
             <Phone className="w-4 h-4" />
@@ -1536,7 +1599,7 @@ export default function BookingsPage() {
               </Button>
               <Button 
                 variant="outline" 
-                className="h-11 gap-2 rounded-xl text-purple-600 border-purple-200 hover:bg-purple-50"
+                className="h-11 gap-2 rounded-xl text-accent border-accent/30 hover:bg-accent/10"
                 onClick={handleBulkNotifyCleaners}
                 disabled={bulkNotifyingCleaners}
               >
@@ -1556,37 +1619,106 @@ export default function BookingsPage() {
           )}
         </div>
       </div>
+      )}
 
-      {/* Table */}
-      <div className="bg-card rounded-2xl border border-border/50 shadow-sm overflow-hidden animate-fade-in" style={{ animationDelay: '0.2s' }}>
-        {isLoading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="flex flex-col items-center gap-3">
-              <Loader2 className="w-10 h-10 animate-spin text-primary" />
-              <p className="text-muted-foreground">Loading bookings...</p>
-            </div>
+      {/* Bookings List */}
+      <div className={cn(!isMobile && "bg-card rounded-2xl border border-border/50 shadow-sm overflow-hidden animate-fade-in")} style={!isMobile ? { animationDelay: '0.2s' } : undefined}>
+      {isLoading ? (
+        <div className="flex items-center justify-center h-64">
+          <div className="flex flex-col items-center gap-3">
+            <Loader2 className="w-10 h-10 animate-spin text-primary" />
+            <p className="text-muted-foreground">Loading bookings...</p>
           </div>
-        ) : filteredBookings.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-64 text-center p-8">
-            <div className="w-16 h-16 bg-secondary/50 rounded-full flex items-center justify-center mb-4">
-              <Calendar className="w-8 h-8 text-muted-foreground" />
-            </div>
-            <h3 className="text-lg font-semibold text-foreground mb-2">No bookings found</h3>
-            <p className="text-muted-foreground mb-6 max-w-sm">
-              {searchTerm || statusFilter !== 'all' 
-                ? "Try adjusting your search or filter criteria"
-                : "Get started by creating your first booking"
-              }
-            </p>
-            <Button 
-              onClick={() => setAddDialogOpen(true)}
-              className="gap-2 bg-gradient-to-r from-primary to-accent hover:opacity-90"
-            >
-              <Plus className="w-4 h-4" />
-              Create Booking
-            </Button>
+        </div>
+      ) : filteredBookings.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-64 text-center p-8 bg-card rounded-2xl border border-border/50">
+          <div className="w-16 h-16 bg-secondary/50 rounded-full flex items-center justify-center mb-4">
+            <Calendar className="w-8 h-8 text-muted-foreground" />
           </div>
-        ) : (
+          <h3 className="text-lg font-semibold text-foreground mb-2">No bookings found</h3>
+          <p className="text-muted-foreground mb-6 max-w-sm">
+            {searchTerm || statusFilter !== 'all' 
+              ? "Try adjusting your search or filter criteria"
+              : "Get started by creating your first booking"
+            }
+          </p>
+          <Button 
+            onClick={() => { hapticImpact('medium'); setAddDialogOpen(true); }}
+            className="gap-2 bg-gradient-to-r from-primary to-accent hover:opacity-90"
+          >
+            <Plus className="w-4 h-4" />
+            Create Booking
+          </Button>
+        </div>
+      ) : isMobile ? (
+        /* ── Mobile Card List ── */
+        <div className="space-y-2">
+          {filteredBookings.map((booking) => {
+            const statusStyle = statusConfig[booking.status] || statusConfig.pending;
+            const paymentInfo = getPaymentStatusInfo(booking);
+            const scheduledDate = new Date(booking.scheduled_at);
+            return (
+              <SwipeableRow
+                key={booking.id}
+                rightAction={{
+                  label: 'Details',
+                  onAction: () => {
+                    setActiveBooking(booking);
+                    setViewDialogOpen(true);
+                  },
+                }}
+              >
+                <button
+                  type="button"
+                  className="w-full text-left bg-card rounded-2xl border border-border/50 p-4 active:bg-secondary/30 transition-colors"
+                  onClick={() => {
+                    setActiveBooking(booking);
+                    setViewDialogOpen(true);
+                  }}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-mono text-xs font-bold text-primary">#{booking.booking_number}</span>
+                        <div className={cn(
+                          "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium",
+                          statusStyle.bg, statusStyle.text
+                        )}>
+                          <span className={cn("w-1.5 h-1.5 rounded-full", statusStyle.dot)} />
+                          {statusLabels[booking.status] || booking.status}
+                        </div>
+                      </div>
+                      <p className="font-medium text-foreground text-sm truncate">
+                        {booking.customer
+                          ? maskName(`${booking.customer.first_name} ${booking.customer.last_name}`)
+                          : 'Unknown'}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {booking.service?.name || 'Service'} • {format(scheduledDate, 'MMM d, h:mm a')}
+                      </p>
+                      {booking.staff?.name && (
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          Cleaner: {booking.staff.name}
+                        </p>
+                      )}
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="font-bold text-foreground text-sm">{maskAmount(booking.total_amount)}</p>
+                      <div className={cn(
+                        "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium mt-1",
+                        paymentInfo.bg, paymentInfo.text
+                      )}>
+                        <span>{paymentInfo.icon}</span>
+                        {paymentInfo.label}
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              </SwipeableRow>
+            );
+          })}
+        </div>
+      ) : (
           <div className="overflow-x-auto" data-no-swipe>
             <Table>
               <TableHeader>
@@ -1985,6 +2117,21 @@ export default function BookingsPage() {
           </div>
         )}
       </div>
+      {/* Mobile FAB */}
+      {isMobile && (
+        <button
+          type="button"
+          className="fixed bottom-20 right-4 z-40 w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center active:scale-95 transition-transform"
+          style={{ marginBottom: 'env(safe-area-inset-bottom, 0px)' }}
+          onClick={() => {
+            hapticImpact('medium');
+            setEditingBooking(null);
+            setAddDialogOpen(true);
+          }}
+        >
+          <Plus className="w-6 h-6" />
+        </button>
+      )}
         </TabsContent>
 
         <TabsContent value="drafts" className="space-y-6">
