@@ -251,6 +251,13 @@ export default function LoginPage() {
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Sign In
               </Button>
+
+              {/* Apple Sign In — iOS only */}
+              <AppleSignInButton
+                label="Sign in with Apple"
+                onSuccess={() => setShowSplash(true)}
+                disabled={loading}
+              />
             </form>
 
             {/* Sign up link - on native, direct to website */}
