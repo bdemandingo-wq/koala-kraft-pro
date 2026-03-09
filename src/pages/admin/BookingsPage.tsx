@@ -2152,6 +2152,8 @@ export default function BookingsPage() {
         </AlertDialogContent>
       </AlertDialog>
 
+        </TabsContent>
+      </Tabs>
     </AdminLayout>
   );
 }
