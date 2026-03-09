@@ -54,8 +54,8 @@ export function AdminLayout({ children, title, subtitle, actions }: AdminLayoutP
         </main>
       </div>
 
-      {/* Bottom nav only on non-native mobile (small screens on web) */}
-      {!isNative && <MobileBottomNav />}
+      {/* Bottom nav on both web mobile and native */}
+      <MobileBottomNav />
       
       {/* Only show subscription dialog on web - native apps direct to website */}
       {canShowPaymentFlows && (
