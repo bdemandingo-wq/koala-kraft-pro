@@ -168,7 +168,7 @@ export default function NotificationsPage() {
             </Button>
           </div>
         </>
-      )
+      )}
     </AdminLayout>
   );
 }
