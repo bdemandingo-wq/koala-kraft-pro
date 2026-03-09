@@ -292,7 +292,7 @@ export default function ExpensesPage() {
         })}
       </div>
 
-      {/* Expenses Table */}
+      {/* Expenses List */}
       <Card>
         <CardHeader>
           <CardTitle>All Expenses</CardTitle>
@@ -303,6 +303,59 @@ export default function ExpensesPage() {
           ) : expenses.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               No expenses yet. Add your first expense to track business costs.
+            </div>
+          ) : isMobile ? (
+            <div className="space-y-2 -mx-4 px-1">
+              {expenses.map((expense) => {
+                const Icon = getCategoryIcon(expense.category);
+                const catLabel = EXPENSE_CATEGORIES.find(c => c.value === expense.category)?.label || expense.category;
+                return (
+                  <SwipeableRow
+                    key={expense.id}
+                    rightAction={{
+                      label: 'Delete',
+                      variant: 'destructive',
+                      onAction: () => setDeleteConfirm(expense.id),
+                    }}
+                  >
+                    <button
+                      type="button"
+                      className="w-full text-left bg-card border border-border/40 rounded-2xl p-4 active:scale-[0.99] transition-transform"
+                      onClick={() => handleEdit(expense)}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-sm truncate">{expense.description}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge variant="secondary" className="gap-1 text-[10px] px-1.5 py-0">
+                              <Icon className="w-3 h-3" />
+                              {catLabel}
+                            </Badge>
+                            {expense.vendor && (
+                              <span className="text-xs text-muted-foreground truncate">{expense.vendor}</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="font-semibold">${expense.amount.toFixed(2)}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {format(new Date(expense.expense_date), 'MMM d')}
+                          </p>
+                        </div>
+                      </div>
+                    </button>
+                  </SwipeableRow>
+                );
+              })}
+
+              {/* Mobile FAB */}
+              <Button
+                size="icon"
+                className="fixed bottom-20 right-4 z-30 h-14 w-14 rounded-full shadow-lg"
+                onClick={() => setAddDialogOpen(true)}
+              >
+                <Plus className="w-6 h-6" />
+              </Button>
             </div>
           ) : (
             <Table>
