@@ -34,6 +34,7 @@ interface FeedbackEntry {
 }
 
 export default function ClientFeedbackPage() {
+  const isMobile = useIsMobile();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<FeedbackEntry | null>(null);
   const [filterResolved, setFilterResolved] = useState<string>('all');
