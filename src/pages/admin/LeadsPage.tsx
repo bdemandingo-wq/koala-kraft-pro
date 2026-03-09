@@ -836,6 +836,8 @@ export default function LeadsPage() {
         </CardContent>
       </Card>
       )}
+      </>
+      )}
 
       {/* Add/Edit Dialog */}
       <LeadDialog
