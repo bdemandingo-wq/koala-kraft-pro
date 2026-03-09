@@ -28,8 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Plus, Mail, Phone, UserPlus, MoreHorizontal, Trash2, Edit, Download, Filter, TrendingDown, ArrowRight, MapPin, LayoutGrid, Table2, CalendarDays } from 'lucide-react';
-// Simple address input - no Google Places integration
+import { Plus, Mail, Phone, UserPlus, MoreHorizontal, Trash2, Edit, Download, Filter, TrendingDown, ArrowRight, MapPin, LayoutGrid, Table2, CalendarDays, Search } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,6 +42,10 @@ import { format, startOfMonth, endOfMonth, subMonths, isWithinInterval } from 'd
 import { useTestMode } from '@/contexts/TestModeContext';
 import { useOrganization } from '@/contexts/OrganizationContext';
 import { LeadPipelineBoard } from '@/components/admin/LeadPipelineBoard';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { SwipeableRow } from '@/components/mobile/SwipeableRow';
+import { MobileFilterSheet } from '@/components/mobile/MobileFilterSheet';
+import { cn } from '@/lib/utils';
 
 
 
