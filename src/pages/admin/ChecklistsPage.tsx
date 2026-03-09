@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useOrganization } from '@/contexts/OrganizationContext';
 import { 
   ClipboardCheck, 
