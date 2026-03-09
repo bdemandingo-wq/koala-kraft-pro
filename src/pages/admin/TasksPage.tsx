@@ -467,6 +467,16 @@ export default function TasksPage() {
           ))}
         </Tabs>
       </div>
+
+      {/* Mobile FAB */}
+      {isMobile && (
+        <Button
+          className="fixed bottom-20 right-4 h-14 w-14 rounded-full shadow-lg z-30"
+          onClick={() => setAddDialogOpen(true)}
+        >
+          <Plus className="w-6 h-6" />
+        </Button>
+      )}
     </AdminLayout>
   );
 }
