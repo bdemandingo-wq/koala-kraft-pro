@@ -57,7 +57,6 @@ export default function AdminDashboard() {
   const { data: bookings = [], isLoading: bookingsLoading } = useBookings();
   const { data: customers = [], isLoading: customersLoading } = useCustomers();
   const queryClient = useQueryClient();
-  const { isNative } = usePlatform();
   const { organization } = useOrganization();
   const navigate = useNavigate();
 
