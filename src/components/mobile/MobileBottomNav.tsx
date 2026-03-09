@@ -62,16 +62,17 @@ export function MobileBottomNav() {
 
   const roleKey = isAdmin ? 'admin' : 'member';
 
-  // Haptic feedback for native tab presses
+  // Haptic feedback for tab presses
   const triggerHaptic = useCallback(async () => {
-    if (!isNative) return;
     try {
+      const { Capacitor } = await import('@capacitor/core');
+      if (!Capacitor.isNativePlatform()) return;
       const { Haptics, ImpactStyle } = await import('@capacitor/haptics');
       await Haptics.impact({ style: ImpactStyle.Light });
     } catch {
       // Haptics not available
     }
-  }, [isNative]);
+  }, []);
 
   useEffect(() => {
     if (!isDashboard) return;
