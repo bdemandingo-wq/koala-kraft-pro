@@ -1621,36 +1621,103 @@ export default function BookingsPage() {
       </div>
       )}
 
-      {/* Table */}
-      <div className="bg-card rounded-2xl border border-border/50 shadow-sm overflow-hidden animate-fade-in" style={{ animationDelay: '0.2s' }}>
-        {isLoading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="flex flex-col items-center gap-3">
-              <Loader2 className="w-10 h-10 animate-spin text-primary" />
-              <p className="text-muted-foreground">Loading bookings...</p>
-            </div>
+      {/* Bookings List */}
+      {isLoading ? (
+        <div className="flex items-center justify-center h-64">
+          <div className="flex flex-col items-center gap-3">
+            <Loader2 className="w-10 h-10 animate-spin text-primary" />
+            <p className="text-muted-foreground">Loading bookings...</p>
           </div>
-        ) : filteredBookings.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-64 text-center p-8">
-            <div className="w-16 h-16 bg-secondary/50 rounded-full flex items-center justify-center mb-4">
-              <Calendar className="w-8 h-8 text-muted-foreground" />
-            </div>
-            <h3 className="text-lg font-semibold text-foreground mb-2">No bookings found</h3>
-            <p className="text-muted-foreground mb-6 max-w-sm">
-              {searchTerm || statusFilter !== 'all' 
-                ? "Try adjusting your search or filter criteria"
-                : "Get started by creating your first booking"
-              }
-            </p>
-            <Button 
-              onClick={() => setAddDialogOpen(true)}
-              className="gap-2 bg-gradient-to-r from-primary to-accent hover:opacity-90"
-            >
-              <Plus className="w-4 h-4" />
-              Create Booking
-            </Button>
+        </div>
+      ) : filteredBookings.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-64 text-center p-8 bg-card rounded-2xl border border-border/50">
+          <div className="w-16 h-16 bg-secondary/50 rounded-full flex items-center justify-center mb-4">
+            <Calendar className="w-8 h-8 text-muted-foreground" />
           </div>
-        ) : (
+          <h3 className="text-lg font-semibold text-foreground mb-2">No bookings found</h3>
+          <p className="text-muted-foreground mb-6 max-w-sm">
+            {searchTerm || statusFilter !== 'all' 
+              ? "Try adjusting your search or filter criteria"
+              : "Get started by creating your first booking"
+            }
+          </p>
+          <Button 
+            onClick={() => { hapticImpact('medium'); setAddDialogOpen(true); }}
+            className="gap-2 bg-gradient-to-r from-primary to-accent hover:opacity-90"
+          >
+            <Plus className="w-4 h-4" />
+            Create Booking
+          </Button>
+        </div>
+      ) : isMobile ? (
+        /* ── Mobile Card List ── */
+        <div className="space-y-2">
+          {filteredBookings.map((booking) => {
+            const statusStyle = statusConfig[booking.status] || statusConfig.pending;
+            const paymentInfo = getPaymentStatusInfo(booking);
+            const scheduledDate = new Date(booking.scheduled_at);
+            return (
+              <SwipeableRow
+                key={booking.id}
+                rightAction={{
+                  label: 'Details',
+                  onAction: () => {
+                    setActiveBooking(booking);
+                    setViewDialogOpen(true);
+                  },
+                }}
+              >
+                <button
+                  type="button"
+                  className="w-full text-left bg-card rounded-2xl border border-border/50 p-4 active:bg-secondary/30 transition-colors"
+                  onClick={() => {
+                    setActiveBooking(booking);
+                    setViewDialogOpen(true);
+                  }}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-mono text-xs font-bold text-primary">#{booking.booking_number}</span>
+                        <div className={cn(
+                          "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium",
+                          statusStyle.bg, statusStyle.text
+                        )}>
+                          <span className={cn("w-1.5 h-1.5 rounded-full", statusStyle.dot)} />
+                          {statusLabels[booking.status] || booking.status}
+                        </div>
+                      </div>
+                      <p className="font-medium text-foreground text-sm truncate">
+                        {booking.customer
+                          ? maskName(`${booking.customer.first_name} ${booking.customer.last_name}`)
+                          : 'Unknown'}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {booking.service?.name || 'Service'} • {format(scheduledDate, 'MMM d, h:mm a')}
+                      </p>
+                      {booking.staff?.name && (
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          Cleaner: {booking.staff.name}
+                        </p>
+                      )}
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="font-bold text-foreground text-sm">{maskAmount(booking.total_amount)}</p>
+                      <div className={cn(
+                        "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium mt-1",
+                        paymentInfo.bg, paymentInfo.text
+                      )}>
+                        <span>{paymentInfo.icon}</span>
+                        {paymentInfo.label}
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              </SwipeableRow>
+            );
+          })}
+        </div>
+      ) : (
           <div className="overflow-x-auto" data-no-swipe>
             <Table>
               <TableHeader>
