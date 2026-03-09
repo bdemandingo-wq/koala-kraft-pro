@@ -807,6 +807,7 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
             })
           )}
         </div>
+        </div>
 
         {/* Drag Overlay */}
         <DragOverlay>
