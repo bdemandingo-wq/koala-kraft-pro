@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useOrganization } from '@/contexts/OrganizationContext';
 import { 
   ClipboardCheck, 
@@ -129,6 +130,7 @@ function SortableChecklistItem({ item, index, onRemove }: SortableItemProps) {
 }
 
 export default function ChecklistsPage() {
+  const isMobile = useIsMobile();
   const queryClient = useQueryClient();
   const { organization } = useOrganization();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -688,6 +690,16 @@ export default function ChecklistsPage() {
           })
         )}
       </div>
+
+      {/* Mobile FAB */}
+      {isMobile && (
+        <Button
+          className="fixed bottom-20 right-4 h-14 w-14 rounded-full shadow-lg z-30"
+          onClick={openCreateDialog}
+        >
+          <Plus className="w-6 h-6" />
+        </Button>
+      )}
     </AdminLayout>
   );
 }
