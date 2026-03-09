@@ -1556,6 +1556,7 @@ export default function BookingsPage() {
                 Delete ({selectedBookings.size})
               </Button>
             </>
+          )}
         </div>
       </div>
 
@@ -2151,6 +2152,8 @@ export default function BookingsPage() {
         </AlertDialogContent>
       </AlertDialog>
 
+        </TabsContent>
+      </Tabs>
     </AdminLayout>
   );
 }
