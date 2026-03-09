@@ -258,6 +258,14 @@ export default function LeadsPage() {
     });
   }, [leads, searchTerm, statusFilter, sourceFilter, monthFilter]);
 
+  const activeFilterCount = [statusFilter !== 'all', sourceFilter !== 'all', monthFilter !== 'all'].filter(Boolean).length;
+
+  const clearAllFilters = () => {
+    setStatusFilter('all');
+    setSourceFilter('all');
+    setMonthFilter('all');
+  };
+
   const stats = {
     total: leads.length,
     new: leads.filter(l => l.status === 'new').length,
