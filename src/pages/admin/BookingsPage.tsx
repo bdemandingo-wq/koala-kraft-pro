@@ -128,7 +128,6 @@ const getPaymentStatusInfo = (booking: BookingWithDetails) => {
 
 export default function BookingsPage() {
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
