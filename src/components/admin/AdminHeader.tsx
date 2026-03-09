@@ -23,10 +23,6 @@ interface AdminHeaderProps {
 export function AdminHeader({ title, actions }: AdminHeaderProps) {
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
   const { isTestMode, toggleTestMode } = useTestMode();
-  const { isNative } = usePlatform();
-
-  // On native, header is replaced by inline title in AdminLayout
-  if (isNative) return null;
 
   return (
     <>

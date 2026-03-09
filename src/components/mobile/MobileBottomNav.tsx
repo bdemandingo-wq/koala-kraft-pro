@@ -130,10 +130,9 @@ export function MobileBottomNav() {
   return (
     <nav
       className={cn(
-        'fixed left-0 right-0 z-50',
+        'fixed left-0 right-0 z-50 md:hidden',
         'bottom-0 pb-[env(safe-area-inset-bottom)]',
-        'bg-background/95 backdrop-blur-md border-t border-border/30',
-        !isNative && 'md:hidden'
+        'bg-background/95 backdrop-blur-md border-t border-border/30'
       )}
       aria-label="Primary"
     >

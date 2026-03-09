@@ -42,14 +42,10 @@ export interface ButtonProps
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const { isNative } = usePlatform();
     const Comp = asChild ? Slot : "button";
     return (
       <Comp
-        className={cn(
-          buttonVariants({ variant, size, className }),
-          isNative && "min-h-[44px] rounded-xl text-sm font-medium"
-        )}
+        className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         {...props}
       />
