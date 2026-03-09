@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { useStaff } from '@/hooks/useBookings';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
