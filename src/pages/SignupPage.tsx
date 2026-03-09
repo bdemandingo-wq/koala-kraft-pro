@@ -22,6 +22,7 @@ import { toast } from 'sonner';
 import { Eye, EyeOff, Loader2, ArrowLeft, Mail, Lock, User, Phone } from 'lucide-react';
 import { z } from 'zod';
 import { AppleSignInButton } from '@/components/AppleSignInButton';
+import { AppleSignInWebButton } from '@/components/AppleSignInWebButton';
 
 // Validation schema
 const signupSchema = z.object({
@@ -265,10 +266,16 @@ export default function SignupPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {/* Apple Sign Up — iOS only */}
+            {/* Apple Sign Up — iOS native */}
             <AppleSignInButton
               label="Sign up with Apple"
               onSuccess={() => setShowSplash(true)}
+              disabled={googleLoading || loading}
+            />
+
+            {/* Apple Sign Up — Web */}
+            <AppleSignInWebButton
+              label="Sign up with Apple"
               disabled={googleLoading || loading}
             />
 
