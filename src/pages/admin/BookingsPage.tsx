@@ -1432,6 +1432,64 @@ export default function BookingsPage() {
           </div>
 
       {/* Filters */}
+      {isMobile ? (
+        <div className="flex gap-2 mb-4 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Search bookings..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-11 h-11 bg-card border-border/50 rounded-xl"
+            />
+          </div>
+          <MobileFilterSheet
+            activeFilterCount={
+              (statusFilter !== 'all' ? 1 : 0) + (dateRange?.from ? 1 : 0)
+            }
+            onClearAll={() => {
+              setStatusFilter('all');
+              setDateRange(undefined);
+            }}
+          >
+            <div className="space-y-4">
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Status</Label>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-full h-11">
+                    <SelectValue placeholder="All Bookings" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Bookings</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Date Range</Label>
+                <CalendarComponent
+                  mode="range"
+                  selected={dateRange}
+                  onSelect={setDateRange}
+                  className="rounded-md border"
+                />
+                {dateRange && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full mt-2 gap-2"
+                    onClick={() => setDateRange(undefined)}
+                  >
+                    <X className="w-4 h-4" />
+                    Clear Date
+                  </Button>
+                )}
+              </div>
+            </div>
+          </MobileFilterSheet>
+        </div>
+      ) : (
       <div className="flex flex-col sm:flex-row gap-4 mb-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
         <div className="relative flex-1">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -1498,7 +1556,7 @@ export default function BookingsPage() {
           </Select>
           <Button 
             variant="outline" 
-            className="h-11 gap-2 rounded-xl text-blue-600 border-blue-200 hover:bg-blue-50"
+            className="h-11 gap-2 rounded-xl text-info border-info/30 hover:bg-info/10"
             onClick={handleBulkNotifyWeekCleaners}
             disabled={bulkNotifyingWeek}
           >
@@ -1507,7 +1565,7 @@ export default function BookingsPage() {
           </Button>
           <Button 
             variant="outline" 
-            className="h-11 gap-2 rounded-xl text-emerald-600 border-emerald-200 hover:bg-emerald-50"
+            className="h-11 gap-2 rounded-xl text-success border-success/30 hover:bg-success/10"
             onClick={handlePrepareWeeklyReminders}
           >
             <Phone className="w-4 h-4" />
@@ -1541,7 +1599,7 @@ export default function BookingsPage() {
               </Button>
               <Button 
                 variant="outline" 
-                className="h-11 gap-2 rounded-xl text-purple-600 border-purple-200 hover:bg-purple-50"
+                className="h-11 gap-2 rounded-xl text-accent border-accent/30 hover:bg-accent/10"
                 onClick={handleBulkNotifyCleaners}
                 disabled={bulkNotifyingCleaners}
               >
@@ -1561,6 +1619,7 @@ export default function BookingsPage() {
           )}
         </div>
       </div>
+      )}
 
       {/* Table */}
       <div className="bg-card rounded-2xl border border-border/50 shadow-sm overflow-hidden animate-fade-in" style={{ animationDelay: '0.2s' }}>
