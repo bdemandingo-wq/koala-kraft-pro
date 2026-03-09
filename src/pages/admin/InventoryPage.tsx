@@ -75,17 +75,20 @@ export default function InventoryPage() {
   const queryClient = useQueryClient();
   const { organization } = useOrganization();
 
-  // Fetch inventory items
+  // Fetch inventory items — scoped by organization
   const { data: items = [], isLoading } = useQuery({
-    queryKey: ['inventory'],
+    queryKey: ['inventory', organization?.id],
     queryFn: async () => {
+      if (!organization?.id) return [];
       const { data, error } = await supabase
         .from('inventory_items')
         .select('*')
+        .eq('organization_id', organization.id)
         .order('name');
       if (error) throw error;
       return data as InventoryItem[];
     },
+    enabled: !!organization?.id,
   });
 
   // Fetch custom categories
