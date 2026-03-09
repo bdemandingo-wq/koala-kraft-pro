@@ -246,7 +246,7 @@ export default function StaffPage() {
             placeholder="Search staff..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9"
+            className={cn('pl-9', isMobile && 'h-11 rounded-xl')}
           />
         </div>
         <div className="flex items-center gap-2">
