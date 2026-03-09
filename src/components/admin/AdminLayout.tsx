@@ -34,40 +34,28 @@ export function AdminLayout({ children, title, subtitle, actions }: AdminLayoutP
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
-      {/* Hide sidebar completely on native */}
-      {!isNative && (
-        <AdminSidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
-      )}
+      {/* Show sidebar on all platforms — same layout as web */}
+      <AdminSidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
 
       <div className={cn(
         "transition-all duration-300 min-h-screen",
-        isNative
-          ? "w-full"
-          : cn("pl-0 md:pl-16", sidebarOpen && "md:pl-64")
+        "pl-0 md:pl-16",
+        sidebarOpen && "md:pl-64"
       )}>
-        {/* Hide AdminHeader on native; show inline title instead */}
-        {isNative ? (
-          <div className="px-4 pt-[calc(env(safe-area-inset-top)+12px)]">
-            <h1 className="text-xl font-bold text-foreground">{title}</h1>
-            {subtitle && <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>}
-          </div>
-        ) : (
-          <AdminHeader title={title} subtitle={subtitle} actions={actions} />
-        )}
+        <AdminHeader title={title} subtitle={subtitle} actions={actions} />
 
         <main
           className={cn(
             "animate-page-enter overflow-y-auto",
-            isNative
-              ? "px-4 pt-3 pb-28"
-              : "p-2 md:p-4 pt-2 md:pt-4 pb-24 md:pb-4"
+            "p-2 md:p-4 pt-2 md:pt-4 pb-24 md:pb-4"
           )}
         >
           {children}
         </main>
       </div>
 
-      <MobileBottomNav />
+      {/* Bottom nav only on non-native mobile (small screens on web) */}
+      {!isNative && <MobileBottomNav />}
       
       {/* Only show subscription dialog on web - native apps direct to website */}
       {canShowPaymentFlows && (
