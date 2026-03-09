@@ -432,12 +432,6 @@ export default function AuthPage() {
               </svg>
               {isLogin ? 'Continue with Google' : 'Sign up with Google'}
             </Button>
-            {/* Apple Sign In — iOS native only (Guideline 4.8) */}
-            <div className="mt-3">
-              <AppleSignInButton
-                label={isLogin ? 'Sign in with Apple' : 'Sign up with Apple'}
-              />
-            </div>
             <div className="mt-4 text-center text-sm">
               <span className="text-muted-foreground">
                 {isLogin ? "Don't have an account? " : 'Already have an account? '}

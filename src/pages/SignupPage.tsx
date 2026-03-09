@@ -265,12 +265,6 @@ export default function SignupPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {/* Apple Sign Up — iOS only */}
-            <AppleSignInButton
-              label="Sign up with Apple"
-              onSuccess={() => setShowSplash(true)}
-              disabled={googleLoading || loading}
-            />
 
             {/* Google Sign Up Button - SIGNUP ONLY, hidden on native (Guideline 4.0: no browser redirects) */}
             {!isNative && (

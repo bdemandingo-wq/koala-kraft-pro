@@ -233,12 +233,6 @@ export default function LoginPage() {
                 Sign In
               </Button>
 
-              {/* Apple Sign In — iOS only */}
-              <AppleSignInButton
-                label="Sign in with Apple"
-                onSuccess={() => setShowSplash(true)}
-                disabled={loading}
-              />
             </form>
 
             {/* Sign up link - on native, direct to website */}
