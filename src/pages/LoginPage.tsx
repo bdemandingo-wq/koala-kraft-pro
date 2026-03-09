@@ -16,34 +16,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { TermsOfServiceDialog } from '@/components/legal/TermsOfServiceDialog';
 import { SplashScreen } from '@/components/SplashScreen';
 import { toast } from 'sonner';
-import { Eye, EyeOff, Loader2, ArrowLeft, Mail, Lock, ExternalLink } from 'lucide-react';
+import { Eye, EyeOff, Loader2, ArrowLeft, Mail, Lock } from 'lucide-react';
 import { z } from 'zod';
 import { usePlatform } from '@/hooks/usePlatform';
 import { AppleSignInButton } from '@/components/AppleSignInButton';
 
 // Native-aware signup link component for App Store compliance
 function NativeAwareSignupLink() {
-  const { canShowPaymentFlows, signupUrl } = usePlatform();
-  
-  if (!canShowPaymentFlows) {
-    // On native: show website link instead of in-app signup
-    return (
-      <div className="mt-6 text-center text-sm space-y-2">
-        <p className="text-muted-foreground">Don't have an account?</p>
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => window.open(signupUrl, '_blank')}
-          className="gap-2"
-        >
-          <ExternalLink className="h-4 w-4" />
-          Sign up at jointidywise.lovable.app
-        </Button>
-      </div>
-    );
-  }
-  
-  // On web: normal in-app signup link
+  // On all platforms (including native): use in-app signup link
+  // Per App Store Guideline 4.0: users must be able to sign up in-app
   return (
     <div className="mt-6 text-center text-sm">
       <span className="text-muted-foreground">Don't have an account? </span>
