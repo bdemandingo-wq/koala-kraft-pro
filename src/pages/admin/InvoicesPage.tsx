@@ -96,6 +96,7 @@ export default function InvoicesPage() {
   const queryClient = useQueryClient();
   const { isTestMode, maskName, maskEmail, maskAmount } = useTestMode();
   const { organization } = useOrganization();
+  const isMobile = useIsMobile();
 
   // Fetch invoices with items
   const { data: invoices = [], isLoading } = useQuery({
