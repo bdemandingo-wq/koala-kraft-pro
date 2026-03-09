@@ -1,13 +1,14 @@
 /**
- * Native Subscription Page - iOS App Store Compliant
+ * Native Subscription Page - iOS App Store Compliant (US Storefront)
  * 
- * This page is shown on native apps (iOS/Android) instead of the regular SubscriptionPage.
- * It contains NO prices, NO payment buttons - just subscription status and a link to the website.
+ * Per Apple Guideline 3.1.1 and the US storefront alternative payment ruling,
+ * apps may link out to the default browser for payment using a compliant button.
+ * This page shows subscription status and a clearly labeled external link.
  */
 
 import { useState, useEffect } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -90,8 +91,24 @@ export default function SubscriptionPageNative() {
   if (!status?.subscribed) {
     return (
       <AdminLayout title="Subscription" subtitle="Manage your TIDYWISE subscription">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-2xl mx-auto space-y-4">
           <TrialExpiredBanner onManageOnWeb={handleManageOnWeb} />
+          
+          {/* Apple-compliant external link disclosure */}
+          <Card>
+            <CardContent className="pt-6">
+              <p className="text-sm text-muted-foreground text-center mb-4">
+                Subscriptions are managed on the TIDYWISE website. You will leave this app to subscribe.
+              </p>
+              <Button onClick={handleManageOnWeb} className="w-full gap-2">
+                <ExternalLink className="h-4 w-4" />
+                Continue to jointidywise.com
+              </Button>
+              <p className="text-xs text-muted-foreground text-center mt-3">
+                Apple is not responsible for the privacy or security of transactions made outside this app.
+              </p>
+            </CardContent>
+          </Card>
         </div>
       </AdminLayout>
     );
@@ -109,12 +126,15 @@ export default function SubscriptionPageNative() {
               </div>
               <h3 className="text-lg font-semibold mb-2">Payment Issue</h3>
               <p className="text-muted-foreground mb-4 max-w-sm">
-                Please update your payment method at jointidywise.lovable.app to continue using TIDYWISE.
+                Please update your payment method to continue using TIDYWISE.
               </p>
               <Button onClick={handleManageOnWeb} variant="destructive" className="gap-2">
                 <ExternalLink className="h-4 w-4" />
-                Manage on Web
+                Update Payment Method
               </Button>
+              <p className="text-xs text-muted-foreground mt-3">
+                You will leave this app. Apple is not responsible for the privacy or security of transactions made outside this app.
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -164,20 +184,20 @@ export default function SubscriptionPageNative() {
                     <div>
                       <p className="font-medium text-foreground">Your trial includes full access</p>
                       <p className="text-sm text-muted-foreground mt-1">
-                        Manage your subscription at jointidywise.lovable.app before your trial ends.
+                        Subscribe before your trial ends to keep all features.
                       </p>
                     </div>
                   </div>
                 </div>
               )}
 
-              <Button onClick={handleManageOnWeb} variant="outline" className="gap-2">
+              <Button onClick={handleManageOnWeb} variant="outline" className="w-full gap-2">
                 <ExternalLink className="h-4 w-4" />
-                Manage Subscription on Web
+                Manage Subscription
               </Button>
               
               <p className="text-xs text-muted-foreground text-center">
-                Open jointidywise.lovable.app/dashboard/subscription in your browser to manage billing
+                You will leave this app to manage billing. Apple is not responsible for the privacy or security of transactions made outside this app.
               </p>
             </div>
           </CardContent>
