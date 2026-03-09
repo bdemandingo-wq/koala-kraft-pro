@@ -41,6 +41,7 @@ import { Label } from '@/components/ui/label';
 import { useTestMode } from '@/contexts/TestModeContext';
 import { CleanerCalendar } from '@/components/staff/CleanerCalendar';
 import { useOrgId } from '@/hooks/useOrgId';
+import { cn } from '@/lib/utils';
 
 interface StaffMember {
   id: string;
