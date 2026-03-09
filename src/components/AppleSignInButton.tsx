@@ -1,22 +1,19 @@
 /**
  * Apple Sign In Button — iOS only (Capacitor)
  * 
- * Uses @capacitor-community/apple-sign-in plugin and wires
- * the resulting identityToken to Supabase signInWithIdToken.
- * Follows Apple HIG: black button, white Apple logo, white text.
+ * Dynamically imports the native plugin so the build doesn't fail
+ * when @capacitor-community/apple-sign-in is not installed.
+ * Falls back gracefully if unavailable.
  */
 
 import { useState } from 'react';
-import { SignInWithApple, SignInWithAppleOptions } from '@capacitor-community/apple-sign-in';
 import { supabase } from '@/integrations/supabase/client';
 import { usePlatform } from '@/hooks/usePlatform';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface AppleSignInButtonProps {
-  /** Label shown on the button */
   label?: string;
-  /** Called after a successful Supabase sign-in */
   onSuccess?: () => void;
   disabled?: boolean;
 }
@@ -29,21 +26,21 @@ export function AppleSignInButton({
   const { isIOS } = usePlatform();
   const [loading, setLoading] = useState(false);
 
-  // Only render on native iOS
   if (!isIOS) return null;
 
   const handleAppleSignIn = async () => {
     setLoading(true);
     try {
-      const options: SignInWithAppleOptions = {
+      // Dynamic import — won't break build if package is missing
+      const { SignInWithApple } = await import('@capacitor-community/apple-sign-in');
+
+      const result = await SignInWithApple.authorize({
         clientId: 'app.lovable.b5fbe592e63a4ccf8d0f0393049d0881',
         redirectURI: 'https://slwfkaqczvwvvvavkgpr.supabase.co/auth/v1/callback',
         scopes: 'email name',
-      };
+      });
 
-      const result = await SignInWithApple.authorize(options);
       const idToken = result.response?.identityToken;
-
       if (!idToken) {
         toast.error('Apple Sign In failed — no identity token received.');
         setLoading(false);
@@ -53,7 +50,7 @@ export function AppleSignInButton({
       const { error } = await supabase.auth.signInWithIdToken({
         provider: 'apple',
         token: idToken,
-        nonce: '', // Apple handles nonce internally on iOS
+        nonce: '',
       });
 
       if (error) {
@@ -64,8 +61,14 @@ export function AppleSignInButton({
 
       onSuccess?.();
     } catch (err: any) {
-      // User cancelled = code 1001 on iOS — don't show error
       if (err?.code === '1001' || err?.message?.includes('canceled')) {
+        setLoading(false);
+        return;
+      }
+      // Plugin not installed — silently ignore
+      if (err?.message?.includes('Failed to fetch') || err?.code === 'MODULE_NOT_FOUND') {
+        console.warn('Apple Sign In plugin not available');
+        toast.error('Apple Sign In is not available on this device.');
         setLoading(false);
         return;
       }
