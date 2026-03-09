@@ -57,7 +57,6 @@ export function MobileBottomNav() {
   const { isAdmin } = useOrganization();
   const [tabs, setTabs] = useState<MobileNavItem[]>(DEFAULT_TABS);
   const [moreOpen, setMoreOpen] = useState(false);
-  const { isNative } = usePlatform();
 
   const isDashboard = isDashboardRoute(location.pathname);
 
