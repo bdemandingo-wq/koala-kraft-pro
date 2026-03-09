@@ -22,6 +22,7 @@ import { toast } from 'sonner';
 import { Eye, EyeOff, Loader2, ArrowLeft, Mail, Lock, User, Phone } from 'lucide-react';
 import { z } from 'zod';
 import { AppleSignInButton } from '@/components/AppleSignInButton';
+import { AppleSignInWebButton } from '@/components/AppleSignInWebButton';
 
 // Validation schema
 const signupSchema = z.object({
