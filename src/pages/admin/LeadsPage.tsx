@@ -98,6 +98,7 @@ export default function LeadsPage() {
   const queryClient = useQueryClient();
   const { isTestMode, maskName, maskEmail, maskPhone } = useTestMode();
   const { organization } = useOrganization();
+  const isMobile = useIsMobile();
 
 
   const { data: leads = [], isLoading } = useQuery({
