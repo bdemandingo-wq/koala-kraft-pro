@@ -20,6 +20,7 @@ import { SplashScreen } from '@/components/SplashScreen';
 import { toast } from 'sonner';
 import { Eye, EyeOff, Loader2, ArrowLeft, Mail, Lock, User, Phone } from 'lucide-react';
 import { z } from 'zod';
+import { AppleSignInButton } from '@/components/AppleSignInButton';
 
 // Validation schema
 const signupSchema = z.object({
@@ -262,11 +263,18 @@ export default function SignupPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {/* Apple Sign Up — iOS only */}
+            <AppleSignInButton
+              label="Sign up with Apple"
+              onSuccess={() => setShowSplash(true)}
+              disabled={googleLoading || loading}
+            />
+
             {/* Google Sign Up Button - SIGNUP ONLY */}
             <Button 
               type="button"
               variant="outline" 
-              className="w-full gap-2 mb-4"
+              className="w-full gap-2 mt-3"
               onClick={handleGoogleSignup}
               disabled={googleLoading || loading}
             >
