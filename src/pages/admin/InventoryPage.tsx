@@ -132,7 +132,8 @@ export default function InventoryPage() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, ...data }: Partial<InventoryItem> & { id: string }) => {
-      const { error } = await supabase.from('inventory_items').update(data).eq('id', id);
+      if (!organization?.id) throw new Error('No organization found');
+      const { error } = await supabase.from('inventory_items').update(data).eq('id', id).eq('organization_id', organization.id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -146,7 +147,8 @@ export default function InventoryPage() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('inventory_items').delete().eq('id', id);
+      if (!organization?.id) throw new Error('No organization found');
+      const { error } = await supabase.from('inventory_items').delete().eq('id', id).eq('organization_id', organization.id);
       if (error) throw error;
     },
     onSuccess: () => {
