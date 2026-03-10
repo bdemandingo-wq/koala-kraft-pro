@@ -409,11 +409,11 @@ export default function CustomersPage() {
                           onAction: () => handleDeleteClick(customer),
                         }}
                       >
-                        <button
+                         <button
                           type="button"
                           className={cn(
                             'w-full text-left',
-                            'bg-card border border-border shadow-sm rounded-xl p-4',
+                            'bg-card border border-border shadow-sm rounded-xl p-3',
                             'transition-transform active:scale-[0.99] will-change-transform'
                           )}
                           onPointerDown={() => startLongPress(customer.id)}
