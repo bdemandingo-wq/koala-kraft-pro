@@ -158,6 +158,11 @@ export default function AuthPage() {
 
   const handleGoogleSignIn = async () => {
     try {
+      if (Capacitor.isNativePlatform()) {
+        const { error } = await signInWithOAuthNative('google');
+        if (error) toast.error('Failed to sign in with Google');
+        return;
+      }
       const result = await lovable.auth.signInWithOAuth('google', {
         redirect_uri: window.location.origin,
       });
@@ -171,6 +176,11 @@ export default function AuthPage() {
 
   const handleAppleSignIn = async () => {
     try {
+      if (Capacitor.isNativePlatform()) {
+        const { error } = await signInWithOAuthNative('apple');
+        if (error) toast.error('Failed to sign in with Apple');
+        return;
+      }
       const result = await lovable.auth.signInWithOAuth('apple', {
         redirect_uri: window.location.origin,
       });
