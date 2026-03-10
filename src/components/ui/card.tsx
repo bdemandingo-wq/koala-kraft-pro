@@ -72,7 +72,7 @@ CardContent.displayName = "CardContent";
 
 const CardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn("flex items-center p-3 pt-0 md:p-5 md:pt-0", className)} {...props} />
+    <div ref={ref} className={cn("flex items-center p-2.5 pt-0 md:p-5 md:pt-0", className)} {...props} />
   ),
 );
 CardFooter.displayName = "CardFooter";
