@@ -478,14 +478,14 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
                 navigate('/dashboard/settings');
                 handleNavClick();
               }}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors min-h-[44px] pointer-events-auto touch-manipulation"
             >
               <Settings className="w-4 h-4" />
               <span className="text-sm">Settings</span>
             </button>
             <button 
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-destructive hover:bg-destructive/10 transition-colors"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-destructive hover:bg-destructive/10 transition-colors min-h-[44px] pointer-events-auto touch-manipulation"
             >
               <LogOut className="w-4 h-4" />
               <span className="text-sm">Logout</span>
