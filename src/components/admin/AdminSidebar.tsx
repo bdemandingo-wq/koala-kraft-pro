@@ -138,13 +138,13 @@ function SortableNavItem({ item, isActive, isOpen, isMobile, onNavClick }: Sorta
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center group"
+      className="flex items-center group pointer-events-auto touch-manipulation"
     >
       <button
         {...attributes}
         {...listeners}
         className={cn(
-          "p-1 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity",
+          "p-1 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity touch-manipulation",
           isDragging && "opacity-100"
         )}
       >
@@ -154,7 +154,7 @@ function SortableNavItem({ item, isActive, isOpen, isMobile, onNavClick }: Sorta
         to={item.href}
         onClick={onNavClick}
         className={cn(
-          'sidebar-link flex-1',
+          'sidebar-link flex-1 min-h-[44px] pointer-events-auto touch-manipulation',
           isActive && 'active',
           !isOpen && !isMobile && 'justify-center px-2'
         )}
@@ -378,7 +378,7 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto px-3 py-4">
+      <nav className="flex-1 overflow-y-auto px-3 py-4 pointer-events-auto touch-manipulation relative z-10">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -414,7 +414,7 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
               to="/dashboard/platform-analytics"
               onClick={handleNavClick}
               className={cn(
-                'sidebar-link',
+                'sidebar-link min-h-[44px] pointer-events-auto touch-manipulation',
                 location.pathname === '/dashboard/platform-analytics' && 'active',
                 !isOpen && !isMobile && 'justify-center px-2'
               )}
@@ -433,7 +433,7 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
         <button
           onClick={() => setIsProfileOpen(!isProfileOpen)}
           className={cn(
-            "w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-sidebar-accent transition-colors",
+            "w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-sidebar-accent transition-colors min-h-[44px] pointer-events-auto touch-manipulation",
             !isOpen && !isMobile && "justify-center px-2"
           )}
         >
@@ -478,14 +478,14 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
                 navigate('/dashboard/settings');
                 handleNavClick();
               }}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors min-h-[44px] pointer-events-auto touch-manipulation"
             >
               <Settings className="w-4 h-4" />
               <span className="text-sm">Settings</span>
             </button>
             <button 
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-destructive hover:bg-destructive/10 transition-colors"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-destructive hover:bg-destructive/10 transition-colors min-h-[44px] pointer-events-auto touch-manipulation"
             >
               <LogOut className="w-4 h-4" />
               <span className="text-sm">Logout</span>
@@ -500,7 +500,7 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
     <>
       {/* Mobile Sheet */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent side="left" className="w-64 p-0 bg-sidebar md:hidden">
+        <SheetContent side="left" className="w-64 p-0 bg-sidebar md:hidden z-[60] pointer-events-auto touch-manipulation">
           <div className="flex flex-col h-full">
             <SidebarContent isMobile />
           </div>
