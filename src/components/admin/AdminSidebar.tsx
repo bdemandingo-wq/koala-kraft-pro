@@ -402,33 +402,52 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-3 py-4 pointer-events-auto touch-manipulation relative z-10">
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={visibleNavigation.map(item => item.href)}
-            strategy={verticalListSortingStrategy}
+        {isMobile ? (
+          <div className="space-y-1">
+            {visibleNavigation.map((item) => {
+              const isActive = location.pathname === item.href ||
+                (item.href !== '/dashboard' && location.pathname.startsWith(item.href));
+              return (
+                <StaticNavItem
+                  key={item.href}
+                  item={item}
+                  isActive={isActive}
+                  isOpen={isOpen}
+                  isMobile={isMobile}
+                  onNavClick={handleNavClick}
+                />
+              );
+            })}
+          </div>
+        ) : (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
           >
-            <div className="space-y-1">
-              {visibleNavigation.map((item) => {
-                const isActive = location.pathname === item.href || 
-                  (item.href !== '/dashboard' && location.pathname.startsWith(item.href));
-                return (
-                  <SortableNavItem
-                    key={item.href}
-                    item={item}
-                    isActive={isActive}
-                    isOpen={isOpen}
-                    isMobile={isMobile}
-                    onNavClick={handleNavClick}
-                  />
-                );
-              })}
-            </div>
-          </SortableContext>
-        </DndContext>
+            <SortableContext
+              items={visibleNavigation.map(item => item.href)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="space-y-1">
+                {visibleNavigation.map((item) => {
+                  const isActive = location.pathname === item.href || 
+                    (item.href !== '/dashboard' && location.pathname.startsWith(item.href));
+                  return (
+                    <SortableNavItem
+                      key={item.href}
+                      item={item}
+                      isActive={isActive}
+                      isOpen={isOpen}
+                      isMobile={isMobile}
+                      onNavClick={handleNavClick}
+                    />
+                  );
+                })}
+              </div>
+            </SortableContext>
+          </DndContext>
+        )}
 
         {/* Platform Admin Link - Only visible for support@tidywisecleaning.com */}
         {user?.email === 'support@tidywisecleaning.com' && (
