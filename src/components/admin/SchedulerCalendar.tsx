@@ -226,7 +226,7 @@ function DraggableBooking({ booking, index, onClick, staffList, teamStaffIds = [
   );
 }
 
-export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilter = 'all' }: SchedulerCalendarProps) {
+export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilter = 'all', staffFilter = null }: SchedulerCalendarProps) {
   const isMobile = useIsMobile();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedBooking, setSelectedBooking] = useState<BookingWithDetails | null>(null);
