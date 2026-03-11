@@ -722,20 +722,20 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
         </div>
 
         {/* Day Headers */}
-        <div className="overflow-x-auto">
-        <div className="grid grid-cols-7 border-b border-border min-w-[700px]">
+        <div>
+        <div className="grid grid-cols-7 border-b border-border">
           {DAYS.map((day) => (
             <div
               key={day}
-              className="py-3 text-center text-sm font-medium text-muted-foreground min-w-[100px]"
+              className="py-1.5 md:py-3 text-center text-[10px] md:text-sm font-medium text-muted-foreground"
             >
-              {day}
+              {isMobile ? day.charAt(0) : day}
             </div>
           ))}
         </div>
 
         {/* Calendar Grid */}
-        <div className="grid grid-cols-7 min-w-[700px]">
+        <div className="grid grid-cols-7">
           {isLoading ? (
             <div className="col-span-7 flex items-center justify-center h-64">
               <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
@@ -750,7 +750,9 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
                   disabled={!date}
                   className={cn(
                     'calendar-day',
-                    viewMode === 'week' ? 'min-h-[300px]' : isMobile ? 'min-h-[70px]' : 'min-h-[120px]',
+                    viewMode === 'week' 
+                      ? (isMobile ? 'min-h-[100px]' : 'min-h-[300px]') 
+                      : (isMobile ? 'min-h-[52px]' : 'min-h-[120px]'),
                     date && isToday(date) && 'today',
                     !date && 'bg-muted/30'
                   )}
@@ -759,13 +761,13 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
                     <>
                       <span
                         className={cn(
-                          'text-sm font-medium mb-1',
+                          'text-[10px] md:text-sm font-medium mb-0.5 md:mb-1',
                           isToday(date) && 'text-primary'
                         )}
                       >
-                        {viewMode === 'week' ? format(date, 'MMM d') : date.getDate()}
+                        {viewMode === 'week' ? (isMobile ? format(date, 'd') : format(date, 'MMM d')) : date.getDate()}
                       </span>
-                      <div className={cn("w-full space-y-1 overflow-y-auto scrollbar-thin", isMobile ? "max-h-[60px]" : "max-h-[200px]")}>
+                      <div className={cn("w-full space-y-0.5 md:space-y-1 overflow-y-auto scrollbar-thin", isMobile ? "max-h-[36px]" : "max-h-[200px]")}>
                         {/* Mobile: 1 booking shows name, 2+ shows +X count. Desktop: show all names */}
                         {isMobile ? (
                           // Mobile behavior: compact +X for 2+ bookings
@@ -781,7 +783,7 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
                           ) : dayBookings.length >= 2 ? (
                             <button
                               onClick={() => setDayBookingsPopup({ date, bookings: dayBookings })}
-                              className="w-full text-left text-xs font-medium text-muted-foreground hover:text-foreground px-1 py-1 rounded hover:bg-muted/50 transition-colors"
+                              className="w-full text-left text-[10px] font-semibold text-primary px-0.5 py-0.5 rounded hover:bg-muted/50 transition-colors touch-manipulation"
                             >
                               +{dayBookings.length}
                             </button>
