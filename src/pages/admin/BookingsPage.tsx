@@ -1427,7 +1427,7 @@ export default function BookingsPage() {
           </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+      <div className="flex flex-col sm:flex-row gap-2 md:gap-4 mb-4 md:mb-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
         <div className="relative flex-1">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
@@ -1647,20 +1647,20 @@ export default function BookingsPage() {
                         </span>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                            <span className="text-sm font-semibold text-primary">
+                        <div className="flex items-center gap-2 md:gap-3">
+                          <div className="w-7 h-7 md:w-9 md:h-9 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                            <span className="text-xs md:text-sm font-semibold text-primary">
                               {isTestMode ? 'J' : (booking.customer?.first_name?.[0] || '?')}
                             </span>
                           </div>
                           <div>
-                            <p className="font-medium text-foreground">
+                            <p className="text-sm md:text-base font-medium text-foreground">
                               {booking.customer 
                                 ? maskName(`${booking.customer.first_name} ${booking.customer.last_name}`)
                                 : 'Unknown'
                               }
                             </p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-[10px] md:text-xs text-muted-foreground">
                               {maskEmail(booking.customer?.email || 'No email')}
                             </p>
                           </div>
