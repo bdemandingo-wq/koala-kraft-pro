@@ -121,6 +121,7 @@ interface SchedulerCalendarProps {
   searchTerm?: string;
   onSearchChange?: (term: string) => void;
   statusFilter?: 'all' | 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled';
+  staffFilter?: string | null;
 }
 
 interface DraggableBookingProps {
