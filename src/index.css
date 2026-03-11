@@ -628,3 +628,64 @@
 .animate-message-in {
   animation: messageBubbleIn 0.2s ease-out;
 }
+
+/* ============================================================
+   CAPACITOR / IOS APP STORE — MOBILE NATIVE FIXES
+   ============================================================ */
+
+html, body {
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+input,
+select,
+textarea {
+  font-size: max(16px, 1em);
+}
+
+img {
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+}
+
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.above-bottom-nav {
+  bottom: calc(3.75rem + env(safe-area-inset-bottom) + 0.75rem);
+}
+
+@supports (height: 100dvh) {
+  .min-h-screen {
+    min-height: 100dvh;
+  }
+}
+
+[data-radix-popper-content-wrapper],
+[role="dialog"] {
+  max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+}
+
+[data-vaul-drawer] {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.tap-target {
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
