@@ -124,6 +124,11 @@ const queryClient = new QueryClient({
   },
 });
 
+const AppStateHandler = () => {
+  useAppStateHandler();
+  return null;
+};
+
 const App = () => (
   <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
     <QueryClientProvider client={queryClient}>
