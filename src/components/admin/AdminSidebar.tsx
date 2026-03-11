@@ -172,6 +172,29 @@ function SortableNavItem({ item, isActive, isOpen, isMobile, onNavClick }: Sorta
   );
 }
 
+function StaticNavItem({ item, isActive, isOpen, isMobile, onNavClick }: SortableNavItemProps) {
+  return (
+    <Link
+      to={item.href}
+      onClick={onNavClick}
+      className={cn(
+        'sidebar-link min-h-[44px] pointer-events-auto touch-manipulation',
+        isActive && 'active',
+        !isOpen && !isMobile && 'justify-center px-2'
+      )}
+      title={!isOpen && !isMobile ? item.name : undefined}
+    >
+      <item.icon className="w-5 h-5 flex-shrink-0" />
+      {(isOpen || isMobile) && <span>{item.name}</span>}
+      {item.badge !== undefined && item.badge > 0 && (
+        <Badge variant="destructive" className="ml-auto h-5 w-5 flex items-center justify-center p-0 text-xs rounded-full">
+          {item.badge > 9 ? '9+' : item.badge}
+        </Badge>
+      )}
+    </Link>
+  );
+}
+
 export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
@@ -379,33 +402,52 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-3 py-4 pointer-events-auto touch-manipulation relative z-10">
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={visibleNavigation.map(item => item.href)}
-            strategy={verticalListSortingStrategy}
+        {isMobile ? (
+          <div className="space-y-1">
+            {visibleNavigation.map((item) => {
+              const isActive = location.pathname === item.href ||
+                (item.href !== '/dashboard' && location.pathname.startsWith(item.href));
+              return (
+                <StaticNavItem
+                  key={item.href}
+                  item={item}
+                  isActive={isActive}
+                  isOpen={isOpen}
+                  isMobile={isMobile}
+                  onNavClick={handleNavClick}
+                />
+              );
+            })}
+          </div>
+        ) : (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
           >
-            <div className="space-y-1">
-              {visibleNavigation.map((item) => {
-                const isActive = location.pathname === item.href || 
-                  (item.href !== '/dashboard' && location.pathname.startsWith(item.href));
-                return (
-                  <SortableNavItem
-                    key={item.href}
-                    item={item}
-                    isActive={isActive}
-                    isOpen={isOpen}
-                    isMobile={isMobile}
-                    onNavClick={handleNavClick}
-                  />
-                );
-              })}
-            </div>
-          </SortableContext>
-        </DndContext>
+            <SortableContext
+              items={visibleNavigation.map(item => item.href)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="space-y-1">
+                {visibleNavigation.map((item) => {
+                  const isActive = location.pathname === item.href || 
+                    (item.href !== '/dashboard' && location.pathname.startsWith(item.href));
+                  return (
+                    <SortableNavItem
+                      key={item.href}
+                      item={item}
+                      isActive={isActive}
+                      isOpen={isOpen}
+                      isMobile={isMobile}
+                      onNavClick={handleNavClick}
+                    />
+                  );
+                })}
+              </div>
+            </SortableContext>
+          </DndContext>
+        )}
 
         {/* Platform Admin Link - Only visible for support@tidywisecleaning.com */}
         {user?.email === 'support@tidywisecleaning.com' && (
