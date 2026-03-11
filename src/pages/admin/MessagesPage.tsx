@@ -682,7 +682,11 @@ export default function MessagesPage() {
 
   const handleSelectConversation = (conv: Conversation) => {
     setSelectedConversation(conv);
-    setShowConversationList(false);
+  };
+
+  const handleBackToList = () => {
+    setSelectedConversation(null);
+    setMessages([]);
   };
 
   const renderConversationList = () => (
