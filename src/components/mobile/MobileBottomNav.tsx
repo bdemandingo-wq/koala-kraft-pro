@@ -129,9 +129,11 @@ export function MobileBottomNav() {
   const leftSlots = slots.slice(0, 2);
   const rightSlots = slots.slice(2, 4);
 
+  const [showAddBooking, setShowAddBooking] = useState(false);
+
   const handleAdd = () => {
     triggerHaptic();
-    navigate('/dashboard/bookings', { state: { openAddBooking: true } });
+    setShowAddBooking(true);
   };
 
   return (
