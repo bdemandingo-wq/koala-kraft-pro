@@ -179,6 +179,7 @@ export function MobileBottomNav() {
           <NavItem key={item.id} item={item} onTap={triggerHaptic} currentPath={location.pathname} />
         ))}
       </div>
+      <AddBookingDialog open={showAddBooking} onOpenChange={setShowAddBooking} />
     </nav>
   );
 }
