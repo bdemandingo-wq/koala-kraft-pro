@@ -200,10 +200,23 @@ export default function BookingsPage() {
   const { isTestMode, maskName, maskEmail, maskAmount, maskAddress } = useTestMode();
   const { organization } = useOrganization();
 
+  // Helper: is a booking fully done (completed + paid)?
+  const isFullyDone = useCallback((b: BookingWithDetails) => {
+    return b.status === 'completed' && b.payment_status === 'paid';
+  }, []);
+
   // Sort bookings: upcoming first (chronologically), then past
+  // On mobile: additionally pin uncompleted/unpaid bookings above fully-done ones
   const sortedBookings = useMemo(() => {
     const now = new Date();
     return [...bookings].sort((a, b) => {
+      // Mobile smart sort: uncompleted/unpaid always above completed+paid
+      if (isMobile) {
+        const aDone = isFullyDone(a);
+        const bDone = isFullyDone(b);
+        if (aDone !== bDone) return aDone ? 1 : -1;
+      }
+
       const aDate = new Date(a.scheduled_at);
       const bDate = new Date(b.scheduled_at);
       const aIsUpcoming = aDate >= now;
@@ -220,7 +233,7 @@ export default function BookingsPage() {
       // Upcoming before past
       return aIsUpcoming ? -1 : 1;
     });
-  }, [bookings]);
+  }, [bookings, isMobile, isFullyDone]);
 
   // Filter for drafts (pending status with is_draft flag or pending payment)
   const draftBookings = sortedBookings.filter((booking) => 
