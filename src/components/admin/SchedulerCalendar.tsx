@@ -738,7 +738,7 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
         </div>
 
         {/* Calendar Grid */}
-        <div className="grid grid-cols-7">
+        <div className="grid grid-cols-7 flex-1">
           {isLoading ? (
             <div className="col-span-7 flex items-center justify-center h-64">
               <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
