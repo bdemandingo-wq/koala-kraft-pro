@@ -200,10 +200,23 @@ export default function BookingsPage() {
   const { isTestMode, maskName, maskEmail, maskAmount, maskAddress } = useTestMode();
   const { organization } = useOrganization();
 
+  // Helper: is a booking fully done (completed + paid)?
+  const isFullyDone = useCallback((b: BookingWithDetails) => {
+    return b.status === 'completed' && b.payment_status === 'paid';
+  }, []);
+
   // Sort bookings: upcoming first (chronologically), then past
+  // On mobile: additionally pin uncompleted/unpaid bookings above fully-done ones
   const sortedBookings = useMemo(() => {
     const now = new Date();
     return [...bookings].sort((a, b) => {
+      // Mobile smart sort: uncompleted/unpaid always above completed+paid
+      if (isMobile) {
+        const aDone = isFullyDone(a);
+        const bDone = isFullyDone(b);
+        if (aDone !== bDone) return aDone ? 1 : -1;
+      }
+
       const aDate = new Date(a.scheduled_at);
       const bDate = new Date(b.scheduled_at);
       const aIsUpcoming = aDate >= now;
@@ -220,7 +233,7 @@ export default function BookingsPage() {
       // Upcoming before past
       return aIsUpcoming ? -1 : 1;
     });
-  }, [bookings]);
+  }, [bookings, isMobile, isFullyDone]);
 
   // Filter for drafts (pending status with is_draft flag or pending payment)
   const draftBookings = sortedBookings.filter((booking) => 
@@ -1605,15 +1618,26 @@ export default function BookingsPage() {
         ) : isMobile ? (
           /* ========== MOBILE CARD VIEW ========== */
           <div className="divide-y divide-border">
-            {filteredBookings.map((booking, index) => {
-              const statusStyle = statusConfig[booking.status] || statusConfig.pending;
+          {filteredBookings.map((booking, index) => {
               const paymentInfo = getPaymentStatusInfo(booking);
               const scheduledDate = new Date(booking.scheduled_at);
+              const isCleaned = booking.status === 'completed';
+              const isPaid = booking.payment_status === 'paid';
+
+              // Color-coded left border
+              const borderColor = isCleaned && isPaid
+                ? 'border-l-emerald-500'
+                : isCleaned && !isPaid
+                ? 'border-l-amber-500'
+                : 'border-l-red-500';
               
               return (
                 <div
                   key={booking.id}
-                  className="p-3 active:bg-muted/30 transition-colors"
+                  className={cn(
+                    "p-3 active:bg-muted/30 transition-colors border-l-4",
+                    borderColor
+                  )}
                   onClick={() => setActionSheetBooking(booking)}
                 >
                   {/* Top row: booking number + amount */}
@@ -1648,19 +1672,43 @@ export default function BookingsPage() {
                   
                   {/* Badges row */}
                   <div className="flex items-center gap-2">
+                    {/* Clean status badge */}
                     <div className={cn(
                       "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium",
-                      statusStyle.bg, statusStyle.text
+                      isCleaned
+                        ? "bg-emerald-50 text-emerald-700"
+                        : "bg-red-50 text-red-700"
                     )}>
-                      <span className={cn("w-1.5 h-1.5 rounded-full", statusStyle.dot)} />
-                      {statusLabels[booking.status] || booking.status.replace('_', ' ')}
+                      {isCleaned ? (
+                        <>
+                          <CheckCircle className="w-3 h-3" />
+                          clean completed
+                        </>
+                      ) : (
+                        <>
+                          <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                          uncleaned
+                        </>
+                      )}
                     </div>
+                    {/* Payment badge */}
                     <div className={cn(
                       "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium",
-                      paymentInfo.bg, paymentInfo.text
+                      isPaid
+                        ? "bg-emerald-50 text-emerald-700"
+                        : "bg-orange-50 text-orange-700"
                     )}>
-                      <span>{paymentInfo.icon}</span>
-                      {paymentInfo.label}
+                      {isPaid ? (
+                        <>
+                          <CheckCircle className="w-3 h-3" />
+                          Paid
+                        </>
+                      ) : (
+                        <>
+                          <span>○</span>
+                          {paymentInfo.label}
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
