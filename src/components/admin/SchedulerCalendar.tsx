@@ -725,7 +725,7 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
         )}
 
         {/* Day Headers */}
-        <div>
+        <div className="flex-1 flex flex-col overflow-hidden">
         <div className="grid grid-cols-7 border-b border-border">
           {DAYS.map((day) => (
             <div
