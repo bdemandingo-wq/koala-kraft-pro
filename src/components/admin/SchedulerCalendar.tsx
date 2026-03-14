@@ -202,7 +202,7 @@ function DraggableBooking({ booking, index, onClick, staffList, teamStaffIds = [
         if (!isDragging) onClick();
       }}
       className={cn(
-        'booking-pill w-full text-left cursor-grab active:cursor-grabbing group select-none touch-none',
+        'booking-pill w-full text-left cursor-grab active:cursor-grabbing group select-none',
         isDragging && 'opacity-50'
       )}
       style={{
@@ -305,11 +305,12 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
     enabled: !!organization?.id,
   });
 
+  // On mobile, require long-press (500ms delay) to initiate drag; on desktop use distance
   const sensors = useSensors(
     useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
+      activationConstraint: isMobile
+        ? { delay: 500, tolerance: 5 }
+        : { distance: 8 },
     })
   );
 
@@ -771,16 +772,36 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
                         {viewMode === 'week' ? (isMobile ? format(date, 'd') : format(date, 'MMM d')) : date.getDate()}
                       </span>
                         <div className={cn("w-full space-y-0.5 md:space-y-1 overflow-y-auto scrollbar-thin", isMobile ? "max-h-[80px]" : "max-h-[200px]")}>
-                        {dayBookings.map((booking, bIndex) => (
-                          <DraggableBooking
-                            key={booking.id}
-                            booking={booking}
-                            index={bIndex}
-                            onClick={() => setSelectedBooking(booking)}
-                            staffList={staffList}
-                            teamStaffIds={teamAssignmentMap.get(booking.id)}
-                          />
-                        ))}
+                        {(() => {
+                          const maxVisible = isMobile && viewMode === 'month' ? 2 : dayBookings.length;
+                          const visibleBookings = dayBookings.slice(0, maxVisible);
+                          const overflowCount = dayBookings.length - maxVisible;
+                          return (
+                            <>
+                              {visibleBookings.map((booking, bIndex) => (
+                                <DraggableBooking
+                                  key={booking.id}
+                                  booking={booking}
+                                  index={bIndex}
+                                  onClick={() => setSelectedBooking(booking)}
+                                  staffList={staffList}
+                                  teamStaffIds={teamAssignmentMap.get(booking.id)}
+                                />
+                              ))}
+                              {overflowCount > 0 && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setDayBookingsPopup({ date: date!, bookings: dayBookings });
+                                  }}
+                                  className="w-full text-center text-[10px] font-semibold text-primary bg-primary/10 rounded py-0.5 hover:bg-primary/20 transition-colors"
+                                >
+                                  +{overflowCount} more
+                                </button>
+                              )}
+                            </>
+                          );
+                        })()}
                       </div>
                     </>
                   )}
@@ -809,7 +830,7 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
               </DialogTitle>
             </DialogHeader>
             {dayBookingsPopup && (
-              <div className="space-y-2">
+              <div className="space-y-2 max-h-[60vh] overflow-y-auto">
                 {dayBookingsPopup.bookings.map((booking) => {
                   const color = getStaffColor(booking.staff_id, staffList);
                   const fullName = booking.customer 
@@ -822,13 +843,31 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
                         setDayBookingsPopup(null);
                         setSelectedBooking(booking);
                       }}
-                      className="w-full text-left px-4 py-3 rounded-lg transition-colors hover:opacity-80"
+                      className="w-full text-left px-4 py-3 rounded-lg border transition-colors hover:opacity-80"
                       style={{
-                        backgroundColor: color,
-                        color: '#fff',
+                        backgroundColor: `${color}15`,
+                        borderColor: `${color}40`,
+                        borderLeftWidth: '4px',
+                        borderLeftColor: color,
                       }}
                     >
-                      <span className="font-medium">{maskName(fullName)}</span>
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium" style={{ color }}>{maskName(fullName)}</span>
+                        <Badge className={cn('text-xs', statusColors[booking.status])}>
+                          {statusLabels[booking.status] || booking.status}
+                        </Badge>
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
+                        <span>{formatInTimezone(booking.scheduled_at, orgTimezone, { hour: 'numeric', minute: '2-digit', hour12: true })}</span>
+                        <span>•</span>
+                        <span>{booking.service?.name || 'Service'}</span>
+                        {!isTestMode && booking.total_amount > 0 && (
+                          <>
+                            <span>•</span>
+                            <span>${Number(booking.total_amount).toFixed(0)}</span>
+                          </>
+                        )}
+                      </div>
                     </button>
                   );
                 })}
