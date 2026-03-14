@@ -31,6 +31,7 @@ import { cn } from '@/lib/utils';
 import { useTestMode } from '@/contexts/TestModeContext';
 import { useOrganization } from '@/contexts/OrganizationContext';
 import { SubscriptionGate } from '@/components/admin/SubscriptionGate';
+import { PnLCalendar } from '@/components/admin/PnLCalendar';
 
 interface Transaction {
   id: string;
