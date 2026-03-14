@@ -31,6 +31,7 @@ import { cn } from '@/lib/utils';
 import { useTestMode } from '@/contexts/TestModeContext';
 import { useOrganization } from '@/contexts/OrganizationContext';
 import { SubscriptionGate } from '@/components/admin/SubscriptionGate';
+import { PnLCalendar } from '@/components/admin/PnLCalendar';
 
 interface Transaction {
   id: string;
@@ -424,6 +425,7 @@ export default function FinancePage() {
       <Tabs defaultValue="transactions" className="space-y-4">
         <TabsList>
           <TabsTrigger value="transactions">Transactions</TabsTrigger>
+          <TabsTrigger value="pnl-calendar">P&L Calendar</TabsTrigger>
           <TabsTrigger value="sales-tax">Sales Tax by Zip</TabsTrigger>
           <TabsTrigger value="pnl">P&L Breakdown</TabsTrigger>
         </TabsList>
@@ -487,6 +489,14 @@ export default function FinancePage() {
               </Table>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="pnl-calendar">
+          <PnLCalendar
+            bookings={bookings}
+            expenses={expenses}
+            teamPaysByBooking={teamPaysByBooking as Map<string, number>}
+          />
         </TabsContent>
 
         <TabsContent value="sales-tax">
