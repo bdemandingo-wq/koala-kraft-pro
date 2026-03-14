@@ -305,11 +305,12 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
     enabled: !!organization?.id,
   });
 
+  // On mobile, require long-press (500ms delay) to initiate drag; on desktop use distance
   const sensors = useSensors(
     useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
+      activationConstraint: isMobile
+        ? { delay: 500, tolerance: 5 }
+        : { distance: 8 },
     })
   );
 
