@@ -770,40 +770,17 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
                       >
                         {viewMode === 'week' ? (isMobile ? format(date, 'd') : format(date, 'MMM d')) : date.getDate()}
                       </span>
-                      <div className={cn("w-full space-y-0.5 md:space-y-1 overflow-y-auto scrollbar-thin", isMobile ? "max-h-[36px]" : "max-h-[200px]")}>
-                        {/* Mobile: 1 booking shows name, 2+ shows +X count. Desktop: show all names */}
-                        {isMobile ? (
-                          // Mobile behavior: compact +X for 2+ bookings
-                          dayBookings.length === 1 ? (
-                            <DraggableBooking
-                              key={dayBookings[0].id}
-                              booking={dayBookings[0]}
-                              index={0}
-                              onClick={() => setSelectedBooking(dayBookings[0])}
-                              staffList={staffList}
-                              teamStaffIds={teamAssignmentMap.get(dayBookings[0].id)}
-                            />
-                          ) : dayBookings.length >= 2 ? (
-                            <button
-                              onClick={() => setDayBookingsPopup({ date, bookings: dayBookings })}
-                              className="w-full text-left text-[10px] font-semibold text-primary px-0.5 py-0.5 rounded hover:bg-muted/50 transition-colors touch-manipulation"
-                            >
-                              +{dayBookings.length}
-                            </button>
-                          ) : null
-                        ) : (
-                          // Desktop behavior: show all booking names
-                          dayBookings.map((booking, bIndex) => (
-                            <DraggableBooking
-                              key={booking.id}
-                              booking={booking}
-                              index={bIndex}
-                              onClick={() => setSelectedBooking(booking)}
-                              staffList={staffList}
-                              teamStaffIds={teamAssignmentMap.get(booking.id)}
-                            />
-                          ))
-                        )}
+                        <div className={cn("w-full space-y-0.5 md:space-y-1 overflow-y-auto scrollbar-thin", isMobile ? "max-h-[80px]" : "max-h-[200px]")}>
+                        {dayBookings.map((booking, bIndex) => (
+                          <DraggableBooking
+                            key={booking.id}
+                            booking={booking}
+                            index={bIndex}
+                            onClick={() => setSelectedBooking(booking)}
+                            staffList={staffList}
+                            teamStaffIds={teamAssignmentMap.get(booking.id)}
+                          />
+                        ))}
                       </div>
                     </>
                   )}
