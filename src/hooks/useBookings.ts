@@ -478,7 +478,38 @@ export function useStaff() {
       return data;
     },
     enabled: !!organizationId,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    gcTime: 1000 * 60 * 30, // Keep in cache for 30 minutes
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 30,
+  });
+}
+
+/** Fetches ALL staff (active + inactive) for admin management pages. */
+export function useAllStaff() {
+  const { organization } = useOrganization();
+  const organizationId = organization?.id;
+
+  return useQuery({
+    queryKey: ['staff-all', organizationId],
+    queryFn: async () => {
+      if (!organizationId) {
+        return [];
+      }
+      const { data, error } = await supabase
+        .from('staff')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .order('is_active', { ascending: false })
+        .order('name', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching all staff:', error);
+        throw error;
+      }
+
+      return data;
+    },
+    enabled: !!organizationId,
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 30,
   });
 }
