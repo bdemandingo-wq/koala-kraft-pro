@@ -18,16 +18,18 @@ import {
   Sparkles,
   Gift,
   Star,
+  Smartphone,
 } from 'lucide-react';
 
 const includedFeatures = [
-  { icon: Calendar, label: 'Unlimited bookings & scheduling' },
-  { icon: Users, label: 'Team & staff management' },
-  { icon: CreditCard, label: 'Payment processing & invoicing' },
-  { icon: MessageSquare, label: 'SMS & email notifications' },
+  { icon: Calendar, label: 'Online booking system' },
+  { icon: Users, label: 'Client CRM' },
+  { icon: Zap, label: 'Team scheduling' },
+  { icon: CreditCard, label: 'Automated payments & invoicing' },
+  { icon: MessageSquare, label: 'Email reminders and notifications' },
+  { icon: Smartphone, label: 'Mobile app access' },
   { icon: Target, label: 'Lead management & CRM' },
   { icon: BarChart3, label: 'Dashboard & analytics' },
-  { icon: Zap, label: 'Automated dispatching' },
   { icon: Shield, label: 'Client portal with login' },
 ];
 
@@ -42,12 +44,16 @@ const premiumFeatures = [
 
 const faqs = [
   {
-    q: 'What happens after my free trial?',
-    a: 'After 60 days, your plan converts to $50/month. You can cancel anytime before that—no charge.',
+    q: 'Is there a free trial?',
+    a: 'Yes, get started free with no credit card required. Your first 60 days are completely free.',
   },
   {
     q: 'Can I cancel anytime?',
-    a: 'Yes. Cancel with one click from your dashboard. No contracts, no hidden fees.',
+    a: 'Absolutely. No long-term contracts. Cancel with one click from your dashboard.',
+  },
+  {
+    q: 'Do you offer support?',
+    a: 'Yes, real support from real people. We\'re here to help you succeed.',
   },
   {
     q: 'What payment methods do you accept?',
@@ -61,26 +67,22 @@ const faqs = [
     q: 'Do I need a credit card to start?',
     a: 'No credit card is required to start your trial. You only enter payment details when you choose to subscribe.',
   },
-  {
-    q: 'Can I switch plans later?',
-    a: 'TIDYWISE currently offers one all-inclusive plan so every business gets the full toolkit. We are working on additional tiers - stay tuned.',
-  },
 ];
 
 export default function PricingPage() {
   return (
     <>
       <Seo
-        title="Pricing – $50/mo All-Inclusive | TIDYWISE"
-        description="Simple pricing for cleaning businesses. 60-day free trial, then $50/mo for unlimited bookings, team management, payments, CRM, and more. No hidden fees."
+        title="TidyWise Pricing | Cleaning Business Software Plans"
+        description="Simple, transparent pricing for cleaning business owners. Start free and scale as you grow. No hidden fees."
         canonicalPath="/pricing"
         ogImage="/images/tidywise-og.png"
         jsonLd={[
           {
             "@type": "Product",
-            "name": "TIDYWISE Pro",
+            "name": "TidyWise Pro",
             "description": "Complete cleaning business management software",
-            "brand": { "@type": "Brand", "name": "TIDYWISE" },
+            "brand": { "@type": "Brand", "name": "TidyWise" },
             "offers": {
               "@type": "Offer",
               "price": "50.00",
@@ -124,10 +126,10 @@ export default function PricingPage() {
               60-day free trial · No credit card required
             </Badge>
             <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4 tracking-tight">
-              One plan. Everything included.
+              Simple Pricing for Cleaning Business Owners
             </h1>
             <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-              No tiers to compare, no features locked behind upsells. Every cleaning business gets the full toolkit.
+              No confusing tiers. No surprise fees. Just straightforward pricing that grows with your business.
             </p>
           </div>
         </section>
@@ -138,7 +140,7 @@ export default function PricingPage() {
             <Card className="border-2 border-primary/30 shadow-lg shadow-primary/5 overflow-hidden">
               <div className="bg-primary/5 px-6 py-5 flex items-end justify-between">
                 <div>
-                  <h2 className="text-xl font-bold text-foreground">TIDYWISE Pro</h2>
+                  <h2 className="text-xl font-bold text-foreground">TidyWise Pro</h2>
                   <p className="text-sm text-muted-foreground">Complete cleaning business management</p>
                 </div>
                 <div className="text-right">
@@ -147,7 +149,6 @@ export default function PricingPage() {
                 </div>
               </div>
               <CardContent className="p-6 space-y-6">
-                {/* Trial callout */}
                 <div className="bg-success/10 border border-success/20 rounded-lg p-4 flex items-start gap-3">
                   <Sparkles className="h-5 w-5 text-success flex-shrink-0 mt-0.5" />
                   <div>
@@ -156,10 +157,9 @@ export default function PricingPage() {
                   </div>
                 </div>
 
-                {/* Core features */}
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-                    Included from day one
+                    Everything included
                   </p>
                   <div className="grid grid-cols-1 gap-2.5">
                     {includedFeatures.map(({ icon: Icon, label }) => (
@@ -171,7 +171,6 @@ export default function PricingPage() {
                   </div>
                 </div>
 
-                {/* Premium unlock */}
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
                     Unlocked with subscription
@@ -188,7 +187,7 @@ export default function PricingPage() {
 
                 <Button size="lg" className="w-full gap-2" asChild>
                   <Link to="/signup">
-                    Start Free Trial <ArrowRight className="h-4 w-4" />
+                    Get Started <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
               </CardContent>
@@ -196,11 +195,21 @@ export default function PricingPage() {
           </div>
         </section>
 
+        {/* Why TidyWise */}
+        <section className="py-16 px-4 sm:px-6 lg:px-8 border-t border-border bg-muted/30">
+          <div className="max-w-2xl mx-auto text-center">
+            <h2 className="text-2xl font-bold text-foreground mb-4">Why Cleaning Businesses Choose TidyWise</h2>
+            <p className="text-muted-foreground">
+              Most cleaning software was built for general field service companies. TidyWise was built from the ground up for cleaning businesses — by someone who runs one. Every feature was designed with your daily workflow in mind.
+            </p>
+          </div>
+        </section>
+
         {/* FAQ */}
         <section className="py-16 px-4 sm:px-6 lg:px-8 border-t border-border bg-secondary/20">
           <div className="max-w-2xl mx-auto">
             <h2 className="text-2xl font-bold text-foreground text-center mb-10">
-              Frequently asked questions
+              Frequently Asked Questions
             </h2>
             <div className="space-y-6">
               {faqs.map(({ q, a }) => (
@@ -215,19 +224,18 @@ export default function PricingPage() {
 
         {/* Bottom CTA */}
         <section className="py-16 px-4 sm:px-6 lg:px-8 text-center border-t border-border">
-          <h2 className="text-2xl font-bold text-foreground mb-3">Ready to streamline your cleaning business?</h2>
-          <p className="text-muted-foreground mb-6">Join cleaning companies already using TIDYWISE.</p>
+          <h2 className="text-2xl font-bold text-foreground mb-3">Start Your Free Trial Today</h2>
+          <p className="text-muted-foreground mb-6">Join cleaning companies already using TidyWise.</p>
           <Button size="lg" className="gap-2" asChild>
             <Link to="/signup">
-              Start Your 60-Day Free Trial <ArrowRight className="h-4 w-4" />
+              Get Started <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
         </section>
 
-        {/* Footer */}
         <footer className="border-t border-border py-8 px-4 text-center">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} TIDYWISE. All rights reserved.
+            © {new Date().getFullYear()} TidyWise. All rights reserved.
           </p>
         </footer>
       </div>

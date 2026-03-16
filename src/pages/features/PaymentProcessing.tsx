@@ -3,66 +3,18 @@ import { Button } from "@/components/ui/button";
 import { Seo } from "@/components/Seo";
 import { RelatedArticles, allArticles } from "@/components/blog/RelatedArticles";
 import { 
-  ArrowRight, 
-  CreditCard, 
-  Shield, 
-  DollarSign, 
-  Zap,
-  CheckCircle2,
-  Receipt,
-  RefreshCw,
-  Smartphone,
-  Menu,
-  X
+  ArrowRight, CreditCard, Shield, DollarSign, CheckCircle2,
+  Receipt, RefreshCw, Bell, Menu, X
 } from "lucide-react";
 import { useState } from "react";
 
 const benefits = [
-  {
-    icon: CreditCard,
-    title: "Card on File",
-    description: "Securely store customer cards. Charge automatically after jobs or on a schedule."
-  },
-  {
-    icon: DollarSign,
-    title: "Deposit Collection",
-    description: "Collect deposits when bookings are made. Reduce cancellations and no-shows."
-  },
-  {
-    icon: Receipt,
-    title: "Automatic Invoicing",
-    description: "Professional invoices generated and sent automatically after every job."
-  },
-  {
-    icon: RefreshCw,
-    title: "Recurring Payments",
-    description: "Set up recurring billing for regular customers. Never chase payments again."
-  },
-  {
-    icon: Smartphone,
-    title: "Mobile Payments",
-    description: "Accept payments on-site via the mobile app. Tap-to-pay and card readers."
-  },
-  {
-    icon: Shield,
-    title: "PCI Compliant",
-    description: "Bank-level security with Stripe. Your customers' data is always protected."
-  },
-];
-
-const features = [
-  "Stripe integration",
-  "Card on file",
-  "Automatic charging",
-  "Deposit collection",
-  "Professional invoices",
-  "Payment reminders",
-  "Recurring billing",
-  "Refund processing",
-  "Tip collection",
-  "Payment links",
-  "Mobile card reader",
-  "Real-time reporting"
+  { icon: Receipt, title: "Instant Professional Invoices", description: "Send professional invoices instantly after each job. No more manual billing." },
+  { icon: CreditCard, title: "Accept Cards, ACH & Recurring", description: "Accept credit cards, ACH, and recurring payments. Clients pay online with one click." },
+  { icon: RefreshCw, title: "Auto-Billing for Recurring Clients", description: "Set up weekly or monthly auto-billing for recurring clients. Set it and forget it." },
+  { icon: Bell, title: "Automatic Payment Reminders", description: "Payment reminders sent automatically. Stop chasing payments manually." },
+  { icon: DollarSign, title: "Full Payment History", description: "Complete payment history per client. Know exactly who paid what and when." },
+  { icon: Shield, title: "PCI Compliant & Secure", description: "Bank-level security with Stripe. Your customers' data is always protected." },
 ];
 
 export default function PaymentProcessing() {
@@ -77,12 +29,20 @@ export default function PaymentProcessing() {
   return (
     <div className="min-h-screen bg-background">
       <Seo 
-        title="Credit Card Processing for Cleaning Businesses | TIDYWISE"
-        description="Integrated payment processing for cleaning companies. Card on file, automatic charging, invoicing, and deposit collection. Secure Stripe integration."
+        title="Automated Payments for Cleaning Businesses | TidyWise"
+        description="Get paid faster with TidyWise. Send invoices, accept online payments, and set up recurring billing — all in one place."
         canonicalPath="/features/payment-processing"
+        ogImage="/images/tidywise-og.png"
+        jsonLd={{
+          "@type": "SoftwareApplication",
+          "name": "TidyWise Payment Processing",
+          "applicationCategory": "BusinessApplication",
+          "operatingSystem": "Web, iOS, Android",
+          "offers": { "@type": "Offer", "price": "50", "priceCurrency": "USD" },
+          "description": "Automated payment processing for cleaning businesses with Stripe, invoicing, and recurring billing."
+        }}
       />
 
-      {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -91,14 +51,12 @@ export default function PaymentProcessing() {
             </a>
             <div className="hidden md:flex items-center gap-8">
               <a href="/#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
+              <a href="/pricing" className="text-muted-foreground hover:text-foreground transition-colors">Pricing</a>
               <a href="/blog" className="text-muted-foreground hover:text-foreground transition-colors">Blog</a>
-              <Button variant="ghost" onClick={() => navigate("/auth")}>Log In</Button>
+              <Button variant="ghost" onClick={() => navigate("/login")}>Log In</Button>
               <Button onClick={handleStartFreeTrial}>Start Free Trial</Button>
             </div>
-            <button 
-              className="md:hidden p-2"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
+            <button className="md:hidden p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
               {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
@@ -106,8 +64,9 @@ export default function PaymentProcessing() {
             <div className="md:hidden py-4 border-t border-border">
               <div className="flex flex-col gap-4">
                 <a href="/#features" className="text-muted-foreground hover:text-foreground">Features</a>
+                <a href="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</a>
                 <a href="/blog" className="text-muted-foreground hover:text-foreground">Blog</a>
-                <Button variant="ghost" className="justify-start" onClick={() => navigate("/auth")}>Log In</Button>
+                <Button variant="ghost" className="justify-start" onClick={() => navigate("/login")}>Log In</Button>
                 <Button onClick={handleStartFreeTrial}>Start Free Trial</Button>
               </div>
             </div>
@@ -115,123 +74,79 @@ export default function PaymentProcessing() {
         </div>
       </nav>
 
-      {/* Hero Section */}
+      {/* Hero */}
       <section className="pt-32 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-primary text-sm font-medium mb-6">
             <CreditCard className="h-4 w-4" />
-            Payment Processing
+            Payments & Invoicing
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
-            Integrated Credit Card<br/>
-            <span className="text-primary">Processing for Cleaners</span>
+            Get Paid Faster With Automated<br/>
+            <span className="text-primary">Cleaning Business Payments</span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Accept payments seamlessly with Stripe. Card on file, automatic charging, deposits, and professional invoicing. <strong>Get paid faster, chase less.</strong>
+            Chasing invoices is the worst part of running a cleaning business. TidyWise handles billing automatically so you get paid on time, every time — without lifting a finger.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="h-12 px-8" onClick={handleStartFreeTrial}>
-              Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
+            <Button size="lg" className="text-lg px-8 h-14" onClick={handleStartFreeTrial}>
+              Try TidyWise Free <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
-            <Button size="lg" variant="outline" className="h-12 px-8" onClick={() => document.getElementById('benefits')?.scrollIntoView({ behavior: 'smooth' })}>
-              See Payment Features
+            <Button size="lg" variant="outline" className="text-lg px-8 h-14" onClick={() => navigate("/pricing")}>
+              See Pricing
             </Button>
           </div>
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-secondary/30">
-        <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-primary">2.9%</div>
-              <p className="text-sm text-muted-foreground">Processing Fee</p>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-primary">2 Days</div>
-              <p className="text-sm text-muted-foreground">To Your Bank</p>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-primary">PCI</div>
-              <p className="text-sm text-muted-foreground">Compliant</p>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-primary">$0</div>
-              <p className="text-sm text-muted-foreground">Setup Fee</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Benefits */}
-      <section id="benefits" className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold text-foreground text-center mb-4">
-            Complete Payment Solution
-          </h2>
-          <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
-            Everything you need to get paid on time, every time.
-          </p>
-
+      {/* What's Included */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted/30">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-3xl font-bold text-center text-foreground mb-12">What's Included</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {benefits.map((benefit) => (
-              <div key={benefit.title} className="bg-card rounded-xl p-6 border border-border">
+            {benefits.map((b, i) => (
+              <div key={i} className="bg-card rounded-xl p-6 border border-border">
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                  <benefit.icon className="h-6 w-6 text-primary" />
+                  <b.icon className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">{benefit.title}</h3>
-                <p className="text-muted-foreground">{benefit.description}</p>
+                <h3 className="text-lg font-semibold text-foreground mb-2">{b.title}</h3>
+                <p className="text-muted-foreground">{b.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Feature List */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-secondary/30">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold text-foreground text-center mb-12">
-            Every Payment Feature Included
-          </h2>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {features.map((feature) => (
-              <div key={feature} className="flex items-center gap-3 bg-card rounded-lg p-4 border border-border">
-                <CheckCircle2 className="h-5 w-5 text-success flex-shrink-0" />
-                <span className="text-foreground">{feature}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-primary">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-primary-foreground mb-4">
-            Stop Chasing Payments
-          </h2>
-          <p className="text-lg text-primary-foreground/80 mb-8">
-            Automatic charging and professional invoicing. Start your free trial today.
+      {/* Built for cleaning */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-3xl font-bold text-foreground mb-4">Built for Cleaning Businesses</h2>
+          <p className="text-lg text-muted-foreground">
+            Whether you charge per job, weekly, or on a subscription basis, TidyWise flexes to match how you run your business.
           </p>
-          <Button size="lg" variant="secondary" className="h-12 px-8" onClick={handleStartFreeTrial}>
-            Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-primary/5">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-3xl font-bold text-foreground mb-4">Start Getting Paid on Time</h2>
+          <p className="text-lg text-muted-foreground mb-8">Automatic charging and professional invoicing. Start your free trial today.</p>
+          <Button size="lg" className="text-lg px-8 h-14" onClick={handleStartFreeTrial}>
+            Try TidyWise Free <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
         </div>
       </section>
 
-      {/* Related Articles */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-secondary/30">
-        <div className="max-w-5xl mx-auto">
-          <RelatedArticles articles={allArticles} currentSlug="/features/payment-processing" />
+      <section className="py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
+          <RelatedArticles articles={allArticles} currentSlug="payments" />
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-border">
-        <div className="max-w-5xl mx-auto text-center">
-          <p className="text-muted-foreground">© 2026 TIDYWISE. Payment processing for cleaning businesses.</p>
+      <footer className="border-t border-border py-8 px-4 text-center text-sm text-muted-foreground">
+        <div className="max-w-5xl mx-auto">
+          <p>© {new Date().getFullYear()} TidyWise. All rights reserved.</p>
           <div className="flex justify-center gap-6 mt-4">
             <Link to="/" className="text-muted-foreground hover:text-foreground">Home</Link>
             <Link to="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</Link>
@@ -239,19 +154,6 @@ export default function PaymentProcessing() {
           </div>
         </div>
       </footer>
-
-      {/* Schema */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{
-        __html: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "SoftwareApplication",
-          "name": "TIDYWISE Payment Processing",
-          "applicationCategory": "BusinessApplication",
-          "operatingSystem": "Web, iOS, Android",
-          "offers": { "@type": "Offer", "price": "50", "priceCurrency": "USD" },
-          "description": "Integrated credit card processing for cleaning businesses with Stripe, automatic charging, and invoicing."
-        })
-      }} />
     </div>
   );
 }
