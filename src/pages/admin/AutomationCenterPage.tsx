@@ -11,7 +11,7 @@ import { useOrganization } from '@/contexts/OrganizationContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
-  Zap, Star, Clock, PhoneMissed, RotateCcw, Repeat, UserX,
+  Zap, Star, Clock, RotateCcw, Repeat, UserX,
   HelpCircle, Home, Calendar, ClipboardList, Users, Target,
   MessageSquare, Briefcase, UserCircle, CheckSquare, Package, DollarSign,
   Receipt, BarChart3, Sparkles, CreditCard, Tag, MapPin, Globe, Brain,
