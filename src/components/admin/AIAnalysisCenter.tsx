@@ -216,6 +216,8 @@ export function AIAnalysisCenter() {
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const chatMessagesRef = useRef(chatMessages);
+  chatMessagesRef.current = chatMessages;
 
   const sendChat = useCallback(async (input: string) => {
     if (!input.trim() || !orgId) return;
@@ -234,14 +236,18 @@ export function AIAnalysisCenter() {
         },
         body: JSON.stringify({
           type: 'chat',
-          messages: [...chatMessages, userMsg],
+          messages: [...chatMessagesRef.current, userMsg],
           businessSnapshot,
         }),
       });
 
       if (resp.status === 429) { toast.error('Rate limit exceeded. Try again later.'); setChatLoading(false); return; }
       if (resp.status === 402) { toast.error('AI credits exhausted. Please add credits.'); setChatLoading(false); return; }
-      if (!resp.ok || !resp.body) throw new Error('Failed to start stream');
+      if (!resp.ok || !resp.body) {
+        const errorText = await resp.text().catch(() => '');
+        console.error('AI chat error:', resp.status, errorText);
+        throw new Error(`AI request failed (${resp.status})`);
+      }
 
       const reader = resp.body.getReader();
       const decoder = new TextDecoder();
@@ -283,11 +289,12 @@ export function AIAnalysisCenter() {
         }
       }
     } catch (e: any) {
+      console.error('Chat error:', e);
       toast.error(e.message || 'Chat error');
     } finally {
       setChatLoading(false);
     }
-  }, [orgId, chatMessages, businessSnapshot]);
+  }, [orgId, businessSnapshot]);
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [chatMessages]);
 
