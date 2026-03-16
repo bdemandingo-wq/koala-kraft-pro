@@ -492,7 +492,12 @@ export function AIAnalysisCenter() {
 
         {/* ─── Tab 4: Scheduling ─── */}
         <TabsContent value="scheduling">
-          <h3 style={{ fontFamily: labelFont, fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Bookings Per Day</h3>
+          <h3 style={{ fontFamily: labelFont, fontSize: 16, fontWeight: 600, marginBottom: 16 }}>
+            This Week's Bookings
+            <span style={{ fontSize: 12, fontWeight: 400, color: 'rgba(255,255,255,0.4)', marginLeft: 8 }}>
+              {format(startOfWeek(now, { weekStartsOn: 1 }), 'MMM d')} – {format(endOfWeek(now, { weekStartsOn: 1 }), 'MMM d')}
+            </span>
+          </h3>
           <div style={cardStyle} className="p-5 mb-4">
             <div className="grid grid-cols-7 gap-3" style={{ height: 200 }}>
               {DAYS.map(day => {
