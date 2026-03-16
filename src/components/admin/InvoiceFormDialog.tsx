@@ -241,7 +241,7 @@ export function InvoiceFormDialog({
 
   // Save and optionally send invoice
   const saveMutation = useMutation({
-    mutationFn: async (shouldSend: boolean = false) => {
+    mutationFn: async (sendMethod: 'none' | 'email' | 'sms' | 'both' = 'none') => {
       const validLineItems = lineItems.filter(item => item.description);
 
       if (validLineItems.length === 0) {
