@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
-import { useStaff } from '@/hooks/useBookings';
+import { useAllStaff } from '@/hooks/useBookings';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, Plus, MoreHorizontal, Mail, Phone, Edit, Trash2, Calendar, KeyRound, Copy, Check } from 'lucide-react';
 import {
   DropdownMenu,
@@ -40,6 +41,7 @@ import { Label } from '@/components/ui/label';
 import { useTestMode } from '@/contexts/TestModeContext';
 import { CleanerCalendar } from '@/components/staff/CleanerCalendar';
 import { useOrgId } from '@/hooks/useOrgId';
+import { cn } from '@/lib/utils';
 
 interface StaffMember {
   id: string;
@@ -54,9 +56,11 @@ interface StaffMember {
   default_hours?: number | null;
 }
 
+type StatusFilter = 'all' | 'active' | 'inactive';
+
 export default function StaffPage() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [showInactive, setShowInactive] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
@@ -70,7 +74,7 @@ export default function StaffPage() {
   const [isDeletingPermanently, setIsDeletingPermanently] = useState(false);
   const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
   
-  const { data: staff = [], isLoading } = useStaff();
+  const { data: staff = [], isLoading } = useAllStaff();
   const queryClient = useQueryClient();
   const { isTestMode, maskName, maskEmail, maskPhone } = useTestMode();
   const { organizationId } = useOrgId();
@@ -78,8 +82,9 @@ export default function StaffPage() {
   const filteredStaff = staff.filter((s) => {
     const matchesSearch = s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       s.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesActiveFilter = showInactive ? true : s.is_active;
-    return matchesSearch && matchesActiveFilter;
+    if (statusFilter === 'active') return matchesSearch && s.is_active;
+    if (statusFilter === 'inactive') return matchesSearch && !s.is_active;
+    return matchesSearch;
   });
 
   const activeCount = staff.filter(s => s.is_active).length;
@@ -125,6 +130,7 @@ export default function StaffPage() {
 
       if (error) throw error;
 
+      queryClient.invalidateQueries({ queryKey: ['staff-all'] });
       queryClient.invalidateQueries({ queryKey: ['staff'] });
       toast.success('Staff member permanently deleted');
       setPermanentDeleteDialogOpen(false);
@@ -137,20 +143,19 @@ export default function StaffPage() {
     }
   };
 
-  const handleReactivateStaff = async (member: StaffMember) => {
+  const handleToggleActive = async (member: StaffMember, checked: boolean) => {
     try {
       const { error } = await supabase
         .from('staff')
-        .update({ is_active: true })
+        .update({ is_active: checked })
         .eq('id', member.id);
-
       if (error) throw error;
-
+      queryClient.invalidateQueries({ queryKey: ['staff-all'] });
       queryClient.invalidateQueries({ queryKey: ['staff'] });
-      toast.success('Staff member reactivated');
+      toast.success(`${member.name} ${checked ? 'activated — now available for bookings' : 'deactivated — removed from booking assignments'}`);
     } catch (error) {
-      console.error('Error reactivating staff:', error);
-      toast.error('Failed to reactivate staff member');
+      console.error('Error updating staff status:', error);
+      toast.error('Failed to update staff status');
     }
   };
 
@@ -204,7 +209,7 @@ export default function StaffPage() {
     setCopied(false);
   };
 
-  const handleConfirmDelete = async () => {
+  const handleConfirmDeactivate = async () => {
     if (!staffToDelete) return;
 
     try {
@@ -215,13 +220,14 @@ export default function StaffPage() {
 
       if (error) throw error;
 
+      queryClient.invalidateQueries({ queryKey: ['staff-all'] });
       queryClient.invalidateQueries({ queryKey: ['staff'] });
-      toast.success('Staff member deactivated');
+      toast.success('Staff member deactivated — they remain in your records');
       setDeleteDialogOpen(false);
       setStaffToDelete(null);
     } catch (error) {
-      console.error('Error deleting staff:', error);
-      toast.error('Failed to delete staff member');
+      console.error('Error deactivating staff:', error);
+      toast.error('Failed to deactivate staff member');
     }
   };
 
@@ -237,7 +243,7 @@ export default function StaffPage() {
       }
     >
       {/* Search and Filters */}
-      <div className="flex flex-wrap gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
@@ -247,33 +253,24 @@ export default function StaffPage() {
             className="pl-10"
           />
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant={showInactive ? "secondary" : "outline"}
-            size="sm"
-            onClick={() => setShowInactive(!showInactive)}
-            className="gap-2"
-          >
-            {showInactive ? 'Showing All' : 'Show Inactive'}
-            {inactiveCount > 0 && (
-              <Badge variant="secondary" className="text-xs">
-                {inactiveCount}
-              </Badge>
-            )}
-          </Button>
-        </div>
-      </div>
-
-      {/* Stats */}
-      <div className="flex gap-4 mb-4">
-        <Badge variant="outline" className="text-sm py-1 px-3">
-          Active: {activeCount}
-        </Badge>
-        {inactiveCount > 0 && (
-          <Badge variant="secondary" className="text-sm py-1 px-3">
-            Inactive: {inactiveCount}
-          </Badge>
-        )}
+        <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
+          <TabsList>
+            <TabsTrigger value="all" className="gap-1.5">
+              All Staff
+              <Badge variant="secondary" className="ml-1 text-xs h-5 px-1.5">{staff.length}</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="active" className="gap-1.5">
+              Active
+              <Badge variant="secondary" className="ml-1 text-xs h-5 px-1.5">{activeCount}</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="inactive" className="gap-1.5">
+              Inactive
+              {inactiveCount > 0 && (
+                <Badge variant="secondary" className="ml-1 text-xs h-5 px-1.5">{inactiveCount}</Badge>
+              )}
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
       {/* Staff Grid */}
@@ -281,18 +278,25 @@ export default function StaffPage() {
         <div className="text-center py-8 text-muted-foreground">Loading staff...</div>
       ) : filteredStaff.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
-          {searchTerm ? 'No staff found matching your search' : 'No staff members yet. Add your first team member!'}
+          {searchTerm ? 'No staff found matching your search' : statusFilter === 'inactive' ? 'No inactive staff members' : 'No staff members yet. Add your first team member!'}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredStaff.map((member) => {
             const color = getColorFromName(member.name);
+            const isInactive = !member.is_active;
             return (
-              <Card key={member.id} className="hover:shadow-md transition-shadow">
+              <Card
+                key={member.id}
+                className={cn(
+                  "hover:shadow-md transition-all",
+                  isInactive && "opacity-60 border-dashed"
+                )}
+              >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
-                      <Avatar className="h-12 w-12">
+                      <Avatar className={cn("h-12 w-12", isInactive && "grayscale")}>
                         <AvatarFallback 
                           className="font-medium text-lg"
                           style={{ 
@@ -346,20 +350,15 @@ export default function StaffPage() {
                         >
                           <KeyRound className="w-4 h-4" /> Resend Password Link
                         </DropdownMenuItem>
-                        {!member.is_active && (
+                        {isInactive && (
                           <DropdownMenuItem 
-                            className="gap-2 text-green-600"
-                            onClick={() => handleReactivateStaff(member)}
+                            className="gap-2"
+                            onClick={() => handlePermanentDeleteClick(member)}
                           >
-                            <Edit className="w-4 h-4" /> Reactivate
+                            <Trash2 className="w-4 h-4 text-destructive" />
+                            <span className="text-destructive">Delete Permanently</span>
                           </DropdownMenuItem>
                         )}
-                        <DropdownMenuItem 
-                          className="gap-2 text-destructive"
-                          onClick={() => member.is_active ? handleDeleteClick(member) : handlePermanentDeleteClick(member)}
-                        >
-                          <Trash2 className="w-4 h-4" /> {member.is_active ? 'Deactivate' : 'Delete Permanently'}
-                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -380,21 +379,30 @@ export default function StaffPage() {
                       <p className="text-sm text-muted-foreground line-clamp-2">{member.bio}</p>
                     )}
                     <div className="flex items-center justify-between pt-3 border-t">
-                      <span className="text-sm text-muted-foreground">Active</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">Status</span>
+                        <Badge
+                          variant={member.is_active ? "default" : "secondary"}
+                          className={cn(
+                            "text-xs",
+                            member.is_active
+                              ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30"
+                              : "bg-muted text-muted-foreground"
+                          )}
+                        >
+                          {member.is_active ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </div>
                       <Switch 
                         checked={member.is_active} 
-                        onCheckedChange={async (checked) => {
-                          try {
-                            const { error } = await supabase
-                              .from('staff')
-                              .update({ is_active: checked })
-                              .eq('id', member.id);
-                            if (error) throw error;
-                            queryClient.invalidateQueries({ queryKey: ['staff'] });
-                            toast.success(`Staff member ${checked ? 'activated' : 'deactivated'}`);
-                          } catch (error) {
-                            console.error('Error updating staff status:', error);
-                            toast.error('Failed to update staff status');
+                        onCheckedChange={(checked) => {
+                          if (!checked) {
+                            // Show confirmation dialog before deactivating
+                            setStaffToDelete(member);
+                            setDeleteDialogOpen(true);
+                          } else {
+                            // Reactivate immediately
+                            handleToggleActive(member, true);
                           }
                         }}
                       />
@@ -414,18 +422,27 @@ export default function StaffPage() {
         staff={selectedStaff}
       />
 
+      {/* Deactivate Confirmation */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Deactivate Staff Member</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to deactivate {staffToDelete?.name}? They won't be able to log in, but their records will be preserved.
+              Are you sure you want to deactivate <strong>{staffToDelete?.name}</strong>?
+              <br /><br />
+              • They will be marked as <strong>Inactive</strong> and remain in your staff list
+              <br />
+              • They will be <strong>excluded from booking assignment</strong> dropdowns
+              <br />
+              • Their records, history, and data will be <strong>fully preserved</strong>
+              <br />
+              • You can <strong>reactivate them at any time</strong> with a single toggle
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleConfirmDelete}
+              onClick={handleConfirmDeactivate}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Deactivate
@@ -434,6 +451,7 @@ export default function StaffPage() {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Permanent Delete Confirmation */}
       <AlertDialog open={permanentDeleteDialogOpen} onOpenChange={setPermanentDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -456,6 +474,7 @@ export default function StaffPage() {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Password Reset Link Dialog */}
       <Dialog open={resendLinkDialogOpen} onOpenChange={handleResendLinkDialogClose}>
         <DialogContent>
           <DialogHeader>
@@ -463,8 +482,8 @@ export default function StaffPage() {
           </DialogHeader>
           {resendLinkData && (
             <div className="space-y-4 py-4">
-              <div className="bg-green-50 border border-green-200 rounded-lg p-3 dark:bg-green-950 dark:border-green-800">
-                <p className="text-sm text-green-800 dark:text-green-200 font-medium flex items-center gap-2">
+              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3">
+                <p className="text-sm font-medium flex items-center gap-2">
                   <Mail className="w-4 h-4" />
                   Send this link to {resendLinkData.name}
                 </p>
