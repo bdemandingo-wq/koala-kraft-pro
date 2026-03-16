@@ -31,6 +31,8 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: typeof
 export function InvoiceViewDialog({ open, onOpenChange, invoice }: InvoiceViewDialogProps) {
   const printRef = useRef<HTMLDivElement>(null);
   const { organization } = useOrganization();
+  const queryClient = useQueryClient();
+  const [sending, setSending] = useState(false);
 
   // Fetch business settings for branding
   const { data: businessSettings } = useQuery({
