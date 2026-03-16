@@ -89,10 +89,20 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     console.log("[create-stripe-invoice] Using organization-specific Stripe key for org:", data.organizationId);
+    
+    // Determine send channels (default: both if not specified, for backward compat)
+    const wantsEmail = data.sendEmail !== false;
+    const wantsSms = data.sendSms !== false;
+    
     const stripe = new Stripe(orgStripeSettings.stripe_secret_key, { apiVersion: "2025-08-27.basil" });
 
+    // Need a valid email for Stripe customer - use provided or generate placeholder
+    const emailForStripe = data.customerEmail || `noemail+${data.invoiceId.substring(0, 8)}@placeholder.local`;
+
     // Get or create Stripe customer
-    const customers = await stripe.customers.list({ email: data.customerEmail, limit: 1 });
+    const customers = data.customerEmail 
+      ? await stripe.customers.list({ email: data.customerEmail, limit: 1 })
+      : { data: [] };
     let customerId: string;
 
     if (customers.data.length > 0) {
