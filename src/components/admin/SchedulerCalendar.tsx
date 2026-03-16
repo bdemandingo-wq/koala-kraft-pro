@@ -744,7 +744,15 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
         </div>
 
         {/* Calendar Grid */}
-        <div className="grid grid-cols-7 flex-1" style={{ gridAutoRows: '1fr' }}>
+        <div
+          className="grid grid-cols-7 flex-1 min-h-0"
+          style={{
+            gridTemplateRows:
+              viewMode === 'week'
+                ? 'repeat(1, minmax(0, 1fr))'
+                : `repeat(${monthWeekRows}, minmax(0, 1fr))`,
+          }}
+        >
           {isLoading ? (
             <div className="col-span-7 flex items-center justify-center h-64">
               <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
