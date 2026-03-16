@@ -656,7 +656,7 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
                 placeholder="Search bookings..."
                 value={activeSearchTerm}
                 onChange={(e) => handleSearchChange(e.target.value)}
-                className="pl-9 w-40 md:w-64"
+                className="pl-10 w-40 md:w-64"
                 onFocus={() => activeSearchTerm && setSearchResultsOpen(true)}
               />
               

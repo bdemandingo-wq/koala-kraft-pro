@@ -158,7 +158,7 @@ export function CustomerSearchInput({
               onFocus={() => setIsOpen(true)}
               onKeyDown={handleKeyDown}
               placeholder={placeholder}
-              className="pl-9"
+              className="pl-10"
             />
           </div>
 
