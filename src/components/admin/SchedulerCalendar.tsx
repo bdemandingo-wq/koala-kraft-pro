@@ -766,9 +766,9 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
                   id={date ? `day-${format(date, 'yyyy-MM-dd')}` : `empty-${index}`}
                   disabled={!date}
                   className={cn(
-                    'calendar-day',
-                    viewMode === 'week' 
-                      ? (isMobile ? 'min-h-[100px]' : 'min-h-[200px]') 
+                    'calendar-day min-h-0 overflow-hidden',
+                    viewMode === 'week'
+                      ? (isMobile ? 'min-h-[100px]' : 'min-h-[200px]')
                       : '',
                     date && isToday(date) && 'today',
                     !date && 'bg-muted/30'
@@ -784,7 +784,14 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
                       >
                         {viewMode === 'week' ? (isMobile ? format(date, 'd') : format(date, 'MMM d')) : date.getDate()}
                       </span>
-                        <div className={cn("w-full space-y-0.5 md:space-y-1 overflow-y-auto scrollbar-thin", isMobile ? "max-h-[80px]" : "max-h-[200px]")}>
+                        <div
+                          className={cn(
+                            'w-full space-y-0.5 md:space-y-1 overflow-y-auto scrollbar-thin min-h-0',
+                            viewMode === 'week'
+                              ? (isMobile ? 'max-h-[80px]' : 'max-h-[200px]')
+                              : 'flex-1'
+                          )}
+                        >
                         {(() => {
                           const maxVisible = isMobile && viewMode === 'month' ? 2 : dayBookings.length;
                           const visibleBookings = dayBookings.slice(0, maxVisible);
