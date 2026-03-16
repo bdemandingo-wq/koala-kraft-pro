@@ -233,20 +233,22 @@ export default function BookingsPage() {
       const aTodayActive = isTodayActive(a);
       const bTodayActive = isTodayActive(b);
       if (aTodayActive !== bTodayActive) return aTodayActive ? -1 : 1;
-      // Within today's active: earliest first
       if (aTodayActive && bTodayActive) {
         return new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime();
       }
 
-      // Mobile smart sort: uncompleted/unpaid above completed+paid
-      if (isMobile) {
-        const aDone = isFullyDone(a);
-        const bDone = isFullyDone(b);
-        if (aDone !== bDone) return aDone ? 1 : -1;
+      // Push completed/cancelled bookings to the bottom
+      const aCompleted = a.status === 'completed' || a.status === 'cancelled';
+      const bCompleted = b.status === 'completed' || b.status === 'cancelled';
+      if (aCompleted !== bCompleted) return aCompleted ? 1 : -1;
+
+      // Within non-completed: upcoming dates first (chronological)
+      if (!aCompleted && !bCompleted) {
+        return new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime();
       }
 
-      // Rest: chronological (upcoming dates first)
-      return new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime();
+      // Within completed: most recent first
+      return new Date(b.scheduled_at).getTime() - new Date(a.scheduled_at).getTime();
     });
   }, [bookings, isMobile, isFullyDone]);
 
