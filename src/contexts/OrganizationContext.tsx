@@ -84,13 +84,12 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
       }
 
       // Build the full list
-      const allOrgs: OrgWithRole[] = memberships
-        .map(m => {
-          const org = orgs.find(o => o.id === m.organization_id);
-          if (!org) return null;
-          return { organization: org, role: m.role as 'owner' | 'admin' | 'member' };
-        })
-        .filter((x): x is OrgWithRole => x !== null);
+      const allOrgs: OrgWithRole[] = [];
+      for (const m of memberships) {
+        const org = orgs.find(o => o.id === m.organization_id);
+        if (!org) continue;
+        allOrgs.push({ organization: org, role: m.role as 'owner' | 'admin' | 'member' });
+      }
 
       setAllOrganizations(allOrgs);
 
