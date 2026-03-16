@@ -37,12 +37,12 @@ interface PnLCalendarProps {
   teamPaysByBooking: Map<string, number>;
 }
 
-const formatAmount = (amount: number): string => {
+const formatAmount = (amount: number, showSign = true): string => {
   const abs = Math.abs(amount);
   if (abs >= 1000) {
-    return `${amount >= 0 ? '+' : '-'}$${(abs / 1000).toFixed(2)}K`;
+    return `${showSign ? (amount >= 0 ? '+' : '-') : (amount < 0 ? '-' : '')}$${(abs / 1000).toFixed(2)}K`;
   }
-  return `${amount >= 0 ? '+' : '-'}$${abs.toFixed(2)}`;
+  return `${showSign ? (amount >= 0 ? '+' : '-') : (amount < 0 ? '-' : '')}$${abs.toFixed(2)}`;
 };
 
 const WEEKDAYS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
