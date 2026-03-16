@@ -109,9 +109,9 @@ const handler = async (req: Request): Promise<Response> => {
       customerId = customers.data[0].id;
     } else {
       const customer = await stripe.customers.create({
-        email: data.customerEmail,
+        email: emailForStripe,
         name: data.customerName,
-        phone: data.customerPhone,
+        phone: data.customerPhone || undefined,
       });
       customerId = customer.id;
     }
