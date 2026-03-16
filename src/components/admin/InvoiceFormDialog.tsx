@@ -6,6 +6,7 @@ import {
   Dialog,
   DialogContent,
 } from '@/components/ui/dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import {
   Select,
   SelectContent,
@@ -24,8 +25,8 @@ import {
 } from '@/components/ui/collapsible';
 import { Switch } from '@/components/ui/switch';
 import { 
-  Plus, Trash2, Loader2, ChevronUp, ChevronLeft, ChevronRight, 
-  Tag, CreditCard, MessageSquare, Eye, Building, Bell, Calendar
+  Plus, Trash2, Loader2, ChevronUp, ChevronLeft, ChevronRight, ChevronDown,
+  Tag, CreditCard, MessageSquare, Eye, Building, Bell, Calendar, Mail, Phone
 } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
@@ -241,7 +242,7 @@ export function InvoiceFormDialog({
 
   // Save and optionally send invoice
   const saveMutation = useMutation({
-    mutationFn: async (shouldSend: boolean = false) => {
+    mutationFn: async (sendMethod: 'none' | 'email' | 'sms' | 'both' = 'none') => {
       const validLineItems = lineItems.filter(item => item.description);
 
       if (validLineItems.length === 0) {
@@ -311,24 +312,32 @@ export function InvoiceFormDialog({
       }
 
       // If we should send the invoice, call the edge function
-      if (shouldSend) {
+      if (sendMethod !== 'none') {
         const customerEmail = selectedCustomer.email;
         const customerName = formData.customer_type === 'customer' 
           ? `${selectedCustomer.first_name} ${selectedCustomer.last_name}`
           : selectedCustomer.name;
         const customerPhone = selectedCustomer.phone;
 
-        if (!customerEmail && !customerPhone) {
-          throw new Error('Customer has no email or phone - cannot send invoice');
+        const wantsEmail = sendMethod === 'email' || sendMethod === 'both';
+        const wantsSms = sendMethod === 'sms' || sendMethod === 'both';
+
+        if (wantsEmail && !customerEmail) {
+          throw new Error('Customer has no email address');
+        }
+        if (wantsSms && !customerPhone) {
+          throw new Error('Customer has no phone number');
         }
 
         const { error: sendError } = await supabase.functions.invoke('create-stripe-invoice', {
           body: {
             invoiceId,
             organizationId,
-            customerEmail,
+            customerEmail: wantsEmail ? customerEmail : null,
             customerName,
-            customerPhone,
+            customerPhone: wantsSms ? customerPhone : null,
+            sendEmail: wantsEmail,
+            sendSms: wantsSms,
             items: validLineItems.map(item => ({
               description: item.description,
               quantity: item.quantity,
@@ -343,7 +352,7 @@ export function InvoiceFormDialog({
 
         if (sendError) throw sendError;
         
-        return { sent: true, invoiceNumber };
+        return { sent: true, sendMethod, invoiceNumber };
       }
 
       return { sent: false, invoiceNumber };
@@ -351,7 +360,8 @@ export function InvoiceFormDialog({
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
       if (result?.sent) {
-        toast.success(`Invoice #${result.invoiceNumber} sent successfully`);
+        const method = result.sendMethod === 'both' ? 'via email & SMS' : result.sendMethod === 'email' ? 'via email' : 'via SMS';
+        toast.success(`Invoice #${result.invoiceNumber} sent ${method}`);
       } else {
         toast.success(isEditing ? 'Invoice updated' : 'Invoice saved as draft');
       }
@@ -370,8 +380,8 @@ export function InvoiceFormDialog({
     setPreviewOpen(true);
   };
 
-  const handleSend = () => {
-    saveMutation.mutate(true);
+  const handleSend = (method: 'email' | 'sms' | 'both') => {
+    saveMutation.mutate(method);
   };
 
   const SectionHeader = ({ 
@@ -861,15 +871,42 @@ export function InvoiceFormDialog({
                 <Eye className="w-4 h-4 mr-2" />
                 Preview
               </Button>
-              <Button
-                className="flex-1"
-                onClick={handleSend}
-                disabled={saveMutation.isPending || lineItems.length === 0 || !selectedCustomer}
-              >
-                {saveMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                <MessageSquare className="w-4 h-4 mr-2" />
-                Send
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    className="flex-1"
+                    disabled={saveMutation.isPending || lineItems.length === 0 || !selectedCustomer}
+                  >
+                    {saveMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    Send
+                    <ChevronDown className="w-4 h-4 ml-2" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem
+                    onClick={() => handleSend('email')}
+                    disabled={!selectedCustomer?.email}
+                  >
+                    <Mail className="w-4 h-4 mr-2" />
+                    Send via Email
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => handleSend('sms')}
+                    disabled={!selectedCustomer?.phone}
+                  >
+                    <Phone className="w-4 h-4 mr-2" />
+                    Send via SMS
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => handleSend('both')}
+                    disabled={!selectedCustomer?.email || !selectedCustomer?.phone}
+                  >
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    Send Both
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </DialogContent>
