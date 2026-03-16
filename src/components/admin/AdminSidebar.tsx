@@ -201,7 +201,7 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
-  const { organization, isOwner } = useOrganization();
+  const { organization, isOwner, allOrganizations, switchOrganization } = useOrganization();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
