@@ -116,7 +116,7 @@ export default function BookingPhotosPage() {
               placeholder="Search by customer, cleaner, or booking #..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="pl-9"
+              className="pl-10"
             />
           </div>
           <Select value={typeFilter} onValueChange={setTypeFilter}>

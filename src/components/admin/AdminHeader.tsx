@@ -52,7 +52,7 @@ export function AdminHeader({ title, actions }: AdminHeaderProps) {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   placeholder="Search..."
-                  className="w-60 pl-9 bg-secondary/50 border-0 focus-visible:ring-1"
+                  className="w-60 pl-10 bg-secondary/50 border-0 focus-visible:ring-1"
                 />
               </div>
 

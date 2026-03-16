@@ -244,7 +244,7 @@ export default function StaffPage() {
             placeholder="Search staff..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9"
+            className="pl-10"
           />
         </div>
         <div className="flex items-center gap-2">
