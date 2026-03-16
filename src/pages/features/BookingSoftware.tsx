@@ -3,25 +3,17 @@ import { Button } from "@/components/ui/button";
 import { Seo } from "@/components/Seo";
 import { RelatedArticles, allArticles } from "@/components/blog/RelatedArticles";
 import { 
-  ArrowRight, Calendar, Globe, Users, Zap, CheckCircle2,
-  Clock, Smartphone, Bell, MousePointer, Menu, X
+  ArrowRight, Calendar, Globe, CheckCircle2,
+  Clock, Smartphone, Bell, Menu, X
 } from "lucide-react";
 import { useState } from "react";
 
-const benefits = [
-  { icon: Globe, title: "Online Booking Portal", description: "Let clients book 24/7 from your branded booking page. Embed on your website or share the link." },
-  { icon: Calendar, title: "Smart Scheduling", description: "Avoid double-bookings with real-time availability checks. Auto-assign cleaners based on location and skills." },
-  { icon: Bell, title: "Instant Notifications", description: "Automatic confirmation emails and SMS when bookings are made, changed, or cancelled." },
-  { icon: Smartphone, title: "Mobile-First Design", description: "Your booking page looks perfect on phones, tablets, and desktops. No app download required for clients." },
-  { icon: Clock, title: "Buffer Time Management", description: "Set travel time between jobs. Never overlap appointments or leave your team rushing between locations." },
-  { icon: MousePointer, title: "One-Click Rebooking", description: "Recurring clients rebook in seconds. Build loyalty with frictionless repeat scheduling." },
-];
-
 const features = [
-  "Branded booking page", "Real-time availability", "Automatic confirmations",
-  "Recurring bookings", "Buffer time settings", "Custom service menu",
-  "Deposit collection", "Client self-service portal", "Team assignment",
-  "Multi-location support", "Cancellation policies", "Waitlist management"
+  "Instant online booking available 24/7",
+  "Automated confirmation emails and reminders",
+  "Custom service types and pricing",
+  "Real-time calendar sync",
+  "Mobile-friendly booking page for your clients",
 ];
 
 export default function BookingSoftware() {
@@ -36,8 +28,8 @@ export default function BookingSoftware() {
   return (
     <div className="min-h-screen bg-background">
       <Seo 
-        title="Online Booking Software for Cleaning Businesses"
-        description="Let clients book online 24/7. Smart scheduling, automatic confirmations, and recurring bookings for cleaning companies. Start your free trial today."
+        title="Online Booking Software for Cleaning Businesses | TidyWise"
+        description="Let clients book cleaning services online 24/7. TidyWise automates your booking process so you never miss a job. Try free today."
         canonicalPath="/features/booking"
         ogImage="/images/tidywise-og.png"
         jsonLd={{
@@ -49,7 +41,6 @@ export default function BookingSoftware() {
         }}
       />
 
-      {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -90,48 +81,55 @@ export default function BookingSoftware() {
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
             Online Booking Software<br/>
-            <span className="text-primary">for Cleaning Businesses</span>
+            <span className="text-primary">Built for Cleaning Businesses</span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Let your clients book online 24/7. Smart scheduling prevents double-bookings, automatic confirmations reduce no-shows, and recurring booking keeps regulars coming back. <strong>Fill your calendar without lifting the phone.</strong>
+            Stop playing phone tag with clients. TidyWise gives your cleaning business a professional online booking system that works around the clock — even while you're on the job.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="text-lg px-8 h-14" onClick={handleStartFreeTrial}>
-              Start Free 60-Day Trial <ArrowRight className="ml-2 h-5 w-5" />
+              Get Started Free <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
             <Button size="lg" variant="outline" className="text-lg px-8 h-14" onClick={() => navigate("/pricing")}>
               See Pricing
             </Button>
           </div>
-          <p className="text-sm text-muted-foreground mt-4">No credit card required · Free for 60 days</p>
         </div>
       </section>
 
-      {/* Benefits Grid */}
+      {/* How it works */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted/30">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-foreground mb-12">Why Cleaning Businesses Choose TidyWise for Booking</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {benefits.map((b, i) => (
-              <div key={i} className="bg-card rounded-xl p-6 border border-border">
-                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                  <b.icon className="h-6 w-6 text-primary" />
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold text-center text-foreground mb-6">How It Works</h2>
+          <p className="text-lg text-muted-foreground text-center max-w-2xl mx-auto mb-12">
+            Clients visit your booking page, select their service, pick a date and time, and confirm instantly. No back-and-forth. No missed calls. Just confirmed bookings straight to your calendar.
+          </p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { step: "1", icon: Globe, label: "Client visits your booking page" },
+              { step: "2", icon: Calendar, label: "Selects service, date & time" },
+              { step: "3", icon: Bell, label: "Gets instant confirmation" },
+              { step: "4", icon: Clock, label: "Job appears on your calendar" },
+            ].map((item) => (
+              <div key={item.step} className="bg-card rounded-xl p-6 border border-border text-center">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3 text-primary font-bold">
+                  {item.step}
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">{b.title}</h3>
-                <p className="text-muted-foreground">{b.description}</p>
+                <item.icon className="h-6 w-6 text-primary mx-auto mb-2" />
+                <p className="text-foreground font-medium">{item.label}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Features Checklist */}
+      {/* What you get */}
       <section className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-foreground mb-8">Everything You Need to Manage Bookings</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-left">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold text-foreground text-center mb-8">What You Get</h2>
+          <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
             {features.map((f, i) => (
-              <div key={i} className="flex items-center gap-2">
+              <div key={i} className="flex items-center gap-3">
                 <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />
                 <span className="text-foreground">{f}</span>
               </div>
@@ -143,10 +141,10 @@ export default function BookingSoftware() {
       {/* CTA */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-primary/5">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-foreground mb-4">Ready to Fill Your Calendar?</h2>
-          <p className="text-lg text-muted-foreground mb-8">Join hundreds of cleaning businesses using TidyWise to manage bookings. Start free, no credit card required.</p>
+          <h2 className="text-3xl font-bold text-foreground mb-4">Start Accepting Bookings Today</h2>
+          <p className="text-lg text-muted-foreground mb-8">Join hundreds of cleaning businesses using TidyWise to fill their calendar. Start free, no credit card required.</p>
           <Button size="lg" className="text-lg px-8 h-14" onClick={handleStartFreeTrial}>
-            Start Free Trial <ArrowRight className="ml-2 h-5 w-5" />
+            Get Started Free <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
         </div>
       </section>
@@ -158,7 +156,6 @@ export default function BookingSoftware() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="border-t border-border py-8 px-4 text-center text-sm text-muted-foreground">
         <p>© {new Date().getFullYear()} TidyWise. All rights reserved.</p>
       </footer>

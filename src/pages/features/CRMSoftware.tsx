@@ -3,25 +3,18 @@ import { Button } from "@/components/ui/button";
 import { Seo } from "@/components/Seo";
 import { RelatedArticles, allArticles } from "@/components/blog/RelatedArticles";
 import { 
-  ArrowRight, Users, Target, BarChart3, Zap, CheckCircle2,
-  MessageSquare, FileText, Heart, TrendingUp, Menu, X
+  ArrowRight, Users, Target, BarChart3, CheckCircle2,
+  MessageSquare, Heart, FileText, Menu, X
 } from "lucide-react";
 import { useState } from "react";
 
-const benefits = [
-  { icon: Users, title: "Complete Client Profiles", description: "Store contact info, property details, service history, notes, and payment methods in one place." },
-  { icon: Target, title: "Lead Pipeline", description: "Track leads from inquiry to booked. Never lose a potential customer with automated follow-ups." },
-  { icon: MessageSquare, title: "Automated Communication", description: "Send booking confirmations, reminders, and follow-ups automatically via SMS and email." },
-  { icon: BarChart3, title: "Customer Analytics", description: "Track lifetime value, booking frequency, churn risk, and revenue per client." },
-  { icon: Heart, title: "Loyalty Program", description: "Reward repeat customers with points and tier-based perks. Increase retention effortlessly." },
-  { icon: TrendingUp, title: "Revenue Insights", description: "See which services are most popular, which clients are most profitable, and where to grow." },
-];
-
-const features = [
-  "Client database", "Lead management", "Service history tracking",
-  "Automated follow-ups", "Customer notes", "Property details",
-  "Lifetime value tracking", "Churn prediction", "Referral tracking",
-  "Loyalty points system", "Custom tags & segments", "Bulk messaging"
+const capabilities = [
+  { icon: FileText, title: "Full Job & Payment History", description: "View every client's complete job history and payment records in one place." },
+  { icon: MessageSquare, title: "Notes & Special Instructions", description: "Add notes and special instructions per client so your team always knows what to expect." },
+  { icon: Target, title: "Lead Tracking & Auto Follow-Up", description: "Track leads and follow up automatically. Never lose a potential customer again." },
+  { icon: BarChart3, title: "Client Segmentation", description: "Segment clients by service type, frequency, or location. See your best clients at a glance." },
+  { icon: Heart, title: "Retention Insights", description: "Identify at-risk customers before they churn. Build loyalty with data-driven decisions." },
+  { icon: Users, title: "Scales With You", description: "Whether you have 10 clients or 500, TidyWise keeps everything organized so you can focus on delivering great cleans." },
 ];
 
 export default function CRMSoftware() {
@@ -36,8 +29,8 @@ export default function CRMSoftware() {
   return (
     <div className="min-h-screen bg-background">
       <Seo 
-        title="CRM for Cleaning Companies | Manage Clients & Jobs"
-        description="Purpose-built CRM for cleaning businesses. Track clients, manage leads, automate follow-ups, and grow revenue. Free 60-day trial, no credit card required."
+        title="CRM for Cleaning Companies | Manage Clients & Jobs | TidyWise"
+        description="TidyWise CRM keeps all your cleaning clients, job history, and notes in one place. Stay organized and grow your cleaning business faster."
         canonicalPath="/features/crm"
         ogImage="/images/tidywise-og.png"
         jsonLd={{
@@ -80,6 +73,7 @@ export default function CRMSoftware() {
         </div>
       </nav>
 
+      {/* Hero */}
       <section className="pt-32 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-primary text-sm font-medium mb-6">
@@ -87,58 +81,55 @@ export default function CRMSoftware() {
             CRM Software
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
-            CRM for Cleaning Companies<br/>
-            <span className="text-primary">Manage Clients & Jobs</span>
+            The CRM Built Specifically<br/>
+            <span className="text-primary">for Cleaning Business Owners</span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Stop losing clients to spreadsheets. Track every customer, automate follow-ups, manage leads, and grow your cleaning business with a CRM built specifically for your industry. <strong>Know every client by name, not just number.</strong>
+            Spreadsheets can't scale your business. TidyWise gives you a simple, powerful CRM designed for cleaning companies — so you always know who your clients are, what they need, and when they last booked.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="text-lg px-8 h-14" onClick={handleStartFreeTrial}>
-              Start Free 60-Day Trial <ArrowRight className="ml-2 h-5 w-5" />
+              Start Free Trial <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
             <Button size="lg" variant="outline" className="text-lg px-8 h-14" onClick={() => navigate("/pricing")}>
               See Pricing
             </Button>
           </div>
-          <p className="text-sm text-muted-foreground mt-4">No credit card required · Free for 60 days</p>
         </div>
       </section>
 
+      {/* What you can do */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted/30">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-foreground mb-12">Why Cleaning Companies Need a Dedicated CRM</h2>
+          <h2 className="text-3xl font-bold text-center text-foreground mb-12">What You Can Do With TidyWise CRM</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {benefits.map((b, i) => (
+            {capabilities.map((c, i) => (
               <div key={i} className="bg-card rounded-xl p-6 border border-border">
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                  <b.icon className="h-6 w-6 text-primary" />
+                  <c.icon className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">{b.title}</h3>
-                <p className="text-muted-foreground">{b.description}</p>
+                <h3 className="text-lg font-semibold text-foreground mb-2">{c.title}</h3>
+                <p className="text-muted-foreground">{c.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
+      {/* Who it's for */}
       <section className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-foreground mb-8">Full-Featured CRM for Your Cleaning Business</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-left">
-            {features.map((f, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />
-                <span className="text-foreground">{f}</span>
-              </div>
-            ))}
-          </div>
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-3xl font-bold text-foreground mb-4">Who It's For</h2>
+          <p className="text-lg text-muted-foreground">
+            Whether you have 10 clients or 500, TidyWise keeps everything organized so you can focus on delivering great cleans — not chasing down information.
+          </p>
         </div>
       </section>
 
+      {/* CTA */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-primary/5">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-foreground mb-4">Ready to Know Your Clients Better?</h2>
+          <h2 className="text-3xl font-bold text-foreground mb-4">See Your Business in One Place</h2>
           <p className="text-lg text-muted-foreground mb-8">Join hundreds of cleaning businesses using TidyWise CRM. Start free, no credit card required.</p>
           <Button size="lg" className="text-lg px-8 h-14" onClick={handleStartFreeTrial}>
             Start Free Trial <ArrowRight className="ml-2 h-5 w-5" />
