@@ -106,6 +106,8 @@ const PaymentProcessing = lazy(() => import("./pages/features/PaymentProcessing"
 const RouteOptimization = lazy(() => import("./pages/features/RouteOptimization"));
 const InvoicingSoftware = lazy(() => import("./pages/features/InvoicingSoftware"));
 const SchedulingSoftware = lazy(() => import("./pages/features/SchedulingSoftware"));
+const BookingSoftware = lazy(() => import("./pages/features/BookingSoftware"));
+const CRMSoftware = lazy(() => import("./pages/features/CRMSoftware"));
 const CompareHousecallPro = lazy(() => import("./pages/compare/CompareHousecallPro"));
 const PricingPage = lazy(() => import("./pages/PricingPage"));
 const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage"));
