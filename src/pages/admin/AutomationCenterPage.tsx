@@ -41,13 +41,6 @@ const automationMeta: Record<string, {
     benefit: 'Reduces cancellations and no-shows by keeping customers informed.',
     color: 'text-blue-500',
   },
-  missed_call_textback: {
-    icon: PhoneMissed,
-    trigger: 'Missed call detected on OpenPhone',
-    action: 'Sends an automatic SMS reply to the caller',
-    benefit: 'Recovers lost leads instantly — never miss a potential customer.',
-    color: 'text-red-500',
-  },
   rebooking_reminder: {
     icon: RotateCcw,
     trigger: 'Completed job with no future booking',
