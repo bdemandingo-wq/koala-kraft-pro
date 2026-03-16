@@ -111,6 +111,49 @@ export function InvoiceViewDialog({ open, onOpenChange, invoice }: InvoiceViewDi
     printWindow.print();
   };
 
+  const handleSendEmail = async () => {
+    if (!customerEmail) {
+      toast.error('No email address found for this client');
+      return;
+    }
+
+    setSending(true);
+    try {
+      const serviceName = invoice.invoice_items?.map((i: any) => i.description).join(', ') || 'Cleaning Service';
+
+      const { error } = await supabase.functions.invoke('send-invoice', {
+        body: {
+          invoiceNumber: invoice.invoice_number,
+          organizationId: organization?.id,
+          customerEmail,
+          customerName,
+          serviceName,
+          amount: invoice.total_amount,
+          address: invoice.address || undefined,
+          validUntil: invoice.due_date ? format(new Date(invoice.due_date), 'MMM d, yyyy') : undefined,
+          notes: invoice.notes || undefined,
+        },
+      });
+
+      if (error) throw error;
+
+      if (invoice.status === 'draft') {
+        await supabase
+          .from('invoices')
+          .update({ status: 'sent', sent_at: new Date().toISOString() })
+          .eq('id', invoice.id);
+      }
+
+      toast.success(`Invoice emailed to ${customerEmail}`);
+      queryClient.invalidateQueries({ queryKey: ['invoices'] });
+    } catch (err: any) {
+      console.error('Failed to send invoice email:', err);
+      toast.error(err.message || 'Failed to send invoice email');
+    } finally {
+      setSending(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -118,6 +161,22 @@ export function InvoiceViewDialog({ open, onOpenChange, invoice }: InvoiceViewDi
           <div className="flex items-center justify-between">
             <DialogTitle>Invoice Details</DialogTitle>
             <div className="flex gap-2">
+              {['draft', 'sent', 'overdue'].includes(invoice.status) && customerEmail && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSendEmail}
+                  disabled={sending}
+                  className="text-blue-600"
+                >
+                  {sending ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Send className="w-4 h-4 mr-2" />
+                  )}
+                  {invoice.status === 'draft' ? 'Send Email' : 'Resend Email'}
+                </Button>
+              )}
               {invoice.stripe_invoice_url && (
                 <Button variant="outline" size="sm" asChild>
                   <a href={invoice.stripe_invoice_url} target="_blank" rel="noopener noreferrer">
