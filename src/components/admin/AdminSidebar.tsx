@@ -27,9 +27,10 @@ import {
   Activity,
   Zap,
   Brain,
-  Trash2,
   Globe,
   Camera,
+  Plus,
+  Check,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState, useEffect, useMemo } from 'react';
@@ -200,7 +201,7 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
-  const { organization, isOwner } = useOrganization();
+  const { organization, isOwner, allOrganizations, switchOrganization } = useOrganization();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
@@ -471,7 +472,7 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
 
       </nav>
 
-      {/* User Profile */}
+      {/* Business Switcher */}
       <div className="border-t border-sidebar-border p-3">
         <button
           onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -480,8 +481,7 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
             !isOpen && !isMobile && "justify-center px-2"
           )}
         >
-          {/* Show logo for owners if available, otherwise show initials */}
-          {isOwner && logoUrl ? (
+          {logoUrl ? (
             <div className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center bg-background flex-shrink-0">
               <SignedImage
                 src={logoUrl}
@@ -489,24 +489,24 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
                 className="w-full h-full object-cover"
                 fallback={
                   <div className="w-full h-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-sm font-medium text-primary-foreground">
-                    {userInitials}
+                    {businessDisplayName.substring(0, 2).toUpperCase()}
                   </div>
                 }
               />
             </div>
           ) : (
             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-sm font-medium text-primary-foreground flex-shrink-0">
-              {userInitials}
+              {businessDisplayName.substring(0, 2).toUpperCase()}
             </div>
           )}
           {(isOpen || isMobile) && (
             <>
-              <div className="flex-1 text-left">
-                <p className="text-sm font-medium text-sidebar-foreground">{businessDisplayName}</p>
+              <div className="flex-1 text-left min-w-0">
+                <p className="text-sm font-medium text-sidebar-foreground truncate">{businessDisplayName}</p>
                 <p className="text-xs text-sidebar-foreground/60">{isOwner ? 'Owner' : 'Team Member'}</p>
               </div>
               <ChevronDown className={cn(
-                "w-4 h-4 text-sidebar-foreground/60 transition-transform",
+                "w-4 h-4 text-sidebar-foreground/60 transition-transform flex-shrink-0",
                 isProfileOpen && "rotate-180"
               )} />
             </>
@@ -515,6 +515,59 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
         
         {isProfileOpen && (isOpen || isMobile) && (
           <div className="mt-2 py-2 space-y-1 animate-fade-in">
+            {/* Business list */}
+            {allOrganizations.length > 1 && (
+              <div className="pb-2 mb-2 border-b border-sidebar-border space-y-0.5">
+                <p className="px-3 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/40 mb-1">Your Businesses</p>
+                {allOrganizations.map((orgItem) => {
+                  const isActive = orgItem.organization.id === organization?.id;
+                  const initials = orgItem.organization.name.substring(0, 2).toUpperCase();
+                  const roleLabel = orgItem.role === 'owner' ? 'Owner' : orgItem.role === 'admin' ? 'Admin' : 'Member';
+                  return (
+                    <button
+                      key={orgItem.organization.id}
+                      onClick={() => {
+                        if (!isActive) {
+                          switchOrganization(orgItem.organization.id);
+                        }
+                      }}
+                      className={cn(
+                        "w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors min-h-[44px] pointer-events-auto touch-manipulation",
+                        isActive
+                          ? "bg-sidebar-accent text-sidebar-foreground"
+                          : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+                      )}
+                    >
+                      <div className="w-7 h-7 rounded-full bg-primary/15 flex items-center justify-center text-xs font-bold text-primary flex-shrink-0">
+                        {initials}
+                      </div>
+                      <div className="flex-1 text-left min-w-0">
+                        <p className="text-sm font-medium truncate">{orgItem.organization.name}</p>
+                        <p className="text-[10px] text-sidebar-foreground/50">{roleLabel}</p>
+                      </div>
+                      {isActive && (
+                        <Check className="w-4 h-4 text-primary flex-shrink-0" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Add New Business */}
+            <button 
+              onClick={() => {
+                setIsProfileOpen(false);
+                navigate('/onboarding?new=true');
+                handleNavClick();
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors min-h-[44px] pointer-events-auto touch-manipulation"
+            >
+              <Plus className="w-4 h-4" />
+              <span className="text-sm">Add New Business</span>
+            </button>
+
+            {/* Settings */}
             <button 
               onClick={() => {
                 setIsProfileOpen(false);
@@ -526,6 +579,8 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
               <Settings className="w-4 h-4" />
               <span className="text-sm">Settings</span>
             </button>
+
+            {/* Logout */}
             <button 
               onClick={handleLogout}
               className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-destructive hover:bg-destructive/10 transition-colors min-h-[44px] pointer-events-auto touch-manipulation"
