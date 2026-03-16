@@ -359,7 +359,8 @@ export function InvoiceFormDialog({
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
       if (result?.sent) {
-        toast.success(`Invoice #${result.invoiceNumber} sent successfully`);
+        const method = result.sendMethod === 'both' ? 'via email & SMS' : result.sendMethod === 'email' ? 'via email' : 'via SMS';
+        toast.success(`Invoice #${result.invoiceNumber} sent ${method}`);
       } else {
         toast.success(isEditing ? 'Invoice updated' : 'Invoice saved as draft');
       }
