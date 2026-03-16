@@ -24,8 +24,8 @@ import {
 } from '@/components/ui/collapsible';
 import { Switch } from '@/components/ui/switch';
 import { 
-  Plus, Trash2, Loader2, ChevronUp, ChevronLeft, ChevronRight, 
-  Tag, CreditCard, MessageSquare, Eye, Building, Bell, Calendar
+  Plus, Trash2, Loader2, ChevronUp, ChevronLeft, ChevronRight, ChevronDown,
+  Tag, CreditCard, MessageSquare, Eye, Building, Bell, Calendar, Mail, Phone
 } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
