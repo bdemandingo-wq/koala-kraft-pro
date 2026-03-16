@@ -93,6 +93,9 @@ const HowToStartCleaningBusiness = lazy(() => import("./pages/blog/HowToStartCle
 const BookingKoalaVsJobberVsTidywise = lazy(() => import("./pages/blog/BookingKoalaVsJobberVsTidywise"));
 const CleaningBusinessCRM = lazy(() => import("./pages/blog/CleaningBusinessCRM"));
 const DynamicBlogPost = lazy(() => import("./pages/blog/DynamicBlogPost"));
+const GrowCleaningBusiness2025 = lazy(() => import("./pages/blog/GrowCleaningBusiness2025"));
+const BestSoftwareForCleaners = lazy(() => import("./pages/blog/BestSoftwareForCleaners"));
+const AutomateCleaningCompany = lazy(() => import("./pages/blog/AutomateCleaningCompany"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const CompareJobber = lazy(() => import("./pages/compare/CompareJobber"));
 const CompareBookingKoala = lazy(() => import("./pages/compare/CompareBookingKoala"));
