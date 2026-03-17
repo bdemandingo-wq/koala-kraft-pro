@@ -16,115 +16,106 @@ import { useCleanerConflicts } from '@/hooks/useCleanerConflicts';
 import { CleanerConflictWarning } from '../CleanerConflictWarning';
 import { calculateDistanceMiles, estimateDriveMinutes, formatDistance, formatDriveTime, geocodeAddress } from '@/lib/distanceUtils';
 
+type Coordinates = { lat: number; lng: number };
+
+type GeocodeCacheEntry = {
+  coords: Coordinates | null;
+  updatedAt: number;
+};
+
 // Module-level geocode cache persists across step navigation
-const geocodeCache = new Map<string, { lat: number; lng: number } | null>();
+const geocodeCache = new Map<string, GeocodeCacheEntry>();
+const GEOCODE_SUCCESS_TTL_MS = 1000 * 60 * 60 * 12; // 12 hours
+const GEOCODE_FAILURE_TTL_MS = 1000 * 60 * 2; // 2 minutes
 
 // 12-hour time slots with AM/PM labels
 const TIME_SLOTS = [
-  { value: '00:00', label: '12:00 AM' }, { value: '00:30', label: '12:30 AM' },
-  { value: '01:00', label: '1:00 AM' }, { value: '01:30', label: '1:30 AM' },
-  { value: '02:00', label: '2:00 AM' }, { value: '02:30', label: '2:30 AM' },
-  { value: '03:00', label: '3:00 AM' }, { value: '03:30', label: '3:30 AM' },
-  { value: '04:00', label: '4:00 AM' }, { value: '04:30', label: '4:30 AM' },
-  { value: '05:00', label: '5:00 AM' }, { value: '05:30', label: '5:30 AM' },
-  { value: '06:00', label: '6:00 AM' }, { value: '06:30', label: '6:30 AM' },
-  { value: '07:00', label: '7:00 AM' }, { value: '07:30', label: '7:30 AM' },
-  { value: '08:00', label: '8:00 AM' }, { value: '08:30', label: '8:30 AM' },
-  { value: '09:00', label: '9:00 AM' }, { value: '09:30', label: '9:30 AM' },
-  { value: '10:00', label: '10:00 AM' }, { value: '10:30', label: '10:30 AM' },
-  { value: '11:00', label: '11:00 AM' }, { value: '11:30', label: '11:30 AM' },
-  { value: '12:00', label: '12:00 PM' }, { value: '12:30', label: '12:30 PM' },
-  { value: '13:00', label: '1:00 PM' }, { value: '13:30', label: '1:30 PM' },
-  { value: '14:00', label: '2:00 PM' }, { value: '14:30', label: '2:30 PM' },
-  { value: '15:00', label: '3:00 PM' }, { value: '15:30', label: '3:30 PM' },
-  { value: '16:00', label: '4:00 PM' }, { value: '16:30', label: '4:30 PM' },
-  { value: '17:00', label: '5:00 PM' }, { value: '17:30', label: '5:30 PM' },
-  { value: '18:00', label: '6:00 PM' }, { value: '18:30', label: '6:30 PM' },
-  { value: '19:00', label: '7:00 PM' }, { value: '19:30', label: '7:30 PM' },
-  { value: '20:00', label: '8:00 PM' }, { value: '20:30', label: '8:30 PM' },
-  { value: '21:00', label: '9:00 PM' }, { value: '21:30', label: '9:30 PM' },
-  { value: '22:00', label: '10:00 PM' }, { value: '22:30', label: '10:30 PM' },
-  { value: '23:00', label: '11:00 PM' }, { value: '23:30', label: '11:30 PM' },
-];
-
-// Helper to get display label from 24h value
-const getTimeLabel = (value: string) => TIME_SLOTS.find(t => t.value === value)?.label || value;
-
-export function ScheduleStep({ currentBookingId }: { currentBookingId?: string }) {
-  const {
-    selectedDate,
-    setSelectedDate,
-    selectedTime,
-    setSelectedTime,
-    selectedStaffId,
-    setSelectedStaffId,
-    isTeamMode,
-    setIsTeamMode,
-    selectedTeamMembers,
-    setSelectedTeamMembers,
-    teamMemberPay,
-    updateTeamMemberPay,
-    staff,
-    cleanerWage,
-    cleanerWageType,
-    totalAmount,
-    calculatedPrice,
-    selectedService,
-    conflictOverride,
-    setConflictOverride,
-    address,
-    city,
-    state,
-    zipCode,
-  } = useBookingForm();
-
-  // State for job location coordinates (geocoded from address)
-  const [jobCoordinates, setJobCoordinates] = useState<{ lat: number; lng: number } | null>(null);
-  const [isGeocodingJob, setIsGeocodingJob] = useState(false);
-
-  // Geocode the job address when it changes - with cache and retry
+...
+  // Geocode the job address when it changes - with cache, retry, and fallback queries
   useEffect(() => {
-    const fullAddress = [address, city, state, zipCode].filter(Boolean).join(', ');
-    if (!fullAddress || fullAddress.length < 10) {
+    const fullAddress = [address, city, state, zipCode].filter(Boolean).join(', ').trim();
+    if (!fullAddress || fullAddress.length < 5) {
       setJobCoordinates(null);
+      setIsGeocodingJob(false);
       return;
     }
 
-    const cacheKey = fullAddress.trim().toLowerCase();
+    const cacheKey = fullAddress.toLowerCase();
+    const cachedEntry = geocodeCache.get(cacheKey);
 
-    // Check cache first
-    if (geocodeCache.has(cacheKey)) {
-      setJobCoordinates(geocodeCache.get(cacheKey) || null);
-      return;
+    if (cachedEntry) {
+      const maxAge = cachedEntry.coords ? GEOCODE_SUCCESS_TTL_MS : GEOCODE_FAILURE_TTL_MS;
+      const isFresh = Date.now() - cachedEntry.updatedAt < maxAge;
+
+      if (isFresh) {
+        setJobCoordinates(cachedEntry.coords);
+        setIsGeocodingJob(false);
+        return;
+      }
+
+      geocodeCache.delete(cacheKey);
     }
 
     let cancelled = false;
 
-    const geocodeWithRetry = async (retries = 2) => {
-      setIsGeocodingJob(true);
+    const geocodeWithRetry = async (query: string, retries = 2): Promise<Coordinates | null> => {
       for (let attempt = 0; attempt <= retries; attempt++) {
+        if (cancelled) return null;
+
+        const coords = await geocodeAddress(query);
+        if (cancelled) return null;
+        if (coords) return coords;
+
+        if (attempt < retries) {
+          await new Promise((resolve) => setTimeout(resolve, 1500 * (attempt + 1)));
+        }
+      }
+
+      return null;
+    };
+
+    const runGeocode = async () => {
+      setIsGeocodingJob(true);
+
+      const primaryCoords = await geocodeWithRetry(fullAddress, 2);
+      if (cancelled) return;
+
+      if (primaryCoords) {
+        geocodeCache.set(cacheKey, { coords: primaryCoords, updatedAt: Date.now() });
+        setJobCoordinates(primaryCoords);
+        setIsGeocodingJob(false);
+        return;
+      }
+
+      const fallbackCandidates = [
+        [address, state, zipCode].filter(Boolean).join(', '),
+        [address, zipCode].filter(Boolean).join(', '),
+        [city, state, zipCode].filter(Boolean).join(', '),
+      ]
+        .map((candidate) => candidate.trim())
+        .filter((candidate) => candidate.length >= 5 && candidate.toLowerCase() !== cacheKey);
+
+      for (const candidate of fallbackCandidates) {
+        const fallbackCoords = await geocodeWithRetry(candidate, 0);
         if (cancelled) return;
-        const coords = await geocodeAddress(fullAddress);
-        if (cancelled) return;
-        if (coords) {
-          geocodeCache.set(cacheKey, coords);
-          setJobCoordinates(coords);
+
+        if (fallbackCoords) {
+          geocodeCache.set(cacheKey, { coords: fallbackCoords, updatedAt: Date.now() });
+          setJobCoordinates(fallbackCoords);
           setIsGeocodingJob(false);
           return;
         }
-        // Wait before retry (increasing delay)
-        if (attempt < retries) {
-          await new Promise(r => setTimeout(r, 1500 * (attempt + 1)));
-        }
       }
-      // All retries failed - cache the failure too to avoid hammering
-      geocodeCache.set(cacheKey, null);
+
+      geocodeCache.set(cacheKey, { coords: null, updatedAt: Date.now() });
       setJobCoordinates(null);
       setIsGeocodingJob(false);
     };
 
-    // Debounce geocoding
-    const timeout = setTimeout(geocodeWithRetry, 500);
+    const timeout = setTimeout(() => {
+      void runGeocode();
+    }, 500);
+
     return () => {
       cancelled = true;
       clearTimeout(timeout);
