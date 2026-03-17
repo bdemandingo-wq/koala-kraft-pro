@@ -209,10 +209,11 @@ const formatCustomerName = (customer: { first_name: string; last_name: string } 
   return `${firstName} ${lastInitial}`.trim();
 };
 
-function DraggableBooking({ booking, index, onClick, staffList, teamStaffIds = [] }: DraggableBookingProps) {
+function DraggableBooking({ booking, index, onClick, staffList, teamStaffIds = [], disableDrag }: DraggableBookingProps & { disableDrag?: boolean }) {
   const color = getStaffColor(booking.staff_id, staffList);
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: booking.id,
+    disabled: disableDrag,
   });
 
   // Get team member colors (excluding primary)
@@ -223,13 +224,13 @@ function DraggableBooking({ booking, index, onClick, staffList, teamStaffIds = [
   return (
     <div
       ref={setNodeRef}
-      {...attributes}
-      {...listeners}
+      {...(disableDrag ? {} : { ...attributes, ...listeners })}
       onClick={() => {
         if (!isDragging) onClick();
       }}
       className={cn(
-        'booking-pill w-full text-left cursor-grab active:cursor-grabbing group select-none',
+        'booking-pill w-full text-left select-none',
+        !disableDrag && 'cursor-grab active:cursor-grabbing',
         isDragging && 'opacity-50'
       )}
       style={{
@@ -239,7 +240,7 @@ function DraggableBooking({ booking, index, onClick, staffList, teamStaffIds = [
       }}
     >
       <div className="flex items-center gap-1">
-        <GripVertical className="w-3 h-3 opacity-0 group-hover:opacity-50 shrink-0" />
+        {!disableDrag && <GripVertical className="w-3 h-3 opacity-0 group-hover:opacity-50 shrink-0" />}
         <span className="truncate font-medium">{formatCustomerName(booking.customer)}</span>
         {teamColors.length > 0 && (
           <div className="flex items-center gap-0.5 ml-auto shrink-0">
