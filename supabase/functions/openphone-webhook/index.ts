@@ -17,6 +17,7 @@ interface OpenPhoneWebhookPayload {
       direction: string;
       createdAt: string;
       phoneNumberId: string;
+      media?: Array<{ url: string; type?: string }>;
     };
   };
 }
