@@ -203,6 +203,7 @@ export default function MessagesPage() {
                 content: newMsg.content,
                 sent_at: newMsg.sent_at,
                 status: newMsg.status,
+                media_urls: newMsg.media_urls || null,
               }]);
             }
             
