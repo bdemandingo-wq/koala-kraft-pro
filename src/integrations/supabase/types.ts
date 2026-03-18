@@ -4850,6 +4850,7 @@ export type Database = {
           delivery_status: string | null
           direction: string
           id: string
+          media_urls: string[] | null
           openphone_message_id: string | null
           organization_id: string
           sent_at: string
@@ -4863,6 +4864,7 @@ export type Database = {
           delivery_status?: string | null
           direction: string
           id?: string
+          media_urls?: string[] | null
           openphone_message_id?: string | null
           organization_id: string
           sent_at?: string
@@ -4876,6 +4878,7 @@ export type Database = {
           delivery_status?: string | null
           direction?: string
           id?: string
+          media_urls?: string[] | null
           openphone_message_id?: string | null
           organization_id?: string
           sent_at?: string
