@@ -17,6 +17,7 @@ interface OpenPhoneWebhookPayload {
       direction: string;
       createdAt: string;
       phoneNumberId: string;
+      media?: Array<{ url: string; type?: string }>;
     };
   };
 }
@@ -303,6 +304,7 @@ const handler = async (req: Request): Promise<Response> => {
 
           if (conversationId) {
             // Insert the outbound message
+            const deliveryMediaUrls = (messageObj as any).media?.map((m: any) => m.url).filter(Boolean) || null;
             await supabase.from('sms_messages').insert({
               conversation_id: conversationId,
               organization_id: organizationId,
@@ -313,6 +315,7 @@ const handler = async (req: Request): Promise<Response> => {
               openphone_message_id: openphoneMessageId,
               sent_at: messageObj.createdAt || new Date().toISOString(),
               delivered_at: new Date().toISOString(),
+              media_urls: deliveryMediaUrls?.length ? deliveryMediaUrls : null,
             });
 
             // Update conversation timestamp
@@ -621,6 +624,9 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    // Extract media URLs from OpenPhone MMS
+    const mediaUrls = message.media?.map((m) => m.url).filter(Boolean) || null;
+
     // Insert the message
     const { error: messageError } = await supabase
       .from('sms_messages')
@@ -632,6 +638,7 @@ const handler = async (req: Request): Promise<Response> => {
         status: direction === 'inbound' ? 'received' : 'sent',
         openphone_message_id: openphoneMessageId,
         sent_at: message.createdAt || new Date().toISOString(),
+        media_urls: mediaUrls?.length ? mediaUrls : null,
       });
 
     if (messageError) {
