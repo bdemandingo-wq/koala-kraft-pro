@@ -26,6 +26,7 @@ import {
   StickyNote, 
   CalendarDays, 
   CalendarCheck,
+  CalendarRange,
   Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
