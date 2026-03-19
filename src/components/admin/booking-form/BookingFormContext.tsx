@@ -14,6 +14,7 @@ interface CardInfo {
   brand?: string;
   expMonth?: number;
   expYear?: number;
+  paymentMethodId?: string;
 }
 
 interface AppliedDiscount {
