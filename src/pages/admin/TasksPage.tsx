@@ -202,6 +202,7 @@ export default function TasksPage() {
     switch (type) {
       case 'daily': return 'Daily Tasks';
       case 'weekly': return 'Weekly Reminders';
+      case 'monthly': return 'Monthly Tasks';
       case 'note': return 'General Notes';
     }
   };
