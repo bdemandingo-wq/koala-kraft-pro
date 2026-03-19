@@ -26,12 +26,13 @@ import {
   StickyNote, 
   CalendarDays, 
   CalendarCheck,
+  CalendarRange,
   Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
-type TaskType = 'daily' | 'weekly' | 'note';
+type TaskType = 'daily' | 'weekly' | 'monthly' | 'note';
 
 interface Task {
   id: string;
@@ -192,6 +193,7 @@ export default function TasksPage() {
     switch (type) {
       case 'daily': return <CalendarDays className="w-4 h-4" />;
       case 'weekly': return <CalendarCheck className="w-4 h-4" />;
+      case 'monthly': return <CalendarRange className="w-4 h-4" />;
       case 'note': return <StickyNote className="w-4 h-4" />;
     }
   };
@@ -200,6 +202,7 @@ export default function TasksPage() {
     switch (type) {
       case 'daily': return 'Daily Tasks';
       case 'weekly': return 'Weekly Reminders';
+      case 'monthly': return 'Monthly Tasks';
       case 'note': return 'General Notes';
     }
   };
@@ -223,8 +226,8 @@ export default function TasksPage() {
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label>Type</Label>
-                <div className="flex gap-2">
-                  {(['daily', 'weekly', 'note'] as TaskType[]).map(type => (
+                <div className="flex gap-2 flex-wrap">
+                  {(['daily', 'weekly', 'monthly', 'note'] as TaskType[]).map(type => (
                     <Button
                       key={type}
                       variant={newType === type ? 'default' : 'outline'}
@@ -233,7 +236,7 @@ export default function TasksPage() {
                       className="gap-2"
                     >
                       {getTabIcon(type)}
-                      {type === 'daily' ? 'Daily' : type === 'weekly' ? 'Weekly' : 'Note'}
+                      {type === 'daily' ? 'Daily' : type === 'weekly' ? 'Weekly' : type === 'monthly' ? 'Monthly' : 'Note'}
                     </Button>
                   ))}
                 </div>
@@ -250,7 +253,7 @@ export default function TasksPage() {
                   />
                 ) : (
                   <Input
-                    placeholder={newType === 'daily' ? 'What needs to be done today?' : 'Weekly reminder...'}
+                    placeholder={newType === 'daily' ? 'What needs to be done today?' : newType === 'weekly' ? 'Weekly reminder...' : 'Monthly task...'}
                     value={newContent}
                     onChange={(e) => setNewContent(e.target.value)}
                   />
@@ -300,7 +303,7 @@ export default function TasksPage() {
     >
       <div className="space-y-6">
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TaskType)}>
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="daily" className="gap-2">
               <CalendarDays className="w-4 h-4" />
               <span className="hidden sm:inline">Daily Tasks</span>
@@ -311,6 +314,11 @@ export default function TasksPage() {
               <span className="hidden sm:inline">Weekly Reminders</span>
               <span className="sm:hidden">Weekly</span>
             </TabsTrigger>
+            <TabsTrigger value="monthly" className="gap-2">
+              <CalendarRange className="w-4 h-4" />
+              <span className="hidden sm:inline">Monthly Tasks</span>
+              <span className="sm:hidden">Monthly</span>
+            </TabsTrigger>
             <TabsTrigger value="note" className="gap-2">
               <StickyNote className="w-4 h-4" />
               <span className="hidden sm:inline">General Notes</span>
@@ -318,7 +326,7 @@ export default function TasksPage() {
             </TabsTrigger>
           </TabsList>
 
-          {(['daily', 'weekly', 'note'] as TaskType[]).map(type => (
+          {(['daily', 'weekly', 'monthly', 'note'] as TaskType[]).map(type => (
             <TabsContent key={type} value={type} className="mt-6">
               {isLoading ? (
                 <div className="flex justify-center py-12">
