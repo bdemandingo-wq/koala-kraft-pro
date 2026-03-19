@@ -1745,6 +1745,84 @@ export default function MessagesPage() {
           </div>
         </div>
       )}
+      {/* Forward Photo Dialog */}
+      <Dialog open={forwardOpen} onOpenChange={setForwardOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Forward Photo</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {forwardMediaUrl && (
+              <img src={forwardMediaUrl} alt="Photo to forward" className="w-full max-h-48 object-cover rounded-lg" />
+            )}
+            <div>
+              <Label className="text-sm font-medium">Send to</Label>
+              <Command className="border rounded-md mt-1">
+                <CommandInput
+                  placeholder="Search contacts..."
+                  value={forwardContactSearch}
+                  onValueChange={setForwardContactSearch}
+                />
+                <CommandList className="max-h-48">
+                  <CommandEmpty>No contacts found.</CommandEmpty>
+                  <CommandGroup>
+                    {contacts
+                      .filter(c => 
+                        c.name.toLowerCase().includes(forwardContactSearch.toLowerCase()) ||
+                        c.phone.includes(forwardContactSearch)
+                      )
+                      .slice(0, 20)
+                      .map(contact => (
+                        <CommandItem
+                          key={contact.id}
+                          onSelect={() => setForwardSelectedContact(contact)}
+                          className={cn(
+                            "cursor-pointer",
+                            forwardSelectedContact?.id === contact.id && "bg-accent"
+                          )}
+                        >
+                          <div className="flex items-center gap-2 w-full">
+                            <Avatar className="h-6 w-6">
+                              <AvatarFallback className="text-xs">
+                                {contact.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">{contact.name}</p>
+                              <p className="text-xs text-muted-foreground">{contact.phone}</p>
+                            </div>
+                            <Badge variant="outline" className="text-xs">
+                              {contact.type === 'client' ? 'Client' : 'Staff'}
+                            </Badge>
+                            {forwardSelectedContact?.id === contact.id && (
+                              <Check className="w-4 h-4 text-primary" />
+                            )}
+                          </div>
+                        </CommandItem>
+                      ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+              {forwardSelectedContact && (
+                <p className="text-sm text-muted-foreground mt-2">
+                  Sending to <span className="font-medium text-foreground">{forwardSelectedContact.name}</span> ({forwardSelectedContact.phone})
+                </p>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setForwardOpen(false)}>Cancel</Button>
+            <Button
+              onClick={handleSendForward}
+              disabled={!forwardSelectedContact || forwardSending}
+              className="gap-2"
+            >
+              {forwardSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Forward className="w-4 h-4" />}
+              {forwardSending ? 'Sending...' : 'Forward'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       </SubscriptionGate>
     </AdminLayout>
   );
