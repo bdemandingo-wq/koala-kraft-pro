@@ -253,7 +253,7 @@ export default function TasksPage() {
                   />
                 ) : (
                   <Input
-                    placeholder={newType === 'daily' ? 'What needs to be done today?' : 'Weekly reminder...'}
+                    placeholder={newType === 'daily' ? 'What needs to be done today?' : newType === 'weekly' ? 'Weekly reminder...' : 'Monthly task...'}
                     value={newContent}
                     onChange={(e) => setNewContent(e.target.value)}
                   />
