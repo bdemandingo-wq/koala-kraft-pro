@@ -1343,6 +1343,48 @@ export type Database = {
           },
         ]
       }
+      charge_audit_log: {
+        Row: {
+          amount_cents: number | null
+          booking_id: string | null
+          created_at: string
+          customer_email: string | null
+          customer_id: string | null
+          failure_reason: string | null
+          id: string
+          match_status: string
+          organization_id: string
+          payment_method_id: string | null
+          stripe_customer_id: string | null
+        }
+        Insert: {
+          amount_cents?: number | null
+          booking_id?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_id?: string | null
+          failure_reason?: string | null
+          id?: string
+          match_status: string
+          organization_id: string
+          payment_method_id?: string | null
+          stripe_customer_id?: string | null
+        }
+        Update: {
+          amount_cents?: number | null
+          booking_id?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_id?: string | null
+          failure_reason?: string | null
+          id?: string
+          match_status?: string
+          organization_id?: string
+          payment_method_id?: string | null
+          stripe_customer_id?: string | null
+        }
+        Relationships: []
+      }
       checklist_items: {
         Row: {
           created_at: string
