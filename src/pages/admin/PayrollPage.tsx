@@ -861,17 +861,17 @@ export default function PayrollPage() {
         </Card>
       )}
 
-      {/* Weekly Forecast */}
+      {/* Period Forecast */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <ForecastCard
-          title="Current Week Forecast"
+          title={getPeriodTitle(periodConfig, 'current')}
           forecast={currentWeekForecast}
-          weekLabel={`${format(currentWeekStart, 'MMM d')} – ${format(currentWeekEnd, 'MMM d, yyyy')}`}
+          weekLabel={formatPeriodLabel(currentWeekStart, currentWeekEnd)}
         />
         <ForecastCard
-          title="Next Week Forecast"
+          title={getPeriodTitle(periodConfig, 'next')}
           forecast={nextWeekForecast}
-          weekLabel={`${format(nextWeekStart, 'MMM d')} – ${format(nextWeekEnd, 'MMM d, yyyy')}`}
+          weekLabel={formatPeriodLabel(nextWeekStart, nextWeekEnd)}
         />
       </div>
 
@@ -880,6 +880,7 @@ export default function PayrollPage() {
         <TabsList>
           <TabsTrigger value="summary">Staff Summary</TabsTrigger>
           <TabsTrigger value="details">Booking Details</TabsTrigger>
+          <TabsTrigger value="settings">Payroll Settings</TabsTrigger>
         </TabsList>
 
         <TabsContent value="summary">
