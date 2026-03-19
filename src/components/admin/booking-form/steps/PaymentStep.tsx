@@ -269,8 +269,45 @@ export function PaymentStep() {
       hasCard: true,
       last4: info.last4,
       brand: info.brand,
+      paymentMethodId: info.paymentMethodId,
     });
     toast.success(`Card saved: ${info.brand} ending in ${info.last4}`);
+  };
+
+  const [removingCard, setRemovingCard] = useState(false);
+
+  const handleRemoveCard = async () => {
+    if (!customerEmail || !organizationId || !cardInfo?.paymentMethodId) {
+      toast.error('Cannot remove card: missing information');
+      return;
+    }
+    setRemovingCard(true);
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      const { data, error } = await supabase.functions.invoke('remove-customer-card', {
+        body: {
+          email: customerEmail,
+          organizationId,
+          paymentMethodId: cardInfo.paymentMethodId,
+        },
+        headers: {
+          Authorization: `Bearer ${session?.session?.access_token}`,
+        },
+      });
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Failed to remove card');
+
+      // Reset state to null, then re-fetch fresh from Stripe
+      setCardInfo(null);
+      toast.success('Card removed successfully');
+      // Force re-fetch to get fresh state from Stripe
+      await loadCardInfo(customerEmail);
+    } catch (err: any) {
+      console.error('Failed to remove card:', err);
+      toast.error(err.message || 'Failed to remove card');
+    } finally {
+      setRemovingCard(false);
+    }
   };
 
   return (
