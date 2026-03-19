@@ -5218,6 +5218,7 @@ export type Database = {
           is_completed: boolean | null
           last_reset_at: string | null
           organization_id: string | null
+          sort_order: number | null
           type: string
           updated_at: string
           user_id: string
@@ -5230,6 +5231,7 @@ export type Database = {
           is_completed?: boolean | null
           last_reset_at?: string | null
           organization_id?: string | null
+          sort_order?: number | null
           type: string
           updated_at?: string
           user_id: string
@@ -5242,6 +5244,7 @@ export type Database = {
           is_completed?: boolean | null
           last_reset_at?: string | null
           organization_id?: string | null
+          sort_order?: number | null
           type?: string
           updated_at?: string
           user_id?: string

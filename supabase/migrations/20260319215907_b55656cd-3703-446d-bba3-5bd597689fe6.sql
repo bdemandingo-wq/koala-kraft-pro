@@ -1,0 +1,1 @@
+ALTER TABLE public.tasks_and_notes ADD COLUMN IF NOT EXISTS sort_order integer DEFAULT 0;
