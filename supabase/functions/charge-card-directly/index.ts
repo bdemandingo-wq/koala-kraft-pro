@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { verifyAdminAuth, createUnauthorizedResponse, createForbiddenResponse } from "../_shared/verify-admin-auth.ts";
 import { logAudit, AuditActions } from "../_shared/audit-log.ts";
 import { getOrgStripeClient } from "../_shared/get-org-stripe-settings.ts";
@@ -19,14 +20,87 @@ interface ChargeRequest {
 }
 
 const buildIdempotencyKey = (input: { organizationId: string; bookingId?: string; email: string; amountInCents: number; description?: string }) => {
-  // Include a hash of the description to avoid conflicts when the same booking/amount is retried
-  // with different parameters. Also include a timestamp bucketed to ~5 second windows to prevent
-  // rapid double-clicks while still allowing intentional retries after a short delay.
   const base = input.bookingId ? `booking:${input.bookingId}` : `email:${input.email}`;
   const descHash = input.description ? input.description.slice(0, 20).replace(/\s+/g, '_') : 'no_desc';
-  const timeBucket = Math.floor(Date.now() / 5000); // 5-second window
+  const timeBucket = Math.floor(Date.now() / 5000);
   return `charge-card-directly:org:${input.organizationId}:${base}:amt:${input.amountInCents}:${descHash}:${timeBucket}`;
 };
+
+/**
+ * Logs a charge attempt to the charge_audit_log table.
+ */
+async function logChargeAudit(params: {
+  organizationId: string;
+  bookingId?: string;
+  customerId?: string;
+  stripeCustomerId?: string;
+  paymentMethodId?: string;
+  customerEmail?: string;
+  amountCents?: number;
+  matchStatus: 'pass' | 'fail' | 'skipped';
+  failureReason?: string;
+}) {
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    await supabase.from("charge_audit_log").insert({
+      organization_id: params.organizationId,
+      booking_id: params.bookingId || null,
+      customer_id: params.customerId || null,
+      stripe_customer_id: params.stripeCustomerId || null,
+      payment_method_id: params.paymentMethodId || null,
+      customer_email: params.customerEmail || null,
+      amount_cents: params.amountCents || null,
+      match_status: params.matchStatus,
+      failure_reason: params.failureReason || null,
+    });
+  } catch (e) {
+    console.error("[charge-card-directly] Failed to write charge audit log:", e);
+  }
+}
+
+/**
+ * Pre-charge validation: verifies that the payment method belongs to the
+ * Stripe customer and that the customer belongs to this organization.
+ */
+async function validatePaymentMethodOwnership(
+  stripe: Stripe,
+  stripeCustomerId: string,
+  paymentMethodId: string,
+  organizationId: string,
+): Promise<{ valid: boolean; reason?: string }> {
+  try {
+    // Retrieve the payment method from Stripe
+    const pm = await stripe.paymentMethods.retrieve(paymentMethodId);
+
+    // Check 1: Payment method must be attached to the expected customer
+    if (pm.customer !== stripeCustomerId) {
+      return {
+        valid: false,
+        reason: `Payment method ${paymentMethodId} belongs to customer ${pm.customer}, expected ${stripeCustomerId}`,
+      };
+    }
+
+    // Check 2: Retrieve the Stripe customer and verify org metadata
+    const customer = await stripe.customers.retrieve(stripeCustomerId) as Stripe.Customer;
+    if (customer.deleted) {
+      return { valid: false, reason: "Stripe customer has been deleted" };
+    }
+    if (customer.metadata?.organization_id && customer.metadata.organization_id !== organizationId) {
+      return {
+        valid: false,
+        reason: `Stripe customer ${stripeCustomerId} belongs to org ${customer.metadata.organization_id}, not ${organizationId}`,
+      };
+    }
+
+    return { valid: true };
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return { valid: false, reason: `Validation error: ${msg}` };
+  }
+}
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
@@ -59,6 +133,13 @@ const handler = async (req: Request): Promise<Response> => {
         userId: authResult.userId!,
         organizationId: authResult.organizationId!,
         details: { reason: "Organization mismatch", requestedOrg: organizationId },
+      });
+      await logChargeAudit({
+        organizationId,
+        bookingId,
+        customerEmail: email,
+        matchStatus: 'fail',
+        failureReason: 'Organization mismatch between auth and request',
       });
       return createForbiddenResponse("Access denied: organization mismatch", corsHeaders);
     }
@@ -98,10 +179,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Find customer that belongs to THIS organization
     let customer = customers.data.find((c: Stripe.Customer) => c.metadata?.organization_id === organizationId);
 
-    // Legacy adoption path: if there is exactly one Stripe customer with this email and it has
-    // NO organization metadata, we can safely attach the organization_id to preserve access.
-    // Fail-safe: if there are multiple customers for this email (or any customer is tagged to a
-    // different organization), we do NOT guess.
+    // Legacy adoption path
     if (!customer) {
       const taggedToOtherOrg = customers.data.find((c: Stripe.Customer) => {
         const org = c.metadata?.organization_id;
@@ -109,23 +187,25 @@ const handler = async (req: Request): Promise<Response> => {
       });
 
       if (taggedToOtherOrg) {
+        await logChargeAudit({
+          organizationId,
+          bookingId,
+          customerEmail: email,
+          stripeCustomerId: taggedToOtherOrg.id,
+          amountCents: amountInCents,
+          matchStatus: 'fail',
+          failureReason: 'Customer belongs to a different organization',
+        });
         await logAudit({
           action: AuditActions.PAYMENT_FAILED,
           userId: authResult.userId!,
           organizationId: authResult.organizationId!,
           success: false,
           error: "Customer belongs to a different organization",
-          details: {
-            email,
-            taggedCustomerId: taggedToOtherOrg.id,
-            taggedOrg: taggedToOtherOrg.metadata?.organization_id,
-          },
+          details: { email, taggedCustomerId: taggedToOtherOrg.id, taggedOrg: taggedToOtherOrg.metadata?.organization_id },
         });
         return new Response(
-          JSON.stringify({
-            success: false,
-            error: "No customer found for this organization. Please save their card for this business first.",
-          }),
+          JSON.stringify({ success: false, error: "No customer found for this organization. Please save their card for this business first." }),
           { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
@@ -133,38 +213,34 @@ const handler = async (req: Request): Promise<Response> => {
       const legacyCandidates = customers.data.filter((c: Stripe.Customer) => !c.metadata?.organization_id);
       if (legacyCandidates.length === 1 && customers.data.length === 1) {
         const legacy = legacyCandidates[0];
-
-        // Attach organization metadata (preserves isolation going forward)
         customer = await stripe.customers.update(legacy.id, {
-          metadata: {
-            ...(legacy.metadata || {}),
-            organization_id: organizationId,
-          },
+          metadata: { ...(legacy.metadata || {}), organization_id: organizationId },
         });
-
         await logAudit({
           action: AuditActions.PAYMENT_CHARGE,
           userId: authResult.userId!,
           organizationId: authResult.organizationId!,
-          details: {
-            email,
-            adoptedCustomerId: legacy.id,
-            reason: "adopt_legacy_customer_missing_org_metadata",
-          },
+          details: { email, adoptedCustomerId: legacy.id, reason: "adopt_legacy_customer_missing_org_metadata" },
         });
       }
     }
 
     if (!customer) {
+      await logChargeAudit({
+        organizationId,
+        bookingId,
+        customerEmail: email,
+        amountCents: amountInCents,
+        matchStatus: 'fail',
+        failureReason: 'No Stripe customer found for this organization',
+      });
       return new Response(
-        JSON.stringify({
-          success: false,
-          error: "No customer found for this organization. Please save their card first.",
-        }),
+        JSON.stringify({ success: false, error: "No customer found for this organization. Please save their card first." }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
+    // Resolve payment method
     let paymentMethodId: string | undefined;
 
     if (customer.invoice_settings?.default_payment_method) {
@@ -175,22 +251,89 @@ const handler = async (req: Request): Promise<Response> => {
         type: 'card',
         limit: 1,
       });
-
       if (paymentMethods.data.length > 0) {
         paymentMethodId = paymentMethods.data[0].id;
       }
     }
 
     if (!paymentMethodId) {
+      await logChargeAudit({
+        organizationId,
+        bookingId,
+        customerEmail: email,
+        stripeCustomerId: customer.id,
+        amountCents: amountInCents,
+        matchStatus: 'fail',
+        failureReason: 'No payment method on file',
+      });
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: "No payment method on file. Please save their card first." 
+        JSON.stringify({ success: false, error: "No payment method on file. Please save their card first." }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // PRE-CHARGE VALIDATION: Verify payment method → customer → org
+    // This is the critical security gate that prevents cross-customer charges
+    // ═══════════════════════════════════════════════════════════════
+    const validation = await validatePaymentMethodOwnership(
+      stripe,
+      customer.id,
+      paymentMethodId,
+      organizationId,
+    );
+
+    if (!validation.valid) {
+      console.error("[charge-card-directly] PRE-CHARGE VALIDATION FAILED:", validation.reason);
+
+      await logChargeAudit({
+        organizationId,
+        bookingId,
+        customerEmail: email,
+        stripeCustomerId: customer.id,
+        paymentMethodId,
+        amountCents: amountInCents,
+        matchStatus: 'fail',
+        failureReason: validation.reason,
+      });
+
+      await logAudit({
+        action: AuditActions.PAYMENT_FAILED,
+        userId: authResult.userId!,
+        organizationId: authResult.organizationId!,
+        success: false,
+        error: "Pre-charge validation failed",
+        details: {
+          reason: validation.reason,
+          paymentMethodId,
+          stripeCustomerId: customer.id,
+          email,
+          bookingId,
+        },
+      });
+
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Payment method validation failed. The card on file does not match this customer. Please update the card and try again.",
         }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
+    // Log successful pre-charge validation
+    await logChargeAudit({
+      organizationId,
+      bookingId,
+      customerEmail: email,
+      stripeCustomerId: customer.id,
+      paymentMethodId,
+      amountCents: amountInCents,
+      matchStatus: 'pass',
+    });
+
+    // Create payment intent with explicit customer scoping
+    // Stripe will reject if payment_method doesn't belong to customer
     const paymentIntent = await stripe.paymentIntents.create(
       {
         amount: amountInCents,
@@ -211,19 +354,16 @@ const handler = async (req: Request): Promise<Response> => {
           allow_redirects: 'never',
         },
       },
-      {
-        idempotencyKey,
-      }
+      { idempotencyKey }
     );
 
     if (paymentIntent.status === 'succeeded') {
-      // Log successful charge
       await logAudit({
         action: AuditActions.PAYMENT_CAPTURE,
         userId: authResult.userId!,
         organizationId: authResult.organizationId!,
-        details: { 
-          paymentIntentId: paymentIntent.id, 
+        details: {
+          paymentIntentId: paymentIntent.id,
           amount,
           customerEmail: email,
           bookingId,
@@ -245,8 +385,8 @@ const handler = async (req: Request): Promise<Response> => {
         action: AuditActions.PAYMENT_FAILED,
         userId: authResult.userId!,
         organizationId: authResult.organizationId!,
-        details: { 
-          paymentIntentId: paymentIntent.id, 
+        details: {
+          paymentIntentId: paymentIntent.id,
           status: paymentIntent.status,
           customerEmail: email,
           bookingId,
@@ -265,25 +405,19 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error: unknown) {
     console.error("Error charging card:", error);
     
-    // Extract user-friendly message from Stripe errors
     let errorMessage = "Unknown error occurred";
     let isCardDecline = false;
     
-    // Stripe errors have a 'type' property to identify card declines
     const stripeError = error as { type?: string; message?: string };
     if (stripeError?.type === "StripeCardError" || stripeError?.type === "card_error") {
-      // Card was declined - user-friendly message from Stripe
       errorMessage = stripeError.message || "Your card was declined";
       isCardDecline = true;
     } else if (stripeError?.message) {
-      // Other Stripe or standard errors
       errorMessage = stripeError.message;
     } else if (error instanceof Error) {
       errorMessage = error.message;
     }
     
-    // Return 200 with success:false for card declines so the client parses it properly
-    // (Supabase client throws on non-2xx, losing the body)
     const status = isCardDecline ? 200 : 500;
     
     return new Response(
