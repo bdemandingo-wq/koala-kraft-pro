@@ -1659,14 +1659,24 @@ export default function MessagesPage() {
                           {msg.media_urls && msg.media_urls.length > 0 && (
                             <div className="space-y-1 mb-1">
                               {msg.media_urls.map((url, idx) => (
-                                <img
-                                  key={idx}
-                                  src={url}
-                                  alt="MMS attachment"
-                                  className="max-w-full rounded-lg cursor-pointer"
-                                  onClick={() => window.open(url, '_blank')}
-                                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                                />
+                                <div key={idx} className="relative group">
+                                  <img
+                                    src={url}
+                                    alt="MMS attachment"
+                                    className="max-w-full rounded-lg cursor-pointer"
+                                    onClick={() => window.open(url, '_blank')}
+                                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                  />
+                                  <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity gap-1 h-7 text-xs shadow-md"
+                                    onClick={(e) => { e.stopPropagation(); handleForwardPhoto(url); }}
+                                  >
+                                    <Forward className="w-3 h-3" />
+                                    Forward
+                                  </Button>
+                                </div>
                               ))}
                             </div>
                           )}
