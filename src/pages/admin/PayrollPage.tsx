@@ -1100,6 +1100,10 @@ export default function PayrollPage() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="settings">
+          <PayrollPeriodSettings />
+        </TabsContent>
       </Tabs>
       </SubscriptionGate>
     </AdminLayout>
