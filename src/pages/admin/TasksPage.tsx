@@ -32,7 +32,7 @@ import {
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
-type TaskType = 'daily' | 'weekly' | 'note';
+type TaskType = 'daily' | 'weekly' | 'monthly' | 'note';
 
 interface Task {
   id: string;
