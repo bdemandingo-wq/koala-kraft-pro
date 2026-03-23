@@ -1,4 +1,6 @@
-import { useState, useMemo, type ReactNode } from 'react';
+import { useState, useMemo, useCallback, type ReactNode } from 'react';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
+import { PullToRefreshIndicator } from '@/components/admin/PullToRefreshIndicator';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
   DndContext,
@@ -270,7 +272,13 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
   const { organization } = useOrganization();
   const orgTimezone = useOrgTimezone();
 
-  const { data: allBookings = [], isLoading } = useBookings();
+  const { data: allBookings = [], isLoading, refetch } = useBookings();
+
+  const handleRefresh = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
+
+  const { refreshing, pullDistance, handlers: pullHandlers } = usePullToRefresh(handleRefresh);
 
   // Fetch team assignments for the selected booking (org-scoped)
   const { data: teamMembers = [] } = useQuery({
@@ -641,7 +649,11 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="bg-card rounded-xl border border-border shadow-sm flex flex-col h-[calc(100vh-10rem)] md:h-[calc(100vh-8rem)]">
+      <div
+        className="bg-card rounded-xl border border-border shadow-sm flex flex-col h-[calc(100vh-10rem)] md:h-[calc(100vh-8rem)]"
+        {...pullHandlers}
+      >
+        <PullToRefreshIndicator pullDistance={pullDistance} refreshing={refreshing} />
         {/* Calendar Header */}
         <div className="flex items-center justify-between p-2 md:p-4 border-b border-border flex-wrap gap-2 md:gap-4">
           <div className="flex items-center gap-2 md:gap-4">
