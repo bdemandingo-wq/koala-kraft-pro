@@ -270,6 +270,31 @@ export function AutomationHealthMonitor() {
     enabled: !!organization?.id,
   });
 
+  // Abandoned booking link stats
+  const { data: abandonedStats } = useQuery({
+    queryKey: ['automation-health-abandoned', organization?.id],
+    queryFn: async (): Promise<{ total: number; opened: number; completed: number; abandoned: number; conversionRate: number }> => {
+      if (!organization?.id) return { total: 0, opened: 0, completed: 0, abandoned: 0, conversionRate: 0 };
+      const { data, error } = await supabase
+        .from('booking_link_tracking' as any)
+        .select('status, link_opened_at, booking_completed_at')
+        .eq('organization_id', organization.id);
+      if (error) throw error;
+      const items = data || [];
+      const opened = items.filter((i: any) => i.link_opened_at).length;
+      const completed = items.filter((i: any) => i.booking_completed_at).length;
+      const abandoned = items.filter((i: any) => i.link_opened_at && !i.booking_completed_at).length;
+      return {
+        total: items.length,
+        opened,
+        completed,
+        abandoned,
+        conversionRate: opened > 0 ? Math.round((completed / opened) * 100) : 0,
+      };
+    },
+    enabled: !!organization?.id,
+  });
+
   const automationQueues = [
     { name: 'Review Requests', table: 'automated_review_sms_queue', stats: reviewStats, icon: CheckCircle2, color: 'text-amber-500' },
     { name: 'Rebooking Reminders', table: 'rebooking_reminder_queue', stats: rebookingStats, icon: TrendingUp, color: 'text-green-500' },
