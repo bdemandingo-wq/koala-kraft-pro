@@ -208,6 +208,14 @@ export default function PublicBookingPage() {
         .eq('session_token', sessionTokenRef)
         .then(() => {});
     }
+    // Also mark link tracking as completed
+    if (confirmationNumber && trackingRef) {
+      supabase
+        .from('booking_link_tracking' as any)
+        .update({ booking_completed_at: new Date().toISOString(), status: 'completed' })
+        .eq('tracking_ref', trackingRef)
+        .then(() => {});
+    }
   }, [confirmationNumber]);
 
   const service = services.find(s => s.id === selectedService);

@@ -358,6 +358,48 @@ export function AutomationHealthMonitor() {
         </Card>
       </div>
 
+      {/* Abandoned Bookings Card */}
+      {abandonedStats && abandonedStats.total > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-amber-500" />
+              Abandoned Bookings
+            </CardTitle>
+            <CardDescription>Booking links sent but not completed</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="p-3 bg-muted/50 rounded-lg text-center">
+                <p className="text-2xl font-bold">{abandonedStats.total}</p>
+                <p className="text-xs text-muted-foreground">Links Sent</p>
+              </div>
+              <div className="p-3 bg-muted/50 rounded-lg text-center">
+                <p className="text-2xl font-bold text-amber-600">{abandonedStats.opened}</p>
+                <p className="text-xs text-muted-foreground">Opened</p>
+              </div>
+              <div className="p-3 bg-muted/50 rounded-lg text-center">
+                <p className="text-2xl font-bold text-green-600">{abandonedStats.completed}</p>
+                <p className="text-xs text-muted-foreground">Completed</p>
+              </div>
+              <div className="p-3 bg-muted/50 rounded-lg text-center">
+                <p className="text-2xl font-bold">{abandonedStats.conversionRate}%</p>
+                <p className="text-xs text-muted-foreground">Conversion</p>
+                <Progress value={abandonedStats.conversionRate} className="mt-1 h-1.5" />
+              </div>
+            </div>
+            {abandonedStats.abandoned > 0 && (
+              <div className="mt-3 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
+                <p className="text-sm">
+                  <strong>{abandonedStats.abandoned}</strong> customers opened their booking link but didn't complete.
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Per-Automation Breakdown */}
       <Card>
         <CardHeader>

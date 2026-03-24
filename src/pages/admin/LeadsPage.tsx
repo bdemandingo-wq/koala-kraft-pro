@@ -724,6 +724,104 @@ export default function LeadsPage() {
       </Card>
       )}
 
+      {/* Abandoned Bookings View */}
+      {viewMode === 'abandoned' && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-amber-500" />
+              Abandoned Bookings
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0 overflow-x-auto" data-no-swipe>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Link Sent</TableHead>
+                  <TableHead>Link Opened</TableHead>
+                  <TableHead>Time Elapsed</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {abandonedLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Loading...</TableCell>
+                  </TableRow>
+                ) : abandonedLinks.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No abandoned bookings</TableCell>
+                  </TableRow>
+                ) : (
+                  abandonedLinks.map((link: any) => {
+                    const elapsed = link.link_opened_at
+                      ? formatDistanceToNow(new Date(link.link_opened_at), { addSuffix: false })
+                      : '-';
+                    return (
+                      <TableRow key={link.id}>
+                        <TableCell className="font-medium">
+                          {maskName(link.customer_name || 'Unknown')}
+                          {link.customer_phone && (
+                            <div className="text-xs text-muted-foreground">{maskPhone(link.customer_phone)}</div>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {link.link_sent_at ? format(new Date(link.link_sent_at), 'MMM d, h:mm a') : '-'}
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {link.link_opened_at ? (
+                            <span className="text-amber-600">{format(new Date(link.link_opened_at), 'MMM d, h:mm a')}</span>
+                          ) : (
+                            <span className="text-muted-foreground">Not opened</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-sm">{elapsed}</TableCell>
+                        <TableCell>
+                          <Badge variant={link.link_opened_at ? 'destructive' : 'secondary'}>
+                            {link.link_opened_at ? 'Abandoned' : 'Not Opened'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="gap-1.5"
+                            onClick={async () => {
+                              if (!organization?.id) return;
+                              // Re-send booking link via SMS
+                              try {
+                                const { error } = await supabase.functions.invoke('send-card-link-sms', {
+                                  body: {
+                                    phone: link.customer_phone,
+                                    email: link.customer_email || '',
+                                    customerName: link.customer_name || 'Customer',
+                                    organizationId: organization.id,
+                                    amount: 0,
+                                  },
+                                });
+                                if (error) throw error;
+                                toast.success('Booking link re-sent!');
+                              } catch {
+                                toast.error('Failed to re-send link');
+                              }
+                            }}
+                          >
+                            <Send className="w-3.5 h-3.5" />
+                            Re-send
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Add/Edit Dialog */}
       <LeadDialog
         open={dialogOpen}
