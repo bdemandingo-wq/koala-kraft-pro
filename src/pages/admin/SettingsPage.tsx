@@ -512,6 +512,7 @@ export default function SettingsPage() {
             <TabsTrigger className="shrink-0" value="loyalty">Loyalty</TabsTrigger>
             <TabsTrigger className="shrink-0" value="notifications">Notifications</TabsTrigger>
             <TabsTrigger className="shrink-0" value="sms">SMS</TabsTrigger>
+            <TabsTrigger className="shrink-0" value="phone">Phone & Messaging</TabsTrigger>
             <TabsTrigger className="shrink-0" value="emails">Emails</TabsTrigger>
             <TabsTrigger className="shrink-0" value="reviews">Reviews</TabsTrigger>
             <TabsTrigger className="shrink-0" value="branding">Branding</TabsTrigger>
