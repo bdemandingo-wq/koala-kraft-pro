@@ -31,6 +31,7 @@ import { SignedImage } from '@/components/ui/signed-image';
 import { toast } from 'sonner';
 import { SMSSettingsCard } from '@/components/admin/SMSSettingsCard';
 import { OpenPhoneDebugTools } from '@/components/admin/OpenPhoneDebugTools';
+import { OpenPhoneIntegrationCard } from '@/components/admin/OpenPhoneIntegrationCard';
 import { PricingSettingsCard } from '@/components/admin/PricingSettingsCard';
 import { FormDisplaySettings } from '@/components/admin/FormDisplaySettings';
 import { SidebarVisibilitySettings } from '@/components/admin/SidebarVisibilitySettings';
@@ -511,6 +512,7 @@ export default function SettingsPage() {
             <TabsTrigger className="shrink-0" value="loyalty">Loyalty</TabsTrigger>
             <TabsTrigger className="shrink-0" value="notifications">Notifications</TabsTrigger>
             <TabsTrigger className="shrink-0" value="sms">SMS</TabsTrigger>
+            <TabsTrigger className="shrink-0" value="phone">Phone & Messaging</TabsTrigger>
             <TabsTrigger className="shrink-0" value="emails">Emails</TabsTrigger>
             <TabsTrigger className="shrink-0" value="reviews">Reviews</TabsTrigger>
             <TabsTrigger className="shrink-0" value="branding">Branding</TabsTrigger>
@@ -745,6 +747,11 @@ export default function SettingsPage() {
         <TabsContent value="sms" className="space-y-6">
           <SMSSettingsCard />
           <OpenPhoneDebugTools />
+        </TabsContent>
+
+        {/* Phone & Messaging (OpenPhone Integration) */}
+        <TabsContent value="phone" className="space-y-6">
+          <OpenPhoneIntegrationCard />
         </TabsContent>
 
         {/* Email & Domain Settings */}
