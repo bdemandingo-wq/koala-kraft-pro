@@ -236,6 +236,7 @@ export function OpenPhoneIntegrationCard() {
 
   return (
     <>
+    <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
