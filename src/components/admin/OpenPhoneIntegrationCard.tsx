@@ -45,6 +45,10 @@ export function OpenPhoneIntegrationCard() {
   const [draftApiKey, setDraftApiKey] = useState('');
   const [draftPhoneId, setDraftPhoneId] = useState('');
 
+  // Google Review Link state
+  const [googleReviewUrl, setGoogleReviewUrl] = useState('');
+  const [savingReview, setSavingReview] = useState(false);
+
   useEffect(() => {
     if (organization?.id) fetchSettings();
   }, [organization?.id]);
