@@ -150,6 +150,19 @@ export default function PublicBookingPage() {
     return () => clearPublicBranding();
   }, [primaryColor, accentColor, formColors.accent]);
 
+  // Track link_opened when ref param exists
+  useEffect(() => {
+    if (trackingRef && organizationId) {
+      supabase
+        .from('booking_link_tracking' as any)
+        .update({ link_opened_at: new Date().toISOString(), status: 'opened' })
+        .eq('tracking_ref', trackingRef)
+        .then(({ error }) => {
+          if (error) console.log('Link tracking update skipped:', error.message);
+        });
+    }
+  }, [trackingRef, organizationId]);
+
   // Track abandoned bookings - save progress when user has contact info
   const sessionTokenRef = useState(() => crypto.randomUUID())[0];
   const abandonedTrackedRef = useState({ tracked: false })[0];
