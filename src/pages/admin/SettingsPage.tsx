@@ -749,6 +749,11 @@ export default function SettingsPage() {
           <OpenPhoneDebugTools />
         </TabsContent>
 
+        {/* Phone & Messaging (OpenPhone Integration) */}
+        <TabsContent value="phone" className="space-y-6">
+          <OpenPhoneIntegrationCard />
+        </TabsContent>
+
         {/* Email & Domain Settings */}
         <TabsContent value="emails" className="space-y-6">
           <EmailSettingsCard />
