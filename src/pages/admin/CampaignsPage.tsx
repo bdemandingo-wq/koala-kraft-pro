@@ -31,8 +31,9 @@ import {
   Sparkles, Copy, Check, BarChart3, AlertCircle, Plus, Mail,
   MoreHorizontal, Edit, CalendarDays, TrendingUp, TrendingDown,
   UserX, Zap, Star, RefreshCw, ChevronDown, ChevronUp, Eye,
+  Link2, AlertTriangle, X,
 } from "lucide-react";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 
 interface AITemplate {
