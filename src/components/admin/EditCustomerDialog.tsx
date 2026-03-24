@@ -13,11 +13,12 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
-import { Loader2, User, Mail, Phone, ShieldAlert, UserCheck, CreditCard } from 'lucide-react';
+import { Loader2, User, Mail, Phone, ShieldAlert, UserCheck, CreditCard, Link2, Check, Clock, Send } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useOrganization } from '@/contexts/OrganizationContext';
 import { StripeCardForm } from '@/components/stripe/StripeCardForm';
+import { format } from 'date-fns';
 
 interface Customer {
   id: string;
