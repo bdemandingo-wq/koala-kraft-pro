@@ -211,6 +211,9 @@ export default function AutomationCenterPage() {
                   );
                 })}
               </div>
+              <div className="mt-6">
+                <CustomAutomationBuilder key={importTemplate ? JSON.stringify(importTemplate) : 'default'} />
+              </div>
             )}
           </TabsContent>
 
