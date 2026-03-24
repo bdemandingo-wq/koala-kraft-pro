@@ -54,6 +54,12 @@ function formatTime24to12(time24: string): string {
 
 export default function PublicBookingPage() {
   const { orgSlug } = useParams<{ orgSlug: string }>();
+  
+  // Track booking link ref parameter for link tracking
+  const [trackingRef] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('ref') || null;
+  });
   const [step, setStep] = useState(1);
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectedSqFtIndex, setSelectedSqFtIndex] = useState<number | null>(null);
