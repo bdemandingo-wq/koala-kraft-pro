@@ -155,65 +155,67 @@ export default function AutomationCenterPage() {
                 ))}
               </div>
             ) : (
-              <div className="grid gap-4 md:grid-cols-2">
-                {automations.map((auto) => {
-                  const meta = automationMeta[auto.automation_type];
-                  if (!meta) return null;
-                  const Icon = meta.icon;
-                  return (
-                    <Card key={auto.id} className="relative overflow-hidden">
-                      <div className={`absolute top-0 left-0 w-1 h-full ${auto.is_enabled ? 'bg-green-500' : 'bg-muted-foreground/30'}`} />
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-lg bg-muted ${meta.color}`}>
-                              <Icon className="w-5 h-5" />
+              <>
+                <div className="grid gap-4 md:grid-cols-2">
+                  {automations.map((auto) => {
+                    const meta = automationMeta[auto.automation_type];
+                    if (!meta) return null;
+                    const Icon = meta.icon;
+                    return (
+                      <Card key={auto.id} className="relative overflow-hidden">
+                        <div className={`absolute top-0 left-0 w-1 h-full ${auto.is_enabled ? 'bg-green-500' : 'bg-muted-foreground/30'}`} />
+                        <CardHeader className="pb-3">
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className={`p-2 rounded-lg bg-muted ${meta.color}`}>
+                                <Icon className="w-5 h-5" />
+                              </div>
+                              <div>
+                                <CardTitle className="text-base">{formatName(auto.automation_type)}</CardTitle>
+                                <Badge variant={auto.is_enabled ? 'default' : 'secondary'} className="mt-1 text-xs">
+                                  {auto.is_enabled ? 'Auto' : 'Manual Only'}
+                                </Badge>
+                              </div>
                             </div>
-                            <div>
-                              <CardTitle className="text-base">{formatName(auto.automation_type)}</CardTitle>
-                              <Badge variant={auto.is_enabled ? 'default' : 'secondary'} className="mt-1 text-xs">
-                                {auto.is_enabled ? 'Auto' : 'Manual Only'}
+                            <Switch
+                              checked={auto.is_enabled}
+                              onCheckedChange={(checked) => toggleMutation.mutate({ id: auto.id, is_enabled: checked })}
+                            />
+                          </div>
+                        </CardHeader>
+                        <CardContent className="space-y-3 text-sm">
+                          <div>
+                            <span className="font-medium text-muted-foreground">Trigger: </span>
+                            <span className="text-foreground">{meta.trigger}</span>
+                          </div>
+                          <div>
+                            <span className="font-medium text-muted-foreground">Action: </span>
+                            <span className="text-foreground">{meta.action}</span>
+                          </div>
+                          <div className="flex items-start gap-2 p-2 rounded-md bg-muted/50">
+                            <Sparkles className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                            <span className="text-muted-foreground">{meta.benefit}</span>
+                          </div>
+                          {!auto.is_enabled && (
+                            <div className="pt-2 border-t">
+                              <p className="text-xs text-muted-foreground mb-2">
+                                Automatic sending is off. You can still trigger this manually from the relevant page (Bookings, Customers, etc.).
+                              </p>
+                              <Badge variant="outline" className="text-xs gap-1">
+                                <Send className="w-3 h-3" />
+                                Manual mode — send from booking/customer actions
                               </Badge>
                             </div>
-                          </div>
-                          <Switch
-                            checked={auto.is_enabled}
-                            onCheckedChange={(checked) => toggleMutation.mutate({ id: auto.id, is_enabled: checked })}
-                          />
-                        </div>
-                      </CardHeader>
-                      <CardContent className="space-y-3 text-sm">
-                        <div>
-                          <span className="font-medium text-muted-foreground">Trigger: </span>
-                          <span className="text-foreground">{meta.trigger}</span>
-                        </div>
-                        <div>
-                          <span className="font-medium text-muted-foreground">Action: </span>
-                          <span className="text-foreground">{meta.action}</span>
-                        </div>
-                        <div className="flex items-start gap-2 p-2 rounded-md bg-muted/50">
-                          <Sparkles className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                          <span className="text-muted-foreground">{meta.benefit}</span>
-                        </div>
-                        {!auto.is_enabled && (
-                          <div className="pt-2 border-t">
-                            <p className="text-xs text-muted-foreground mb-2">
-                              Automatic sending is off. You can still trigger this manually from the relevant page (Bookings, Customers, etc.).
-                            </p>
-                            <Badge variant="outline" className="text-xs gap-1">
-                              <Send className="w-3 h-3" />
-                              Manual mode — send from booking/customer actions
-                            </Badge>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-              <div className="mt-6">
-                <CustomAutomationBuilder key={importTemplate ? JSON.stringify(importTemplate) : 'default'} />
-              </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+                <div className="mt-6">
+                  <CustomAutomationBuilder />
+                </div>
+              </>
             )}
           </TabsContent>
 
