@@ -89,12 +89,30 @@ export default function LeadsPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [sourceFilter, setSourceFilter] = useState('all');
   const [showFunnel, setShowFunnel] = useState(false);
-  const [viewMode, setViewMode] = useState<'table' | 'pipeline'>('pipeline');
+  const [viewMode, setViewMode] = useState<'table' | 'pipeline' | 'abandoned'>('pipeline');
   const [monthFilter, setMonthFilter] = useState('all');
   
   const queryClient = useQueryClient();
   const { isTestMode, maskName, maskEmail, maskPhone } = useTestMode();
   const { organization } = useOrganization();
+
+  // Fetch abandoned booking link tracking data
+  const { data: abandonedLinks = [], isLoading: abandonedLoading } = useQuery({
+    queryKey: ['abandoned-booking-links', organization?.id],
+    queryFn: async () => {
+      if (!organization?.id) return [];
+      const { data, error } = await supabase
+        .from('booking_link_tracking' as any)
+        .select('*')
+        .eq('organization_id', organization.id)
+        .in('status', ['opened', 'sent', 'abandoned'])
+        .is('booking_completed_at', null)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!organization?.id,
+  });
 
 
   const { data: leads = [], isLoading } = useQuery({
