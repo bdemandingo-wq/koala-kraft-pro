@@ -798,7 +798,7 @@ export default function CampaignsPage() {
                     rows={4}
                   />
                   <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Placeholders: {"{first_name}"}, {"{last_name}"}, {"{company_name}"}, {"{booking_date}"}, {"{service_type}"}</span>
+                    <span>Placeholders: {"{first_name}"}, {"{last_name}"}, {"{company_name}"}, {"{booking_link}"}, {"{booking_date}"}, {"{service_type}"}</span>
                     <span className={cn(charCount > 160 ? "text-amber-600" : "")}>{charCount} chars · {segments} segment{segments > 1 ? "s" : ""}</span>
                   </div>
                 </div>
