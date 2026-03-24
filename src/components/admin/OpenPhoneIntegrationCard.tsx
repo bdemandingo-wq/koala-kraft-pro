@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Phone, Save, Loader2, Eye, EyeOff, Zap, Unplug, CheckCircle2, XCircle } from 'lucide-react';
+import { Phone, Save, Loader2, Eye, EyeOff, Zap, Unplug, CheckCircle2, XCircle, Star } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
