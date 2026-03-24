@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { SubscriptionGate } from '@/components/admin/SubscriptionGate';
 import { Seo } from '@/components/Seo';
@@ -19,6 +20,9 @@ import {
 } from 'lucide-react';
 import { AutomationHealthMonitor } from '@/components/admin/automation/AutomationHealthMonitor';
 import { CRMSuggestionsPanel } from '@/components/admin/automation/CRMSuggestionsPanel';
+import { CustomAutomationBuilder } from '@/components/admin/automation/CustomAutomationBuilder';
+import { AutomationTemplates } from '@/components/admin/automation/AutomationTemplates';
+import type { CustomAutomation } from '@/components/admin/automation/CustomAutomationBuilder';
 
 const automationMeta: Record<string, {
   icon: typeof Zap;
