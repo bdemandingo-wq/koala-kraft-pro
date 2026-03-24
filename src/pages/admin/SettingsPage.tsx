@@ -31,6 +31,7 @@ import { SignedImage } from '@/components/ui/signed-image';
 import { toast } from 'sonner';
 import { SMSSettingsCard } from '@/components/admin/SMSSettingsCard';
 import { OpenPhoneDebugTools } from '@/components/admin/OpenPhoneDebugTools';
+import { OpenPhoneIntegrationCard } from '@/components/admin/OpenPhoneIntegrationCard';
 import { PricingSettingsCard } from '@/components/admin/PricingSettingsCard';
 import { FormDisplaySettings } from '@/components/admin/FormDisplaySettings';
 import { SidebarVisibilitySettings } from '@/components/admin/SidebarVisibilitySettings';
