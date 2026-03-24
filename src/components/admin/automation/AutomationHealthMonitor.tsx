@@ -450,6 +450,45 @@ export function AutomationHealthMonitor() {
         </Card>
       )}
 
+      {/* Campaign Abandoned Stats */}
+      {campaignAbandonedStats && campaignAbandonedStats.campaigns.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-primary" />
+              Campaign Booking Tracking
+            </CardTitle>
+            <CardDescription>Abandoned bookings from campaign messages</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <p className="text-xs text-muted-foreground mb-1">Total Abandoned (Campaigns)</p>
+                <p className="text-2xl font-bold text-destructive">{campaignAbandonedStats.totalAbandoned}</p>
+              </div>
+              {campaignAbandonedStats.best && campaignAbandonedStats.best.completed > 0 && (
+                <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+                  <p className="text-xs text-muted-foreground mb-1">Best Conversion</p>
+                  <p className="text-sm font-medium truncate">{campaignAbandonedStats.best.name}</p>
+                  <p className="text-lg font-bold text-green-600">
+                    {Math.round((campaignAbandonedStats.best.completed / campaignAbandonedStats.best.sent) * 100)}%
+                  </p>
+                </div>
+              )}
+              {campaignAbandonedStats.worst && campaignAbandonedStats.worst.abandoned > 0 && (
+                <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+                  <p className="text-xs text-muted-foreground mb-1">Highest Abandonment</p>
+                  <p className="text-sm font-medium truncate">{campaignAbandonedStats.worst.name}</p>
+                  <p className="text-lg font-bold text-destructive">
+                    {Math.round((campaignAbandonedStats.worst.abandoned / campaignAbandonedStats.worst.sent) * 100)}%
+                  </p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Per-Automation Breakdown */}
       <Card>
         <CardHeader>
