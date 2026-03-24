@@ -370,6 +370,17 @@ export default function LeadsPage() {
               <Table2 className="w-4 h-4" />
               Table
             </Button>
+            <Button
+              variant={viewMode === 'abandoned' ? 'default' : 'ghost'}
+              size="sm"
+              className="gap-1.5 rounded-none"
+              onClick={() => setViewMode('abandoned')}
+            >
+              <AlertTriangle className="w-4 h-4" />
+              Abandoned ({abandonedLinks.filter((l: any) => l.link_opened_at && !l.booking_completed_at).length})
+              <Table2 className="w-4 h-4" />
+              Table
+            </Button>
           </div>
           <Button 
             variant={showFunnel ? "default" : "outline"} 
