@@ -536,6 +536,17 @@ export default function CampaignsPage() {
                         </TableCell>
                         <TableCell>{getStatusBadge(campaign)}</TableCell>
                         <TableCell>
+                          {(() => {
+                            const stats = campaignTrackingStats[campaign.id];
+                            if (!stats || stats.sent === 0) return <span className="text-muted-foreground text-sm">—</span>;
+                            return (
+                              <Badge variant={stats.abandoned > 0 ? "destructive" : "secondary"} className="text-xs">
+                                {stats.abandoned}
+                              </Badge>
+                            );
+                          })()}
+                        </TableCell>
+                        <TableCell>
                           <span className="text-sm capitalize">{campaign.type?.replace(/_/g, " ")}</span>
                         </TableCell>
                         <TableCell>
@@ -545,6 +556,9 @@ export default function CampaignsPage() {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDetailCampaignId(campaign.id)} title="View tracking">
+                              <BarChart3 className="w-4 h-4" />
+                            </Button>
                             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => runCampaign.mutate(campaign.id)} disabled={runCampaign.isPending}>
                               <Play className="w-4 h-4" />
                             </Button>
