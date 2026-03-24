@@ -215,6 +215,16 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    // Get org's booking slug for tracked links
+    const { data: orgData } = await supabase
+      .from('organizations')
+      .select('slug')
+      .eq('id', organizationId)
+      .maybeSingle();
+    
+    const orgSlug = orgData?.slug || organizationId;
+    const projectUrl = Deno.env.get("PROJECT_URL") || "https://jointidywise.lovable.app";
+
     // Send SMS to each inactive customer
     let sentCount = 0;
     let failedCount = 0;
@@ -222,11 +232,16 @@ const handler = async (req: Request): Promise<Response> => {
 
     for (const customer of customersToContact) {
       try {
-        // Personalize message
+        // Generate tracking ref for this recipient
+        const trackingRef = crypto.randomUUID().replace(/-/g, '').substring(0, 12);
+        const trackedBookingLink = `${projectUrl}/book/${orgSlug}?ref=${trackingRef}`;
+
+        // Personalize message - replace {booking_link} with tracked URL
         const personalizedMessage = messageTemplate
           .replace(/{first_name}/g, customer.first_name)
           .replace(/{last_name}/g, customer.last_name)
-          .replace(/{company_name}/g, companyName);
+          .replace(/{company_name}/g, companyName)
+          .replace(/{booking_link}/g, trackedBookingLink);
 
         // Format phone number
         let toPhone = customer.phone.replace(/\D/g, '');
@@ -264,6 +279,26 @@ const handler = async (req: Request): Promise<Response> => {
               status: 'sent',
               campaign_type: targetAudience,
             });
+
+          // Insert booking link tracking record if message contained {booking_link}
+          if (messageTemplate.includes('{booking_link}')) {
+            await supabase
+              .from('booking_link_tracking')
+              .insert({
+                organization_id: organizationId,
+                customer_id: customer.id,
+                tracking_ref: trackingRef,
+                customer_name: `${customer.first_name} ${customer.last_name}`,
+                customer_phone: customer.phone,
+                customer_email: customer.email || null,
+                campaign_id: campaignId || null,
+                link_sent_at: new Date().toISOString(),
+                status: 'sent',
+              })
+              .then(({ error: trackErr }) => {
+                if (trackErr) console.log('Link tracking insert skipped:', trackErr.message);
+              });
+          }
         } else {
           const errorData = await response.json();
           console.error(`[run-inactive-campaign] Failed to send to ${customer.id}:`, errorData);

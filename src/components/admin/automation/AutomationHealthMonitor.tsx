@@ -295,6 +295,56 @@ export function AutomationHealthMonitor() {
     enabled: !!organization?.id,
   });
 
+  // Campaign-specific abandoned stats
+  const { data: campaignAbandonedStats } = useQuery({
+    queryKey: ['automation-health-campaign-abandoned', organization?.id],
+    queryFn: async () => {
+      if (!organization?.id) return null;
+      // Get tracking data with campaign associations
+      const { data: trackingData, error: tErr } = await supabase
+        .from('booking_link_tracking' as any)
+        .select('campaign_id, link_opened_at, booking_completed_at')
+        .eq('organization_id', organization.id)
+        .not('campaign_id', 'is', null);
+      if (tErr || !trackingData) return null;
+
+      // Get campaign names
+      const campaignIds = [...new Set(trackingData.map((t: any) => t.campaign_id))];
+      if (campaignIds.length === 0) return null;
+
+      const { data: campaigns } = await supabase
+        .from('automated_campaigns')
+        .select('id, name')
+        .in('id', campaignIds);
+
+      const nameMap: Record<string, string> = {};
+      (campaigns || []).forEach((c: any) => { nameMap[c.id] = c.name; });
+
+      // Aggregate per campaign
+      const perCampaign: Record<string, { name: string; sent: number; opened: number; completed: number; abandoned: number }> = {};
+      trackingData.forEach((row: any) => {
+        const cid = row.campaign_id;
+        if (!perCampaign[cid]) perCampaign[cid] = { name: nameMap[cid] || 'Unknown', sent: 0, opened: 0, completed: 0, abandoned: 0 };
+        perCampaign[cid].sent++;
+        if (row.link_opened_at) perCampaign[cid].opened++;
+        if (row.booking_completed_at) perCampaign[cid].completed++;
+        if (row.link_opened_at && !row.booking_completed_at) perCampaign[cid].abandoned++;
+      });
+
+      const entries = Object.values(perCampaign).filter(c => c.sent > 0);
+      const totalAbandoned = entries.reduce((sum, c) => sum + c.abandoned, 0);
+      const best = entries.length > 0
+        ? entries.reduce((b, c) => (c.sent > 0 && (c.completed / c.sent) > (b.completed / b.sent)) ? c : b)
+        : null;
+      const worst = entries.length > 0
+        ? entries.reduce((w, c) => (c.sent > 0 && (c.abandoned / c.sent) > (w.abandoned / w.sent)) ? c : w)
+        : null;
+
+      return { totalAbandoned, best, worst, campaigns: entries };
+    },
+    enabled: !!organization?.id,
+  });
+
   const automationQueues = [
     { name: 'Review Requests', table: 'automated_review_sms_queue', stats: reviewStats, icon: CheckCircle2, color: 'text-amber-500' },
     { name: 'Rebooking Reminders', table: 'rebooking_reminder_queue', stats: rebookingStats, icon: TrendingUp, color: 'text-green-500' },
@@ -396,6 +446,45 @@ export function AutomationHealthMonitor() {
                 </p>
               </div>
             )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Campaign Abandoned Stats */}
+      {campaignAbandonedStats && campaignAbandonedStats.campaigns.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-primary" />
+              Campaign Booking Tracking
+            </CardTitle>
+            <CardDescription>Abandoned bookings from campaign messages</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <p className="text-xs text-muted-foreground mb-1">Total Abandoned (Campaigns)</p>
+                <p className="text-2xl font-bold text-destructive">{campaignAbandonedStats.totalAbandoned}</p>
+              </div>
+              {campaignAbandonedStats.best && campaignAbandonedStats.best.completed > 0 && (
+                <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+                  <p className="text-xs text-muted-foreground mb-1">Best Conversion</p>
+                  <p className="text-sm font-medium truncate">{campaignAbandonedStats.best.name}</p>
+                  <p className="text-lg font-bold text-green-600">
+                    {Math.round((campaignAbandonedStats.best.completed / campaignAbandonedStats.best.sent) * 100)}%
+                  </p>
+                </div>
+              )}
+              {campaignAbandonedStats.worst && campaignAbandonedStats.worst.abandoned > 0 && (
+                <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+                  <p className="text-xs text-muted-foreground mb-1">Highest Abandonment</p>
+                  <p className="text-sm font-medium truncate">{campaignAbandonedStats.worst.name}</p>
+                  <p className="text-lg font-bold text-destructive">
+                    {Math.round((campaignAbandonedStats.worst.abandoned / campaignAbandonedStats.worst.sent) * 100)}%
+                  </p>
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
       )}

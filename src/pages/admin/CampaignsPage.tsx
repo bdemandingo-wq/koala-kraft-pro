@@ -31,8 +31,9 @@ import {
   Sparkles, Copy, Check, BarChart3, AlertCircle, Plus, Mail,
   MoreHorizontal, Edit, CalendarDays, TrendingUp, TrendingDown,
   UserX, Zap, Star, RefreshCw, ChevronDown, ChevronUp, Eye,
+  Link2, AlertTriangle, X,
 } from "lucide-react";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 
 interface AITemplate {
@@ -91,6 +92,9 @@ export default function CampaignsPage() {
 
   // Automations expand
   const [expandedAutomation, setExpandedAutomation] = useState<string | null>(null);
+
+  // Campaign detail dialog
+  const [detailCampaignId, setDetailCampaignId] = useState<string | null>(null);
 
   // Test results
   const [testResult, setTestResult] = useState<{
@@ -171,6 +175,48 @@ export default function CampaignsPage() {
       return count || 0;
     },
     enabled: !!orgId,
+  });
+
+  // Campaign link tracking stats (aggregated per campaign)
+  const { data: campaignTrackingStats = {} } = useQuery({
+    queryKey: ["campaign-tracking-stats", orgId],
+    queryFn: async () => {
+      if (!orgId) return {};
+      const { data, error } = await supabase
+        .from("booking_link_tracking" as any)
+        .select("campaign_id, status, link_opened_at, booking_completed_at")
+        .eq("organization_id", orgId)
+        .not("campaign_id", "is", null);
+      if (error) return {};
+      const stats: Record<string, { sent: number; opened: number; completed: number; abandoned: number }> = {};
+      (data || []).forEach((row: any) => {
+        if (!row.campaign_id) return;
+        if (!stats[row.campaign_id]) stats[row.campaign_id] = { sent: 0, opened: 0, completed: 0, abandoned: 0 };
+        stats[row.campaign_id].sent++;
+        if (row.link_opened_at) stats[row.campaign_id].opened++;
+        if (row.booking_completed_at) stats[row.campaign_id].completed++;
+        if (row.link_opened_at && !row.booking_completed_at) stats[row.campaign_id].abandoned++;
+      });
+      return stats;
+    },
+    enabled: !!orgId,
+  });
+
+  // Detail tracking for selected campaign
+  const { data: detailTracking = [] } = useQuery({
+    queryKey: ["campaign-detail-tracking", detailCampaignId, orgId],
+    queryFn: async () => {
+      if (!detailCampaignId || !orgId) return [];
+      const { data, error } = await supabase
+        .from("booking_link_tracking" as any)
+        .select("*")
+        .eq("organization_id", orgId)
+        .eq("campaign_id", detailCampaignId)
+        .order("created_at", { ascending: false });
+      if (error) return [];
+      return data || [];
+    },
+    enabled: !!detailCampaignId && !!orgId,
   });
 
   // Filtered campaigns
@@ -468,9 +514,10 @@ export default function CampaignsPage() {
                       <TableHead>Campaign</TableHead>
                       <TableHead className="w-[80px]">Channel</TableHead>
                       <TableHead className="w-[100px]">Status</TableHead>
+                      <TableHead className="w-[80px]">Abandoned</TableHead>
                       <TableHead className="w-[120px]">Audience</TableHead>
                       <TableHead className="w-[120px]">Date</TableHead>
-                      <TableHead className="w-[100px] text-right">Actions</TableHead>
+                      <TableHead className="w-[120px] text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -489,6 +536,17 @@ export default function CampaignsPage() {
                         </TableCell>
                         <TableCell>{getStatusBadge(campaign)}</TableCell>
                         <TableCell>
+                          {(() => {
+                            const stats = campaignTrackingStats[campaign.id];
+                            if (!stats || stats.sent === 0) return <span className="text-muted-foreground text-sm">—</span>;
+                            return (
+                              <Badge variant={stats.abandoned > 0 ? "destructive" : "secondary"} className="text-xs">
+                                {stats.abandoned}
+                              </Badge>
+                            );
+                          })()}
+                        </TableCell>
+                        <TableCell>
                           <span className="text-sm capitalize">{campaign.type?.replace(/_/g, " ")}</span>
                         </TableCell>
                         <TableCell>
@@ -498,6 +556,9 @@ export default function CampaignsPage() {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDetailCampaignId(campaign.id)} title="View tracking">
+                              <BarChart3 className="w-4 h-4" />
+                            </Button>
                             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => runCampaign.mutate(campaign.id)} disabled={runCampaign.isPending}>
                               <Play className="w-4 h-4" />
                             </Button>
@@ -737,7 +798,7 @@ export default function CampaignsPage() {
                     rows={4}
                   />
                   <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Placeholders: {"{first_name}"}, {"{last_name}"}, {"{company_name}"}, {"{booking_date}"}, {"{service_type}"}</span>
+                    <span>Placeholders: {"{first_name}"}, {"{last_name}"}, {"{company_name}"}, {"{booking_link}"}, {"{booking_date}"}, {"{service_type}"}</span>
                     <span className={cn(charCount > 160 ? "text-amber-600" : "")}>{charCount} chars · {segments} segment{segments > 1 ? "s" : ""}</span>
                   </div>
                 </div>
@@ -762,7 +823,7 @@ export default function CampaignsPage() {
                       rows={6}
                     />
                     <p className="text-xs text-muted-foreground">
-                      Placeholders: {"{first_name}"}, {"{last_name}"}, {"{company_name}"}, {"{booking_date}"}, {"{service_type}"}
+                      Placeholders: {"{first_name}"}, {"{last_name}"}, {"{company_name}"}, {"{booking_link}"}, {"{booking_date}"}, {"{service_type}"}
                     </p>
                   </div>
                 </>
@@ -881,6 +942,125 @@ export default function CampaignsPage() {
               </div>
             )}
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Campaign Tracking Detail Dialog */}
+      <Dialog open={!!detailCampaignId} onOpenChange={(open) => { if (!open) setDetailCampaignId(null); }}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart3 className="w-5 h-5" />
+              Campaign Tracking
+            </DialogTitle>
+            <DialogDescription>
+              Booking link tracking for {campaigns.find(c => c.id === detailCampaignId)?.name || "campaign"}
+            </DialogDescription>
+          </DialogHeader>
+
+          {/* Stats Cards */}
+          {(() => {
+            const stats = detailCampaignId ? campaignTrackingStats[detailCampaignId] : null;
+            const sent = stats?.sent || 0;
+            const opened = stats?.opened || 0;
+            const completed = stats?.completed || 0;
+            const abandoned = stats?.abandoned || 0;
+            const convRate = sent > 0 ? Math.round((completed / sent) * 100) : 0;
+            return (
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                <div className="p-3 bg-muted/50 rounded-lg text-center">
+                  <p className="text-xl font-bold">{sent}</p>
+                  <p className="text-xs text-muted-foreground">Sent</p>
+                </div>
+                <div className="p-3 bg-muted/50 rounded-lg text-center">
+                  <p className="text-xl font-bold text-amber-600">{opened}</p>
+                  <p className="text-xs text-muted-foreground">Opened</p>
+                </div>
+                <div className="p-3 bg-muted/50 rounded-lg text-center">
+                  <p className="text-xl font-bold text-green-600">{completed}</p>
+                  <p className="text-xs text-muted-foreground">Completed</p>
+                </div>
+                <div className="p-3 bg-muted/50 rounded-lg text-center">
+                  <p className="text-xl font-bold text-destructive">{abandoned}</p>
+                  <p className="text-xs text-muted-foreground">Abandoned</p>
+                </div>
+                <div className="p-3 bg-muted/50 rounded-lg text-center">
+                  <p className="text-xl font-bold">{convRate}%</p>
+                  <p className="text-xs text-muted-foreground">Conversion</p>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Re-send to Abandoned button */}
+          {(() => {
+            const abandonedRecipients = detailTracking.filter((t: any) => t.link_opened_at && !t.booking_completed_at);
+            if (abandonedRecipients.length === 0) return null;
+            return (
+              <Button
+                variant="outline"
+                className="gap-2 w-full"
+                onClick={async () => {
+                  if (!orgId || !detailCampaignId) return;
+                  const campaign = campaigns.find(c => c.id === detailCampaignId);
+                  const resendMessage = `Hi {first_name}! Just following up on the booking link we sent. Would you like to complete your booking? {booking_link} Reply STOP to opt out.`;
+                  try {
+                    const { data, error } = await supabase.functions.invoke("run-inactive-campaign", {
+                      body: {
+                        organizationId: orgId,
+                        campaignId: detailCampaignId,
+                        message: resendMessage,
+                        targetAudience: "active_clients",
+                        testMode: false,
+                      },
+                    });
+                    if (error) throw error;
+                    toast({ title: "Re-sent!", description: `Sent to ${abandonedRecipients.length} abandoned recipients` });
+                    queryClient.invalidateQueries({ queryKey: ["campaign-tracking-stats"] });
+                    queryClient.invalidateQueries({ queryKey: ["campaign-detail-tracking"] });
+                  } catch {
+                    toast({ title: "Error", description: "Failed to re-send campaign", variant: "destructive" });
+                  }
+                }}
+              >
+                <RefreshCw className="w-4 h-4" />
+                Re-send to {abandonedRecipients.length} Abandoned
+              </Button>
+            );
+          })()}
+
+          {/* Recipients List */}
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium">Recipients</h4>
+            {detailTracking.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">No tracked links for this campaign yet. Include {"{booking_link}"} in your message to enable tracking.</p>
+            ) : (
+              <div className="max-h-[300px] overflow-y-auto space-y-2">
+                {detailTracking.map((track: any) => (
+                  <div key={track.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border">
+                    <div className="min-w-0">
+                      <p className="font-medium text-sm truncate">{track.customer_name || "Unknown"}</p>
+                      <p className="text-xs text-muted-foreground">{track.customer_phone || track.customer_email || ""}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {track.link_opened_at && (
+                        <span className="text-xs text-muted-foreground">
+                          Opened {formatDistanceToNow(new Date(track.link_opened_at), { addSuffix: true })}
+                        </span>
+                      )}
+                      <Badge variant={
+                        track.booking_completed_at ? "default" :
+                        track.link_opened_at ? "destructive" : "secondary"
+                      } className="text-xs">
+                        {track.booking_completed_at ? "Completed" :
+                         track.link_opened_at ? "Abandoned" : "Sent"}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </AdminLayout>
