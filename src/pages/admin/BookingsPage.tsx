@@ -514,10 +514,10 @@ export default function BookingsPage() {
           payment_status: newStatus as any,
         });
         toast({
-          title: "Refund Recorded",
+          title: "Refund Recorded (Manual)",
           description: refundType === 'full'
-            ? `Full refund of $${booking.total_amount?.toFixed(2)} recorded`
-            : `Partial refund of $${parseFloat(refundAmount).toFixed(2)} recorded`,
+            ? `Full refund of $${booking.total_amount?.toFixed(2)} recorded. No Stripe refund was processed — refund the customer manually if needed.`
+            : `Partial refund of $${parseFloat(refundAmount).toFixed(2)} recorded. No Stripe refund was processed — refund the customer manually if needed.`,
         });
         setRefundDialogBooking(null);
         setRefundType('full');
@@ -748,7 +748,8 @@ export default function BookingsPage() {
         
         await updateBooking.mutateAsync({ 
           id: booking.id, 
-          payment_status: 'paid' as any
+          payment_status: 'paid' as any,
+          payment_intent_id: data.paymentIntentId || null,
         });
       } else {
         toast({ 
@@ -2378,6 +2379,11 @@ export default function BookingsPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="py-4 space-y-4">
+            {!(refundDialogBooking as any)?.payment_intent_id && (
+              <div className="rounded-md bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-3 text-sm text-amber-800 dark:text-amber-300">
+                ⚠️ No Stripe payment found for this booking. This will be a <strong>manual record-only</strong> update — no money will be returned via Stripe. To process an actual Stripe refund, the booking must have been charged through the app first.
+              </div>
+            )}
             <RadioGroup value={refundType} onValueChange={(v) => setRefundType(v as 'full' | 'partial')}>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="full" id="refund-full" />
