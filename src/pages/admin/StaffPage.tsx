@@ -265,6 +265,11 @@ export default function StaffPage() {
         </CardContent>
       </Card>
 
+      {/* Document Review Section */}
+      <div className="mb-4">
+        <PendingDocumentsReview />
+      </div>
+
       {/* Search and Filters */}
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <div className="relative flex-1 max-w-md">
