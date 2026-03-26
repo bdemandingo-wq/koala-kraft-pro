@@ -661,38 +661,58 @@ export default function BookingsPage() {
         }
       });
 
-      // Handle error responses - check if hold was already canceled
+      // Handle error responses
       if (error) {
-        // Parse error message - it might indicate already canceled
-        const errorMessage = error.message || '';
+        const errorMessage = typeof error === 'object' ? JSON.stringify(error) : String(error.message || error);
+        
+        // Already canceled
         if (errorMessage.includes('canceled') || errorMessage.includes('status: canceled')) {
           toast({ 
             title: "Already Released", 
             description: "This hold was already released previously." 
           });
-          
-          // Update payment status to refunded since hold is already canceled
           await updateBooking.mutateAsync({ 
             id: booking.id, 
             payment_status: 'refunded' as any
           });
           return;
         }
+        
+        // Payment was already captured (succeeded) — not a hold anymore
+        if (errorMessage.includes('succeeded')) {
+          toast({ 
+            title: "Payment Already Captured", 
+            description: "This payment was already charged. Use the Refund option instead of Release Hold.",
+            variant: "destructive"
+          });
+          return;
+        }
+        
         throw error;
       }
 
-      // Check data for already canceled status
-      if (data?.status === 'canceled' || data?.error?.includes('canceled')) {
-        toast({ 
-          title: "Already Released", 
-          description: "This hold was already released previously." 
-        });
-        
-        await updateBooking.mutateAsync({ 
-          id: booking.id, 
-          payment_status: 'refunded' as any
-        });
-        return;
+      // Check data-level errors (non-throw 400 responses)
+      if (data?.error) {
+        if (data.error.includes('succeeded')) {
+          toast({ 
+            title: "Payment Already Captured", 
+            description: "This payment was already charged. Use the Refund option instead of Release Hold.",
+            variant: "destructive"
+          });
+          return;
+        }
+        if (data.error.includes('canceled') || data.status === 'canceled') {
+          toast({ 
+            title: "Already Released", 
+            description: "This hold was already released previously." 
+          });
+          await updateBooking.mutateAsync({ 
+            id: booking.id, 
+            payment_status: 'refunded' as any
+          });
+          return;
+        }
+        throw new Error(data.error);
       }
 
       if (data.success) {
