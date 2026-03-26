@@ -43,6 +43,7 @@ import { CleanerCalendar } from '@/components/staff/CleanerCalendar';
 import { useOrgId } from '@/hooks/useOrgId';
 import { cn } from '@/lib/utils';
 import { StaffEventNotifications } from '@/components/admin/StaffEventNotifications';
+import { StaffComplianceDashboard } from '@/components/admin/StaffComplianceDashboard';
 
 interface StaffMember {
   id: string;
@@ -247,6 +248,13 @@ export default function StaffPage() {
       <div className="mb-4">
         <StaffEventNotifications />
       </div>
+
+      {/* Staff Compliance Dashboard */}
+      {organizationId && (
+        <div className="mb-4">
+          <StaffComplianceDashboard organizationId={organizationId} />
+        </div>
+      )}
 
       {/* Search and Filters */}
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
