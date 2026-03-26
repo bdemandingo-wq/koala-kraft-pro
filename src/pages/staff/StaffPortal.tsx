@@ -22,6 +22,7 @@ import { BookingChecklist } from '@/components/staff/BookingChecklist';
 import { StaffDocumentUpload } from '@/components/staff/StaffDocumentUpload';
 import { StaffSignatureManager } from '@/components/staff/StaffSignatureManager';
 import { StaffPayoutSetup } from '@/components/staff/StaffPayoutSetup';
+import { OnboardingProgress } from '@/components/staff/OnboardingProgress';
 
 interface Booking {
   id: string;
@@ -563,6 +564,18 @@ export default function StaffPortal() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-4">
+        {/* Onboarding Progress Tracker */}
+        {staffInfo?.id && staffInfo?.organization_id && (
+          <OnboardingProgress
+            staffId={staffInfo.id}
+            organizationId={staffInfo.organization_id}
+            onNavigate={(tab) => {
+              const tabTrigger = document.querySelector(`[value="${tab}"]`) as HTMLButtonElement;
+              if (tabTrigger) tabTrigger.click();
+            }}
+          />
+        )}
+
         {hasSetAvailability === false && (
           <div className="mb-4 p-4 rounded-lg border border-warning bg-warning/10 text-warning-foreground">
             <p className="font-semibold">⚠️ Set Your Availability First</p>
