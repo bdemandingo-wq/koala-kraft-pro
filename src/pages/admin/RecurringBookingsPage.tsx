@@ -495,9 +495,20 @@ export default function RecurringBookingsPage() {
                     </TableCell>
                     <TableCell>{booking.service?.name || '-'}</TableCell>
                     <TableCell className="capitalize">
-                      {booking.frequency.startsWith('custom_')
-                        ? customFrequencies.find(cf => cf.id === booking.frequency.replace('custom_', ''))?.name || booking.frequency
-                        : booking.frequency}
+                      {(() => {
+                        if (booking.frequency.startsWith('custom_')) {
+                          return customFrequencies.find(cf => cf.id === booking.frequency.replace('custom_', ''))?.name || booking.frequency;
+                        }
+                        if (booking.frequency === 'custom' && booking.recurring_days_of_week) {
+                          const matched = customFrequencies.find(cf => {
+                            const cfDays = [...(cf.days_of_week || [])].sort().join(',');
+                            const bDays = [...(booking.recurring_days_of_week || [])].sort().join(',');
+                            return cfDays === bDays;
+                          });
+                          return matched?.name || 'Custom';
+                        }
+                        return booking.frequency;
+                      })()}
                     </TableCell>
                     <TableCell>
                       {booking.preferred_day !== null && (
@@ -507,7 +518,16 @@ export default function RecurringBookingsPage() {
                         <span className="text-muted-foreground"> @ {booking.preferred_time}</span>
                       )}
                     </TableCell>
-                    <TableCell className="font-medium">${booking.total_amount}</TableCell>
+                    <TableCell className="font-medium">
+                      {(() => {
+                        const dp = (booking as any).day_prices as Record<string, number> | null;
+                        if (dp && Object.keys(dp).length > 0) {
+                          const sum = Object.values(dp).reduce((a, b) => a + b, 0);
+                          return `$${Math.round(sum * 100) / 100}`;
+                        }
+                        return `$${booking.total_amount}`;
+                      })()}
+                    </TableCell>
                     <TableCell>
                       <Badge variant={booking.is_active ? 'default' : 'secondary'}>
                         {booking.is_active ? 'Active' : 'Paused'}
