@@ -2402,7 +2402,8 @@ export default function BookingsPage() {
             <AlertDialogAction
               className="bg-primary hover:bg-primary/90"
               disabled={processingRefund}
-              onClick={() => {
+              onClick={(e) => {
+                e.preventDefault();
                 if (refundDialogBooking) {
                   handleProcessRefund(refundDialogBooking);
                 }
