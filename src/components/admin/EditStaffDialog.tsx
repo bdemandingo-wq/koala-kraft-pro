@@ -25,7 +25,7 @@ import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import { Upload, FileText, Trash2, Download, Key, Eye, EyeOff, MapPin, Loader2 } from 'lucide-react';
 import { StaffDocumentManager } from '@/components/admin/StaffDocumentManager';
-import { AdminSignableDocManager } from '@/components/admin/AdminSignableDocManager';
+
 import { AdminPayoutStatus } from '@/components/admin/AdminPayoutStatus';
 
 const STAFF_COLOR_OPTIONS = [
