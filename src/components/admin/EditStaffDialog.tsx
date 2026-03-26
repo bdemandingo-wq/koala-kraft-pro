@@ -591,6 +591,17 @@ export function EditStaffDialog({ open, onOpenChange, staff }: EditStaffDialogPr
             />
           </div>
 
+          {/* Staff Documents Section */}
+          <div className="space-y-2 pt-4 border-t">
+            <Label className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Uploaded Documents
+            </Label>
+            {staff && (
+              <StaffDocumentManager staffId={staff.id} staffName={staff.name} />
+            )}
+          </div>
+
           {/* Password Reset Section */}
           <div className="space-y-2 pt-4 border-t">
             <Label className="flex items-center gap-2">
