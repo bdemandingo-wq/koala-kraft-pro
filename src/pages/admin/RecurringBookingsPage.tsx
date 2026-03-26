@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -28,7 +28,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Calendar, RefreshCw, Pause, Play, Trash2, Edit } from 'lucide-react';
+import { Plus, Calendar, RefreshCw, Pause, Play, Trash2, Edit, X } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
@@ -359,20 +359,24 @@ export default function RecurringBookingsPage() {
       return;
     }
 
-    // Apply day-matched pricing if day_prices exists
+    // Apply day-matched pricing and service if day_prices/day_services exist
     const dayPrices = (recurring as any).day_prices as Record<string, number> | null;
+    const dayServices = (recurring as any).day_services as Record<string, string> | null;
     let bookingAmount = recurring.total_amount;
-    if (dayPrices) {
-      const dayOfWeek = nextDate.getDay().toString();
-      if (dayPrices[dayOfWeek] != null) {
-        bookingAmount = dayPrices[dayOfWeek];
-      }
+    let bookingServiceId = recurring.service_id;
+    const dayOfWeek = nextDate.getDay().toString();
+    if (dayPrices && dayPrices[dayOfWeek] != null) {
+      bookingAmount = dayPrices[dayOfWeek];
+    }
+    if (dayServices && dayServices[dayOfWeek]) {
+      bookingServiceId = dayServices[dayOfWeek];
     }
 
     const scheduledAt = applyTime(new Date(nextDate)).toISOString();
 
     const { error } = await supabase.from('bookings').insert([{
       ...baseBooking,
+      service_id: bookingServiceId,
       total_amount: bookingAmount,
       scheduled_at: scheduledAt,
     }]);
@@ -394,6 +398,18 @@ export default function RecurringBookingsPage() {
 
   const activeCount = recurringBookings.filter(b => b.is_active).length;
   const pausedCount = recurringBookings.filter(b => !b.is_active).length;
+
+  // Sort recurring bookings chronologically by next upcoming date (soonest first)
+  const sortedRecurringBookings = [...recurringBookings].sort((a, b) => {
+    const keyA = `${a.customer_id}__${a.service_id}`;
+    const keyB = `${b.customer_id}__${b.service_id}`;
+    const nextA = computeNextDate(a, latestBookingMap.get(keyA) || null, existingDatesMap.get(keyA), customFrequencies);
+    const nextB = computeNextDate(b, latestBookingMap.get(keyB) || null, existingDatesMap.get(keyB), customFrequencies);
+    if (!nextA && !nextB) return 0;
+    if (!nextA) return 1;
+    if (!nextB) return -1;
+    return nextA.getTime() - nextB.getTime();
+  });
 
   return (
     <AdminLayout
@@ -467,7 +483,7 @@ export default function RecurringBookingsPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                recurringBookings.map((booking) => (
+                sortedRecurringBookings.map((booking) => (
                   <TableRow key={booking.id}>
                     <TableCell>
                       <div>
@@ -606,10 +622,10 @@ function RecurringBookingDialog({
   customFrequencies: { id: string; name: string; interval_days: number; is_active: boolean; days_of_week: number[] | null }[];
   onSave: (data: any) => void;
 }) {
+  const { organization } = useOrganization();
   const [formData, setFormData] = useState({
     customer_id: '',
     service_id: '',
-    staff_id: '',
     frequency: 'weekly',
     preferred_day: '',
     preferred_date_of_month: '',
@@ -617,15 +633,17 @@ function RecurringBookingDialog({
     total_amount: '',
     is_active: true,
     day_prices: {} as Record<string, string>,
+    day_services: {} as Record<string, string>,
   });
 
-  // Determine if current frequency is a multi-day custom frequency
+  // Team members state
+  const [teamMembers, setTeamMembers] = useState<{ staff_id: string }[]>([]);
+
   const selectedCustomFreq = formData.frequency.startsWith('custom_')
     ? customFrequencies.find(cf => cf.id === formData.frequency.replace('custom_', ''))
     : null;
   const isMultiDay = selectedCustomFreq?.days_of_week && selectedCustomFreq.days_of_week.length > 1;
 
-  // Reset form when booking changes or dialog opens
   useEffect(() => {
     if (open) {
       const existingDayPrices = (booking as any)?.day_prices as Record<string, number> | null;
@@ -635,10 +653,16 @@ function RecurringBookingDialog({
           dayPricesStr[k] = v.toString();
         }
       }
+      const existingDayServices = (booking as any)?.day_services as Record<string, string> | null;
+      const dayServicesStr: Record<string, string> = {};
+      if (existingDayServices) {
+        for (const [k, v] of Object.entries(existingDayServices)) {
+          dayServicesStr[k] = v;
+        }
+      }
       setFormData({
         customer_id: booking?.customer_id || '',
         service_id: booking?.service_id || '',
-        staff_id: booking?.staff_id || '',
         frequency: booking?.frequency || 'weekly',
         preferred_day: booking?.preferred_day?.toString() || '',
         preferred_date_of_month: (booking as any)?.preferred_date_of_month?.toString() || '',
@@ -646,46 +670,75 @@ function RecurringBookingDialog({
         total_amount: booking?.total_amount?.toString() || '',
         is_active: booking?.is_active ?? true,
         day_prices: dayPricesStr,
+        day_services: dayServicesStr,
       });
+
+      if (booking?.staff_id) {
+        setTeamMembers([{ staff_id: booking.staff_id }]);
+      } else {
+        setTeamMembers([]);
+      }
     }
   }, [booking, open]);
 
+  const addTeamMember = (staffId: string) => {
+    if (teamMembers.some(m => m.staff_id === staffId)) return;
+    setTeamMembers([...teamMembers, { staff_id: staffId }]);
+  };
+
+  const removeTeamMember = (staffId: string) => {
+    setTeamMembers(teamMembers.filter(m => m.staff_id !== staffId));
+  };
+
+  const availableStaff = staff.filter((s: any) => s.is_active && !teamMembers.some(m => m.staff_id === s.id));
+
   const handleSubmit = () => {
-    if (!formData.customer_id || !formData.service_id) return;
-    // For multi-day, require at least one day price; for single-day, require total_amount
+    if (!formData.customer_id) return;
+    if (!isMultiDay && !formData.service_id) return;
     if (!isMultiDay && !formData.total_amount) return;
 
     const isWeekBased = ['weekly', 'biweekly', 'triweekly'].includes(formData.frequency);
 
-    // Build day_prices as numeric JSON
     let dayPricesPayload: Record<string, number> | null = null;
+    let dayServicesPayload: Record<string, string> | null = null;
     let effectiveTotalAmount = parseFloat(formData.total_amount) || 0;
 
     if (isMultiDay && selectedCustomFreq?.days_of_week) {
       dayPricesPayload = {};
+      dayServicesPayload = {};
       let sum = 0;
       for (const dayIdx of selectedCustomFreq.days_of_week) {
         const val = parseFloat(formData.day_prices[dayIdx.toString()] || '0');
         dayPricesPayload[dayIdx.toString()] = val;
         sum += val;
+        if (formData.day_services[dayIdx.toString()]) {
+          dayServicesPayload[dayIdx.toString()] = formData.day_services[dayIdx.toString()];
+        }
       }
-      // Use average as the series-level total_amount for display
       effectiveTotalAmount = Math.round((sum / selectedCustomFreq.days_of_week.length) * 100) / 100;
+      if (Object.keys(dayServicesPayload).length === 0) dayServicesPayload = null;
     }
 
+    const primaryStaffId = teamMembers.length > 0 ? teamMembers[0].staff_id : null;
+
     onSave({
-      ...formData,
+      customer_id: formData.customer_id,
+      service_id: formData.service_id || null,
+      staff_id: primaryStaffId,
+      frequency: formData.frequency,
       preferred_day: isWeekBased ? (formData.preferred_day ? parseInt(formData.preferred_day) : null) : null,
       preferred_date_of_month: !isWeekBased && formData.preferred_date_of_month ? parseInt(formData.preferred_date_of_month) : null,
+      preferred_time: formData.preferred_time || null,
       total_amount: effectiveTotalAmount,
-      staff_id: formData.staff_id || null,
+      is_active: formData.is_active,
       day_prices: dayPricesPayload,
+      day_services: dayServicesPayload,
     });
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{booking ? 'Edit' : 'Add'} Recurring Booking</DialogTitle>
         </DialogHeader>
@@ -697,7 +750,7 @@ function RecurringBookingDialog({
                 <SelectValue placeholder="Select customer" />
               </SelectTrigger>
               <SelectContent>
-                {customers.map((c) => (
+                {customers.map((c: any) => (
                   <SelectItem key={c.id} value={c.id}>
                     {c.first_name} {c.last_name}
                   </SelectItem>
@@ -705,40 +758,68 @@ function RecurringBookingDialog({
               </SelectContent>
             </Select>
           </div>
+          {!isMultiDay && (
+            <div>
+              <Label>Service *</Label>
+              <Select value={formData.service_id} onValueChange={(v) => setFormData({ ...formData, service_id: v })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select service" />
+                </SelectTrigger>
+                <SelectContent>
+                  {services.map((s: any) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {/* Multi-cleaner team builder */}
           <div>
-            <Label>Service *</Label>
-            <Select value={formData.service_id} onValueChange={(v) => setFormData({ ...formData, service_id: v })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select service" />
-              </SelectTrigger>
-              <SelectContent>
-                {services.map((s) => (
-                  <SelectItem key={s.id} value={s.id}>
-                    {s.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label>Assign Cleaners</Label>
+            {teamMembers.length > 0 && (
+              <div className="space-y-2 mt-2 mb-2">
+                {teamMembers.map((member, idx) => {
+                  const staffMember = staff.find((s: any) => s.id === member.staff_id);
+                  return (
+                    <div key={member.staff_id} className="flex items-center gap-2 p-2 rounded-md border border-border bg-muted/30">
+                      <span className="text-sm font-medium flex-1 truncate">
+                        {staffMember?.name || 'Unknown'}
+                      </span>
+                      {idx === 0 && (
+                        <Badge variant="secondary" className="text-[10px] shrink-0">Lead</Badge>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 shrink-0"
+                        onClick={() => removeTeamMember(member.staff_id)}
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            {availableStaff.length > 0 && (
+              <Select onValueChange={(v) => addTeamMember(v)} value="">
+                <SelectTrigger>
+                  <SelectValue placeholder={teamMembers.length === 0 ? 'Add cleaner...' : 'Add another cleaner...'} />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableStaff.map((s: any) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
-          <div>
-            <Label>Assign Cleaner</Label>
-            <Select 
-              value={formData.staff_id || "unassigned"} 
-              onValueChange={(v) => setFormData({ ...formData, staff_id: v === "unassigned" ? "" : v })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Unassigned" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="unassigned">Unassigned</SelectItem>
-                {staff.filter(s => s.is_active).map((s) => (
-                  <SelectItem key={s.id} value={s.id}>
-                    {s.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+
           <div>
             <Label>Frequency *</Label>
             <Select value={formData.frequency} onValueChange={(v) => setFormData({ ...formData, frequency: v })}>
@@ -813,23 +894,47 @@ function RecurringBookingDialog({
               </Select>
             </div>
           </div>
+
           {isMultiDay && selectedCustomFreq?.days_of_week ? (
             <div>
-              <Label>Amount per Day *</Label>
-              <div className="space-y-2 mt-1">
+              <Label>Service & Amount per Day *</Label>
+              <div className="space-y-3 mt-2">
                 {selectedCustomFreq.days_of_week.sort((a, b) => a - b).map((dayIdx) => (
-                  <div key={dayIdx} className="flex items-center gap-3">
-                    <span className="text-sm font-medium w-24 shrink-0">{DAYS_OF_WEEK[dayIdx]}</span>
-                    <Input
-                      type="number"
-                      value={formData.day_prices[dayIdx.toString()] || ''}
-                      onChange={(e) => setFormData({
-                        ...formData,
-                        day_prices: { ...formData.day_prices, [dayIdx.toString()]: e.target.value },
-                      })}
-                      placeholder="0.00"
-                      className="flex-1"
-                    />
+                  <div key={dayIdx} className="space-y-1">
+                    <span className="text-sm font-medium">{DAYS_OF_WEEK[dayIdx]}</span>
+                    <div className="flex items-center gap-2">
+                      <Select
+                        value={formData.day_services[dayIdx.toString()] || formData.service_id}
+                        onValueChange={(v) => setFormData({
+                          ...formData,
+                          day_services: { ...formData.day_services, [dayIdx.toString()]: v },
+                        })}
+                      >
+                        <SelectTrigger className="flex-1">
+                          <SelectValue placeholder="Service" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {services.map((s: any) => (
+                            <SelectItem key={s.id} value={s.id}>
+                              {s.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <div className="relative w-24 shrink-0">
+                        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
+                        <Input
+                          type="number"
+                          value={formData.day_prices[dayIdx.toString()] || ''}
+                          onChange={(e) => setFormData({
+                            ...formData,
+                            day_prices: { ...formData.day_prices, [dayIdx.toString()]: e.target.value },
+                          })}
+                          placeholder="0"
+                          className="pl-5"
+                        />
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>

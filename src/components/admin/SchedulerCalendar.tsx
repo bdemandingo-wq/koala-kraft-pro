@@ -371,24 +371,32 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
   }, [allBookings, activeSearchTerm]);
 
   const bookings = useMemo(() => {
-    let start: Date, end: Date;
-    
+    // Compute the full visible grid date range (including overflow days from prev/next month)
+    let startStr: string, endStr: string;
+
     if (viewMode === 'week') {
-      start = startOfWeek(currentDate);
-      end = endOfWeek(currentDate);
+      startStr = format(startOfWeek(currentDate), 'yyyy-MM-dd');
+      endStr = format(endOfWeek(currentDate), 'yyyy-MM-dd');
     } else {
-      start = startOfMonth(currentDate);
-      end = endOfMonth(currentDate);
+      const mStart = startOfMonth(currentDate);
+      const mEnd = endOfMonth(currentDate);
+      const padding = mStart.getDay();
+      const gridStart = addDays(mStart, -padding);
+      const totalCells = Math.ceil((padding + mEnd.getDate()) / 7) * 7;
+      const gridEnd = addDays(gridStart, totalCells - 1);
+      startStr = format(gridStart, 'yyyy-MM-dd');
+      endStr = format(gridEnd, 'yyyy-MM-dd');
     }
-    
+
+    // Use timezone-aware comparison (same as getBookingsForDate) to avoid mismatches
     return allBookings.filter(b => {
-      const bookingDate = new Date(b.scheduled_at);
-      const inDateRange = bookingDate >= start && bookingDate <= end;
+      const bookingDateStr = getDateInTimezone(b.scheduled_at, orgTimezone);
+      const inDateRange = bookingDateStr >= startStr && bookingDateStr <= endStr;
       const matchesStatus = statusFilter === 'all' || b.status === statusFilter;
       const matchesStaff = !staffFilter || b.staff_id === staffFilter;
       return inDateRange && matchesStatus && matchesStaff;
     });
-  }, [allBookings, currentDate, viewMode, statusFilter, staffFilter]);
+  }, [allBookings, currentDate, viewMode, statusFilter, staffFilter, orgTimezone]);
 
   const { year, month, days, monthWeekRows } = useMemo(() => {
     const year = currentDate.getFullYear();

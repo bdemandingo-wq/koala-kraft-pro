@@ -1,0 +1,1 @@
+ALTER TABLE public.recurring_bookings ADD COLUMN IF NOT EXISTS day_services JSONB DEFAULT NULL;
