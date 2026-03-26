@@ -402,6 +402,8 @@ export default function PayrollPage() {
     const assignedBookings = bookings.filter((b: any) => b.status !== 'cancelled' && b.staff_id);
 
     for (const b of assignedBookings) {
+      // Re-cleans (no service, $0 total) should show $0 across all financial columns
+      const isReclean = !b.service_id && Number(b.total_amount) === 0;
       const staffMember = staff.find((s) => s.id === b.staff_id);
       const assignments = teamAssignments.filter((a: any) => a.booking_id === b.id);
 
