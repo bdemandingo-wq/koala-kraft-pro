@@ -99,23 +99,23 @@ function computeNextDate(
   const intervalAdder = getIntervalAdder(booking.frequency, customFrequencies);
   const preferredDay = booking.preferred_day;
   const preferredDateOfMonth = (booking as any).preferred_date_of_month as number | null;
-  const isMonthly = booking.frequency === 'monthly';
+  const isWeekBased = ['weekly', 'biweekly', 'triweekly'].includes(booking.frequency);
 
-  // For monthly: use explicit preferred_date_of_month, or derive from anchor date
-  const effectiveDateOfMonth = isMonthly
+  // Use explicit preferred_date_of_month, or derive from anchor date for non-week-based frequencies
+  const effectiveDateOfMonth = !isWeekBased
     ? (preferredDateOfMonth ?? anchor.getDate())
     : null;
 
-  // For monthly with date-of-month, align to that date; otherwise align to weekday
+  // For week-based: align to preferred weekday; for others: align to date-of-month
   const alignToPreferred = (d: Date): Date => {
-    if (isMonthly && effectiveDateOfMonth != null) {
+    if (!isWeekBased && effectiveDateOfMonth != null) {
       const year = d.getFullYear();
       const month = d.getMonth();
       const daysInMonth = new Date(year, month + 1, 0).getDate();
       const day = Math.min(effectiveDateOfMonth, daysInMonth);
       return new Date(year, month, day);
     }
-    if (preferredDay !== null) {
+    if (isWeekBased && preferredDay !== null) {
       while (d.getDay() !== preferredDay) {
         d = addDays(d, 1);
       }
@@ -628,10 +628,11 @@ function RecurringBookingDialog({
     if (!formData.customer_id || !formData.service_id || !formData.total_amount) {
       return;
     }
+    const isWeekBased = ['weekly', 'biweekly', 'triweekly'].includes(formData.frequency);
     onSave({
       ...formData,
-      preferred_day: formData.frequency === 'monthly' ? null : (formData.preferred_day ? parseInt(formData.preferred_day) : null),
-      preferred_date_of_month: formData.frequency === 'monthly' && formData.preferred_date_of_month ? parseInt(formData.preferred_date_of_month) : null,
+      preferred_day: isWeekBased ? (formData.preferred_day ? parseInt(formData.preferred_day) : null) : null,
+      preferred_date_of_month: !isWeekBased && formData.preferred_date_of_month ? parseInt(formData.preferred_date_of_month) : null,
       total_amount: parseFloat(formData.total_amount),
       staff_id: formData.staff_id || null,
     });
@@ -718,23 +719,7 @@ function RecurringBookingDialog({
             </Select>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            {formData.frequency === 'monthly' ? (
-              <div>
-                <Label>Preferred Date</Label>
-                <Select value={formData.preferred_date_of_month} onValueChange={(v) => setFormData({ ...formData, preferred_date_of_month: v })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Same as last" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Array.from({ length: 28 }, (_, i) => i + 1).map((d) => (
-                      <SelectItem key={d} value={d.toString()}>
-                        {d}{d === 1 ? 'st' : d === 2 ? 'nd' : d === 3 ? 'rd' : 'th'}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            ) : (
+            {['weekly', 'biweekly', 'triweekly'].includes(formData.frequency) ? (
               <div>
                 <Label>Preferred Day</Label>
                 <Select value={formData.preferred_day} onValueChange={(v) => setFormData({ ...formData, preferred_day: v })}>
@@ -750,7 +735,23 @@ function RecurringBookingDialog({
                   </SelectContent>
                 </Select>
               </div>
-            )}
+            ) : formData.frequency !== 'anyday' ? (
+              <div>
+                <Label>Preferred Date</Label>
+                <Select value={formData.preferred_date_of_month} onValueChange={(v) => setFormData({ ...formData, preferred_date_of_month: v })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Same as last" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 28 }, (_, i) => i + 1).map((d) => (
+                      <SelectItem key={d} value={d.toString()}>
+                        {d}{d === 1 ? 'st' : d === 2 ? 'nd' : d === 3 ? 'rd' : 'th'}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : <div />}
             <div>
               <Label>Preferred Time</Label>
               <Select value={formData.preferred_time} onValueChange={(v) => setFormData({ ...formData, preferred_time: v })}>
