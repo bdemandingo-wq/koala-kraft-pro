@@ -179,6 +179,7 @@ function StaticNavItem({ item, isActive, isOpen, isMobile, onNavClick }: Sortabl
     <Link
       to={item.href}
       onClick={onNavClick}
+      style={{ position: 'relative', zIndex: 1 }}
       className={cn(
         'sidebar-link min-h-[44px] pointer-events-auto touch-manipulation',
         isActive && 'active',
