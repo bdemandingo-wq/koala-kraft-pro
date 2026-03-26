@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
 import { toast } from 'sonner';
 import { FileText, CheckCircle2, PenLine, Loader2, Eye, Clock, X } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -40,10 +40,6 @@ export function StaffSignatureManager({ staffId, organizationId }: Props) {
   const queryClient = useQueryClient();
   const [signingDocId, setSigningDocId] = useState<string | null>(null);
   const [signingDocUrl, setSigningDocUrl] = useState<string | null>(null);
-  const [previewingDocId, setPreviewingDocId] = useState<string | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [previewTitle, setPreviewTitle] = useState<string>('');
-  const [previewIsPdf, setPreviewIsPdf] = useState(false);
 
   // Fetch signable documents for this org
   const { data: signableDocs = [], isLoading: loadingDocs } = useQuery({
@@ -144,36 +140,17 @@ export function StaffSignatureManager({ staffId, organizationId }: Props) {
     },
   });
 
-  const handlePreview = async (filePath: string, title: string = 'Document') => {
-    const isPdf = filePath.toLowerCase().endsWith('.pdf');
+  const handlePreview = async (filePath: string) => {
     const { data, error } = await supabase.storage
       .from('staff-documents')
-      .createSignedUrl(filePath, 300, {
-        download: false,
-      });
+      .createSignedUrl(filePath, 300);
 
     if (error || !data?.signedUrl) {
-      toast.error('Failed to preview document');
+      toast.error('Failed to open document preview');
       return;
     }
 
-    setPreviewTitle(title);
-    setPreviewIsPdf(isPdf);
-
-    if (isPdf) {
-      // Fetch as blob to bypass Content-Disposition: attachment
-      try {
-        const res = await fetch(data.signedUrl);
-        const blob = await res.blob();
-        const blobUrl = URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
-        setPreviewUrl(blobUrl);
-      } catch {
-        toast.error('Failed to load PDF preview');
-      }
-    } else {
-      const encodedUrl = encodeURIComponent(data.signedUrl);
-      setPreviewUrl(`https://docs.google.com/gview?url=${encodedUrl}&embedded=true`);
-    }
+    window.open(data.signedUrl, '_blank', 'noopener,noreferrer');
   };
 
   const regeneratePdfMutation = useMutation({
@@ -312,7 +289,7 @@ export function StaffSignatureManager({ staffId, organizationId }: Props) {
                         variant="outline"
                         size="sm"
                         className="gap-1 h-8 text-xs"
-                        onClick={() => handlePreview(sig.signed_pdf_path!, doc.title + ' (Signed)')}
+                        onClick={() => handlePreview(sig.signed_pdf_path!)}
                       >
                         <Eye className="h-3 w-3" /> View Signed PDF
                       </Button>
@@ -343,7 +320,7 @@ export function StaffSignatureManager({ staffId, organizationId }: Props) {
                     variant="outline"
                     size="sm"
                     className="gap-1 flex-1 h-10"
-                    onClick={() => handlePreview(doc.file_path, doc.title)}
+                    onClick={() => handlePreview(doc.file_path)}
                   >
                     <Eye className="h-3.5 w-3.5" /> Review Document
                   </Button>
@@ -413,23 +390,6 @@ export function StaffSignatureManager({ staffId, organizationId }: Props) {
         );
       })}
 
-      {/* Document Preview Dialog */}
-      <Dialog open={!!previewUrl} onOpenChange={(open) => { if (!open) { if (previewIsPdf && previewUrl) URL.revokeObjectURL(previewUrl); setPreviewUrl(null); setPreviewTitle(''); setPreviewIsPdf(false); } }}>
-        <DialogContent className="max-w-4xl w-[95vw] h-[85vh] p-0 flex flex-col" aria-describedby={undefined}>
-          <DialogHeader className="px-4 pt-4 pb-2">
-            <DialogTitle className="text-sm">{previewTitle}</DialogTitle>
-          </DialogHeader>
-          <div className="flex-1 min-h-0 px-4 pb-4">
-            {previewUrl ? (
-              <iframe
-                src={previewUrl}
-                className="w-full h-full rounded-lg border"
-                title={previewTitle}
-              />
-            ) : null}
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
