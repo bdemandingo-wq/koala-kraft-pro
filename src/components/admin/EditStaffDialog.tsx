@@ -25,6 +25,7 @@ import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import { Upload, FileText, Trash2, Download, Key, Eye, EyeOff, MapPin, Loader2 } from 'lucide-react';
 import { StaffDocumentManager } from '@/components/admin/StaffDocumentManager';
+import { AdminSignableDocManager } from '@/components/admin/AdminSignableDocManager';
 
 const STAFF_COLOR_OPTIONS = [
   { value: '#3b82f6', label: 'Blue' },
@@ -600,6 +601,11 @@ export function EditStaffDialog({ open, onOpenChange, staff }: EditStaffDialogPr
             {staff && (
               <StaffDocumentManager staffId={staff.id} staffName={staff.name} />
             )}
+          </div>
+
+          {/* Signable Documents Section */}
+          <div className="space-y-2 pt-4 border-t">
+            <AdminSignableDocManager />
           </div>
 
           {/* Password Reset Section */}

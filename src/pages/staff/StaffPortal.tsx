@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { LogOut, Briefcase, CalendarCheck, Clock, DollarSign, Bell, History, Sparkles, Calendar, User, Star, FileText } from 'lucide-react';
+import { LogOut, Briefcase, CalendarCheck, Clock, DollarSign, Bell, History, Sparkles, Calendar, User, Star, FileText, PenLine } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { MyJobCard } from '@/components/staff/MyJobCard';
 import { AvailableJobCard } from '@/components/staff/AvailableJobCard';
@@ -20,6 +20,7 @@ import { NotificationBell } from '@/components/staff/NotificationBell';
 import { CleanerReviews } from '@/components/staff/CleanerReviews';
 import { BookingChecklist } from '@/components/staff/BookingChecklist';
 import { StaffDocumentUpload } from '@/components/staff/StaffDocumentUpload';
+import { StaffSignatureManager } from '@/components/staff/StaffSignatureManager';
 
 interface Booking {
   id: string;
@@ -616,6 +617,10 @@ export default function StaffPortal() {
               <FileText className="w-4 h-4 hidden sm:inline" />
               Documents
             </TabsTrigger>
+            <TabsTrigger value="signatures" className="gap-2">
+              <PenLine className="w-4 h-4 hidden sm:inline" />
+              Signatures
+            </TabsTrigger>
           </TabsList>
 
           {/* My Jobs Tab */}
@@ -767,6 +772,15 @@ export default function StaffPortal() {
               <StaffDocumentUpload staffId={staffInfo.id} organizationId={staffInfo.organization_id} />
             ) : (
               <p className="text-muted-foreground">Loading documents...</p>
+            )}
+          </TabsContent>
+
+          {/* Signatures Tab */}
+          <TabsContent value="signatures" className="space-y-4">
+            {staffInfo?.id && staffInfo?.organization_id ? (
+              <StaffSignatureManager staffId={staffInfo.id} organizationId={staffInfo.organization_id} />
+            ) : (
+              <p className="text-muted-foreground">Loading signatures...</p>
             )}
           </TabsContent>
         </Tabs>
