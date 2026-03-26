@@ -371,12 +371,14 @@ export default function RecurringBookingsPage() {
     const dayServices = (recurring as any).day_services as Record<string, string> | null;
 
     if (customDays && customDays.length > 1) {
-      // For multi-day custom frequencies (M/W/F), generate one booking per day in the next week cycle
-      const key = `${recurring.customer_id}__${recurring.service_id}`;
-      const latestDate = latestBookingMap.get(key) || null;
-      const existingDates = existingDatesMap.get(key) || new Set<string>();
+      // For multi-day custom frequencies (M/W/F), generate one booking per day
+      // continuing from the last existing booking in the series
+      // Use customer-only lookup since per-day services may have different service_ids
+      const custKey = recurring.customer_id;
+      const latestDate = latestByCustomer.get(custKey) || null;
+      const existingDates = existingDatesByCustomer.get(custKey) || new Set<string>();
 
-      // Find the anchor: latest booking or now
+      // Find the anchor: latest booking or stored next_scheduled_at or created_at
       const now = new Date();
       let anchor: Date;
       if (latestDate) {
@@ -384,42 +386,58 @@ export default function RecurringBookingsPage() {
       } else if (recurring.next_scheduled_at) {
         anchor = startOfDay(new Date(recurring.next_scheduled_at));
       } else {
-        anchor = startOfDay(now);
+        anchor = startOfDay(new Date(recurring.created_at));
       }
 
-      // Find the next occurrence of each custom day after the anchor
+      // Sort custom days to establish the pattern order (e.g., Mon=1, Wed=3, Fri=5)
+      const sortedDays = [...customDays].sort((a, b) => a - b);
+
+      // Find which day in the pattern the anchor falls on, then continue from there
+      const anchorDayOfWeek = anchor.getDay();
+      
+      // Generate the next occurrence of each day in pattern order, starting from anchor
       const bookingsToInsert: any[] = [];
-      for (const dayIdx of customDays) {
-        // Find the next occurrence of this day of week after anchor
-        let candidate = addDays(anchor, 1); // Start from day after anchor
-        let safety = 0;
-        while (candidate.getDay() !== dayIdx && safety < 7) {
-          candidate = addDays(candidate, 1);
-          safety++;
-        }
-        // Make sure it's in the future and not already booked
-        while ((isBefore(candidate, now) || existingDates.has(formatDateKey(candidate))) && safety < 60) {
-          candidate = addWeeks(candidate, 1); // Jump by a week to find next occurrence of same day
-          safety++;
-        }
+      
+      // Find the next day in the pattern after the anchor
+      // Walk forward day by day from anchor+1, collecting each pattern day we hit
+      let cursor = addDays(anchor, 1);
+      const collectedDays = new Set<number>();
+      let safety = 0;
+      
+      while (collectedDays.size < sortedDays.length && safety < 14) {
+        if (sortedDays.includes(cursor.getDay())) {
+          const dayIdx = cursor.getDay();
+          if (!collectedDays.has(dayIdx)) {
+            let candidate = new Date(cursor);
+            // Skip past existing bookings and past dates
+            let skipSafety = 0;
+            while ((isBefore(candidate, now) || existingDates.has(formatDateKey(candidate))) && skipSafety < 60) {
+              candidate = addWeeks(candidate, 1);
+              skipSafety++;
+            }
+            
+            let bookingAmount = recurring.total_amount;
+            let bookingServiceId = recurring.service_id;
+            const dayKey = dayIdx.toString();
+            if (dayPrices && dayPrices[dayKey] != null) {
+              bookingAmount = dayPrices[dayKey];
+            }
+            if (dayServices && dayServices[dayKey]) {
+              bookingServiceId = dayServices[dayKey];
+            }
 
-        let bookingAmount = recurring.total_amount;
-        let bookingServiceId = recurring.service_id;
-        const dayKey = dayIdx.toString();
-        if (dayPrices && dayPrices[dayKey] != null) {
-          bookingAmount = dayPrices[dayKey];
+            const scheduledAt = applyTime(new Date(candidate)).toISOString();
+            bookingsToInsert.push({
+              ...baseBooking,
+              service_id: bookingServiceId,
+              total_amount: bookingAmount,
+              scheduled_at: scheduledAt,
+            });
+            collectedDays.add(dayIdx);
+          }
         }
-        if (dayServices && dayServices[dayKey]) {
-          bookingServiceId = dayServices[dayKey];
-        }
-
-        const scheduledAt = applyTime(new Date(candidate)).toISOString();
-        bookingsToInsert.push({
-          ...baseBooking,
-          service_id: bookingServiceId,
-          total_amount: bookingAmount,
-          scheduled_at: scheduledAt,
-        });
+        cursor = addDays(cursor, 1);
+        safety++;
       }
 
       if (bookingsToInsert.length === 0) {
