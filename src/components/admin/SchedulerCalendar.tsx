@@ -770,261 +770,107 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
           </div>
         )}
 
-        {/* Day Headers & Grid */}
+        {/* Day Headers */}
         <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="grid grid-cols-7 border-b border-border">
+          {DAYS.map((day) => (
+            <div
+              key={day}
+              className="py-1.5 md:py-3 text-center text-[10px] md:text-sm font-medium text-muted-foreground"
+            >
+              {isMobile ? day.charAt(0) : day}
+            </div>
+          ))}
+        </div>
 
-        {viewMode === 'week' ? (
-          /* ===== WEEK TIME-GRID VIEW ===== */
-          <>
-            {/* Day header row */}
-            <div className="grid border-b border-border" style={{ gridTemplateColumns: '3rem repeat(7, 1fr)' }}>
-              <div className="py-1.5 md:py-3" />
-              {days.filter((d): d is Date => d !== null).map((date) => (
-                <div
-                  key={date.toISOString()}
+        {/* Calendar Grid */}
+        <div
+          className="grid grid-cols-7 flex-1 min-h-0"
+          style={{
+            gridTemplateRows:
+              viewMode === 'week'
+                ? 'repeat(1, minmax(0, 1fr))'
+                : `repeat(${monthWeekRows}, minmax(0, 1fr))`,
+          }}
+        >
+          {isLoading ? (
+            <div className="col-span-7 flex items-center justify-center h-64">
+              <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            days.map((date, index) => {
+              const dayBookings = date ? getBookingsForDate(date) : [];
+              return (
+                <DroppableDay
+                  key={index}
+                  id={date ? `day-${format(date, 'yyyy-MM-dd')}` : `empty-${index}`}
+                  disabled={!date}
                   className={cn(
-                    'py-1.5 md:py-3 text-center text-[10px] md:text-sm font-medium',
-                    isToday(date) ? 'text-primary font-bold' : 'text-muted-foreground'
+                    'calendar-day min-h-0 overflow-hidden',
+                    viewMode === 'week'
+                      ? (isMobile ? 'min-h-[100px]' : 'min-h-[200px]')
+                      : '',
+                    date && isToday(date) && 'today',
+                    !date && 'bg-muted/30'
                   )}
                 >
-                  {isMobile ? `${DAYS[date.getDay()].charAt(0)} ${date.getDate()}` : `${DAYS[date.getDay()]} ${format(date, 'MMM d')}`}
-                </div>
-              ))}
-            </div>
-
-            {/* Scrollable time grid */}
-            <div className="flex-1 overflow-y-auto min-h-0">
-              {(() => {
-                const HOUR_PX = isMobile ? 48 : 60;
-                const START_HOUR = 6;
-                const TOTAL_HOURS = 17; // 6 AM to 10 PM
-                const TOTAL_HEIGHT = TOTAL_HOURS * HOUR_PX;
-                const weekDays = days.filter((d): d is Date => d !== null);
-
-                return (
-                  <div className="flex" style={{ height: TOTAL_HEIGHT }}>
-                    {/* Time labels column */}
-                    <div className="shrink-0 w-10 md:w-12 relative">
-                      {Array.from({ length: TOTAL_HOURS }, (_, i) => {
-                        const hour = i + START_HOUR;
-                        const label = hour === 12 ? '12p' : hour > 12 ? `${hour - 12}p` : `${hour}a`;
-                        return (
-                          <div
-                            key={hour}
-                            className="absolute right-1 md:right-2 text-[9px] md:text-xs text-muted-foreground leading-none"
-                            style={{ top: i * HOUR_PX - 5 }}
-                          >
-                            {label}
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    {/* Day columns */}
-                    {weekDays.map((date, dayIdx) => {
-                      const dayBookings = getBookingsForDate(date);
-                      return (
+                  {date && (
+                    <>
+                      <span
+                        className={cn(
+                          'text-[10px] md:text-sm font-medium mb-0.5 md:mb-1',
+                          isToday(date) && 'text-primary'
+                        )}
+                      >
+                        {viewMode === 'week' ? (isMobile ? format(date, 'd') : format(date, 'MMM d')) : date.getDate()}
+                      </span>
                         <div
-                          key={date.toISOString()}
                           className={cn(
-                            'flex-1 relative border-l border-border/50',
-                            isToday(date) && 'bg-primary/5'
+                            'w-full space-y-0.5 md:space-y-1 overflow-y-auto scrollbar-thin min-h-0',
+                            viewMode === 'week'
+                              ? (isMobile ? 'max-h-[80px]' : 'max-h-[200px]')
+                              : 'flex-1'
                           )}
                         >
-                          {/* Hour grid lines */}
-                          {Array.from({ length: TOTAL_HOURS }, (_, i) => (
-                            <div
-                              key={i}
-                              className="absolute w-full border-b border-border/40"
-                              style={{ top: i * HOUR_PX, height: HOUR_PX }}
-                            />
-                          ))}
-
-                          {/* Booking blocks with overlap detection */}
-                          {(() => {
-                            // Calculate overlap columns for this day's bookings
-                            const START_HOUR_LOCAL = START_HOUR;
-                            const sorted = [...dayBookings].sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime());
-
-                            // Assign columns using a greedy approach
-                            const layouts: { booking: typeof sorted[0]; col: number; totalCols: number; topPx: number; heightPx: number }[] = [];
-                            const columns: { end: number }[] = []; // track end time per column
-
-                            for (const booking of sorted) {
-                              const bDate = new Date(booking.scheduled_at);
-                              const startH = bDate.getHours() + bDate.getMinutes() / 60;
-                              const durH = (booking.duration || 60) / 60;
-                              const endH = startH + durH;
-
-                              // Find first column where this booking fits (no overlap)
-                              let placed = false;
-                              for (let c = 0; c < columns.length; c++) {
-                                if (startH >= columns[c].end) {
-                                  columns[c].end = endH;
-                                  layouts.push({ booking, col: c, totalCols: 0, topPx: 0, heightPx: 0 });
-                                  placed = true;
-                                  break;
-                                }
-                              }
-                              if (!placed) {
-                                columns.push({ end: endH });
-                                layouts.push({ booking, col: columns.length - 1, totalCols: 0, topPx: 0, heightPx: 0 });
-                              }
-                            }
-
-                            const totalCols = columns.length;
-
-                            // Now compute positions
-                            return layouts.map(({ booking, col }) => {
-                              const bDate = new Date(booking.scheduled_at);
-                              const bookingHour = bDate.getHours() + bDate.getMinutes() / 60;
-                              const clampedStart = Math.max(bookingHour, START_HOUR_LOCAL);
-                              const topPx = (clampedStart - START_HOUR_LOCAL) * HOUR_PX;
-                              const durationHours = (booking.duration || 60) / 60;
-                              const heightPx = Math.max(durationHours * HOUR_PX, isMobile ? 22 : 28);
-                              const color = getStaffColor(booking.staff_id, staffList);
-                              const teamIds = teamAssignmentMap.get(booking.id) || [];
-                              const teamColors = teamIds
-                                .filter(id => id !== booking.staff_id)
-                                .map(id => getStaffColor(id, staffList));
-
-                              const widthPct = 100 / totalCols;
-                              const leftPct = col * widthPct;
-
-                              return (
-                                <button
+                        {(() => {
+                          const maxVisible = isMobile && viewMode === 'month' ? 2 : dayBookings.length;
+                          const visibleBookings = dayBookings.slice(0, maxVisible);
+                          const overflowCount = dayBookings.length - maxVisible;
+                          return (
+                            <>
+                              {visibleBookings.map((booking, bIndex) => (
+                                <DraggableBooking
                                   key={booking.id}
+                                  booking={booking}
+                                  index={bIndex}
                                   onClick={() => setSelectedBooking(booking)}
-                                  className="absolute z-10 rounded text-left px-1 py-0.5 overflow-hidden border-l-[3px] text-[10px] md:text-xs leading-tight select-none cursor-pointer hover:opacity-80 transition-opacity"
-                                  style={{
-                                    top: topPx,
-                                    height: heightPx,
-                                    left: `calc(${leftPct}% + 1px)`,
-                                    width: `calc(${widthPct}% - 2px)`,
-                                    backgroundColor: `${color}25`,
-                                    color: color,
-                                    borderLeftColor: color,
+                                  staffList={staffList}
+                                  teamStaffIds={teamAssignmentMap.get(booking.id)}
+                                  disableDrag={isMobile}
+                                />
+                              ))}
+                              {overflowCount > 0 && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setDayBookingsPopup({ date: date!, bookings: dayBookings });
                                   }}
+                                  className="w-full text-center text-[10px] font-semibold text-primary bg-primary/10 rounded py-0.5 hover:bg-primary/20 transition-colors"
                                 >
-                                  <div className="font-semibold truncate">{formatCustomerName(booking.customer)}</div>
-                                  {heightPx >= (isMobile ? 32 : 36) && (
-                                    <div className="truncate opacity-70">
-                                      {formatInTimezone(booking.scheduled_at, orgTimezone, { hour: 'numeric', minute: '2-digit', hour12: true })}
-                                    </div>
-                                  )}
-                                  {heightPx >= (isMobile ? 48 : 54) && booking.service?.name && (
-                                    <div className="truncate opacity-60">{booking.service.name}</div>
-                                  )}
-                                  {teamColors.length > 0 && (
-                                    <div className="flex items-center gap-0.5 mt-0.5">
-                                      {teamColors.map((tc, i) => (
-                                        <div key={i} className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: tc }} />
-                                      ))}
-                                    </div>
-                                  )}
+                                  +{overflowCount} more
                                 </button>
-                              );
-                            });
-                          })()}
-                        </div>
-                      );
-                    })}
-                  </div>
-                );
-              })()}
-            </div>
-          </>
-        ) : (
-          /* ===== MONTH VIEW (unchanged) ===== */
-          <>
-            <div className="grid grid-cols-7 border-b border-border">
-              {DAYS.map((day) => (
-                <div
-                  key={day}
-                  className="py-1.5 md:py-3 text-center text-[10px] md:text-sm font-medium text-muted-foreground"
-                >
-                  {isMobile ? day.charAt(0) : day}
-                </div>
-              ))}
-            </div>
-
-            {/* Calendar Grid */}
-            <div
-              className="grid grid-cols-7 flex-1 min-h-0"
-              style={{
-                gridTemplateRows: `repeat(${monthWeekRows}, minmax(0, 1fr))`,
-              }}
-            >
-              {isLoading ? (
-                <div className="col-span-7 flex items-center justify-center h-64">
-                  <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-                </div>
-              ) : (
-                days.map((date, index) => {
-                  const dayBookings = date ? getBookingsForDate(date) : [];
-                  return (
-                    <DroppableDay
-                      key={index}
-                      id={date ? `day-${format(date, 'yyyy-MM-dd')}` : `empty-${index}`}
-                      disabled={!date}
-                      className={cn(
-                        'calendar-day min-h-0 overflow-hidden',
-                        date && isToday(date) && 'today',
-                        !date && 'bg-muted/30'
-                      )}
-                    >
-                      {date && (
-                        <>
-                          <span
-                            className={cn(
-                              'text-[10px] md:text-sm font-medium mb-0.5 md:mb-1',
-                              isToday(date) && 'text-primary'
-                            )}
-                          >
-                            {date.getDate()}
-                          </span>
-                          <div className="w-full space-y-0.5 md:space-y-1 overflow-y-auto scrollbar-thin min-h-0 flex-1">
-                            {(() => {
-                              const maxVisible = isMobile ? 2 : dayBookings.length;
-                              const visibleBookings = dayBookings.slice(0, maxVisible);
-                              const overflowCount = dayBookings.length - maxVisible;
-                              return (
-                                <>
-                                  {visibleBookings.map((booking, bIndex) => (
-                                    <DraggableBooking
-                                      key={booking.id}
-                                      booking={booking}
-                                      index={bIndex}
-                                      onClick={() => setSelectedBooking(booking)}
-                                      staffList={staffList}
-                                      teamStaffIds={teamAssignmentMap.get(booking.id)}
-                                      disableDrag={isMobile}
-                                    />
-                                  ))}
-                                  {overflowCount > 0 && (
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setDayBookingsPopup({ date: date!, bookings: dayBookings });
-                                      }}
-                                      className="w-full text-center text-[10px] font-semibold text-primary bg-primary/10 rounded py-0.5 hover:bg-primary/20 transition-colors"
-                                    >
-                                      +{overflowCount} more
-                                    </button>
-                                  )}
-                                </>
-                              );
-                            })()}
-                          </div>
-                        </>
-                      )}
-                    </DroppableDay>
-                  );
-                })
-              )}
-            </div>
-          </>
-        )}
+                              )}
+                            </>
+                          );
+                        })()}
+                      </div>
+                    </>
+                  )}
+                </DroppableDay>
+              );
+            })
+          )}
+        </div>
         </div>
 
         {/* Drag Overlay */}
