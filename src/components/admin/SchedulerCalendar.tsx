@@ -870,7 +870,7 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
                         })()}
                       </div>
                     </>
-                  )}
+
                 </DroppableDay>
               );
             })
