@@ -376,6 +376,7 @@ export default function RecurringBookingsPage() {
 
     const { error } = await supabase.from('bookings').insert([{
       ...baseBooking,
+      service_id: bookingServiceId,
       total_amount: bookingAmount,
       scheduled_at: scheduledAt,
     }]);
