@@ -84,6 +84,33 @@ export function StaffSignatureManager({ staffId, organizationId }: Props) {
         storedSignatureData = path;
       }
 
+      // Get staff name for the signed PDF
+      const { data: staffData } = await supabase
+        .from('staff')
+        .select('name')
+        .eq('id', staffId)
+        .single();
+
+      // Call edge function to generate signed PDF
+      const { data: signedPdfResult, error: pdfError } = await supabase.functions.invoke(
+        'generate-signed-pdf',
+        {
+          body: {
+            document_id: docId,
+            staff_id: staffId,
+            organization_id: organizationId,
+            signature_data: storedSignatureData,
+            signature_type: signatureType,
+            staff_name: staffData?.name || 'N/A',
+          },
+        }
+      );
+
+      if (pdfError) {
+        console.error('PDF generation error:', pdfError);
+        // Continue with saving signature even if PDF fails
+      }
+
       const { error } = await supabase.from('staff_signatures').insert({
         signable_document_id: docId,
         staff_id: staffId,
@@ -91,12 +118,13 @@ export function StaffSignatureManager({ staffId, organizationId }: Props) {
         user_id: user.id,
         signature_data: storedSignatureData,
         signature_type: signatureType,
+        signed_pdf_path: signedPdfResult?.signed_pdf_path || null,
       });
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['staff-signatures', staffId, organizationId] });
-      toast.success('Document signed successfully');
+      toast.success('Document signed successfully! A signed PDF has been generated.');
       setSigningDocId(null);
     },
     onError: (err: any) => {
