@@ -43,6 +43,7 @@ export function StaffSignatureManager({ staffId, organizationId }: Props) {
   const [previewingDocId, setPreviewingDocId] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewTitle, setPreviewTitle] = useState<string>('');
+  const [previewIsPdf, setPreviewIsPdf] = useState(false);
 
   // Fetch signable documents for this org
   const { data: signableDocs = [], isLoading: loadingDocs } = useQuery({
