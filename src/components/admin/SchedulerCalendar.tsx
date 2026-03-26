@@ -967,8 +967,13 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
                   </Badge>
                 </div>
                 
-                <div className="text-sm text-muted-foreground">
-                  Booking #{selectedBooking.booking_number}
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <span>Booking #{selectedBooking.booking_number}</span>
+                  {!isTestMode && (
+                    <span className="font-semibold text-foreground text-base">
+                      ${Number(selectedBooking.total_amount).toFixed(2)}
+                    </span>
+                  )}
                 </div>
                 
                 <div className="space-y-3">
