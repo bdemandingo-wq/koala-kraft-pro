@@ -226,12 +226,22 @@ export function StaffSignatureManager({ staffId, organizationId }: Props) {
               </div>
 
               {sig && (
-                <div className="bg-muted/50 rounded-lg p-3 text-xs text-muted-foreground">
+                <div className="bg-muted/50 rounded-lg p-3 text-xs text-muted-foreground space-y-2">
                   <p>Signed on {format(new Date(sig.signed_at), 'MMM d, yyyy \'at\' h:mm a')}</p>
                   {sig.signature_type === 'type' && (
-                    <p className="mt-1 text-base italic font-serif" style={{ fontFamily: "'Georgia', serif" }}>
+                    <p className="text-base italic font-serif" style={{ fontFamily: "'Georgia', serif" }}>
                       {sig.signature_data}
                     </p>
+                  )}
+                  {sig.signed_pdf_path && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1 h-8 text-xs"
+                      onClick={() => handlePreview(sig.signed_pdf_path!)}
+                    >
+                      <Eye className="h-3 w-3" /> View Signed PDF
+                    </Button>
                   )}
                 </div>
               )}
