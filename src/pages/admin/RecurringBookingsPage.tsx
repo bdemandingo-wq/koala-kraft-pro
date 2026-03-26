@@ -536,10 +536,14 @@ export default function RecurringBookingsPage() {
 
   // Sort recurring bookings chronologically by next upcoming date (soonest first)
   const sortedRecurringBookings = [...recurringBookings].sort((a, b) => {
-    const keyA = `${a.customer_id}__${a.service_id}`;
-    const keyB = `${b.customer_id}__${b.service_id}`;
-    const nextA = computeNextDate(a, latestBookingMap.get(keyA) || null, existingDatesMap.get(keyA), customFrequencies);
-    const nextB = computeNextDate(b, latestBookingMap.get(keyB) || null, existingDatesMap.get(keyB), customFrequencies);
+    const aIsCustomMulti = (a.frequency === 'custom' || a.frequency.startsWith('custom_')) && a.recurring_days_of_week && a.recurring_days_of_week.length > 1;
+    const bIsCustomMulti = (b.frequency === 'custom' || b.frequency.startsWith('custom_')) && b.recurring_days_of_week && b.recurring_days_of_week.length > 1;
+    const latA = aIsCustomMulti ? (latestByCustomer.get(a.customer_id) || null) : (latestBookingMap.get(`${a.customer_id}__${a.service_id}`) || null);
+    const latB = bIsCustomMulti ? (latestByCustomer.get(b.customer_id) || null) : (latestBookingMap.get(`${b.customer_id}__${b.service_id}`) || null);
+    const exA = aIsCustomMulti ? existingDatesByCustomer.get(a.customer_id) : existingDatesMap.get(`${a.customer_id}__${a.service_id}`);
+    const exB = bIsCustomMulti ? existingDatesByCustomer.get(b.customer_id) : existingDatesMap.get(`${b.customer_id}__${b.service_id}`);
+    const nextA = computeNextDate(a, latA, exA, customFrequencies);
+    const nextB = computeNextDate(b, latB, exB, customFrequencies);
     if (!nextA && !nextB) return 0;
     if (!nextA) return 1;
     if (!nextB) return -1;
