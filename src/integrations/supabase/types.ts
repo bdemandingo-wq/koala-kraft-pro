@@ -5422,6 +5422,121 @@ export type Database = {
           },
         ]
       }
+      staff_signable_documents: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          file_name: string
+          file_path: string
+          id: string
+          is_active: boolean
+          organization_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          file_name: string
+          file_path: string
+          id?: string
+          is_active?: boolean
+          organization_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          file_name?: string
+          file_path?: string
+          id?: string
+          is_active?: boolean
+          organization_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_signable_documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_signatures: {
+        Row: {
+          id: string
+          ip_address: string | null
+          organization_id: string
+          signable_document_id: string
+          signature_data: string
+          signature_type: string
+          signed_at: string
+          signed_pdf_path: string | null
+          staff_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          ip_address?: string | null
+          organization_id: string
+          signable_document_id: string
+          signature_data: string
+          signature_type?: string
+          signed_at?: string
+          signed_pdf_path?: string | null
+          staff_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          ip_address?: string | null
+          organization_id?: string
+          signable_document_id?: string
+          signature_data?: string
+          signature_type?: string
+          signed_at?: string
+          signed_pdf_path?: string | null
+          staff_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_signatures_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_signatures_signable_document_id_fkey"
+            columns: ["signable_document_id"]
+            isOneToOne: false
+            referencedRelation: "staff_signable_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_signatures_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_signatures_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_safe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       system_logs: {
         Row: {
           created_at: string
