@@ -96,6 +96,27 @@ function computeNextDate(
     anchor = startOfDay(new Date(booking.created_at));
   }
 
+  // Handle multi-day custom frequencies (M/W/F, Tue/Thu, etc.)
+  const isCustom = booking.frequency === 'custom' || booking.frequency.startsWith('custom_');
+  if (isCustom && booking.recurring_days_of_week && booking.recurring_days_of_week.length > 1) {
+    const sortedDays = [...booking.recurring_days_of_week].sort((a, b) => a - b);
+    // Walk forward from anchor day by day to find the next pattern day
+    let cursor = addDays(anchor, 1);
+    let safety = 0;
+    while (safety < 60) {
+      if (sortedDays.includes(cursor.getDay())) {
+        if (!isBefore(cursor, startOfDay(now))) {
+          if (!existingBookingDates || !existingBookingDates.has(formatDateKey(cursor))) {
+            return cursor;
+          }
+        }
+      }
+      cursor = addDays(cursor, 1);
+      safety++;
+    }
+    return null;
+  }
+
   const intervalAdder = getIntervalAdder(booking.frequency, customFrequencies);
   const preferredDay = booking.preferred_day;
   const preferredDateOfMonth = (booking as any).preferred_date_of_month as number | null;
