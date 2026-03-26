@@ -24,6 +24,7 @@ import { geocodeAddress } from '@/lib/distanceUtils';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import { Upload, FileText, Trash2, Download, Key, Eye, EyeOff, MapPin, Loader2 } from 'lucide-react';
+import { StaffDocumentManager } from '@/components/admin/StaffDocumentManager';
 
 const STAFF_COLOR_OPTIONS = [
   { value: '#3b82f6', label: 'Blue' },
