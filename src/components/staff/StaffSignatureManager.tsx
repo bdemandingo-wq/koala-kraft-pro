@@ -24,6 +24,7 @@ interface Signature {
   signature_data: string;
   signature_type: string;
   signed_at: string;
+  signed_pdf_path: string | null;
 }
 
 interface Props {
@@ -59,7 +60,7 @@ export function StaffSignatureManager({ staffId, organizationId }: Props) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('staff_signatures')
-        .select('id, signable_document_id, signature_data, signature_type, signed_at')
+        .select('id, signable_document_id, signature_data, signature_type, signed_at, signed_pdf_path')
         .eq('staff_id', staffId)
         .eq('organization_id', organizationId);
       if (error) throw error;
@@ -84,6 +85,33 @@ export function StaffSignatureManager({ staffId, organizationId }: Props) {
         storedSignatureData = path;
       }
 
+      // Get staff name for the signed PDF
+      const { data: staffData } = await supabase
+        .from('staff')
+        .select('name')
+        .eq('id', staffId)
+        .single();
+
+      // Call edge function to generate signed PDF
+      const { data: signedPdfResult, error: pdfError } = await supabase.functions.invoke(
+        'generate-signed-pdf',
+        {
+          body: {
+            document_id: docId,
+            staff_id: staffId,
+            organization_id: organizationId,
+            signature_data: storedSignatureData,
+            signature_type: signatureType,
+            staff_name: staffData?.name || 'N/A',
+          },
+        }
+      );
+
+      if (pdfError) {
+        console.error('PDF generation error:', pdfError);
+        // Continue with saving signature even if PDF fails
+      }
+
       const { error } = await supabase.from('staff_signatures').insert({
         signable_document_id: docId,
         staff_id: staffId,
@@ -91,12 +119,13 @@ export function StaffSignatureManager({ staffId, organizationId }: Props) {
         user_id: user.id,
         signature_data: storedSignatureData,
         signature_type: signatureType,
+        signed_pdf_path: signedPdfResult?.signed_pdf_path || null,
       });
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['staff-signatures', staffId, organizationId] });
-      toast.success('Document signed successfully');
+      toast.success('Document signed successfully! A signed PDF has been generated.');
       setSigningDocId(null);
     },
     onError: (err: any) => {
@@ -197,12 +226,22 @@ export function StaffSignatureManager({ staffId, organizationId }: Props) {
               </div>
 
               {sig && (
-                <div className="bg-muted/50 rounded-lg p-3 text-xs text-muted-foreground">
+                <div className="bg-muted/50 rounded-lg p-3 text-xs text-muted-foreground space-y-2">
                   <p>Signed on {format(new Date(sig.signed_at), 'MMM d, yyyy \'at\' h:mm a')}</p>
                   {sig.signature_type === 'type' && (
-                    <p className="mt-1 text-base italic font-serif" style={{ fontFamily: "'Georgia', serif" }}>
+                    <p className="text-base italic font-serif" style={{ fontFamily: "'Georgia', serif" }}>
                       {sig.signature_data}
                     </p>
+                  )}
+                  {sig.signed_pdf_path && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1 h-8 text-xs"
+                      onClick={() => handlePreview(sig.signed_pdf_path!)}
+                    >
+                      <Eye className="h-3 w-3" /> View Signed PDF
+                    </Button>
                   )}
                 </div>
               )}
