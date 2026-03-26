@@ -660,10 +660,21 @@ function RecurringBookingDialog({
           dayServicesStr[k] = v;
         }
       }
+      // Resolve 'custom' frequency back to custom_${id} for the Select
+      let resolvedFrequency = booking?.frequency || 'weekly';
+      if (resolvedFrequency === 'custom' && booking?.recurring_days_of_week && customFrequencies.length > 0) {
+        const matchedCf = customFrequencies.find((cf: any) => {
+          const cfDays = [...(cf.days_of_week || [])].sort().join(',');
+          const bookingDays = [...(booking.recurring_days_of_week || [])].sort().join(',');
+          return cfDays === bookingDays;
+        });
+        if (matchedCf) resolvedFrequency = `custom_${matchedCf.id}`;
+      }
+
       setFormData({
         customer_id: booking?.customer_id || '',
         service_id: booking?.service_id || '',
-        frequency: booking?.frequency || 'weekly',
+        frequency: resolvedFrequency,
         preferred_day: booking?.preferred_day?.toString() || '',
         preferred_date_of_month: (booking as any)?.preferred_date_of_month?.toString() || '',
         preferred_time: booking?.preferred_time || '',
