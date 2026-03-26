@@ -148,7 +148,9 @@ export function StaffSignatureManager({ staffId, organizationId }: Props) {
     const isPdf = filePath.toLowerCase().endsWith('.pdf');
     const { data, error } = await supabase.storage
       .from('staff-documents')
-      .createSignedUrl(filePath, 60);
+      .createSignedUrl(filePath, 300, {
+        download: false,
+      });
 
     if (error || !data?.signedUrl) {
       toast.error('Failed to preview document');
@@ -159,7 +161,15 @@ export function StaffSignatureManager({ staffId, organizationId }: Props) {
     setPreviewIsPdf(isPdf);
 
     if (isPdf) {
-      setPreviewUrl(`${data.signedUrl}&response-content-disposition=inline`);
+      // Fetch as blob to bypass Content-Disposition: attachment
+      try {
+        const res = await fetch(data.signedUrl);
+        const blob = await res.blob();
+        const blobUrl = URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
+        setPreviewUrl(blobUrl);
+      } catch {
+        toast.error('Failed to load PDF preview');
+      }
     } else {
       const encodedUrl = encodeURIComponent(data.signedUrl);
       setPreviewUrl(`https://docs.google.com/gview?url=${encodedUrl}&embedded=true`);
@@ -404,21 +414,13 @@ export function StaffSignatureManager({ staffId, organizationId }: Props) {
       })}
 
       {/* Document Preview Dialog */}
-      <Dialog open={!!previewUrl} onOpenChange={(open) => { if (!open) { setPreviewUrl(null); setPreviewTitle(''); setPreviewIsPdf(false); } }}>
+      <Dialog open={!!previewUrl} onOpenChange={(open) => { if (!open) { if (previewIsPdf && previewUrl) URL.revokeObjectURL(previewUrl); setPreviewUrl(null); setPreviewTitle(''); setPreviewIsPdf(false); } }}>
         <DialogContent className="max-w-4xl w-[95vw] h-[85vh] p-0 flex flex-col" aria-describedby={undefined}>
           <DialogHeader className="px-4 pt-4 pb-2">
             <DialogTitle className="text-sm">{previewTitle}</DialogTitle>
           </DialogHeader>
           <div className="flex-1 min-h-0 px-4 pb-4">
-            {previewUrl && previewIsPdf ? (
-              <iframe
-                src={previewUrl}
-                width="100%"
-                height="600px"
-                className="rounded-lg border"
-                title={previewTitle}
-              />
-            ) : previewUrl ? (
+            {previewUrl ? (
               <iframe
                 src={previewUrl}
                 className="w-full h-full rounded-lg border"
