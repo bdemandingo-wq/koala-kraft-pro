@@ -466,7 +466,7 @@ export default function BookingsPage() {
         await updateBooking.mutateAsync({
           id: booking.id,
           payment_intent_id: data.paymentIntentId,
-          payment_status: 'partial' as any,
+          payment_status: 'pending' as any,
         });
       } else {
         toast({
