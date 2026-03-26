@@ -962,20 +962,6 @@ function RecurringBookingDialog({
     </Dialog>
   );
 }
-  // Reset form when booking changes or dialog opens
-  useEffect(() => {
-    if (open) {
-      const existingDayPrices = (booking as any)?.day_prices as Record<string, number> | null;
-      const dayPricesStr: Record<string, string> = {};
-      if (existingDayPrices) {
-        for (const [k, v] of Object.entries(existingDayPrices)) {
-          dayPricesStr[k] = v.toString();
-        }
-      }
-      setFormData({
-        customer_id: booking?.customer_id || '',
-        service_id: booking?.service_id || '',
-        staff_id: booking?.staff_id || '',
         frequency: booking?.frequency || 'weekly',
         preferred_day: booking?.preferred_day?.toString() || '',
         preferred_date_of_month: (booking as any)?.preferred_date_of_month?.toString() || '',
