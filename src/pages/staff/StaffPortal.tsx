@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { LogOut, Briefcase, CalendarCheck, Clock, DollarSign, Bell, History, Sparkles, Calendar, User, Star, FileText, PenLine } from 'lucide-react';
+import { LogOut, Briefcase, CalendarCheck, Clock, DollarSign, Bell, History, Sparkles, Calendar, User, Star, FileText, PenLine, Banknote } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { MyJobCard } from '@/components/staff/MyJobCard';
 import { AvailableJobCard } from '@/components/staff/AvailableJobCard';
@@ -21,6 +21,7 @@ import { CleanerReviews } from '@/components/staff/CleanerReviews';
 import { BookingChecklist } from '@/components/staff/BookingChecklist';
 import { StaffDocumentUpload } from '@/components/staff/StaffDocumentUpload';
 import { StaffSignatureManager } from '@/components/staff/StaffSignatureManager';
+import { StaffPayoutSetup } from '@/components/staff/StaffPayoutSetup';
 
 interface Booking {
   id: string;
@@ -621,6 +622,10 @@ export default function StaffPortal() {
               <PenLine className="w-4 h-4 hidden sm:inline" />
               Signatures
             </TabsTrigger>
+            <TabsTrigger value="payouts" className="gap-2">
+              <Banknote className="w-4 h-4 hidden sm:inline" />
+              Payouts
+            </TabsTrigger>
           </TabsList>
 
           {/* My Jobs Tab */}
@@ -781,6 +786,15 @@ export default function StaffPortal() {
               <StaffSignatureManager staffId={staffInfo.id} organizationId={staffInfo.organization_id} />
             ) : (
               <p className="text-muted-foreground">Loading signatures...</p>
+            )}
+          </TabsContent>
+
+          {/* Payouts Tab */}
+          <TabsContent value="payouts" className="space-y-4">
+            {staffInfo?.id && staffInfo?.organization_id ? (
+              <StaffPayoutSetup staffId={staffInfo.id} organizationId={staffInfo.organization_id} />
+            ) : (
+              <p className="text-muted-foreground">Loading payout setup...</p>
             )}
           </TabsContent>
         </Tabs>
