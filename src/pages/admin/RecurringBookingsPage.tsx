@@ -234,10 +234,14 @@ export default function RecurringBookingsPage() {
   });
 
   // Build lookup maps: latest booking date + existing date sets per customer+service
+  // Also build customer-only maps for multi-service recurring bookings
   const latestBookingMap = new Map<string, Date>();
   const existingDatesMap = new Map<string, Set<string>>();
+  const latestByCustomer = new Map<string, Date>();
+  const existingDatesByCustomer = new Map<string, Set<string>>();
   for (const b of allOrgBookings) {
     const key = `${b.customer_id}__${b.service_id}`;
+    const custKey = b.customer_id;
     const bDate = new Date(b.scheduled_at);
     if (!latestBookingMap.has(key) || bDate > latestBookingMap.get(key)!) {
       latestBookingMap.set(key, bDate);
@@ -246,6 +250,14 @@ export default function RecurringBookingsPage() {
       existingDatesMap.set(key, new Set());
     }
     existingDatesMap.get(key)!.add(formatDateKey(startOfDay(bDate)));
+    // Customer-only maps (for multi-service recurring series)
+    if (!latestByCustomer.has(custKey) || bDate > latestByCustomer.get(custKey)!) {
+      latestByCustomer.set(custKey, bDate);
+    }
+    if (!existingDatesByCustomer.has(custKey)) {
+      existingDatesByCustomer.set(custKey, new Set());
+    }
+    existingDatesByCustomer.get(custKey)!.add(formatDateKey(startOfDay(bDate)));
   }
 
   const createMutation = useMutation({
