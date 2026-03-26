@@ -275,16 +275,34 @@ export function StaffSignatureManager({ staffId, organizationId }: Props) {
                       {sig.signature_data}
                     </p>
                   )}
-                  {sig.signed_pdf_path && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="gap-1 h-8 text-xs"
-                      onClick={() => handlePreview(sig.signed_pdf_path!)}
-                    >
-                      <Eye className="h-3 w-3" /> View Signed PDF
-                    </Button>
-                  )}
+                  <div className="flex gap-2 flex-wrap">
+                    {sig.signed_pdf_path && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1 h-8 text-xs"
+                        onClick={() => handlePreview(sig.signed_pdf_path!)}
+                      >
+                        <Eye className="h-3 w-3" /> View Signed PDF
+                      </Button>
+                    )}
+                    {!sig.signed_pdf_path && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1 h-8 text-xs"
+                        disabled={regeneratePdfMutation.isPending}
+                        onClick={() => regeneratePdfMutation.mutate(sig)}
+                      >
+                        {regeneratePdfMutation.isPending ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <FileText className="h-3 w-3" />
+                        )}
+                        Generate Signed PDF
+                      </Button>
+                    )}
+                  </div>
                 </div>
               )}
 
