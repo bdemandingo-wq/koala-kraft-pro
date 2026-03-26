@@ -45,6 +45,7 @@ import { cn } from '@/lib/utils';
 import { StaffEventNotifications } from '@/components/admin/StaffEventNotifications';
 import { StaffComplianceDashboard } from '@/components/admin/StaffComplianceDashboard';
 import { AdminSignableDocManager } from '@/components/admin/AdminSignableDocManager';
+import { PendingDocumentsReview } from '@/components/admin/PendingDocumentsReview';
 
 interface StaffMember {
   id: string;
