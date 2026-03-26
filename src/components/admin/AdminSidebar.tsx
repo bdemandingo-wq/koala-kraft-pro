@@ -1,4 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
   Calendar,
   Users,
@@ -203,6 +204,7 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { organization, isOwner, allOrganizations, switchOrganization } = useOrganization();
+  const isMobileDevice = useIsMobile();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
@@ -405,7 +407,7 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-3 py-4 pointer-events-auto touch-manipulation relative z-10">
-        {isMobile ? (
+        {(isMobile || isMobileDevice) ? (
           <div className="space-y-0.5">
             {visibleNavigation.map((item) => {
               const isActive = location.pathname === item.href ||
