@@ -101,13 +101,18 @@ function computeNextDate(
   const preferredDateOfMonth = (booking as any).preferred_date_of_month as number | null;
   const isMonthly = booking.frequency === 'monthly';
 
-  // For monthly with preferred_date_of_month, align to that date
+  // For monthly: use explicit preferred_date_of_month, or derive from anchor date
+  const effectiveDateOfMonth = isMonthly
+    ? (preferredDateOfMonth ?? anchor.getDate())
+    : null;
+
+  // For monthly with date-of-month, align to that date; otherwise align to weekday
   const alignToPreferred = (d: Date): Date => {
-    if (isMonthly && preferredDateOfMonth != null) {
+    if (isMonthly && effectiveDateOfMonth != null) {
       const year = d.getFullYear();
       const month = d.getMonth();
       const daysInMonth = new Date(year, month + 1, 0).getDate();
-      const day = Math.min(preferredDateOfMonth, daysInMonth);
+      const day = Math.min(effectiveDateOfMonth, daysInMonth);
       return new Date(year, month, day);
     }
     if (preferredDay !== null) {
