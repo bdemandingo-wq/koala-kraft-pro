@@ -608,9 +608,22 @@ function RecurringBookingDialog({
     day_prices: {} as Record<string, string>,
   });
 
+  // Determine if current frequency is a multi-day custom frequency
+  const selectedCustomFreq = formData.frequency.startsWith('custom_')
+    ? customFrequencies.find(cf => cf.id === formData.frequency.replace('custom_', ''))
+    : null;
+  const isMultiDay = selectedCustomFreq?.days_of_week && selectedCustomFreq.days_of_week.length > 1;
+
   // Reset form when booking changes or dialog opens
   useEffect(() => {
     if (open) {
+      const existingDayPrices = (booking as any)?.day_prices as Record<string, number> | null;
+      const dayPricesStr: Record<string, string> = {};
+      if (existingDayPrices) {
+        for (const [k, v] of Object.entries(existingDayPrices)) {
+          dayPricesStr[k] = v.toString();
+        }
+      }
       setFormData({
         customer_id: booking?.customer_id || '',
         service_id: booking?.service_id || '',
@@ -621,6 +634,7 @@ function RecurringBookingDialog({
         preferred_time: booking?.preferred_time || '',
         total_amount: booking?.total_amount?.toString() || '',
         is_active: booking?.is_active ?? true,
+        day_prices: dayPricesStr,
       });
     }
   }, [booking, open]);
