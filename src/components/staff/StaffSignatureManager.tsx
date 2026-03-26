@@ -5,12 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 import { toast } from 'sonner';
-import { FileText, CheckCircle2, PenLine, Loader2, Eye, Clock, X } from 'lucide-react';
+import { FileText, CheckCircle2, PenLine, Loader2, Eye, Clock } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
 import { SignaturePad } from './SignaturePad';
-import { PDFSignatureOverlay } from './PDFSignatureOverlay';
 
 
 interface SignableDoc {
@@ -39,7 +38,6 @@ export function StaffSignatureManager({ staffId, organizationId }: Props) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [signingDocId, setSigningDocId] = useState<string | null>(null);
-  const [signingDocUrl, setSigningDocUrl] = useState<string | null>(null);
 
   // Fetch signable documents for this org
   const { data: signableDocs = [], isLoading: loadingDocs } = useQuery({
