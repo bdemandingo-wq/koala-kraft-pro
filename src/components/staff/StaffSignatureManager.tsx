@@ -9,45 +9,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
 import { SignaturePad } from './SignaturePad';
+import { PDFSignatureOverlay } from './PDFSignatureOverlay';
 
-function DocumentPreviewEmbed({ filePath }: { filePath: string }) {
-  const { data: url, isLoading } = useQuery({
-    queryKey: ['doc-preview-url', filePath],
-    queryFn: async () => {
-      const { data, error } = await supabase.storage
-        .from('staff-documents')
-        .createSignedUrl(filePath, 3600);
-      if (error || !data?.signedUrl) throw new Error('Failed to load document');
-      return data.signedUrl;
-    },
-    staleTime: 1000 * 60 * 30,
-  });
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64 bg-muted/30 rounded-lg border">
-        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  if (!url) return null;
-
-  return (
-    <div className="rounded-lg border overflow-hidden bg-muted/20">
-      <div className="bg-muted/50 px-3 py-1.5 text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-        <FileText className="h-3.5 w-3.5" />
-        Document Preview — Review before signing
-      </div>
-      <iframe
-        src={`${url}#toolbar=0&navpanes=0`}
-        className="w-full border-0"
-        style={{ height: 400 }}
-        title="Document preview"
-      />
-    </div>
-  );
-}
 
 interface SignableDoc {
   id: string;
@@ -75,6 +38,7 @@ export function StaffSignatureManager({ staffId, organizationId }: Props) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [signingDocId, setSigningDocId] = useState<string | null>(null);
+  const [signingDocUrl, setSigningDocUrl] = useState<string | null>(null);
   const [previewingDocId, setPreviewingDocId] = useState<string | null>(null);
 
   // Fetch signable documents for this org
@@ -109,14 +73,14 @@ export function StaffSignatureManager({ staffId, organizationId }: Props) {
   });
 
   const signMutation = useMutation({
-    mutationFn: async ({ docId, signatureData, signatureType }: { docId: string; signatureData: string; signatureType: 'draw' | 'type' }) => {
+    mutationFn: async ({ docId, signatureData, signatureType, placement }: { docId: string; signatureData: string; signatureType: 'draw' | 'type'; placement?: any }) => {
       if (!user) throw new Error('Not authenticated');
 
       // Store drawn signature image in storage
       let storedSignatureData = signatureData;
       if (signatureType === 'draw') {
         const blob = await (await fetch(signatureData)).blob();
-        const path = `signatures/${user.id}/${docId}_${Date.now()}.png`;
+        const path = `signatures/${organizationId}/${staffId}/${docId}_${Date.now()}.png`;
         const { error: uploadError } = await supabase.storage
           .from('staff-documents')
           .upload(path, blob);
@@ -131,7 +95,7 @@ export function StaffSignatureManager({ staffId, organizationId }: Props) {
         .eq('id', staffId)
         .single();
 
-      // Call edge function to generate signed PDF
+      // Call edge function to generate signed PDF with placement coordinates
       const { data: signedPdfResult, error: pdfError } = await supabase.functions.invoke(
         'generate-signed-pdf',
         {
@@ -142,6 +106,7 @@ export function StaffSignatureManager({ staffId, organizationId }: Props) {
             signature_data: storedSignatureData,
             signature_type: signatureType,
             staff_name: staffData?.name || 'N/A',
+            placement: placement || null,
           },
         }
       );
@@ -358,28 +323,32 @@ export function StaffSignatureManager({ staffId, organizationId }: Props) {
                   <Button
                     size="sm"
                     className="gap-1 flex-1 h-10"
-                    onClick={() => setSigningDocId(doc.id)}
+                    onClick={async () => {
+                      const { data } = await supabase.storage
+                        .from('staff-documents')
+                        .createSignedUrl(doc.file_path, 3600);
+                      if (data?.signedUrl) {
+                        setSigningDocUrl(data.signedUrl);
+                        setSigningDocId(doc.id);
+                      } else {
+                        toast.error('Failed to load document');
+                      }
+                    }}
                   >
                     <PenLine className="h-3.5 w-3.5" /> Sign Now
                   </Button>
                 </div>
               )}
 
-              {isSigning && (
-                <div className="space-y-3">
-                  {/* Show the document inline so it feels like signing on paper */}
-                  <DocumentPreviewEmbed filePath={doc.file_path} />
-                  <div className="border-t pt-3">
-                    <p className="text-xs text-muted-foreground mb-2 font-medium">✍️ Place your signature below</p>
-                    <SignaturePad
-                      saving={signMutation.isPending}
-                      onSave={(data, type) =>
-                        signMutation.mutate({ docId: doc.id, signatureData: data, signatureType: type })
-                      }
-                      onCancel={() => setSigningDocId(null)}
-                    />
-                  </div>
-                </div>
+              {isSigning && signingDocUrl && (
+                <PDFSignatureOverlay
+                  pdfUrl={signingDocUrl}
+                  saving={signMutation.isPending}
+                  onSign={(data, type, placement) =>
+                    signMutation.mutate({ docId: doc.id, signatureData: data, signatureType: type, placement })
+                  }
+                  onCancel={() => { setSigningDocId(null); setSigningDocUrl(null); }}
+                />
               )}
             </CardContent>
           </Card>
