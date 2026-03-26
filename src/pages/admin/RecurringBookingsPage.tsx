@@ -802,15 +802,38 @@ function RecurringBookingDialog({
               </Select>
             </div>
           </div>
-          <div>
-            <Label>Amount per Visit *</Label>
-            <Input
-              type="number"
-              value={formData.total_amount}
-              onChange={(e) => setFormData({ ...formData, total_amount: e.target.value })}
-              placeholder="0.00"
-            />
-          </div>
+          {isMultiDay && selectedCustomFreq?.days_of_week ? (
+            <div>
+              <Label>Amount per Day *</Label>
+              <div className="space-y-2 mt-1">
+                {selectedCustomFreq.days_of_week.sort((a, b) => a - b).map((dayIdx) => (
+                  <div key={dayIdx} className="flex items-center gap-3">
+                    <span className="text-sm font-medium w-24 shrink-0">{DAYS_OF_WEEK[dayIdx]}</span>
+                    <Input
+                      type="number"
+                      value={formData.day_prices[dayIdx.toString()] || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        day_prices: { ...formData.day_prices, [dayIdx.toString()]: e.target.value },
+                      })}
+                      placeholder="0.00"
+                      className="flex-1"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div>
+              <Label>Amount per Visit *</Label>
+              <Input
+                type="number"
+                value={formData.total_amount}
+                onChange={(e) => setFormData({ ...formData, total_amount: e.target.value })}
+                placeholder="0.00"
+              />
+            </div>
+          )}
           <div className="flex items-center gap-2">
             <Switch
               checked={formData.is_active}
