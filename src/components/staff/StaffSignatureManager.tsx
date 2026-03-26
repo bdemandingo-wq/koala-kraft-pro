@@ -137,14 +137,56 @@ export function StaffSignatureManager({ staffId, organizationId }: Props) {
   const handlePreview = async (filePath: string) => {
     const { data, error } = await supabase.storage
       .from('staff-documents')
-      .download(filePath);
-    if (error || !data) {
+      .createSignedUrl(filePath, 3600);
+    if (error || !data?.signedUrl) {
       toast.error('Failed to preview document');
       return;
     }
-    const url = URL.createObjectURL(data);
-    window.open(url, '_blank');
+    window.open(data.signedUrl, '_blank');
   };
+
+  const regeneratePdfMutation = useMutation({
+    mutationFn: async (sig: Signature) => {
+      if (!user) throw new Error('Not authenticated');
+      const { data: staffData } = await supabase
+        .from('staff')
+        .select('name')
+        .eq('id', staffId)
+        .single();
+
+      const doc = signableDocs.find(d => d.id === sig.signable_document_id);
+      if (!doc) throw new Error('Document not found');
+
+      const { data: result, error: pdfError } = await supabase.functions.invoke(
+        'generate-signed-pdf',
+        {
+          body: {
+            document_id: doc.id,
+            staff_id: staffId,
+            organization_id: organizationId,
+            signature_data: sig.signature_data,
+            signature_type: sig.signature_type,
+            staff_name: staffData?.name || 'N/A',
+          },
+        }
+      );
+
+      if (pdfError) throw pdfError;
+
+      const { error: updateError } = await supabase
+        .from('staff_signatures')
+        .update({ signed_pdf_path: result?.signed_pdf_path })
+        .eq('id', sig.id);
+      if (updateError) throw updateError;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['staff-signatures', staffId, organizationId] });
+      toast.success('Signed PDF regenerated successfully!');
+    },
+    onError: () => {
+      toast.error('Failed to regenerate signed PDF');
+    },
+  });
 
   const isLoading = loadingDocs || loadingSigs;
 
