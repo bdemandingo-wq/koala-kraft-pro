@@ -98,28 +98,34 @@ function computeNextDate(
 
   const intervalAdder = getIntervalAdder(booking.frequency, customFrequencies);
   const preferredDay = booking.preferred_day;
+  const preferredDateOfMonth = (booking as any).preferred_date_of_month as number | null;
+  const isMonthly = booking.frequency === 'monthly';
 
-  // Advance from anchor by interval, then align to preferred day
-  let nextDate = intervalAdder(anchor);
-
-  // Align to preferred weekday
-  if (preferredDay !== null) {
-    // Find the nearest occurrence of preferredDay on or after nextDate
-    while (nextDate.getDay() !== preferredDay) {
-      nextDate = addDays(nextDate, 1);
+  // For monthly with preferred_date_of_month, align to that date
+  const alignToPreferred = (d: Date): Date => {
+    if (isMonthly && preferredDateOfMonth != null) {
+      const year = d.getFullYear();
+      const month = d.getMonth();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const day = Math.min(preferredDateOfMonth, daysInMonth);
+      return new Date(year, month, day);
     }
-  }
+    if (preferredDay !== null) {
+      while (d.getDay() !== preferredDay) {
+        d = addDays(d, 1);
+      }
+    }
+    return d;
+  };
+
+  // Advance from anchor by interval, then align to preferred day/date
+  let nextDate = alignToPreferred(intervalAdder(anchor));
 
   // Keep advancing until we're past the latest existing booking AND in the future
   const mustBeAfter = latestBookingDate ? startOfDay(latestBookingDate) : startOfDay(now);
   let safety = 0;
   while ((isBefore(nextDate, mustBeAfter) || isBefore(nextDate, startOfDay(now))) && safety < 200) {
-    nextDate = intervalAdder(nextDate);
-    if (preferredDay !== null) {
-      while (nextDate.getDay() !== preferredDay) {
-        nextDate = addDays(nextDate, 1);
-      }
-    }
+    nextDate = alignToPreferred(intervalAdder(nextDate));
     safety++;
   }
 
@@ -127,12 +133,7 @@ function computeNextDate(
   if (existingBookingDates) {
     let conflictSafety = 0;
     while (existingBookingDates.has(formatDateKey(nextDate)) && conflictSafety < 52) {
-      nextDate = intervalAdder(nextDate);
-      if (preferredDay !== null) {
-        while (nextDate.getDay() !== preferredDay) {
-          nextDate = addDays(nextDate, 1);
-        }
-      }
+      nextDate = alignToPreferred(intervalAdder(nextDate));
       conflictSafety++;
     }
   }
@@ -595,6 +596,7 @@ function RecurringBookingDialog({
     staff_id: '',
     frequency: 'weekly',
     preferred_day: '',
+    preferred_date_of_month: '',
     preferred_time: '',
     total_amount: '',
     is_active: true,
@@ -609,6 +611,7 @@ function RecurringBookingDialog({
         staff_id: booking?.staff_id || '',
         frequency: booking?.frequency || 'weekly',
         preferred_day: booking?.preferred_day?.toString() || '',
+        preferred_date_of_month: (booking as any)?.preferred_date_of_month?.toString() || '',
         preferred_time: booking?.preferred_time || '',
         total_amount: booking?.total_amount?.toString() || '',
         is_active: booking?.is_active ?? true,
@@ -622,7 +625,8 @@ function RecurringBookingDialog({
     }
     onSave({
       ...formData,
-      preferred_day: formData.preferred_day ? parseInt(formData.preferred_day) : null,
+      preferred_day: formData.frequency === 'monthly' ? null : (formData.preferred_day ? parseInt(formData.preferred_day) : null),
+      preferred_date_of_month: formData.frequency === 'monthly' && formData.preferred_date_of_month ? parseInt(formData.preferred_date_of_month) : null,
       total_amount: parseFloat(formData.total_amount),
       staff_id: formData.staff_id || null,
     });
@@ -709,21 +713,39 @@ function RecurringBookingDialog({
             </Select>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Preferred Day</Label>
-              <Select value={formData.preferred_day} onValueChange={(v) => setFormData({ ...formData, preferred_day: v })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Any day" />
-                </SelectTrigger>
-                <SelectContent>
-                  {DAYS_OF_WEEK.map((day, i) => (
-                    <SelectItem key={i} value={i.toString()}>
-                      {day}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {formData.frequency === 'monthly' ? (
+              <div>
+                <Label>Preferred Date</Label>
+                <Select value={formData.preferred_date_of_month} onValueChange={(v) => setFormData({ ...formData, preferred_date_of_month: v })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Same as last" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 28 }, (_, i) => i + 1).map((d) => (
+                      <SelectItem key={d} value={d.toString()}>
+                        {d}{d === 1 ? 'st' : d === 2 ? 'nd' : d === 3 ? 'rd' : 'th'}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : (
+              <div>
+                <Label>Preferred Day</Label>
+                <Select value={formData.preferred_day} onValueChange={(v) => setFormData({ ...formData, preferred_day: v })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Any day" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DAYS_OF_WEEK.map((day, i) => (
+                      <SelectItem key={i} value={i.toString()}>
+                        {day}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div>
               <Label>Preferred Time</Label>
               <Select value={formData.preferred_time} onValueChange={(v) => setFormData({ ...formData, preferred_time: v })}>
