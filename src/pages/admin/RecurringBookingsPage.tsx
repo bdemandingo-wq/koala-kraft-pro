@@ -395,6 +395,18 @@ export default function RecurringBookingsPage() {
   const activeCount = recurringBookings.filter(b => b.is_active).length;
   const pausedCount = recurringBookings.filter(b => !b.is_active).length;
 
+  // Sort recurring bookings chronologically by next upcoming date (soonest first)
+  const sortedRecurringBookings = [...recurringBookings].sort((a, b) => {
+    const keyA = `${a.customer_id}__${a.service_id}`;
+    const keyB = `${b.customer_id}__${b.service_id}`;
+    const nextA = computeNextDate(a, latestBookingMap.get(keyA) || null, existingDatesMap.get(keyA), customFrequencies);
+    const nextB = computeNextDate(b, latestBookingMap.get(keyB) || null, existingDatesMap.get(keyB), customFrequencies);
+    if (!nextA && !nextB) return 0;
+    if (!nextA) return 1;
+    if (!nextB) return -1;
+    return nextA.getTime() - nextB.getTime();
+  });
+
   return (
     <AdminLayout
       title="Recurring Bookings"
