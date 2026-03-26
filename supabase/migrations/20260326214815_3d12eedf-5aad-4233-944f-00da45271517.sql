@@ -1,0 +1,1 @@
+UPDATE public.bookings SET payment_status = 'partial' WHERE id = '12cc056c-25b0-455b-976c-bdc75fa7852b' AND payment_status = 'pending' AND payment_intent_id IS NOT NULL;
