@@ -9,6 +9,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
 import { SignaturePad } from './SignaturePad';
+import { PDFSignatureOverlay } from './PDFSignatureOverlay';
 
 function DocumentPreviewEmbed({ filePath }: { filePath: string }) {
   const { data: url, isLoading } = useQuery({
@@ -109,14 +110,14 @@ export function StaffSignatureManager({ staffId, organizationId }: Props) {
   });
 
   const signMutation = useMutation({
-    mutationFn: async ({ docId, signatureData, signatureType }: { docId: string; signatureData: string; signatureType: 'draw' | 'type' }) => {
+    mutationFn: async ({ docId, signatureData, signatureType, placement }: { docId: string; signatureData: string; signatureType: 'draw' | 'type'; placement?: any }) => {
       if (!user) throw new Error('Not authenticated');
 
       // Store drawn signature image in storage
       let storedSignatureData = signatureData;
       if (signatureType === 'draw') {
         const blob = await (await fetch(signatureData)).blob();
-        const path = `signatures/${user.id}/${docId}_${Date.now()}.png`;
+        const path = `signatures/${organizationId}/${staffId}/${docId}_${Date.now()}.png`;
         const { error: uploadError } = await supabase.storage
           .from('staff-documents')
           .upload(path, blob);
@@ -131,7 +132,7 @@ export function StaffSignatureManager({ staffId, organizationId }: Props) {
         .eq('id', staffId)
         .single();
 
-      // Call edge function to generate signed PDF
+      // Call edge function to generate signed PDF with placement coordinates
       const { data: signedPdfResult, error: pdfError } = await supabase.functions.invoke(
         'generate-signed-pdf',
         {
@@ -142,6 +143,7 @@ export function StaffSignatureManager({ staffId, organizationId }: Props) {
             signature_data: storedSignatureData,
             signature_type: signatureType,
             staff_name: staffData?.name || 'N/A',
+            placement: placement || null,
           },
         }
       );
@@ -365,21 +367,15 @@ export function StaffSignatureManager({ staffId, organizationId }: Props) {
                 </div>
               )}
 
-              {isSigning && (
-                <div className="space-y-3">
-                  {/* Show the document inline so it feels like signing on paper */}
-                  <DocumentPreviewEmbed filePath={doc.file_path} />
-                  <div className="border-t pt-3">
-                    <p className="text-xs text-muted-foreground mb-2 font-medium">✍️ Place your signature below</p>
-                    <SignaturePad
-                      saving={signMutation.isPending}
-                      onSave={(data, type) =>
-                        signMutation.mutate({ docId: doc.id, signatureData: data, signatureType: type })
-                      }
-                      onCancel={() => setSigningDocId(null)}
-                    />
-                  </div>
-                </div>
+              {isSigning && signingDocUrl && (
+                <PDFSignatureOverlay
+                  pdfUrl={signingDocUrl}
+                  saving={signMutation.isPending}
+                  onSign={(data, type, placement) =>
+                    signMutation.mutate({ docId: doc.id, signatureData: data, signatureType: type, placement })
+                  }
+                  onCancel={() => { setSigningDocId(null); setSigningDocUrl(null); }}
+                />
               )}
             </CardContent>
           </Card>
