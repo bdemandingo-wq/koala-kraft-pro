@@ -127,19 +127,26 @@ const statusLabels: Record<string, string> = {
 
 const getPaymentStatusInfo = (booking: BookingWithDetails) => {
   const hasPaymentIntent = !!(booking as any).payment_intent_id;
-  
+
   if (booking.payment_status === 'paid') {
     return { label: 'Paid', bg: 'bg-emerald-50', text: 'text-emerald-700', icon: '✓' };
   }
+
   if (booking.payment_status === 'refunded') {
     return { label: 'Refunded', bg: 'bg-slate-100', text: 'text-slate-600', icon: '↩' };
   }
-  if (hasPaymentIntent && booking.payment_status === 'partial') {
-    return { label: 'Hold', bg: 'bg-amber-50', text: 'text-amber-700', icon: '◐' };
+
+  if (booking.payment_status === 'partial') {
+    const isLikelyHold = hasPaymentIntent && booking.status !== 'completed' && booking.status !== 'cancelled';
+    return isLikelyHold
+      ? { label: 'Hold', bg: 'bg-amber-50', text: 'text-amber-700', icon: '◐' }
+      : { label: 'Partially Refunded', bg: 'bg-slate-100', text: 'text-slate-700', icon: '↩' };
   }
+
   if (hasPaymentIntent) {
     return { label: 'Hold', bg: 'bg-amber-50', text: 'text-amber-700', icon: '◐' };
   }
+
   return { label: 'Unpaid', bg: 'bg-rose-50', text: 'text-rose-700', icon: '○' };
 };
 
