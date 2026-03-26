@@ -28,7 +28,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Calendar, RefreshCw, Pause, Play, Trash2, Edit } from 'lucide-react';
+import { Plus, Calendar, RefreshCw, Pause, Play, Trash2, Edit, X } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
