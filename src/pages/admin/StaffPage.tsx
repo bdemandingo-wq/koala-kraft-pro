@@ -6,8 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Plus, MoreHorizontal, Mail, Phone, Edit, Trash2, Calendar, KeyRound, Copy, Check } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Search, Plus, MoreHorizontal, Mail, Phone, Edit, Trash2, Calendar, KeyRound, Copy, Check, Users, FileText, Bell } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -65,6 +65,7 @@ type StatusFilter = 'all' | 'active' | 'inactive';
 export default function StaffPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [activeTab, setActiveTab] = useState('team');
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
@@ -246,202 +247,218 @@ export default function StaffPage() {
         </Button>
       }
     >
-      {/* Staff Event Notifications */}
-      <div className="mb-4">
-        <StaffEventNotifications />
-      </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full max-w-md grid-cols-3 mb-4">
+          <TabsTrigger value="team" className="gap-2">
+            <Users className="h-4 w-4" />
+            Team
+          </TabsTrigger>
+          <TabsTrigger value="documents" className="gap-2">
+            <FileText className="h-4 w-4" />
+            Documents
+          </TabsTrigger>
+          <TabsTrigger value="activity" className="gap-2">
+            <Bell className="h-4 w-4" />
+            Activity
+          </TabsTrigger>
+        </TabsList>
 
-      {/* Staff Compliance Dashboard */}
-      {organizationId && (
-        <div className="mb-4">
-          <StaffComplianceDashboard organizationId={organizationId} />
-        </div>
-      )}
+        {/* ─── TAB 1: Team ─── */}
+        <TabsContent value="team">
+          {/* Search and Filters */}
+          <div className="flex flex-col sm:flex-row gap-3 mb-4">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Search staff..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
+              <TabsList>
+                <TabsTrigger value="all" className="gap-1.5">
+                  All Staff
+                  <Badge variant="secondary" className="ml-1 text-xs h-5 px-1.5">{staff.length}</Badge>
+                </TabsTrigger>
+                <TabsTrigger value="active" className="gap-1.5">
+                  Active
+                  <Badge variant="secondary" className="ml-1 text-xs h-5 px-1.5">{activeCount}</Badge>
+                </TabsTrigger>
+                <TabsTrigger value="inactive" className="gap-1.5">
+                  Inactive
+                  {inactiveCount > 0 && (
+                    <Badge variant="secondary" className="ml-1 text-xs h-5 px-1.5">{inactiveCount}</Badge>
+                  )}
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
 
-      {/* Org-Wide Signable Documents */}
-      <Card className="mb-4">
-        <CardContent className="pt-6">
-          <AdminSignableDocManager />
-        </CardContent>
-      </Card>
-
-      {/* Document Review Section */}
-      <div className="mb-4">
-        <PendingDocumentsReview />
-      </div>
-
-      {/* Search and Filters */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-4">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Search staff..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
-          <TabsList>
-            <TabsTrigger value="all" className="gap-1.5">
-              All Staff
-              <Badge variant="secondary" className="ml-1 text-xs h-5 px-1.5">{staff.length}</Badge>
-            </TabsTrigger>
-            <TabsTrigger value="active" className="gap-1.5">
-              Active
-              <Badge variant="secondary" className="ml-1 text-xs h-5 px-1.5">{activeCount}</Badge>
-            </TabsTrigger>
-            <TabsTrigger value="inactive" className="gap-1.5">
-              Inactive
-              {inactiveCount > 0 && (
-                <Badge variant="secondary" className="ml-1 text-xs h-5 px-1.5">{inactiveCount}</Badge>
-              )}
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
-
-      {/* Staff Grid */}
-      {isLoading ? (
-        <div className="text-center py-8 text-muted-foreground">Loading staff...</div>
-      ) : filteredStaff.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground">
-          {searchTerm ? 'No staff found matching your search' : statusFilter === 'inactive' ? 'No inactive staff members' : 'No staff members yet. Add your first team member!'}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredStaff.map((member) => {
-            const color = getColorFromName(member.name);
-            const isInactive = !member.is_active;
-            return (
-              <Card
-                key={member.id}
-                className={cn(
-                  "hover:shadow-md transition-all",
-                  isInactive && "opacity-60 border-dashed"
-                )}
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <Avatar className={cn("h-12 w-12", isInactive && "grayscale")}>
-                        <AvatarFallback 
-                          className="font-medium text-lg"
-                          style={{ 
-                            backgroundColor: `${color}20`,
-                            color: color 
-                          }}
-                        >
-                          {getInitials(member.name)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <h3 className="font-semibold">{maskName(member.name)}</h3>
-                        <div className="flex items-center gap-2">
-                          {(member.base_wage || member.hourly_rate) && (
-                            <span className="text-sm text-muted-foreground">
-                              {isTestMode ? '$XX/hr' : `$${member.base_wage || member.hourly_rate}/hr`}
-                            </span>
-                          )}
-                          <Badge variant={member.tax_classification === '1099' ? 'secondary' : 'default'} className="text-xs">
-                            {member.tax_classification === '1099' ? '1099' : 'W-2'}
-                          </Badge>
+          {/* Staff Grid */}
+          {isLoading ? (
+            <div className="text-center py-8 text-muted-foreground">Loading staff...</div>
+          ) : filteredStaff.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              {searchTerm ? 'No staff found matching your search' : statusFilter === 'inactive' ? 'No inactive staff members' : 'No staff members yet. Add your first team member!'}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredStaff.map((member) => {
+                const color = getColorFromName(member.name);
+                const isInactive = !member.is_active;
+                return (
+                  <Card
+                    key={member.id}
+                    className={cn(
+                      "hover:shadow-md transition-all",
+                      isInactive && "opacity-60 border-dashed"
+                    )}
+                  >
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          <Avatar className={cn("h-12 w-12", isInactive && "grayscale")}>
+                            <AvatarFallback 
+                              className="font-medium text-lg"
+                              style={{ 
+                                backgroundColor: `${color}20`,
+                                color: color 
+                              }}
+                            >
+                              {getInitials(member.name)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <h3 className="font-semibold">{maskName(member.name)}</h3>
+                            <div className="flex items-center gap-2">
+                              {(member.base_wage || member.hourly_rate) && (
+                                <span className="text-sm text-muted-foreground">
+                                  {isTestMode ? '$XX/hr' : `$${member.base_wage || member.hourly_rate}/hr`}
+                                </span>
+                              )}
+                              <Badge variant={member.tax_classification === '1099' ? 'secondary' : 'default'} className="text-xs">
+                                {member.tax_classification === '1099' ? '1099' : 'W-2'}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <MoreHorizontal className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem 
+                              className="gap-2"
+                              onClick={() => {
+                                setSelectedStaff(member);
+                                setScheduleDialogOpen(true);
+                              }}
+                            >
+                              <Calendar className="w-4 h-4" /> View Schedule
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              className="gap-2"
+                              onClick={() => handleEditClick(member)}
+                            >
+                              <Edit className="w-4 h-4" /> Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              className="gap-2"
+                              onClick={() => handleResendPasswordLink(member)}
+                              disabled={isResendingLink}
+                            >
+                              <KeyRound className="w-4 h-4" /> Resend Password Link
+                            </DropdownMenuItem>
+                            {isInactive && (
+                              <DropdownMenuItem 
+                                className="gap-2"
+                                onClick={() => handlePermanentDeleteClick(member)}
+                              >
+                                <Trash2 className="w-4 h-4 text-destructive" />
+                                <span className="text-destructive">Delete Permanently</span>
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-sm">
+                          <Mail className="w-4 h-4 text-muted-foreground" />
+                          <span className="truncate">{maskEmail(member.email)}</span>
+                        </div>
+                        {member.phone && (
+                          <div className="flex items-center gap-2 text-sm">
+                            <Phone className="w-4 h-4 text-muted-foreground" />
+                            <span>{maskPhone(member.phone)}</span>
+                          </div>
+                        )}
+                        {member.bio && (
+                          <p className="text-sm text-muted-foreground line-clamp-2">{member.bio}</p>
+                        )}
+                        <div className="flex items-center justify-between pt-3 border-t">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-muted-foreground">Status</span>
+                            <Badge
+                              variant={member.is_active ? "default" : "secondary"}
+                              className={cn(
+                                "text-xs",
+                                member.is_active
+                                  ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30"
+                                  : "bg-muted text-muted-foreground"
+                              )}
+                            >
+                              {member.is_active ? 'Active' : 'Inactive'}
+                            </Badge>
+                          </div>
+                          <Switch 
+                            checked={member.is_active} 
+                            onCheckedChange={(checked) => {
+                              if (!checked) {
+                                setStaffToDelete(member);
+                                setDeleteDialogOpen(true);
+                              } else {
+                                handleToggleActive(member, true);
+                              }
+                            }}
+                          />
                         </div>
                       </div>
-                    </div>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem 
-                          className="gap-2"
-                          onClick={() => {
-                            setSelectedStaff(member);
-                            setScheduleDialogOpen(true);
-                          }}
-                        >
-                          <Calendar className="w-4 h-4" /> View Schedule
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          className="gap-2"
-                          onClick={() => handleEditClick(member)}
-                        >
-                          <Edit className="w-4 h-4" /> Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          className="gap-2"
-                          onClick={() => handleResendPasswordLink(member)}
-                          disabled={isResendingLink}
-                        >
-                          <KeyRound className="w-4 h-4" /> Resend Password Link
-                        </DropdownMenuItem>
-                        {isInactive && (
-                          <DropdownMenuItem 
-                            className="gap-2"
-                            onClick={() => handlePermanentDeleteClick(member)}
-                          >
-                            <Trash2 className="w-4 h-4 text-destructive" />
-                            <span className="text-destructive">Delete Permanently</span>
-                          </DropdownMenuItem>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Mail className="w-4 h-4 text-muted-foreground" />
-                      <span className="truncate">{maskEmail(member.email)}</span>
-                    </div>
-                    {member.phone && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <Phone className="w-4 h-4 text-muted-foreground" />
-                        <span>{maskPhone(member.phone)}</span>
-                      </div>
-                    )}
-                    {member.bio && (
-                      <p className="text-sm text-muted-foreground line-clamp-2">{member.bio}</p>
-                    )}
-                    <div className="flex items-center justify-between pt-3 border-t">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">Status</span>
-                        <Badge
-                          variant={member.is_active ? "default" : "secondary"}
-                          className={cn(
-                            "text-xs",
-                            member.is_active
-                              ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30"
-                              : "bg-muted text-muted-foreground"
-                          )}
-                        >
-                          {member.is_active ? 'Active' : 'Inactive'}
-                        </Badge>
-                      </div>
-                      <Switch 
-                        checked={member.is_active} 
-                        onCheckedChange={(checked) => {
-                          if (!checked) {
-                            // Show confirmation dialog before deactivating
-                            setStaffToDelete(member);
-                            setDeleteDialogOpen(true);
-                          } else {
-                            // Reactivate immediately
-                            handleToggleActive(member, true);
-                          }
-                        }}
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </TabsContent>
+
+        {/* ─── TAB 2: Documents ─── */}
+        <TabsContent value="documents" className="space-y-4">
+          {/* Signable Documents */}
+          <Card>
+            <CardContent className="pt-6">
+              <AdminSignableDocManager />
+            </CardContent>
+          </Card>
+
+          {/* Document Review */}
+          <PendingDocumentsReview />
+        </TabsContent>
+
+        {/* ─── TAB 3: Activity ─── */}
+        <TabsContent value="activity" className="space-y-4">
+          <StaffEventNotifications />
+
+          {organizationId && (
+            <StaffComplianceDashboard organizationId={organizationId} />
+          )}
+        </TabsContent>
+      </Tabs>
 
       <AddStaffDialog open={addDialogOpen} onOpenChange={setAddDialogOpen} />
       <EditStaffDialog 
