@@ -114,23 +114,26 @@ export function AdminSignableDocManager() {
     enabled: !!organizationId,
   });
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !user || !organizationId) return;
+  const processFile = async (file: File) => {
+    if (!user || !organizationId) return;
     if (!title.trim()) {
       toast.error('Please enter a document title');
       return;
     }
     if (file.size > 10 * 1024 * 1024) {
       toast.error('File must be under 10MB');
-      e.target.value = '';
+      return;
+    }
+    const allowed = ['.pdf', '.doc', '.docx'];
+    const ext = '.' + (file.name.split('.').pop()?.toLowerCase() || '');
+    if (!allowed.includes(ext)) {
+      toast.error('Only PDF, DOC, and DOCX files are allowed');
       return;
     }
 
     setUploading(true);
     try {
-      const ext = file.name.split('.').pop();
-      const safeName = `${Date.now()}.${ext}`;
+      const safeName = `${Date.now()}${ext}`;
       const path = `signable/${organizationId}/${safeName}`;
 
       const { error: uploadError } = await supabase.storage.from('staff-documents').upload(path, file);
@@ -159,6 +162,13 @@ export function AdminSignableDocManager() {
       toast.error('Failed to upload document');
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      await processFile(file);
       e.target.value = '';
     }
   };
