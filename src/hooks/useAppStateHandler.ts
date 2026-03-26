@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase';
 
 export function useAppStateHandler() {
   useEffect(() => {
@@ -14,9 +14,18 @@ export function useAppStateHandler() {
       const resumeListener = await App.addListener('appStateChange', async ({ isActive }) => {
         if (isActive) {
           try {
-            await supabase.auth.refreshSession();
+            // First try getSession — if token is still valid, no network call needed
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+              // Proactively refresh if token expires within 5 minutes
+              const expiresAt = session.expires_at ?? 0;
+              const expiresInSec = expiresAt - Math.floor(Date.now() / 1000);
+              if (expiresInSec < 300) {
+                await supabase.auth.refreshSession();
+              }
+            }
           } catch {
-            // Non-fatal
+            // Non-fatal — offline or transient error
           }
         }
       });
