@@ -604,10 +604,6 @@ export function EditStaffDialog({ open, onOpenChange, staff }: EditStaffDialogPr
             )}
           </div>
 
-          {/* Signable Documents Section */}
-          <div className="space-y-2 pt-4 border-t">
-            <AdminSignableDocManager />
-          </div>
 
           {/* Payout Status Section */}
           <div className="space-y-2 pt-4 border-t">
