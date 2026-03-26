@@ -402,6 +402,8 @@ export default function PayrollPage() {
     const assignedBookings = bookings.filter((b: any) => b.status !== 'cancelled' && b.staff_id);
 
     for (const b of assignedBookings) {
+      // Re-cleans (no service, $0 total) should show $0 across all financial columns
+      const isReclean = !b.service_id && Number(b.total_amount) === 0;
       const staffMember = staff.find((s) => s.id === b.staff_id);
       const assignments = teamAssignments.filter((a: any) => a.booking_id === b.id);
 
@@ -412,7 +414,9 @@ export default function PayrollPage() {
         for (const a of assignments) {
           const member = staff.find((s) => s.id === a.staff_id);
           const payShareOverride = a.pay_share != null ? Number(a.pay_share) : null;
-          const wageInfo = calcWage(b, member, payShareOverride);
+          const wageInfo = isReclean
+            ? { calculatedPay: 0, actualPay: 0, wageType: 'reclean', wageRate: 0, hoursWorked: 0, isMissingPay: false }
+            : calcWage(b, member, payShareOverride);
           totalBookingLabor += wageInfo.calculatedPay;
           memberDetails.push({ a, member, wageInfo });
         }
@@ -443,7 +447,9 @@ export default function PayrollPage() {
           });
         }
       } else {
-        const wageInfo = calcWage(b, staffMember);
+        const wageInfo = isReclean
+          ? { calculatedPay: 0, actualPay: 0, wageType: 'reclean', wageRate: 0, hoursWorked: 0, isMissingPay: false }
+          : calcWage(b, staffMember);
         const financials = calcBookingFinancials(b, wageInfo.calculatedPay, settings);
         details.push({
           id: b.id,
