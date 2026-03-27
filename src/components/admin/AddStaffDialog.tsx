@@ -21,6 +21,8 @@ import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import { Copy, Check, Eye, EyeOff } from 'lucide-react';
 import { useOrganization } from '@/contexts/OrganizationContext';
+import { useSubscription, useStaffCount } from '@/hooks/useSubscription';
+import { UpgradeModal } from './UpgradeModal';
 
 interface AddStaffDialogProps {
   open: boolean;
@@ -30,6 +32,9 @@ interface AddStaffDialogProps {
 export function AddStaffDialog({ open, onOpenChange }: AddStaffDialogProps) {
   const queryClient = useQueryClient();
   const { organization } = useOrganization();
+  const { tier, limits } = useSubscription();
+  const { data: staffCount = 0 } = useStaffCount();
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showCredentials, setShowCredentials] = useState(false);
   const [credentials, setCredentials] = useState<{ email: string; password: string } | null>(null);
