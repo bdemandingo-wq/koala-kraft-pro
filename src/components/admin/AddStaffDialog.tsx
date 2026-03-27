@@ -165,6 +165,25 @@ export function AddStaffDialog({ open, onOpenChange }: AddStaffDialogProps) {
     }
   };
 
+  if (atStaffLimit && !showCredentials) {
+    return (
+      <>
+        <UpgradeModal
+          open={open}
+          onOpenChange={onOpenChange}
+          featureName={`more than ${limits.maxStaff} staff members`}
+          requiredTier={tier === 'starter' ? 'pro' : 'business'}
+          currentTier={tier}
+          upgradeFeatures={[
+            `Up to ${tier === 'starter' ? '15' : 'unlimited'} staff members`,
+            'Unlimited bookings per month',
+            tier === 'starter' ? 'AI-powered business insights' : 'Custom branding & white-label',
+          ]}
+        />
+      </>
+    );
+  }
+
   if (showCredentials && credentials) {
     return (
       <Dialog open={open} onOpenChange={() => {}}>
