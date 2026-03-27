@@ -1334,7 +1334,7 @@ export default function MessagesPage() {
       <SubscriptionGate feature="Messages">
       {isMobile ? (
         /* MOBILE: Full-screen list OR full-screen chat */
-        <div className="flex flex-col h-[calc(100vh-7rem)] -mx-2 -mt-2 bg-background">
+        <div className="flex flex-col h-[calc(100vh-6.5rem)] -mx-2 -mt-2 bg-background">
           {!selectedConversation ? (
             /* Full-screen conversation list */
             renderConversationList()
@@ -1342,7 +1342,7 @@ export default function MessagesPage() {
             /* Full-screen chat view */
             <div className="flex flex-col h-full">
               {/* Chat Header with back button */}
-              <div className="px-3 py-2.5 border-b flex items-center gap-2 bg-card">
+              <div className="px-3 py-2.5 border-b flex items-center gap-2 bg-card sticky top-0 z-20 shrink-0">
                 <Button
                   variant="ghost"
                   size="icon"
