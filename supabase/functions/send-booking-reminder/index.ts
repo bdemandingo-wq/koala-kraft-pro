@@ -120,7 +120,16 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    const companyName = businessSettings?.company_name || "Your cleaning service";
+    let companyName = businessSettings?.company_name?.trim() || "";
+    if (!companyName) {
+      const { data: orgRecord } = await supabase
+        .from("organizations")
+        .select("name")
+        .eq("id", organizationId)
+        .maybeSingle();
+
+      companyName = orgRecord?.name?.trim() || "Your cleaning service";
+    }
 
     // Fetch timezone for this org (stored in business_settings)
     const { data: tzSettings } = await supabase
@@ -280,7 +289,10 @@ const handler = async (req: Request): Promise<Response> => {
       const serviceName = payload?.serviceName || "cleaning";
       const address = payload?.address || "";
 
-      const message = `Hi ${customerName}! This is a reminder about your ${serviceName} appointment with ${companyName} on ${formattedDate} at ${formattedTime}.${address ? ` Address: ${address}` : ""} Reply with any questions!`;
+      const isConfirmation = payload?.messageType === "confirmation";
+      const message = isConfirmation
+        ? `Hi ${customerName}! Your ${serviceName} appointment with ${companyName} is confirmed for ${formattedDate} at ${formattedTime}.${address ? ` Address: ${address}.` : ""} Reply to this message with any questions!`
+        : `Hi ${customerName}! This is a reminder about your ${serviceName} appointment with ${companyName} on ${formattedDate} at ${formattedTime}.${address ? ` Address: ${address}` : ""} Reply with any questions!`;
 
       const result = await sendAndLog(
         payload.customerPhone,
