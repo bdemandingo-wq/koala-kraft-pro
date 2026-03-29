@@ -187,6 +187,35 @@ export default function SubscriptionPage() {
                   </div>
                 )}
 
+                {status.trial_active && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button disabled={upgrading} size="lg" className="w-full">
+                        {upgrading ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Zap className="mr-2 h-4 w-4" />
+                        )}
+                        Upgrade Now
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>End free trial and upgrade?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will end your free trial immediately and charge your card $50 today. Continue?
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleUpgradeNow}>
+                          Yes, Upgrade Now
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
+
                 <Button onClick={handleManageSubscription} disabled={openingPortal} variant="outline">
                   {openingPortal ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
