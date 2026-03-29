@@ -381,7 +381,7 @@ const handler = async (req: Request): Promise<Response> => {
               ` See you shortly!`;
           } else {
             clientMsg =
-              `Hi ${customerName}! Your ${serviceName} appointment is confirmed for ${formattedDate} at ${formattedTime}.` +
+              `Hi ${customerName}! Your ${serviceName} appointment with ${companyName} is confirmed for ${formattedDate} at ${formattedTime}.` +
               `${address ? ` Address: ${address}.` : ""}` +
               ` Reply to this message with any questions!`;
           }
