@@ -89,7 +89,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuGroup,
 } from '@/components/ui/dropdown-menu';
-import { useBookings, useUpdateBooking, useDeleteBooking, useStaff, BookingWithDetails } from '@/hooks/useBookings';
+import { useBookings, useUpdateBooking, useDeleteBooking, useStaff, useServices, BookingWithDetails } from '@/hooks/useBookings';
 import { format, isWithinInterval, startOfDay, endOfDay, differenceInDays, differenceInHours, addDays } from 'date-fns';
 import { AddBookingDialog } from '@/components/admin/AddBookingDialog';
 import { BookingDetailsDialog, AdjustPaymentDialog } from '@/components/admin/BookingDialogs';
@@ -106,6 +106,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { PullToRefreshIndicator } from '@/components/admin/PullToRefreshIndicator';
 import { BookingActionSheet } from '@/components/admin/BookingActionSheet';
+import { BulkEditBookingsDialog } from '@/components/admin/BulkEditBookingsDialog';
 
 const statusConfig: Record<string, { bg: string; text: string; dot: string }> = {
   pending: { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500' },
@@ -200,9 +201,11 @@ export default function BookingsPage() {
   const [assigningCleaner, setAssigningCleaner] = useState(false);
   const [actionSheetBooking, setActionSheetBooking] = useState<BookingWithDetails | null>(null);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+  const [bulkEditOpen, setBulkEditOpen] = useState(false);
 
   const { data: bookings = [], isLoading, error } = useBookings();
   const { data: staffList = [] } = useStaff();
+  const { data: servicesList = [] } = useServices();
   const queryClient = useQueryClient();
 
   const handlePullRefresh = useCallback(async () => {
@@ -1595,6 +1598,14 @@ export default function BookingsPage() {
             <Phone className="w-4 h-4" />
             Remind Clients
           </Button>
+          <Button 
+            variant="outline" 
+            className="h-11 gap-2 rounded-xl border-primary/30 text-primary hover:bg-primary/10"
+            onClick={() => setBulkEditOpen(true)}
+          >
+            <Edit className="w-4 h-4" />
+            Bulk Edit
+          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="h-11 gap-2 rounded-xl border-border/50 hover:bg-secondary/50" disabled={exporting}>
@@ -1613,6 +1624,14 @@ export default function BookingsPage() {
           </DropdownMenu>
           {selectedBookings.size > 0 && (
             <>
+              <Button 
+                variant="outline" 
+                className="h-11 gap-2 rounded-xl border-primary/30 text-primary hover:bg-primary/10"
+                onClick={() => setBulkEditOpen(true)}
+              >
+                <Edit className="w-4 h-4" />
+                Bulk Edit ({selectedBookings.size})
+              </Button>
               <Button 
                 variant="outline" 
                 className="h-11 gap-2 rounded-xl"
@@ -2692,6 +2711,16 @@ export default function BookingsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <BulkEditBookingsDialog
+        open={bulkEditOpen}
+        onOpenChange={setBulkEditOpen}
+        bookings={selectedBookings.size > 0 
+          ? filteredBookings.filter(b => selectedBookings.has(b.id))
+          : filteredBookings
+        }
+        staffList={staffList}
+        services={servicesList as any}
+      />
 
     </AdminLayout>
   );
