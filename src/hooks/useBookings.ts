@@ -186,13 +186,7 @@ export function useBookings() {
         if (!data || data.length < PAGE_SIZE) break;
         from += PAGE_SIZE;
       }
-
-      if (error) {
-        console.error('Error fetching bookings:', error);
-        throw error;
-      }
-
-      return data as BookingWithDetails[];
+      return allBookings as BookingWithDetails[];
     },
     enabled: !!organizationId,
     staleTime: 1000 * 60 * 2,
