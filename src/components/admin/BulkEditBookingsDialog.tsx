@@ -277,7 +277,7 @@ export function BulkEditBookingsDialog({
                 <Wrench className="w-3.5 h-3.5" />
                 Change Service Type
               </Label>
-              <Select value={editServiceId} onValueChange={setEditServiceId}>
+              <Select value={editServiceId || '__none__'} onValueChange={(v) => setEditServiceId(v === '__none__' ? '' : v)}>
                 <SelectTrigger className="h-10 rounded-xl">
                   <SelectValue placeholder="Keep current" />
                 </SelectTrigger>
@@ -298,7 +298,7 @@ export function BulkEditBookingsDialog({
                 <User className="w-3.5 h-3.5" />
                 Change Cleaner
               </Label>
-              <Select value={editStaffId} onValueChange={setEditStaffId}>
+              <Select value={editStaffId || '__none__'} onValueChange={(v) => setEditStaffId(v === '__none__' ? '' : v)}>
                 <SelectTrigger className="h-10 rounded-xl">
                   <SelectValue placeholder="Keep current" />
                 </SelectTrigger>
