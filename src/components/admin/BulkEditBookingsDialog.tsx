@@ -50,7 +50,7 @@ export function BulkEditBookingsDialog({
 
   // Fields to edit
   const [editServiceId, setEditServiceId] = useState<string>('');
-  const [editStaffId, setEditStaffId] = useState<string>('');
+  const [editStaffIds, setEditStaffIds] = useState<string[]>([]);
   const [editTime, setEditTime] = useState<string>('');
   const [editPrice, setEditPrice] = useState<string>('');
 
