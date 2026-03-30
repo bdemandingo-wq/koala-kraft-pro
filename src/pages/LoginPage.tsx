@@ -13,7 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { TermsOfServiceDialog } from '@/components/legal/TermsOfServiceDialog';
 import { SplashScreen } from '@/components/SplashScreen';
 import { toast } from 'sonner';
-import { Eye, EyeOff, Loader2, ArrowLeft, Mail, Lock } from 'lucide-react';
+import { Eye, EyeOff, Loader2, ArrowLeft, Mail, Lock, Apple } from 'lucide-react';
 import { z } from 'zod';
 
 // Validation schema
@@ -24,7 +24,7 @@ const loginSchema = z.object({
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { user, loading: authLoading, initialCleanupDone, signIn } = useAuthNoSession();
+  const { user, loading: authLoading, initialCleanupDone, signIn, signInWithApple } = useAuthNoSession();
   
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -206,6 +206,33 @@ export default function LoginPage() {
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Sign In
+              </Button>
+
+              <div className="relative my-4">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-border" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-card px-2 text-muted-foreground">or</span>
+                </div>
+              </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                disabled={loading}
+                onClick={async () => {
+                  setLoading(true);
+                  const { error } = await signInWithApple();
+                  if (error) {
+                    toast.error(error.message || 'Apple sign in failed');
+                    setLoading(false);
+                  }
+                }}
+              >
+                <Apple className="mr-2 h-4 w-4" />
+                Sign in with Apple
               </Button>
 
             </form>
