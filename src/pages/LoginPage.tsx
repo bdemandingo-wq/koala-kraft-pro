@@ -13,7 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { TermsOfServiceDialog } from '@/components/legal/TermsOfServiceDialog';
 import { SplashScreen } from '@/components/SplashScreen';
 import { toast } from 'sonner';
-import { Eye, EyeOff, Loader2, ArrowLeft, Mail, Lock } from 'lucide-react';
+import { Eye, EyeOff, Loader2, ArrowLeft, Mail, Lock, Apple } from 'lucide-react';
 import { z } from 'zod';
 
 // Validation schema
