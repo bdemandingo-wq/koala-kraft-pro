@@ -176,7 +176,7 @@ export function BulkEditBookingsDialog({
 
       // Reset
       setEditServiceId('');
-      setEditStaffId('');
+      setEditStaffIds([]);
       setEditTime('');
       setEditPrice('');
       onOpenChange(false);
@@ -295,23 +295,57 @@ export function BulkEditBookingsDialog({
               </Select>
             </div>
 
-            {/* Staff */}
+            {/* Staff (multi-select for team) */}
             <div className="space-y-1.5">
               <Label className="text-xs flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5" />
-                Change Cleaner
+                <Users className="w-3.5 h-3.5" />
+                Assign Cleaner(s)
               </Label>
-              <Select value={editStaffId || '__none__'} onValueChange={(v) => setEditStaffId(v === '__none__' ? '' : v)}>
+              {editStaffIds.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {editStaffIds.map((id) => {
+                    const staff = staffList.find((s) => s.id === id);
+                    return (
+                      <Badge key={id} variant="secondary" className="gap-1 pr-1">
+                        {staff?.name || 'Unknown'}
+                        <button
+                          onClick={() => setEditStaffIds((prev) => prev.filter((sid) => sid !== id))}
+                          className="ml-0.5 rounded-full hover:bg-muted p-0.5"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </Badge>
+                    );
+                  })}
+                </div>
+              )}
+              <Select
+                value="__none__"
+                onValueChange={(v) => {
+                  if (v !== '__none__' && !editStaffIds.includes(v)) {
+                    setEditStaffIds((prev) => [...prev, v]);
+                  }
+                }}
+              >
                 <SelectTrigger className="h-10 rounded-xl">
-                  <SelectValue placeholder="Keep current" />
+                  <SelectValue placeholder={editStaffIds.length > 0 ? 'Add another cleaner...' : 'Keep current'} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__none__">Keep current</SelectItem>
-                  {staffList.map((s) => (
-                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                  ))}
+                  <SelectItem value="__none__">
+                    {editStaffIds.length > 0 ? 'Add another cleaner...' : 'Keep current'}
+                  </SelectItem>
+                  {staffList
+                    .filter((s) => !editStaffIds.includes(s.id))
+                    .map((s) => (
+                      <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
+              {editStaffIds.length > 1 && (
+                <p className="text-xs text-muted-foreground">
+                  Team mode: pay will be split equally ({Math.round(100 / editStaffIds.length)}% each)
+                </p>
+              )}
             </div>
 
             {/* Time */}
