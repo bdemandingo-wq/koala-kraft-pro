@@ -338,6 +338,27 @@ export function BulkEditBookingsDialog({
               </Select>
             </div>
 
+            {/* Status */}
+            <div className="space-y-1.5">
+              <Label className="text-xs flex items-center gap-1.5">
+                <CheckCircle className="w-3.5 h-3.5" />
+                Change Status
+              </Label>
+              <Select value={editStatus || '__none__'} onValueChange={(v) => setEditStatus(v === '__none__' ? '' : v)}>
+                <SelectTrigger className="h-10 rounded-xl">
+                  <SelectValue placeholder="Keep current" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">Keep current</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="confirmed">Confirmed</SelectItem>
+                  <SelectItem value="in_progress">In Progress</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             {/* Staff (multi-select for team) */}
             <div className="space-y-1.5">
               <Label className="text-xs flex items-center gap-1.5">
