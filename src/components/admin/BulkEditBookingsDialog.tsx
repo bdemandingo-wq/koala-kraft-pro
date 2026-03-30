@@ -54,6 +54,7 @@ export function BulkEditBookingsDialog({
   const [editTime, setEditTime] = useState<string>('');
   const [editPrice, setEditPrice] = useState<string>('');
   const [editCleanerPay, setEditCleanerPay] = useState<string>('');
+  const [editIndividualPay, setEditIndividualPay] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
   // Unique customers from bookings
