@@ -24,7 +24,7 @@ const loginSchema = z.object({
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { user, loading: authLoading, initialCleanupDone, signIn } = useAuthNoSession();
+  const { user, loading: authLoading, initialCleanupDone, signIn, signInWithApple } = useAuthNoSession();
   
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
