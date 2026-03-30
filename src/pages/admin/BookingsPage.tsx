@@ -201,9 +201,11 @@ export default function BookingsPage() {
   const [assigningCleaner, setAssigningCleaner] = useState(false);
   const [actionSheetBooking, setActionSheetBooking] = useState<BookingWithDetails | null>(null);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+  const [bulkEditOpen, setBulkEditOpen] = useState(false);
 
   const { data: bookings = [], isLoading, error } = useBookings();
   const { data: staffList = [] } = useStaff();
+  const { data: servicesList = [] } = useServices();
   const queryClient = useQueryClient();
 
   const handlePullRefresh = useCallback(async () => {
