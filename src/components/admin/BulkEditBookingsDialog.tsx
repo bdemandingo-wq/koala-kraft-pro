@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, Edit, Filter, User, Clock, DollarSign, Wrench } from 'lucide-react';
+import { Loader2, Edit, Filter, User, Users, Clock, DollarSign, Wrench, X } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { format, getDay } from 'date-fns';
 import { supabase } from '@/lib/supabase';
@@ -89,7 +89,7 @@ export function BulkEditBookingsDialog({
     });
   };
 
-  const hasChanges = editServiceId || editStaffId || editTime || editPrice;
+  const hasChanges = editServiceId || editStaffIds.length > 0 || editTime || editPrice;
 
   const handleApply = async () => {
     if (!hasChanges) {
