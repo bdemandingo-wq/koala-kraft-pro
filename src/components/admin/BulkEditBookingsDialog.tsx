@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, Edit, Filter, User, Clock, DollarSign, Wrench } from 'lucide-react';
+import { Loader2, Edit, Filter, User, Users, Clock, DollarSign, Wrench, X } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { format, getDay } from 'date-fns';
 import { supabase } from '@/lib/supabase';
@@ -50,7 +50,7 @@ export function BulkEditBookingsDialog({
 
   // Fields to edit
   const [editServiceId, setEditServiceId] = useState<string>('');
-  const [editStaffId, setEditStaffId] = useState<string>('');
+  const [editStaffIds, setEditStaffIds] = useState<string[]>([]);
   const [editTime, setEditTime] = useState<string>('');
   const [editPrice, setEditPrice] = useState<string>('');
 
@@ -89,7 +89,7 @@ export function BulkEditBookingsDialog({
     });
   };
 
-  const hasChanges = editServiceId || editStaffId || editTime || editPrice;
+  const hasChanges = editServiceId || editStaffIds.length > 0 || editTime || editPrice;
 
   const handleApply = async () => {
     if (!hasChanges) {
@@ -122,8 +122,8 @@ export function BulkEditBookingsDialog({
             updates.total_amount = svc.price;
           }
         }
-        if (editStaffId) {
-          updates.staff_id = editStaffId;
+        if (editStaffIds.length > 0) {
+          updates.staff_id = editStaffIds[0]; // Primary cleaner
         }
         if (editPrice) {
           updates.total_amount = parseFloat(editPrice);
@@ -147,16 +147,19 @@ export function BulkEditBookingsDialog({
           console.error('Bulk edit error for booking', booking.id, error);
           failCount++;
         } else {
-          // Also update team assignments if staff changed
-          if (editStaffId) {
+          // Update team assignments if staff changed
+          if (editStaffIds.length > 0) {
             await supabase.from('booking_team_assignments').delete().eq('booking_id', booking.id);
-            await supabase.from('booking_team_assignments').insert({
-              booking_id: booking.id,
-              staff_id: editStaffId,
-              is_primary: true,
-              pay_share: 1,
-              organization_id: (booking as any).organization_id,
-            });
+            const payShare = editStaffIds.length > 1 ? 1 / editStaffIds.length : 1;
+            for (let i = 0; i < editStaffIds.length; i++) {
+              await supabase.from('booking_team_assignments').insert({
+                booking_id: booking.id,
+                staff_id: editStaffIds[i],
+                is_primary: i === 0,
+                pay_share: payShare,
+                organization_id: (booking as any).organization_id,
+              });
+            }
           }
           successCount++;
         }
@@ -173,7 +176,7 @@ export function BulkEditBookingsDialog({
 
       // Reset
       setEditServiceId('');
-      setEditStaffId('');
+      setEditStaffIds([]);
       setEditTime('');
       setEditPrice('');
       onOpenChange(false);
@@ -292,23 +295,57 @@ export function BulkEditBookingsDialog({
               </Select>
             </div>
 
-            {/* Staff */}
+            {/* Staff (multi-select for team) */}
             <div className="space-y-1.5">
               <Label className="text-xs flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5" />
-                Change Cleaner
+                <Users className="w-3.5 h-3.5" />
+                Assign Cleaner(s)
               </Label>
-              <Select value={editStaffId || '__none__'} onValueChange={(v) => setEditStaffId(v === '__none__' ? '' : v)}>
+              {editStaffIds.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {editStaffIds.map((id) => {
+                    const staff = staffList.find((s) => s.id === id);
+                    return (
+                      <Badge key={id} variant="secondary" className="gap-1 pr-1">
+                        {staff?.name || 'Unknown'}
+                        <button
+                          onClick={() => setEditStaffIds((prev) => prev.filter((sid) => sid !== id))}
+                          className="ml-0.5 rounded-full hover:bg-muted p-0.5"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </Badge>
+                    );
+                  })}
+                </div>
+              )}
+              <Select
+                value="__none__"
+                onValueChange={(v) => {
+                  if (v !== '__none__' && !editStaffIds.includes(v)) {
+                    setEditStaffIds((prev) => [...prev, v]);
+                  }
+                }}
+              >
                 <SelectTrigger className="h-10 rounded-xl">
-                  <SelectValue placeholder="Keep current" />
+                  <SelectValue placeholder={editStaffIds.length > 0 ? 'Add another cleaner...' : 'Keep current'} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__none__">Keep current</SelectItem>
-                  {staffList.map((s) => (
-                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                  ))}
+                  <SelectItem value="__none__">
+                    {editStaffIds.length > 0 ? 'Add another cleaner...' : 'Keep current'}
+                  </SelectItem>
+                  {staffList
+                    .filter((s) => !editStaffIds.includes(s.id))
+                    .map((s) => (
+                      <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
+              {editStaffIds.length > 1 && (
+                <p className="text-xs text-muted-foreground">
+                  Team mode: pay will be split equally ({Math.round(100 / editStaffIds.length)}% each)
+                </p>
+              )}
             </div>
 
             {/* Time */}
