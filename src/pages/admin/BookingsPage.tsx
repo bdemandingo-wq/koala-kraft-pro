@@ -1598,6 +1598,14 @@ export default function BookingsPage() {
             <Phone className="w-4 h-4" />
             Remind Clients
           </Button>
+          <Button 
+            variant="outline" 
+            className="h-11 gap-2 rounded-xl border-primary/30 text-primary hover:bg-primary/10"
+            onClick={() => setBulkEditOpen(true)}
+          >
+            <Edit className="w-4 h-4" />
+            Bulk Edit
+          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="h-11 gap-2 rounded-xl border-border/50 hover:bg-secondary/50" disabled={exporting}>
