@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, Edit, Filter, User, Users, Clock, DollarSign, Wrench, X, Banknote } from 'lucide-react';
+import { Loader2, Edit, Filter, User, Users, Clock, DollarSign, Wrench, X, Banknote, CheckCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { format, getDay } from 'date-fns';
 import { supabase } from '@/lib/supabase';
@@ -56,6 +56,7 @@ export function BulkEditBookingsDialog({
   const [editTime, setEditTime] = useState<string>('');
   const [editPrice, setEditPrice] = useState<string>('');
   const [editCleanerPay, setEditCleanerPay] = useState<string>('');
+  const [editStatus, setEditStatus] = useState<string>('');
   const [editIndividualPay, setEditIndividualPay] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
@@ -114,7 +115,7 @@ export function BulkEditBookingsDialog({
   };
 
   const hasIndividualPay = Object.values(editIndividualPay).some(v => v !== '');
-  const hasChanges = editServiceId || editStaffIds.length > 0 || editTime || editPrice || editCleanerPay || hasIndividualPay;
+  const hasChanges = editServiceId || editStaffIds.length > 0 || editTime || editPrice || editCleanerPay || editStatus || hasIndividualPay;
 
   const handleApply = async () => {
     if (!hasChanges) {
@@ -155,6 +156,9 @@ export function BulkEditBookingsDialog({
         }
         if (editCleanerPay) {
           updates.cleaner_pay_expected = parseFloat(editCleanerPay);
+        }
+        if (editStatus) {
+          updates.status = editStatus;
         }
         if (editTime) {
           // Keep same date, change time
@@ -216,6 +220,7 @@ export function BulkEditBookingsDialog({
       setEditTime('');
       setEditPrice('');
       setEditCleanerPay('');
+      setEditStatus('');
       setEditIndividualPay({});
       onOpenChange(false);
     } catch (error: any) {
