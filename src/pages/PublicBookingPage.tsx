@@ -724,11 +724,11 @@ export default function PublicBookingPage() {
                 </div>
               )}
 
-              {/* Home Condition */}
+              {/* Vehicle Condition Surcharge */}
               {displaySettings.show_home_condition && homeConditionOptions.length > 0 && (
                 <div>
-                  <h2 className="text-2xl font-bold mb-2">Home Condition</h2>
-                  <p className="text-muted-foreground mb-4">Rate your home's current condition</p>
+                  <h2 className="text-2xl font-bold mb-2">Vehicle Condition</h2>
+                  <p className="text-muted-foreground mb-4">Rate your vehicle's current condition</p>
                   <div className="space-y-2">
                     {homeConditionOptions.map((condition) => (
                       <Card
