@@ -66,9 +66,9 @@ export default function ReportsPage() {
   const [workingHours, setWorkingHours] = useState<any[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
   const [recurringBookings, setRecurringBookings] = useState<any[]>([]);
-  const [recurringStats, setRecurringStats] = useState<{ recurringClients: number; recurringCleans: number; recurringRevenue: number }>({
+  const [recurringStats, setRecurringStats] = useState<{ recurringClients: number; recurringServices: number; recurringRevenue: number }>({
     recurringClients: 0,
-    recurringCleans: 0,
+    recurringServices: 0,
     recurringRevenue: 0
   });
   const { isTestMode, maskName } = useTestMode();
