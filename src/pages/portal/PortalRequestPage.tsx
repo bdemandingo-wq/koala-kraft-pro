@@ -345,7 +345,7 @@ export default function PortalRequestPage() {
                       This is a turnover clean
                     </label>
                     <p className="text-xs text-muted-foreground">
-                      Turnover cleans must be completed at a specific time between guests
+                      Turnover services must be completed at a specific time between guests
                     </p>
                   </div>
                 </div>
