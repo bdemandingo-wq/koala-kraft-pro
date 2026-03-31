@@ -239,7 +239,7 @@ export default function PayrollPage() {
       toEndOfDay.setHours(23, 59, 59, 999);
       const { data, error } = await supabase
         .from('bookings')
-        .select(`*, customer:customers(*), staff:staff(*)`)
+        .select(`*, customer:customers(*), staff:staff(*), service:services(name)`)
         .eq('organization_id', organizationId)
         .gte('scheduled_at', dateRange.from.toISOString())
         .lte('scheduled_at', toEndOfDay.toISOString())
