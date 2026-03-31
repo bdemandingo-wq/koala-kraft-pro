@@ -623,7 +623,7 @@ function TaxReportCard({ clientUserId }: { clientUserId?: string }) {
           <CardTitle>Tax Reports</CardTitle>
         </div>
         <CardDescription>
-          Download a summary of your bookings for tax purposes
+          Download a summary of your detailing services for tax purposes
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
