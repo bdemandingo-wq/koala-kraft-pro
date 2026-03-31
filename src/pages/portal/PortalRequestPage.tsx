@@ -215,9 +215,9 @@ export default function PortalRequestPage() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-lg font-bold">{isReschedule ? "Reschedule Booking" : "Request a Booking"}</h1>
+            <h1 className="text-lg font-bold">{isReschedule ? "Reschedule Service" : "Book a Detail"}</h1>
             <p className="text-sm text-muted-foreground">
-              {isReschedule ? "Pick a new date and time" : "Choose your preferred date"}
+              {isReschedule ? "Pick a new date and time" : "Choose your preferred date for service"}
             </p>
           </div>
         </div>
