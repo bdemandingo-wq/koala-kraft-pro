@@ -90,7 +90,7 @@ export default function ReportsPage() {
       const totalRecurringPlans = recData.length;
       setRecurringStats({
         recurringClients: totalRecurringPlans,
-        recurringCleans: 0,
+        recurringServices: 0,
         recurringRevenue: 0,
       });
     };
