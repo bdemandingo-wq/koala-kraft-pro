@@ -144,7 +144,7 @@ export default function PortalLoginPage() {
             </form>
 
             <p className="mt-6 text-center text-sm text-muted-foreground">
-              Need access? Contact the business to get your portal login.
+              Need access? Contact We Detail NC at (984) 332-8570 to get your portal login.
             </p>
           </CardContent>
         </Card>

@@ -285,7 +285,7 @@ export default function PortalRequestPage() {
             {/* Address Selection */}
             {locations.length >= 1 && (
               <div className="space-y-2">
-                <Label>Address *</Label>
+                <Label>Where would you like us to come? *</Label>
                 <Select value={selectedLocation} onValueChange={setSelectedLocation}>
                   <SelectTrigger>
                     <div className="flex items-center">
