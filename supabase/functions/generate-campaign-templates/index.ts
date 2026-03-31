@@ -16,7 +16,7 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const { companyName, serviceType = "cleaning", audience = "all_eligible", timestamp } = await req.json();
+    const { companyName, serviceType = "detailing", audience = "all_eligible", timestamp } = await req.json();
     
     const uniqueId = timestamp || Date.now();
 
@@ -126,7 +126,7 @@ Return JSON format:
           },
           {
             name: "The Referral Request",
-            message: `Hi {first_name}! Know someone who needs cleaning? Refer a friend to {company_name} & you both get $25 off! Reply STOP to opt out.`
+            message: `Hi {first_name}! Know someone who needs detailing? Refer a friend to {company_name} & you both get $25 off! Reply STOP to opt out.`
           }
         ]
       };

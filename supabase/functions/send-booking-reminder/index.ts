@@ -286,7 +286,7 @@ const handler = async (req: Request): Promise<Response> => {
         : "your scheduled time");
 
       const customerName = payload?.customerName || "there";
-      const serviceName = payload?.serviceName || "cleaning";
+      const serviceName = payload?.serviceName || "detailing";
       const address = payload?.address || "";
 
       const isConfirmation = payload?.messageType === "confirmation";
@@ -378,7 +378,7 @@ const handler = async (req: Request): Promise<Response> => {
         const formattedDate = formatLocalDate(scheduledDate);
         const formattedTime = formatLocalTime(scheduledDate);
         const address = [booking.address, booking.city].filter(Boolean).join(", ");
-        const serviceName = booking.service?.name || "cleaning";
+        const serviceName = booking.service?.name || "detailing";
 
         // --- CLIENT REMINDER ---
         if (interval.send_to_client && booking.customer?.phone) {
@@ -417,7 +417,7 @@ const handler = async (req: Request): Promise<Response> => {
           }
         }
 
-        // --- CLEANER REMINDER ---
+        // --- TECHNICIAN REMINDER ---
         if (interval.send_to_cleaner && booking.staff?.phone) {
           const technicianName = booking.staff.name || "there";
           const customerName = `${booking.customer?.first_name || ""} ${booking.customer?.last_name || ""}`.trim() || "Customer";

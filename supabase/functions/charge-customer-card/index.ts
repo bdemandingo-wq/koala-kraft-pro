@@ -171,7 +171,7 @@ const handler = async (req: Request): Promise<Response> => {
         off_session: true,
         confirm: true,
         capture_method: "manual", // This places a hold but doesn't capture (charge) the funds
-        description: description || "Cleaning service hold",
+        description: description || "Detailing service hold",
         metadata: {
           bookingId: bookingId || "",
           organization_id: organizationId,

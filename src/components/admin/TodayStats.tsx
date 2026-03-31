@@ -33,7 +33,7 @@ export function TodayStats({ grossVolume, payments, customers }: TodayStatsProps
 
   return (
     <div className="mb-6">
-      <h2 className="text-lg font-bold md:font-semibold text-primary md:text-foreground mb-3">Today</h2>
+      <h2 className="text-lg font-bold md:font-semibold text-primary md:text-foreground mb-3">Today's Overview</h2>
       <div 
         className={cn(
           "bg-card border border-border rounded-xl p-4 transition-all duration-300",
@@ -42,7 +42,7 @@ export function TodayStats({ grossVolume, payments, customers }: TodayStatsProps
       >
         <div className="grid grid-cols-3 divide-x divide-border">
           <div className="text-center px-4">
-            <p className="text-sm text-muted-foreground mb-1">Gross Volume</p>
+            <p className="text-sm text-muted-foreground mb-1">Today's Revenue</p>
             <p className={cn(
               "text-lg md:text-2xl font-bold transition-colors duration-300",
               isPulsing && "text-primary"
@@ -51,7 +51,7 @@ export function TodayStats({ grossVolume, payments, customers }: TodayStatsProps
             </p>
           </div>
           <div className="text-center px-4">
-            <p className="text-sm text-muted-foreground mb-1">Payments</p>
+            <p className="text-sm text-muted-foreground mb-1">Jobs Paid</p>
             <p className={cn(
               "text-lg md:text-2xl font-bold transition-colors duration-300",
               isPulsing && "text-primary"
@@ -60,7 +60,7 @@ export function TodayStats({ grossVolume, payments, customers }: TodayStatsProps
             </p>
           </div>
           <div className="text-center px-4">
-            <p className="text-sm text-muted-foreground mb-1">Customers</p>
+            <p className="text-sm text-muted-foreground mb-1">New Customers</p>
             <p className={cn(
               "text-lg md:text-2xl font-bold transition-colors duration-300",
               isPulsing && "text-primary"

@@ -25,7 +25,7 @@ const comparisonData = [
   { feature: "Automated Payroll", wedetailnc: true, housecallpro: false, winner: "wedetailnc" },
   { feature: "P&L Reports", wedetailnc: true, housecallpro: false, winner: "wedetailnc" },
   { feature: "Demo/Test Mode", wedetailnc: true, housecallpro: false, winner: "wedetailnc" },
-  { feature: "Cleaning-Specific Pricing", wedetailnc: true, housecallpro: false, winner: "wedetailnc" },
+  { feature: "Detailing-Specific Pricing", wedetailnc: true, housecallpro: false, winner: "wedetailnc" },
   { feature: "AI Revenue Tools", wedetailnc: true, housecallpro: false, winner: "wedetailnc" },
   { feature: "Unlimited Users", wedetailnc: true, housecallpro: "Add-on", winner: "wedetailnc" },
   { feature: "Review Requests", wedetailnc: true, housecallpro: true, winner: "tie" },
@@ -74,7 +74,7 @@ export default function CompareHousecallPro() {
     <div className="min-h-screen bg-background">
       <Seo 
         title="WE DETAIL NC vs Housecall Pro (2026)"
-        description="Compare WE DETAIL NC vs Housecall Pro for car detailing businesses. Cleaning-specific features, payroll, and $50/mo flat pricing vs Housecall Pro's $59–$199/mo."
+        description="Compare WE DETAIL NC vs Housecall Pro for car detailing businesses. Detailing-specific features, payroll, and $50/mo flat pricing vs Housecall Pro's $59–$199/mo."
         canonicalPath="/compare/housecall-pro"
         ogImage="/images/wedetailnc-og.png"
       />
@@ -121,7 +121,7 @@ export default function CompareHousecallPro() {
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
             We Detail NC vs Housecall Pro:<br/>
-            <span className="text-primary">Built for Cleaning, Not Plumbing</span>
+            <span className="text-primary">Built for Detailing, Not Plumbing</span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
             Housecall Pro was built for plumbers and HVAC techs. We Detail NC is built specifically for car detailing businesses with <strong>square footage pricing, automated payroll, and P&L reports</strong>—all for a flat $50/month.
@@ -152,7 +152,7 @@ export default function CompareHousecallPro() {
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-primary">10+</div>
-              <p className="text-sm text-muted-foreground">Cleaning Features</p>
+              <p className="text-sm text-muted-foreground">Detailing Features</p>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-primary">4.9★</div>
@@ -221,7 +221,7 @@ export default function CompareHousecallPro() {
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-2">Save $100+/Month</h3>
               <p className="text-muted-foreground">
-                Housecall Pro's Pro plan costs $199/month. We Detail NC gives you more cleaning features for just $50/month flat.
+                Housecall Pro's Pro plan costs $199/month. We Detail NC gives you more detailing features for just $50/month flat.
               </p>
             </div>
 
@@ -239,7 +239,7 @@ export default function CompareHousecallPro() {
               <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <Clock className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">Built for Cleaning</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-2">Built for Detailing</h3>
               <p className="text-muted-foreground">
                 Housecall Pro serves 20+ industries. We Detail NC is 100% focused on making car detailing businesses successful.
               </p>
@@ -330,7 +330,7 @@ export default function CompareHousecallPro() {
             "priceCurrency": "USD",
             "priceValidUntil": "2027-12-31"
           },
-          "description": "The best Housecall Pro alternative for car detailing businesses. Cleaning-specific features, automated payroll, and flat $50/month pricing."
+          "description": "The best Housecall Pro alternative for car detailing businesses. Detailing-specific features, automated payroll, and flat $50/month pricing."
         })
       }} />
     </div>

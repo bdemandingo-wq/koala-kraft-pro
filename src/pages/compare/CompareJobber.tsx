@@ -49,7 +49,7 @@ const testimonials = [
   {
     quote: "Jobber's pricing kept going up. WE DETAIL NC is half the cost with more features for car detailing businesses.",
     author: "Lisa K.",
-    role: "Sparkle Queens Cleaning",
+    role: "Sparkle Queens Detailing",
     rating: 5
   },
   {

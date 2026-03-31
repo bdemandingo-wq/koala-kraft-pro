@@ -179,7 +179,7 @@ const handler = async (req: Request): Promise<Response> => {
         const customerName = `${customer.first_name || ""} ${customer.last_name || ""}`.trim() || "there";
 
         // 6. Build Hormozi-style million dollar offer message
-        const message = `Hi ${customerName}! 🏠 ${companyName} here. We loved making your home sparkle! Here's our EXCLUSIVE returning client offer: Book your next cleaning in the next 48 hours and get priority scheduling + our premium deep-clean checklist at NO extra charge. Your home deserves the best — and so do you! Book now: ${bookingLink}`;
+        const message = `Hi ${customerName}! 🚗 ${companyName} here. We loved making your vehicle shine! Here's our EXCLUSIVE returning client offer: Book your next detail in the next 48 hours and get priority scheduling + our premium detailing checklist at NO extra charge. Your vehicle deserves the best — and so do you! Book now: ${bookingLink}`;
 
         // 7. Send via OpenPhone
         let phoneNumberId = smsSettings.openphone_phone_number_id;

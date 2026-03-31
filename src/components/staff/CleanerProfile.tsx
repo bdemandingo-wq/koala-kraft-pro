@@ -338,7 +338,7 @@ export function TechnicianProfile({ staffInfo, userId }: Props) {
             id="bio"
             value={formData.bio}
             onChange={(e) => handleInputChange('bio', e.target.value)}
-            placeholder="I'm a professional technician with 5+ years of experience specializing in deep cleaning and organization..."
+            placeholder="I'm a professional detailer with 5+ years of experience specializing in paint correction, ceramic coatings, and interior restoration..."
             rows={4}
           />
           <p className="text-xs text-muted-foreground">

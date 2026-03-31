@@ -156,7 +156,7 @@ serve(async (req: Request) => {
         const companyName = businessSettings?.company_name || "Your detailing service";
 
         // Build message
-        const message = `Hi! This is ${companyName}. Most of our recurring clients never have to worry about cleaning again and also get priority scheduling and lower pricing than one-time bookings.\n\nWant us to lock in a regular cleaning every 2 or 4 weeks so your home stays taken care of automatically?`;
+        const message = `Hi! This is ${companyName}. Most of our recurring clients never have to worry about detailing again and also get priority scheduling and lower pricing than one-time bookings.\n\nWant us to lock in a regular detail every 2 or 4 weeks so your vehicle stays looking fresh automatically?`;
 
         // 6. Send via OpenPhone
         let phoneNumberId = smsSettings.openphone_phone_number_id;

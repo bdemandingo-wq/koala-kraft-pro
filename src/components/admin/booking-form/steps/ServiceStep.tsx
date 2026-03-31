@@ -161,7 +161,7 @@ export function ServiceStep() {
         </div>
         <div>
           <h3 className="text-lg font-semibold">Service Selection</h3>
-          <p className="text-sm text-muted-foreground">Choose the service type and property details</p>
+          <p className="text-sm text-muted-foreground">Choose the service type and vehicle details</p>
         </div>
       </div>
 

@@ -73,7 +73,7 @@ export default function QuoteSoftware() {
   return (
     <div className="min-h-screen bg-background">
       <Seo 
-        title="Cleaning Quote Software | Instant Estimates | WE DETAIL NC"
+        title="Detailing Quote Software | Instant Estimates | WE DETAIL NC"
         description="Professional quote software for car detailing businesses. Auto-calculate prices, send branded estimates, and convert leads to bookings. Start free trial."
         canonicalPath="/features/quote-software"
       />
@@ -119,7 +119,7 @@ export default function QuoteSoftware() {
             Quote Software
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
-            Cleaning Quote Software<br/>
+            Detailing Quote Software<br/>
             <span className="text-primary">That Closes Deals</span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
@@ -167,7 +167,7 @@ export default function QuoteSoftware() {
             Quote Software Built for Car Detailing Businesses
           </h2>
           <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
-            From lead to booked job in minutes. Everything you need to win more cleaning contracts.
+            From lead to booked job in minutes. Everything you need to win more detailing contracts.
           </p>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -206,7 +206,7 @@ export default function QuoteSoftware() {
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-primary">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl sm:text-4xl font-bold text-primary-foreground mb-4">
-            Start Winning More Cleaning Contracts
+            Start Winning More Detailing Contracts
           </h2>
           <p className="text-lg text-primary-foreground/80 mb-8">
             Professional quotes in 60 seconds. Start your free trial today.
