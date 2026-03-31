@@ -908,7 +908,7 @@ export default function PayrollPage() {
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Tax Status</TableHead>
-                    <TableHead className="text-right">Cleans</TableHead>
+                    <TableHead className="text-right">Jobs</TableHead>
                     <TableHead className="text-right">Hours</TableHead>
                     <TableHead className="text-right">Period Pay</TableHead>
                     <TableHead className="text-right">Revenue</TableHead>
