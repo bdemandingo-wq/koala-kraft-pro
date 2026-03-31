@@ -225,6 +225,11 @@ function DraggableBooking({ booking, index, onClick, staffList, teamStaffIds = [
     .filter(id => id !== booking.staff_id)
     .map(id => getStaffColor(id, staffList));
 
+  // Calculate end time
+  const startTime = new Date(booking.scheduled_at);
+  const endTime = new Date(startTime.getTime() + booking.duration * 60 * 1000);
+  const timeStr = `${startTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`;
+
   return (
     <div
       ref={setNodeRef}
@@ -245,7 +250,7 @@ function DraggableBooking({ booking, index, onClick, staffList, teamStaffIds = [
     >
       <div className="flex items-center gap-1">
         {!disableDrag && <GripVertical className="w-3 h-3 opacity-0 group-hover:opacity-50 shrink-0" />}
-        <span className="truncate font-medium">{formatCustomerName(booking.customer)}</span>
+        <span className="truncate font-medium text-[10px] md:text-xs">{formatCustomerName(booking.customer)}</span>
         {teamColors.length > 0 && (
           <div className="flex items-center gap-0.5 ml-auto shrink-0">
             {teamColors.map((tc, i) => (
@@ -254,6 +259,14 @@ function DraggableBooking({ booking, index, onClick, staffList, teamStaffIds = [
           </div>
         )}
       </div>
+      <div className="text-[9px] md:text-[10px] opacity-80 truncate">
+        {timeStr} · {booking.service?.name || 'Service'}
+      </div>
+      {booking.address && (
+        <div className="text-[8px] md:text-[9px] opacity-60 truncate hidden md:block">
+          <MapPin className="w-2 h-2 inline mr-0.5" />{booking.address}
+        </div>
+      )}
     </div>
   );
 }
