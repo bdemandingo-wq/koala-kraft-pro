@@ -632,7 +632,7 @@ export default function PublicBookingPage() {
                     </CardContent>
                   </Card>
                 </div>
-              )
+              )}
 
               {/* Extras */}
               {displaySettings.show_addons_on_booking && service && !service.name.toLowerCase().includes('deep') && (
