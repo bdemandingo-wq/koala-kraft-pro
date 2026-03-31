@@ -221,7 +221,7 @@ export default function CompareHousecallPro() {
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-2">Save $100+/Month</h3>
               <p className="text-muted-foreground">
-                Housecall Pro's Pro plan costs $199/month. We Detail NC gives you more cleaning features for just $50/month flat.
+                Housecall Pro's Pro plan costs $199/month. We Detail NC gives you more detailing features for just $50/month flat.
               </p>
             </div>
 
