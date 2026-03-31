@@ -359,7 +359,7 @@ serve(async (req) => {
         console.log('Trying city-level fallback:', fallbackQuery);
         const response = await fetch(
           `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fallbackQuery)}&limit=1&countrycodes=us`,
-          { headers: { 'Accept': 'application/json', 'User-Agent': 'TidywiseApp/1.0' } }
+          { headers: { 'Accept': 'application/json', 'User-Agent': 'WeDetailNCApp/1.0' } }
         );
         const ct = response.headers.get('content-type') || '';
         if (response.ok && ct.includes('application/json')) {

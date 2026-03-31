@@ -126,7 +126,7 @@ Return JSON format:
           },
           {
             name: "The Referral Request",
-            message: `Hi {first_name}! Know someone who needs cleaning? Refer a friend to {company_name} & you both get $25 off! Reply STOP to opt out.`
+            message: `Hi {first_name}! Know someone who needs detailing? Refer a friend to {company_name} & you both get $25 off! Reply STOP to opt out.`
           }
         ]
       };

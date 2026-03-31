@@ -417,7 +417,7 @@ const handler = async (req: Request): Promise<Response> => {
           }
         }
 
-        // --- CLEANER REMINDER ---
+        // --- TECHNICIAN REMINDER ---
         if (interval.send_to_cleaner && booking.staff?.phone) {
           const technicianName = booking.staff.name || "there";
           const customerName = `${booking.customer?.first_name || ""} ${booking.customer?.last_name || ""}`.trim() || "Customer";
