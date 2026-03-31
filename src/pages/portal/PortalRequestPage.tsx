@@ -312,7 +312,7 @@ export default function PortalRequestPage() {
             {/* Service Selection */}
             {services.length > 0 && (
               <div className="space-y-2">
-                <Label>Service (Optional)</Label>
+                <Label>Detailing Package (Optional)</Label>
                 <Select value={selectedService} onValueChange={setSelectedService}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a service" />
