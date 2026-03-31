@@ -315,7 +315,7 @@ export default function PortalRequestPage() {
                 <Label>Detailing Package (Optional)</Label>
                 <Select value={selectedService} onValueChange={setSelectedService}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a service" />
+                    <SelectValue placeholder="Select a detailing package" />
                   </SelectTrigger>
                   <SelectContent>
                     {services.map((service) => (
