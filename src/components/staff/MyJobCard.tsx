@@ -56,7 +56,7 @@ interface Props {
   onEnRoute?: (bookingId: string) => void;
 }
 
-export function MyJobCard({ booking, staffInfo, onUpdateStatus, isUpdating }: Props) {
+export function MyJobCard({ booking, staffInfo, onUpdateStatus, isUpdating, onEnRoute }: Props) {
   const [checklistOpen, setChecklistOpen] = useState(false);
   const [isSendingOnTheWay, setIsSendingOnTheWay] = useState(false);
   const [onTheWaySent, setOnTheWaySent] = useState(false);
