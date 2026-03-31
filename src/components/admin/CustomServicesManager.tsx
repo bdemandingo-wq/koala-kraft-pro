@@ -202,7 +202,7 @@ export function CustomServicesManager() {
               Custom Services
             </CardTitle>
             <CardDescription>
-              Create and manage your cleaning service types. These will appear in your booking form.
+              Create and manage your detailing service types. These will appear in your booking form.
             </CardDescription>
           </div>
           <Dialog open={isAddOpen || !!editingService} onOpenChange={(open) => {
@@ -232,7 +232,7 @@ export function CustomServicesManager() {
                   <Input
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g., Deep Clean, Move-Out Clean"
+                    placeholder="e.g., Full Detail, Move-Out Clean"
                   />
                 </div>
                 <div>

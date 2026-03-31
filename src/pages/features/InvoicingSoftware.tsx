@@ -67,15 +67,15 @@ export default function InvoicingSoftware() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleStartFreeTrial = () => {
-    sessionStorage.setItem("selectedIndustry", "Home Cleaning");
+    sessionStorage.setItem("selectedIndustry", "Car Detailing");
     navigate("/auth", { state: { mode: "signup" } });
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Seo 
-        title="Cleaning Business Invoicing Software"
-        description="Create branded invoices, accept online payments, and automate reminders. Get paid 2x faster with TidyWise invoicing for cleaning companies."
+        title="Car Detailing Business Invoicing Software"
+        description="Create branded invoices, accept online payments, and automate reminders. Get paid 2x faster with We Detail NC invoicing for detailing companies."
         canonicalPath="/features/invoicing-software"
       />
 
@@ -84,7 +84,7 @@ export default function InvoicingSoftware() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <a href="/" className="flex items-center gap-2">
-              <span className="font-bold text-xl text-foreground">TIDYWISE</span>
+              <span className="font-bold text-xl text-foreground">WE DETAIL NC</span>
             </a>
             <div className="hidden md:flex items-center gap-8">
               <a href="/#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
@@ -121,10 +121,10 @@ export default function InvoicingSoftware() {
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
             Invoicing Software<br/>
-            <span className="text-primary">for Cleaning Businesses</span>
+            <span className="text-primary">for Car Detailing Businesses</span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Stop using spreadsheets and paper invoices. TidyWise creates professional invoices automatically after every cleaning. <strong>Get paid 2x faster</strong> with online payments and automated reminders.
+            Stop using spreadsheets and paper invoices. We Detail NC creates professional invoices automatically after every detailing. <strong>Get paid 2x faster</strong> with online payments and automated reminders.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="h-12 px-8" onClick={handleStartFreeTrial}>
@@ -165,7 +165,7 @@ export default function InvoicingSoftware() {
       <section id="benefits" className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl font-bold text-foreground text-center mb-4">
-            How TidyWise Invoicing Works
+            How We Detail NC Invoicing Works
           </h2>
           <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
             Create, send, and track invoices without lifting a finger. Get paid faster with online payments.
@@ -210,7 +210,7 @@ export default function InvoicingSoftware() {
             Stop Chasing Late Payments
           </h2>
           <p className="text-lg text-primary-foreground/80 mb-8">
-            Get paid faster with automated invoicing for your cleaning business.
+            Get paid faster with automated invoicing for your car detailing business.
           </p>
           <Button size="lg" variant="secondary" className="h-12 px-8" onClick={handleStartFreeTrial}>
             Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
@@ -231,7 +231,7 @@ export default function InvoicingSoftware() {
       {/* Footer */}
       <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-border">
         <div className="max-w-5xl mx-auto text-center">
-          <p className="text-muted-foreground">© 2026 TidyWise. Professional invoicing for cleaning businesses.</p>
+          <p className="text-muted-foreground">© 2026 We Detail NC. Professional invoicing for car detailing businesses.</p>
           <div className="flex flex-wrap justify-center gap-6 mt-4">
             <Link to="/" className="text-muted-foreground hover:text-foreground">Home</Link>
             <Link to="/features/payment-processing" className="text-muted-foreground hover:text-foreground">Payments</Link>
@@ -247,11 +247,11 @@ export default function InvoicingSoftware() {
         __html: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "SoftwareApplication",
-          "name": "TidyWise Invoicing Software",
+          "name": "We Detail NC Invoicing Software",
           "applicationCategory": "BusinessApplication",
           "operatingSystem": "Web, iOS, Android",
           "offers": { "@type": "Offer", "price": "50", "priceCurrency": "USD" },
-          "description": "Invoicing software for cleaning businesses. Create professional invoices, accept online payments, and automate payment reminders."
+          "description": "Invoicing software for car detailing businesses. Create professional invoices, accept online payments, and automate payment reminders."
         })
       }} />
     </div>

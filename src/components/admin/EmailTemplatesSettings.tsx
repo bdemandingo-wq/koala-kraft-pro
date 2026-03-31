@@ -27,7 +27,7 @@ interface EmailTemplatesSettingsProps {
 const availableVariables = [
   { key: '{{customer_name}}', desc: 'Customer full name', sample: 'John Smith' },
   { key: '{{booking_number}}', desc: 'Booking reference number', sample: '12345' },
-  { key: '{{service_name}}', desc: 'Service type name', sample: 'Deep Cleaning' },
+  { key: '{{service_name}}', desc: 'Service type name', sample: 'Full Detailing' },
   { key: '{{scheduled_date}}', desc: 'Appointment date', sample: 'January 15, 2025' },
   { key: '{{scheduled_time}}', desc: 'Appointment time', sample: '10:00 AM' },
   { key: '{{address}}', desc: 'Service address', sample: '123 Main Street, Anytown' },
@@ -222,7 +222,7 @@ export function EmailTemplatesSettings({
                 id="reminderSubject"
                 value={reminderEmailSubject}
                 onChange={(e) => onUpdate('reminder_email_subject', e.target.value)}
-                placeholder="Reminder: Your Cleaning is Tomorrow - {{booking_number}}"
+                placeholder="Reminder: Your Appointment is Tomorrow - {{booking_number}}"
               />
             </div>
             <div className="space-y-2">

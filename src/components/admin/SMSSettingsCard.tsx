@@ -27,7 +27,7 @@ interface ReminderInterval {
   hours_before: number;
   is_active: boolean;
   send_to_client: boolean;
-  send_to_cleaner: boolean;
+  send_to_technician: boolean;
 }
 
 const defaultSettings: SMSSettings = {
@@ -100,7 +100,7 @@ export function SMSSettingsCard() {
           hours_before: Number(d.hours_before),
           is_active: d.is_active,
           send_to_client: d.send_to_client,
-          send_to_cleaner: d.send_to_cleaner,
+          send_to_technician: d.send_to_technician,
         })));
       }
     } catch (error) {
@@ -119,7 +119,7 @@ export function SMSSettingsCard() {
             .update({
               is_active: interval.is_active,
               send_to_client: interval.send_to_client,
-              send_to_cleaner: interval.send_to_cleaner,
+              send_to_technician: interval.send_to_technician,
             })
             .eq('id', interval.id);
         }
@@ -388,15 +388,15 @@ export function SMSSettingsCard() {
                         </label>
                         <label className="flex items-center gap-1.5">
                           <Switch
-                            checked={interval.send_to_cleaner}
+                            checked={interval.send_to_technician}
                             onCheckedChange={(checked) => {
                               const updated = [...reminderIntervals];
-                              updated[index] = { ...updated[index], send_to_cleaner: checked };
+                              updated[index] = { ...updated[index], send_to_technician: checked };
                               setReminderIntervals(updated);
                             }}
                             className="scale-75"
                           />
-                          <span className="text-muted-foreground">Cleaner</span>
+                          <span className="text-muted-foreground">Technician</span>
                         </label>
                       </div>
                     )}
@@ -520,7 +520,7 @@ export function SMSSettingsCard() {
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-green-500" />
-                Appointment reminders before cleanings
+                Appointment reminders before appointments
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-green-500" />

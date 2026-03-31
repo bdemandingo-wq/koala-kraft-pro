@@ -42,7 +42,7 @@ interface Transaction {
   gross_amount: number;
   processing_fee: number;
   net_amount: number;
-  cleaner_pay: number;
+  technician_pay: number;
   zip_code: string | null;
   status: string;
   payment_status: string;
@@ -146,25 +146,25 @@ export default function FinancePage() {
       const processingFee = (grossAmount * 0.029) + 0.30;
       const netAmount = grossAmount - processingFee;
       
-      // Calculate cleaner pay - use single source of truth: cleaner_pay_expected
+      // Calculate technician pay - use single source of truth: technician_pay_expected
       const teamPay = teamPaysByBooking.get(b.id);
-      let cleanerPay = 0;
+      let technicianPay = 0;
       if (teamPay != null && teamPay > 0) {
-        cleanerPay = teamPay;
-      } else if (b.cleaner_pay_expected != null && Number(b.cleaner_pay_expected) > 0) {
-        cleanerPay = Number(b.cleaner_pay_expected);
-      } else if (b.cleaner_actual_payment != null && Number(b.cleaner_actual_payment) > 0) {
-        cleanerPay = Number(b.cleaner_actual_payment);
-      } else if (b.cleaner_wage) {
-        const wage = Number(b.cleaner_wage);
-        const wageType = b.cleaner_wage_type || 'hourly';
+        technicianPay = teamPay;
+      } else if (b.technician_pay_expected != null && Number(b.technician_pay_expected) > 0) {
+        technicianPay = Number(b.technician_pay_expected);
+      } else if (b.technician_actual_payment != null && Number(b.technician_actual_payment) > 0) {
+        technicianPay = Number(b.technician_actual_payment);
+      } else if (b.technician_wage) {
+        const wage = Number(b.technician_wage);
+        const wageType = b.technician_wage_type || 'hourly';
         if (wageType === 'flat') {
-          cleanerPay = wage;
+          technicianPay = wage;
         } else if (wageType === 'percentage') {
-          cleanerPay = (grossAmount * wage) / 100;
+          technicianPay = (grossAmount * wage) / 100;
         } else {
-          const hours = b.cleaner_override_hours || (b.duration / 60);
-          cleanerPay = wage * hours;
+          const hours = b.technician_override_hours || (b.duration / 60);
+          technicianPay = wage * hours;
         }
       }
 
@@ -172,12 +172,12 @@ export default function FinancePage() {
         id: b.id,
         booking_number: b.booking_number,
         customer_name: b.customer ? `${b.customer.first_name} ${b.customer.last_name}` : 'Unknown',
-        service_name: b.service?.name || (b.total_amount === 0 ? 'Re-clean' : 'Service'),
+        service_name: b.service?.name || (b.total_amount === 0 ? 'Re-detail' : 'Service'),
         scheduled_at: b.scheduled_at,
         gross_amount: grossAmount,
         processing_fee: Math.round(processingFee * 100) / 100,
         net_amount: Math.round(netAmount * 100) / 100,
-        cleaner_pay: Math.round(cleanerPay * 100) / 100,
+        technician_pay: Math.round(technicianPay * 100) / 100,
         zip_code: b.zip_code,
         status: b.status,
         payment_status: b.payment_status,
@@ -194,7 +194,7 @@ export default function FinancePage() {
     // Total sales from active bookings in range (excludes cancelled)
     const totalSales = activeTransactions.reduce((sum, t) => sum + t.gross_amount, 0);
     const totalFees = activeTransactions.reduce((sum, t) => sum + t.processing_fee, 0);
-    const totalCleanerPay = activeTransactions.reduce((sum, t) => sum + t.cleaner_pay, 0);
+    const totalTechnicianPay = activeTransactions.reduce((sum, t) => sum + t.technician_pay, 0);
     const refundedTransactions = activeTransactions.filter(t => t.payment_status === 'refunded');
     const totalRefunds = refundedTransactions.reduce((sum, t) => sum + t.gross_amount, 0);
     
@@ -208,14 +208,14 @@ export default function FinancePage() {
     const totalExpenses = expenses.reduce((sum, e: any) => sum + Number(e.amount), 0);
     
     const netRevenue = totalSales - totalFees;
-    const netProfit = netRevenue - totalCleanerPay - totalExpenses - totalRefunds;
+    const netProfit = netRevenue - totalTechnicianPay - totalExpenses - totalRefunds;
     const profitMargin = totalSales > 0 ? (netProfit / totalSales) * 100 : 0;
 
     return {
       totalSales: Math.round(totalSales * 100) / 100,
       totalFees: Math.round(totalFees * 100) / 100,
       netRevenue: Math.round(netRevenue * 100) / 100,
-      totalCleanerPay: Math.round(totalCleanerPay * 100) / 100,
+      totalTechnicianPay: Math.round(totalTechnicianPay * 100) / 100,
       totalExpenses: Math.round(totalExpenses * 100) / 100,
       expensesByCategory,
       totalRefunds: Math.round(totalRefunds * 100) / 100,
@@ -239,7 +239,7 @@ export default function FinancePage() {
     return Array.from(zipMap.entries()).map(([zip, data]) => ({
       zip_code: zip,
       ...data,
-      // Assume 7% sales tax for cleaning services (varies by state)
+      // Assume 7% sales tax for detailing services (varies by state)
       estimated_tax: Math.round(data.total * 0.07 * 100) / 100,
     }));
   }, [transactions]);
@@ -256,20 +256,20 @@ export default function FinancePage() {
       t.gross_amount.toFixed(2),
       t.processing_fee.toFixed(2),
       t.net_amount.toFixed(2),
-      'Cleaning Services',
+      'Detailing Services',
     ]);
     downloadCSV('quickbooks-export', headers, rows);
   };
 
   const exportAnnualIncome = () => {
     // Use proper CSV format with quoted headers to ensure all columns show
-    const headers = ['"Period"', '"Total Sales"', '"Processing Fees"', '"Net Revenue"', '"Cleaner Pay"', '"Expenses"', '"Refunds"', '"Net Profit"', '"Profit Margin %"'];
+    const headers = ['"Period"', '"Total Sales"', '"Processing Fees"', '"Net Revenue"', '"Technician Pay"', '"Expenses"', '"Refunds"', '"Net Profit"', '"Profit Margin %"'];
     const rows = [[
       `"${format(dateRange.from, 'MMM d, yyyy')} - ${format(dateRange.to, 'MMM d, yyyy')}"`,
       metrics.totalSales.toFixed(2),
       metrics.totalFees.toFixed(2),
       metrics.netRevenue.toFixed(2),
-      metrics.totalCleanerPay.toFixed(2),
+      metrics.totalTechnicianPay.toFixed(2),
       metrics.totalExpenses.toFixed(2),
       metrics.totalRefunds.toFixed(2),
       metrics.netProfit.toFixed(2),
@@ -373,10 +373,10 @@ export default function FinancePage() {
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
               <Receipt className="w-4 h-4 text-blue-500" />
-              <span className="text-xs text-muted-foreground">Cleaner Pay</span>
+              <span className="text-xs text-muted-foreground">Technician Pay</span>
             </div>
             <p className="text-xl font-bold text-blue-600">
-              {isTestMode ? '-$X,XXX.XX' : `-$${metrics.totalCleanerPay.toFixed(2)}`}
+              {isTestMode ? '-$X,XXX.XX' : `-$${metrics.totalTechnicianPay.toFixed(2)}`}
             </p>
           </CardContent>
         </Card>
@@ -446,7 +446,7 @@ export default function FinancePage() {
                     <TableHead className="text-right">Gross Amount</TableHead>
                     <TableHead className="text-right">Processing Fee</TableHead>
                     <TableHead className="text-right">Net Amount</TableHead>
-                    <TableHead className="text-right">Cleaner Pay</TableHead>
+                    <TableHead className="text-right">Technician Pay</TableHead>
                     <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -469,7 +469,7 @@ export default function FinancePage() {
                         {isTestMode ? '$XXX.XX' : `$${t.net_amount.toFixed(2)}`}
                       </TableCell>
                       <TableCell className="text-right text-blue-600">
-                        {isTestMode ? '$XX.XX' : `$${t.cleaner_pay.toFixed(2)}`}
+                        {isTestMode ? '$XX.XX' : `$${t.technician_pay.toFixed(2)}`}
                       </TableCell>
                       <TableCell>
                         <Badge variant={t.payment_status === 'paid' ? 'default' : 'secondary'}>
@@ -558,8 +558,8 @@ export default function FinancePage() {
                   <span className="font-bold">{isTestMode ? '$X,XXX.XX' : `$${metrics.netRevenue.toFixed(2)}`}</span>
                 </div>
                 <div className="flex justify-between items-center py-3 border-b">
-                  <span className="text-muted-foreground">Less: Cleaner Pay</span>
-                  <span className="text-blue-600">{isTestMode ? '-$X,XXX.XX' : `-$${metrics.totalCleanerPay.toFixed(2)}`}</span>
+                  <span className="text-muted-foreground">Less: Technician Pay</span>
+                  <span className="text-blue-600">{isTestMode ? '-$X,XXX.XX' : `-$${metrics.totalTechnicianPay.toFixed(2)}`}</span>
                 </div>
                 {Object.entries(metrics.expensesByCategory).map(([category, amount]) => (
                   <div key={category} className="flex justify-between items-center py-3 border-b">

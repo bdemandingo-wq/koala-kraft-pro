@@ -16,7 +16,7 @@ export function usePlatform() {
   const canShowPaymentFlows = !isNative;
   
   // Website URL for directing users to web for payments/signup
-  const websiteUrl = 'https://jointidywise.lovable.app';
+  const websiteUrl = 'https://joinwedetailnc.lovable.app';
   const billingUrl = `${websiteUrl}/dashboard/subscription`;
   const signupUrl = `${websiteUrl}/signup`;
   

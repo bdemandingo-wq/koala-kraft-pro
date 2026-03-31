@@ -37,11 +37,11 @@ export interface HomeConditionOption {
 }
 
 const STORAGE_KEYS = {
-  services: 'tidywise_services',
-  extras: 'tidywise_extras',
-  bedroomPricing: 'tidywise_bedroom_pricing',
-  petOptions: 'tidywise_pet_options',
-  homeConditionOptions: 'tidywise_home_condition_options',
+  services: 'wedetailnc_services',
+  extras: 'wedetailnc_extras',
+  bedroomPricing: 'wedetailnc_bedroom_pricing',
+  petOptions: 'wedetailnc_pet_options',
+  homeConditionOptions: 'wedetailnc_home_condition_options',
 } as const;
 
 export function usePricing() {

@@ -957,9 +957,9 @@ function RecurringBookingDialog({
             </div>
           )}
 
-          {/* Multi-cleaner team builder */}
+          {/* Multi-technician team builder */}
           <div>
-            <Label>Assign Cleaners</Label>
+            <Label>Assign Technicians</Label>
             {teamMembers.length > 0 && (
               <div className="space-y-2 mt-2 mb-2">
                 {teamMembers.map((member, idx) => {
@@ -988,7 +988,7 @@ function RecurringBookingDialog({
             {availableStaff.length > 0 && (
               <Select onValueChange={(v) => addTeamMember(v)} value="">
                 <SelectTrigger>
-                  <SelectValue placeholder={teamMembers.length === 0 ? 'Add cleaner...' : 'Add another cleaner...'} />
+                  <SelectValue placeholder={teamMembers.length === 0 ? 'Add technician...' : 'Add another technician...'} />
                 </SelectTrigger>
                 <SelectContent>
                   {availableStaff.map((s: any) => (

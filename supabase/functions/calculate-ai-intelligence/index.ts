@@ -822,7 +822,7 @@ async function generateAIInsights(apiKey: string, data: any): Promise<string[]> 
   
   const focusAreas = selectedCategories.map(cat => categoryPrompts[cat]).join('\n');
   
-  const prompt = `You are an expert business consultant for service businesses (cleaning, home services, etc.). Analyze this data and provide 3 UNIQUE, SPECIFIC, ACTIONABLE insights.
+  const prompt = `You are an expert business consultant for service businesses (detailing, home services, etc.). Analyze this data and provide 3 UNIQUE, SPECIFIC, ACTIONABLE insights.
 
 BUSINESS DATA:
 - Monthly Revenue Projection: $${data.predictedRevenue}

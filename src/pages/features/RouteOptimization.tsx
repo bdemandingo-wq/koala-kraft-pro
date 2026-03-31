@@ -27,27 +27,27 @@ const benefits = [
   {
     icon: Fuel,
     title: "Reduce Fuel Costs by 25%",
-    description: "Optimized routes mean less driving. Save hundreds on gas every month across your cleaning team."
+    description: "Optimized routes mean less driving. Save hundreds on gas every month across your appointment team."
   },
   {
     icon: Clock,
     title: "Fit More Jobs Per Day",
-    description: "Eliminate wasted drive time. Most cleaning businesses add 1-2 extra jobs per week with optimized routes."
+    description: "Eliminate wasted drive time. Most car detailing businesses add 1-2 extra jobs per week with optimized routes."
   },
   {
     icon: MapPin,
     title: "Zone-Based Scheduling",
-    description: "Group jobs by neighborhood. Assign cleaners to specific zones to minimize travel between appointments."
+    description: "Group jobs by neighborhood. Assign technicians to specific zones to minimize travel between appointments."
   },
   {
     icon: Car,
     title: "Real-Time GPS Tracking",
-    description: "See where every cleaner is in real-time. Know exactly when they'll arrive at the next job."
+    description: "See where every technician is in real-time. Know exactly when they'll arrive at the next job."
   },
   {
     icon: Map,
     title: "One-Click Navigation",
-    description: "Cleaners get turn-by-turn directions to every job. Integrates with Google Maps and Apple Maps."
+    description: "Technicians get turn-by-turn directions to every job. Integrates with Google Maps and Apple Maps."
   },
 ];
 
@@ -67,7 +67,7 @@ export default function RouteOptimization() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleStartFreeTrial = () => {
-    sessionStorage.setItem("selectedIndustry", "Home Cleaning");
+    sessionStorage.setItem("selectedIndustry", "Car Detailing");
     navigate("/auth", { state: { mode: "signup" } });
   };
 
@@ -75,7 +75,7 @@ export default function RouteOptimization() {
     <div className="min-h-screen bg-background">
       <Seo 
         title="Route Optimization for Cleaning Teams"
-        description="Reduce drive time by 30% and save on fuel with AI-powered route planning for cleaning businesses. Fit more jobs per day."
+        description="Reduce drive time by 30% and save on fuel with AI-powered route planning for car detailing businesses. Fit more jobs per day."
         canonicalPath="/features/route-optimization"
       />
 
@@ -84,7 +84,7 @@ export default function RouteOptimization() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <a href="/" className="flex items-center gap-2">
-              <span className="font-bold text-xl text-foreground">TIDYWISE</span>
+              <span className="font-bold text-xl text-foreground">WE DETAIL NC</span>
             </a>
             <div className="hidden md:flex items-center gap-8">
               <a href="/#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
@@ -121,10 +121,10 @@ export default function RouteOptimization() {
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
             Route Optimization<br/>
-            <span className="text-primary">for Cleaning Businesses</span>
+            <span className="text-primary">for Car Detailing Businesses</span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Stop wasting time and money on inefficient routes. TidyWise automatically plans the fastest routes for your cleaning team. <strong>Save 25% on fuel costs</strong> and fit more jobs into every day.
+            Stop wasting time and money on inefficient routes. We Detail NC automatically plans the fastest routes for your appointment team. <strong>Save 25% on fuel costs</strong> and fit more jobs into every day.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="h-12 px-8" onClick={handleStartFreeTrial}>
@@ -168,7 +168,7 @@ export default function RouteOptimization() {
             How Route Optimization Works
           </h2>
           <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
-            TidyWise uses AI to plan the most efficient routes for your cleaning team automatically.
+            We Detail NC uses AI to plan the most efficient routes for your appointment team automatically.
           </p>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -210,7 +210,7 @@ export default function RouteOptimization() {
             Stop Wasting Money on Inefficient Routes
           </h2>
           <p className="text-lg text-primary-foreground/80 mb-8">
-            Save time and fuel with smart route optimization for your cleaning business.
+            Save time and fuel with smart route optimization for your car detailing business.
           </p>
           <Button size="lg" variant="secondary" className="h-12 px-8" onClick={handleStartFreeTrial}>
             Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
@@ -231,7 +231,7 @@ export default function RouteOptimization() {
       {/* Footer */}
       <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-border">
         <div className="max-w-5xl mx-auto text-center">
-          <p className="text-muted-foreground">© 2026 TidyWise. Smart route optimization for cleaning businesses.</p>
+          <p className="text-muted-foreground">© 2026 We Detail NC. Smart route optimization for car detailing businesses.</p>
           <div className="flex flex-wrap justify-center gap-6 mt-4">
             <Link to="/" className="text-muted-foreground hover:text-foreground">Home</Link>
             <Link to="/features/automated-dispatching" className="text-muted-foreground hover:text-foreground">Dispatching</Link>
@@ -247,11 +247,11 @@ export default function RouteOptimization() {
         __html: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "SoftwareApplication",
-          "name": "TidyWise Route Optimization",
+          "name": "We Detail NC Route Optimization",
           "applicationCategory": "BusinessApplication",
           "operatingSystem": "Web, iOS, Android",
           "offers": { "@type": "Offer", "price": "50", "priceCurrency": "USD" },
-          "description": "Route optimization software for cleaning businesses. AI-powered routing saves 25% on fuel and reduces drive time by 30%."
+          "description": "Route optimization software for car detailing businesses. AI-powered routing saves 25% on fuel and reduces drive time by 30%."
         })
       }} />
     </div>

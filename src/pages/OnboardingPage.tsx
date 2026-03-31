@@ -37,8 +37,8 @@ function randomSuffix(length = 5) {
   return Math.random().toString(36).slice(2, 2 + length);
 }
 
-// Cleaning-only template
-const cleaningTemplate = getIndustryTemplate("Home Cleaning")!;
+// Car Detailing template
+const cleaningTemplate = getIndustryTemplate("Car Detailing")!;
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
@@ -60,7 +60,7 @@ export default function OnboardingPage() {
     navigate('/auth', { replace: true });
   };
 
-  // Pre-select all cleaning services and check if user needs phone collection
+  // Pre-select all detailing services and check if user needs phone collection
   useEffect(() => {
     setSelectedServices(new Set(cleaningTemplate.services.map(s => s.name)));
     
@@ -355,10 +355,10 @@ export default function OnboardingPage() {
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
             <Building2 className="h-6 w-6 text-primary" />
           </div>
-          <CardTitle className="text-2xl font-bold">Set Up Your Cleaning Business</CardTitle>
+          <CardTitle className="text-2xl font-bold">Set Up Your Car Detailing Business</CardTitle>
           <CardDescription>
             {step === 1 && "Let's start with your business name"}
-            {step === 2 && "Choose which cleaning services you want to offer"}
+            {step === 2 && "Choose which detailing services you want to offer"}
           </CardDescription>
           
           {/* Progress indicator */}

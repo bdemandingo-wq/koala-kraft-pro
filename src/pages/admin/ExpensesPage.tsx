@@ -62,7 +62,7 @@ interface Expense {
 }
 
 const EXPENSE_CATEGORIES = [
-  { value: 'supplies', label: 'Cleaning Supplies', icon: Package },
+  { value: 'supplies', label: 'Detailing Supplies', icon: Package },
   { value: 'mileage', label: 'Mileage/Travel', icon: Car },
   { value: 'equipment', label: 'Equipment', icon: Wrench },
   { value: 'office', label: 'Office/Admin', icon: Building },

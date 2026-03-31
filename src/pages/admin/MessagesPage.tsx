@@ -79,10 +79,10 @@ interface Contact {
   id: string;
   name: string;
   phone: string;
-  type: 'client' | 'cleaner';
+  type: 'client' | 'technician';
 }
 
-type ConversationTab = 'all' | 'clients' | 'cleaners';
+type ConversationTab = 'all' | 'clients' | 'technicians';
 type UnreadFilter = 'all' | 'unread';
 type DateFilter = 'all' | 'today' | 'week' | 'month';
 
@@ -98,7 +98,7 @@ export default function MessagesPage() {
   const [newConversationOpen, setNewConversationOpen] = useState(false);
   const [newPhone, setNewPhone] = useState('');
   const [newName, setNewName] = useState('');
-  const [conversationType, setConversationType] = useState<'client' | 'cleaner'>('client');
+  const [conversationType, setConversationType] = useState<'client' | 'technician'>('client');
   const [activeTab, setActiveTab] = useState<ConversationTab>('all');
   const [editNameOpen, setEditNameOpen] = useState(false);
   const [editingName, setEditingName] = useState('');
@@ -211,7 +211,7 @@ export default function MessagesPage() {
         id: s.id,
         name: s.name,
         phone: s.phone!,
-        type: 'cleaner' as const
+        type: 'technician' as const
       }));
 
     setContacts([...customerContacts, ...staffContacts]);
@@ -329,7 +329,7 @@ export default function MessagesPage() {
       convs.forEach(c => {
         const norm = normalizePhone(c.customer_phone);
         if (staffPhones.has(norm)) {
-          c.conversation_type = 'cleaner';
+          c.conversation_type = 'technician';
         } else if (customerPhones.has(norm)) {
           c.conversation_type = 'client';
         }
@@ -498,7 +498,7 @@ export default function MessagesPage() {
   };
 
   const filteredContacts = contacts.filter(c => {
-    const matchesType = conversationType === 'client' ? c.type === 'client' : c.type === 'cleaner';
+    const matchesType = conversationType === 'client' ? c.type === 'client' : c.type === 'technician';
     const matchesSearch = contactSearch === '' || 
       c.name.toLowerCase().includes(contactSearch.toLowerCase()) ||
       c.phone.includes(contactSearch);
@@ -655,7 +655,7 @@ export default function MessagesPage() {
     
     if (activeTab === 'all') return matchesSearch && matchesUnread && matchesDate;
     if (activeTab === 'clients') return matchesSearch && matchesUnread && matchesDate && conv.conversation_type === 'client';
-    if (activeTab === 'cleaners') return matchesSearch && matchesUnread && matchesDate && conv.conversation_type === 'cleaner';
+    if (activeTab === 'technicians') return matchesSearch && matchesUnread && matchesDate && conv.conversation_type === 'technician';
     return matchesSearch && matchesUnread && matchesDate;
   });
 
@@ -780,9 +780,9 @@ export default function MessagesPage() {
               <Users className="h-3 w-3" />
               Clients
             </TabsTrigger>
-            <TabsTrigger value="cleaners" className="gap-1">
+            <TabsTrigger value="technicians" className="gap-1">
               <HardHat className="h-3 w-3" />
-              Cleaners
+              Technicians
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -904,11 +904,11 @@ export default function MessagesPage() {
                       <Avatar className="h-11 w-11 shrink-0">
                         <AvatarFallback className={cn(
                           "text-sm font-medium",
-                          conv.conversation_type === 'cleaner' 
+                          conv.conversation_type === 'technician' 
                             ? "bg-amber-100 text-amber-700" 
                             : "bg-primary/10 text-primary"
                         )}>
-                          {conv.conversation_type === 'cleaner' 
+                          {conv.conversation_type === 'technician' 
                             ? <HardHat className="h-4 w-4" />
                             : getInitials(conv.customer_name, conv.customer_phone)
                           }
@@ -932,7 +932,7 @@ export default function MessagesPage() {
                                 {conv.customer_phone}
                               </p>
                             )}
-                            {conv.conversation_type === 'cleaner' && (
+                            {conv.conversation_type === 'technician' && (
                               <Badge variant="outline" className="text-[10px] h-4 px-1 shrink-0">
                                 Staff
                               </Badge>
@@ -997,7 +997,7 @@ export default function MessagesPage() {
                   <Tabs 
                     value={conversationType} 
                     onValueChange={(v) => {
-                      setConversationType(v as 'client' | 'cleaner');
+                      setConversationType(v as 'client' | 'technician');
                       setSelectedContact(null);
                     }} 
                     className="mt-2"
@@ -1007,9 +1007,9 @@ export default function MessagesPage() {
                         <Users className="h-4 w-4" />
                         Client
                       </TabsTrigger>
-                      <TabsTrigger value="cleaner" className="gap-2">
+                      <TabsTrigger value="technician" className="gap-2">
                         <HardHat className="h-4 w-4" />
-                        Cleaner
+                        Technician
                       </TabsTrigger>
                     </TabsList>
                   </Tabs>
@@ -1042,7 +1042,7 @@ export default function MessagesPage() {
                               <Avatar className="h-6 w-6">
                                 <AvatarFallback className={cn(
                                   "text-xs",
-                                  contact.type === 'cleaner' 
+                                  contact.type === 'technician' 
                                     ? "bg-amber-100 text-amber-700" 
                                     : "bg-primary/10 text-primary"
                                 )}>
@@ -1554,11 +1554,11 @@ export default function MessagesPage() {
                     <Avatar className="h-10 w-10">
                       <AvatarFallback className={cn(
                         "text-primary",
-                        selectedConversation.conversation_type === 'cleaner' 
+                        selectedConversation.conversation_type === 'technician' 
                           ? "bg-amber-100" 
                           : "bg-primary/10"
                       )}>
-                        {selectedConversation.conversation_type === 'cleaner' 
+                        {selectedConversation.conversation_type === 'technician' 
                           ? <HardHat className="h-5 w-5 text-amber-600" />
                           : getInitials(selectedConversation.customer_name, selectedConversation.customer_phone)
                         }

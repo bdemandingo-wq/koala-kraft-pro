@@ -12,25 +12,25 @@ export default function GrowCleaningBusiness2025() {
   return (
     <div className="min-h-screen bg-background">
       <Seo
-        title="How to Grow Your Cleaning Business in 2025"
-        description="Proven strategies to grow your cleaning business in 2025. From marketing tips to software automation, learn how to scale your maid service profitably."
+        title="How to Grow Your Car Detailing Business in 2025"
+        description="Proven strategies to grow your car detailing business in 2025. From marketing tips to software automation, learn how to scale your detailing service profitably."
         canonicalPath="/blog/how-to-grow-cleaning-business-2025"
-        ogImage="/images/tidywise-og.png"
+        ogImage="/images/wedetailnc-og.png"
         ogType="article"
         article={{ publishedTime: "2025-12-15", section: "Business Growth" }}
         jsonLd={{
           "@type": "BlogPosting",
-          "headline": "How to Grow Your Cleaning Business in 2025",
-          "description": "Proven strategies to grow your cleaning business in 2025.",
+          "headline": "How to Grow Your Car Detailing Business in 2025",
+          "description": "Proven strategies to grow your car detailing business in 2025.",
           "datePublished": "2025-12-15",
-          "author": { "@type": "Organization", "name": "TidyWise" },
+          "author": { "@type": "Organization", "name": "We Detail NC" },
         }}
       />
 
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <a href="/" className="font-bold text-xl text-foreground">TIDYWISE</a>
+            <a href="/" className="font-bold text-xl text-foreground">WE DETAIL NC</a>
             <div className="hidden md:flex items-center gap-8">
               <a href="/blog" className="text-muted-foreground hover:text-foreground">Blog</a>
               <a href="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</a>
@@ -54,35 +54,35 @@ export default function GrowCleaningBusiness2025() {
             <span>· 10 min read</span>
             <span>· December 2025</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-6">How to Grow Your Cleaning Business in 2025</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-6">How to Grow Your Car Detailing Business in 2025</h1>
 
           <div className="prose prose-lg max-w-none text-foreground space-y-6">
-            <p className="text-muted-foreground text-lg">Growing a cleaning business takes more than word-of-mouth referrals. In 2025, the most successful cleaning companies combine great service with smart technology and targeted marketing. Here's your complete growth playbook.</p>
+            <p className="text-muted-foreground text-lg">Growing a car detailing business takes more than word-of-mouth referrals. In 2025, the most successful detailing companies combine great service with smart technology and targeted marketing. Here's your complete growth playbook.</p>
 
             <h2 className="text-2xl font-bold mt-8">1. Invest in Online Booking Software</h2>
-            <p className="text-muted-foreground">Clients expect to book online. If you're still taking bookings over the phone, you're losing customers to competitors with 24/7 online booking. A tool like <strong>TidyWise</strong> lets clients book, reschedule, and manage appointments without calling you.</p>
+            <p className="text-muted-foreground">Clients expect to book online. If you're still taking bookings over the phone, you're losing customers to competitors with 24/7 online booking. A tool like <strong>We Detail NC</strong> lets clients book, reschedule, and manage appointments without calling you.</p>
 
             <h2 className="text-2xl font-bold mt-8">2. Automate Your Follow-Ups</h2>
-            <p className="text-muted-foreground">Most cleaning businesses lose 30-40% of leads because they don't follow up fast enough. Set up automated email and SMS sequences that reach out within minutes of an inquiry. Cleaning business CRM software handles this automatically.</p>
+            <p className="text-muted-foreground">Most car detailing businesses lose 30-40% of leads because they don't follow up fast enough. Set up automated email and SMS sequences that reach out within minutes of an inquiry. Cleaning business CRM software handles this automatically.</p>
 
             <h2 className="text-2xl font-bold mt-8">3. Build a Referral Program</h2>
             <p className="text-muted-foreground">Your happiest clients are your best marketing channel. Create a structured referral program that rewards clients for sending friends your way. Even a simple $25 credit for each referral can double your organic growth.</p>
 
             <h2 className="text-2xl font-bold mt-8">4. Optimize for Local SEO</h2>
-            <p className="text-muted-foreground">Claim and optimize your Google Business Profile. Collect reviews after every job (automate this with your scheduling software). Target keywords like "cleaning service near me" and "house cleaning [your city]."</p>
+            <p className="text-muted-foreground">Claim and optimize your Google Business Profile. Collect reviews after every job (automate this with your scheduling software). Target keywords like "detailing service near me" and "car detailing [your city]."</p>
 
             <h2 className="text-2xl font-bold mt-8">5. Systemize Your Operations</h2>
-            <p className="text-muted-foreground">Growth stalls when you can't delegate. Document your cleaning checklists, pricing, and communication templates. Use cleaning business scheduling software to assign jobs, track team performance, and manage payroll without micromanaging.</p>
+            <p className="text-muted-foreground">Growth stalls when you can't delegate. Document your service checklists, pricing, and communication templates. Use car detailing business scheduling software to assign jobs, track team performance, and manage payroll without micromanaging.</p>
 
             <h2 className="text-2xl font-bold mt-8">6. Offer Recurring Service Plans</h2>
             <p className="text-muted-foreground">One-time cleanings are feast or famine. Push clients toward weekly, biweekly, or monthly plans with a small discount. Recurring revenue creates predictability and makes your business more valuable.</p>
 
             <h2 className="text-2xl font-bold mt-8">7. Track Your Numbers</h2>
-            <p className="text-muted-foreground">You can't grow what you don't measure. Track revenue per client, average job value, customer retention rate, and profit margins. The right cleaning business software gives you a dashboard with these metrics built in.</p>
+            <p className="text-muted-foreground">You can't grow what you don't measure. Track revenue per client, average job value, customer retention rate, and profit margins. The right car detailing business software gives you a dashboard with these metrics built in.</p>
 
             <div className="bg-primary/5 rounded-xl p-6 mt-8 border border-primary/20">
-              <h3 className="text-xl font-bold text-foreground mb-2">Ready to Grow Your Cleaning Business?</h3>
-              <p className="text-muted-foreground mb-4">TidyWise gives you booking, scheduling, CRM, invoicing, and automation in one platform. Start your free 60-day trial.</p>
+              <h3 className="text-xl font-bold text-foreground mb-2">Ready to Grow Your Car Detailing Business?</h3>
+              <p className="text-muted-foreground mb-4">We Detail NC gives you booking, scheduling, CRM, invoicing, and automation in one platform. Start your free 60-day trial.</p>
               <Button onClick={() => navigate("/signup")}>
                 Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -98,7 +98,7 @@ export default function GrowCleaningBusiness2025() {
       </section>
 
       <footer className="border-t border-border py-8 px-4 text-center text-sm text-muted-foreground">
-        <p>© {new Date().getFullYear()} TidyWise. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} We Detail NC. All rights reserved.</p>
       </footer>
     </div>
   );

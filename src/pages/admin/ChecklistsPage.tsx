@@ -389,7 +389,7 @@ export default function ChecklistsPage() {
 
   if (isLoading) {
     return (
-      <AdminLayout title="Cleaning Checklists" subtitle="Loading...">
+      <AdminLayout title="Service Checklists" subtitle="Loading...">
         <div className="flex items-center justify-center h-64">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
@@ -399,7 +399,7 @@ export default function ChecklistsPage() {
 
   return (
     <AdminLayout
-      title="Cleaning Checklists"
+      title="Service Checklists"
       subtitle="Digital checklists for quality assurance"
       actions={
         <Button className="gap-2" onClick={openCreateDialog}>
@@ -420,7 +420,7 @@ export default function ChecklistsPage() {
             <div>
               <Label>Template Name</Label>
               <Input
-                placeholder="Standard Home Cleaning Checklist"
+                placeholder="Standard Car Detailing Checklist"
                 value={formData.name}
                 onChange={e => setFormData({ ...formData, name: e.target.value })}
               />
@@ -582,7 +582,7 @@ export default function ChecklistsPage() {
           <Card className="p-8 text-center">
             <ClipboardCheck className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="font-semibold mb-2">No checklists yet</h3>
-            <p className="text-muted-foreground mb-4">Create checklist templates for your cleaning staff</p>
+            <p className="text-muted-foreground mb-4">Create checklist templates for your detailing staff</p>
             <Button onClick={openCreateDialog} className="gap-2">
               <Plus className="w-4 h-4" />
               Create Checklist

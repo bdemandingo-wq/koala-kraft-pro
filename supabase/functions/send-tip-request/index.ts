@@ -97,8 +97,8 @@ const handler = async (req: Request): Promise<Response> => {
       .eq('organization_id', organizationId)
       .maybeSingle();
 
-    const companyName = businessSettings?.company_name || 'Your cleaning service';
-    const appUrl = (businessSettings?.app_url || Deno.env.get("PROJECT_URL") || req.headers.get("origin") || "https://jointidywise.lovable.app").replace(/\/+$/, '');
+    const companyName = businessSettings?.company_name || 'Your detailing service';
+    const appUrl = (businessSettings?.app_url || Deno.env.get("PROJECT_URL") || req.headers.get("origin") || "https://joinwedetailnc.lovable.app").replace(/\/+$/, '');
 
     // Shorten the tip link using short_urls table
     const shortCode = Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -116,7 +116,7 @@ const handler = async (req: Request): Promise<Response> => {
     const displayLink = tipLink.replace(/^https?:\/\//, '');
 
     // Build SMS message
-    const message = `Hi ${typedCustomer.first_name}! 😊 We loved serving you from ${companyName}! Tap to leave a tip for your cleaner: ${displayLink} 💚`;
+    const message = `Hi ${typedCustomer.first_name}! 😊 We loved serving you from ${companyName}! Tap to leave a tip for your technician: ${displayLink} 💚`;
 
     // Fetch SMS settings
     const { data: smsSettings } = await supabase

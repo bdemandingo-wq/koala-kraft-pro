@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 import { DateRange } from 'react-day-picker';
 import { useTestMode } from '@/contexts/TestModeContext';
 
-interface CleanerPerformanceDashboardProps {
+interface TechnicianPerformanceDashboardProps {
   bookings: BookingWithDetails[];
   staff: Array<{
     id: string;
@@ -27,7 +27,7 @@ interface CleanerPerformanceDashboardProps {
   }>;
 }
 
-interface CleanerStats {
+interface TechnicianStats {
   id: string;
   name: string;
   avatarUrl?: string | null;
@@ -45,7 +45,7 @@ interface CleanerStats {
   periodEarnings: number;
 }
 
-export function CleanerPerformanceDashboard({ bookings, staff }: CleanerPerformanceDashboardProps) {
+export function TechnicianPerformanceDashboard({ bookings, staff }: TechnicianPerformanceDashboardProps) {
   const now = new Date();
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: startOfMonth(subMonths(new Date(), 2)),
@@ -53,14 +53,14 @@ export function CleanerPerformanceDashboard({ bookings, staff }: CleanerPerforma
   });
   const { isTestMode, maskName, maskAmount } = useTestMode();
 
-  const cleanerStats = useMemo(() => {
+  const technicianStats = useMemo(() => {
     return staff
       .filter(s => s.is_active)
-      .map((cleaner): CleanerStats => {
-        const cleanerBookings = bookings.filter(b => b.staff?.id === cleaner.id);
+      .map((technician): TechnicianStats => {
+        const technicianBookings = bookings.filter(b => b.staff?.id === technician.id);
         
         // Filter by date range for period stats
-        const periodBookings = cleanerBookings.filter(b => {
+        const periodBookings = technicianBookings.filter(b => {
           if (!dateRange?.from) return true;
           const bookingDate = new Date(b.scheduled_at);
           const interval = {
@@ -71,7 +71,7 @@ export function CleanerPerformanceDashboard({ bookings, staff }: CleanerPerforma
         });
         
         const completedBookings = periodBookings.filter(b => b.status === 'completed');
-        const upcomingBookings = cleanerBookings.filter(b => 
+        const upcomingBookings = technicianBookings.filter(b => 
           isAfter(new Date(b.scheduled_at), now) && 
           !['completed', 'cancelled', 'no_show'].includes(b.status)
         );
@@ -80,7 +80,7 @@ export function CleanerPerformanceDashboard({ bookings, staff }: CleanerPerforma
         
         const totalRevenue = completedBookings.reduce((sum, b) => sum + Number(b.total_amount || 0), 0);
         const totalEarnings = completedBookings.reduce((sum, b) => {
-          return sum + Number((b as any).cleaner_actual_payment || 0);
+          return sum + Number((b as any).technician_actual_payment || 0);
         }, 0);
         
         const completionRate = periodBookings.length > 0 
@@ -88,10 +88,10 @@ export function CleanerPerformanceDashboard({ bookings, staff }: CleanerPerforma
           : 0;
         
         return {
-          id: cleaner.id,
-          name: cleaner.name,
-          avatarUrl: cleaner.avatar_url,
-          totalBookings: cleanerBookings.length,
+          id: technician.id,
+          name: technician.name,
+          avatarUrl: technician.avatar_url,
+          totalBookings: technicianBookings.length,
           completedBookings: completedBookings.length,
           upcomingBookings: upcomingBookings.length,
           cancelledBookings: cancelledBookings.length,
@@ -108,11 +108,11 @@ export function CleanerPerformanceDashboard({ bookings, staff }: CleanerPerforma
       .sort((a, b) => b.totalEarnings - a.totalEarnings);
   }, [bookings, staff, now, dateRange]);
 
-  const topPerformer = cleanerStats[0];
-  const totalTeamRevenue = cleanerStats.reduce((sum, c) => sum + c.totalRevenue, 0);
-  const totalTeamEarnings = cleanerStats.reduce((sum, c) => sum + c.totalEarnings, 0);
-  const avgCompletionRate = cleanerStats.length > 0
-    ? cleanerStats.reduce((sum, c) => sum + c.completionRate, 0) / cleanerStats.length
+  const topPerformer = technicianStats[0];
+  const totalTeamRevenue = technicianStats.reduce((sum, c) => sum + c.totalRevenue, 0);
+  const totalTeamEarnings = technicianStats.reduce((sum, c) => sum + c.totalEarnings, 0);
+  const avgCompletionRate = technicianStats.length > 0
+    ? technicianStats.reduce((sum, c) => sum + c.completionRate, 0) / technicianStats.length
     : 0;
 
   const getCompletionColor = (rate: number) => {
@@ -130,8 +130,8 @@ export function CleanerPerformanceDashboard({ bookings, staff }: CleanerPerforma
   };
 
   const exportToCSV = () => {
-    const headers = ['Cleaner', 'Completed Jobs', 'Upcoming', 'Cancelled', 'No Shows', 'Completion Rate', 'Total Earnings', 'Avg/Job'];
-    const rows = cleanerStats.map(c => [
+    const headers = ['Technician', 'Completed Jobs', 'Upcoming', 'Cancelled', 'No Shows', 'Completion Rate', 'Total Earnings', 'Avg/Job'];
+    const rows = technicianStats.map(c => [
       c.name,
       c.completedBookings,
       c.upcomingBookings,
@@ -150,7 +150,7 @@ export function CleanerPerformanceDashboard({ bookings, staff }: CleanerPerforma
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `cleaner-performance-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    link.download = `technician-performance-${format(new Date(), 'yyyy-MM-dd')}.csv`;
     link.click();
   };
 
@@ -198,8 +198,8 @@ export function CleanerPerformanceDashboard({ bookings, staff }: CleanerPerforma
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Active Cleaners</p>
-                <p className="text-2xl font-bold text-foreground">{cleanerStats.length}</p>
+                <p className="text-sm text-muted-foreground">Active Technicians</p>
+                <p className="text-2xl font-bold text-foreground">{technicianStats.length}</p>
               </div>
               <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
                 <Star className="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -285,32 +285,32 @@ export function CleanerPerformanceDashboard({ bookings, staff }: CleanerPerforma
         </Card>
       )}
 
-      {/* Cleaner Cards */}
+      {/* Technician Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {cleanerStats.map((cleaner) => (
-          <Card key={cleaner.id} className="border-border/50">
+        {technicianStats.map((technician) => (
+          <Card key={technician.id} className="border-border/50">
             <CardContent className="p-4">
               <div className="flex items-start gap-3 mb-4">
               <Avatar className="h-10 w-10">
-                  <AvatarImage src={cleaner.avatarUrl || undefined} />
+                  <AvatarImage src={technician.avatarUrl || undefined} />
                   <AvatarFallback className="bg-primary/10 text-primary">
-                    {maskName(cleaner.name).split(' ').map(n => n[0]).join('')}
+                    {maskName(technician.name).split(' ').map(n => n[0]).join('')}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold truncate">{maskName(cleaner.name)}</p>
+                  <p className="font-semibold truncate">{maskName(technician.name)}</p>
                   <p className="text-sm text-muted-foreground">
-                    {cleaner.upcomingBookings} upcoming
+                    {technician.upcomingBookings} upcoming
                   </p>
                 </div>
                 <Badge className={cn(
                   "shrink-0",
-                  cleaner.completionRate >= 90 ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300" :
-                  cleaner.completionRate >= 75 ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300" :
-                  cleaner.completionRate >= 60 ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300" :
+                  technician.completionRate >= 90 ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300" :
+                  technician.completionRate >= 75 ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300" :
+                  technician.completionRate >= 60 ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300" :
                   "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300"
                 )}>
-                  {cleaner.completionRate.toFixed(0)}%
+                  {technician.completionRate.toFixed(0)}%
                 </Badge>
               </div>
 
@@ -318,12 +318,12 @@ export function CleanerPerformanceDashboard({ bookings, staff }: CleanerPerforma
               <div className="mb-4">
                 <div className="flex justify-between text-xs text-muted-foreground mb-1">
                   <span>Completion Rate</span>
-                  <span>{cleaner.completedBookings} of {cleaner.completedBookings + cleaner.cancelledBookings + cleaner.noShowBookings}</span>
+                  <span>{technician.completedBookings} of {technician.completedBookings + technician.cancelledBookings + technician.noShowBookings}</span>
                 </div>
                 <div className="h-2 bg-secondary rounded-full overflow-hidden">
                   <div 
-                    className={cn("h-full transition-all", getProgressColor(cleaner.completionRate))}
-                    style={{ width: `${Math.min(cleaner.completionRate, 100)}%` }}
+                    className={cn("h-full transition-all", getProgressColor(technician.completionRate))}
+                    style={{ width: `${Math.min(technician.completionRate, 100)}%` }}
                   />
                 </div>
               </div>
@@ -335,42 +335,42 @@ export function CleanerPerformanceDashboard({ bookings, staff }: CleanerPerforma
                     <CheckCircle className="w-3 h-3" />
                     Completed
                   </div>
-                  <p className="font-semibold">{cleaner.completedBookings}</p>
+                  <p className="font-semibold">{technician.completedBookings}</p>
                 </div>
                 <div className="p-2 rounded-lg bg-secondary/50">
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
                     <CalendarIcon className="w-3 h-3" />
                     In Period
                   </div>
-                  <p className="font-semibold">{cleaner.periodBookings}</p>
+                  <p className="font-semibold">{technician.periodBookings}</p>
                 </div>
                 <div className="p-2 rounded-lg bg-secondary/50">
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
                     <DollarSign className="w-3 h-3" />
                     Total Earned
                   </div>
-                  <p className="font-semibold text-emerald-600">{maskAmount(cleaner.totalEarnings)}</p>
+                  <p className="font-semibold text-emerald-600">{maskAmount(technician.totalEarnings)}</p>
                 </div>
                 <div className="p-2 rounded-lg bg-secondary/50">
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
                     <Clock className="w-3 h-3" />
                     Avg/Job
                   </div>
-                  <p className="font-semibold">{maskAmount(cleaner.avgEarningsPerJob)}</p>
+                  <p className="font-semibold">{maskAmount(technician.avgEarningsPerJob)}</p>
                 </div>
               </div>
 
               {/* Issues */}
-              {(cleaner.cancelledBookings > 0 || cleaner.noShowBookings > 0) && (
+              {(technician.cancelledBookings > 0 || technician.noShowBookings > 0) && (
                 <div className="mt-3 pt-3 border-t border-border/50 flex gap-2">
-                  {cleaner.cancelledBookings > 0 && (
+                  {technician.cancelledBookings > 0 && (
                     <Badge variant="outline" className="text-xs text-rose-600 border-rose-200">
-                      {cleaner.cancelledBookings} cancelled
+                      {technician.cancelledBookings} cancelled
                     </Badge>
                   )}
-                  {cleaner.noShowBookings > 0 && (
+                  {technician.noShowBookings > 0 && (
                     <Badge variant="outline" className="text-xs text-slate-600 border-slate-200">
-                      {cleaner.noShowBookings} no-show
+                      {technician.noShowBookings} no-show
                     </Badge>
                   )}
                 </div>
@@ -380,9 +380,9 @@ export function CleanerPerformanceDashboard({ bookings, staff }: CleanerPerforma
         ))}
       </div>
 
-      {cleanerStats.length === 0 && (
+      {technicianStats.length === 0 && (
         <div className="text-center py-12 text-muted-foreground">
-          No active cleaners found
+          No active technicians found
         </div>
       )}
     </div>

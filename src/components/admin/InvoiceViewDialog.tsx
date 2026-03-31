@@ -119,7 +119,7 @@ export function InvoiceViewDialog({ open, onOpenChange, invoice }: InvoiceViewDi
 
     setSending(true);
     try {
-      const serviceName = invoice.invoice_items?.map((i: any) => i.description).join(', ') || 'Cleaning Service';
+      const serviceName = invoice.invoice_items?.map((i: any) => i.description).join(', ') || 'Detailing Service';
 
       const { error } = await supabase.functions.invoke('send-invoice', {
         body: {

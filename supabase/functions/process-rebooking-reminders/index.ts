@@ -172,8 +172,8 @@ const handler = async (req: Request): Promise<Response> => {
           .eq("id", item.organization_id)
           .single();
 
-        const companyName = businessSettings?.company_name || "Your cleaning service";
-        const projectUrl = (businessSettings?.app_url || Deno.env.get("PROJECT_URL") || "https://jointidywise.lovable.app").replace(/\/+$/, '');
+        const companyName = businessSettings?.company_name || "Your detailing service";
+        const projectUrl = (businessSettings?.app_url || Deno.env.get("PROJECT_URL") || "https://joinwedetailnc.lovable.app").replace(/\/+$/, '');
         const bookingLink = `${projectUrl}/book/${org?.slug || ""}`.replace(/^https?:\/\//, '');
 
         const customerName = `${customer.first_name || ""} ${customer.last_name || ""}`.trim() || "there";

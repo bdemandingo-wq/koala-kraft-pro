@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 const blogPosts = [
   {
     slug: "how-to-start-a-cleaning-business",
-    title: "The Ultimate Guide on How to Start a Cleaning Business in 2026",
-    excerpt: "Learn everything from automated payroll software for maid services to cleaning business inventory management. Complete step-by-step guide for aspiring entrepreneurs.",
+    title: "The Ultimate Guide on How to Start a Car Detailing Business in 2026",
+    excerpt: "Learn everything from automated payroll software for detailing services to car detailing business inventory management. Complete step-by-step guide for aspiring entrepreneurs.",
     category: "Business Guide",
     readTime: "15 min read",
     date: "January 2026",
@@ -14,9 +14,9 @@ const blogPosts = [
     isFeaturePage: false
   },
   {
-    slug: "booking-koala-vs-jobber-vs-tidywise",
-    title: "Booking Koala vs Jobber vs TidyWise: Which Software Wins?",
-    excerpt: "Side-by-side comparison of the top 3 cleaning business software platforms. See pricing, features, and which one is right for your business.",
+    slug: "booking-koala-vs-jobber-vs-wedetailnc",
+    title: "Booking Koala vs Jobber vs We Detail NC: Which Software Wins?",
+    excerpt: "Side-by-side comparison of the top 3 car detailing business software platforms. See pricing, features, and which one is right for your business.",
     category: "Comparison",
     readTime: "10 min read",
     date: "January 2026",
@@ -26,7 +26,7 @@ const blogPosts = [
   {
     slug: "scheduling-software",
     title: "Cleaning Scheduling Software That Reduces No-Shows by 40%",
-    excerpt: "Discover how automated scheduling, smart reminders, and drag-and-drop calendars can transform your cleaning business operations.",
+    excerpt: "Discover how automated scheduling, smart reminders, and drag-and-drop calendars can transform your car detailing business operations.",
     category: "Features",
     readTime: "5 min read",
     date: "January 2026",
@@ -48,10 +48,10 @@ export function BlogSection() {
             Resources & Guides
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-            Learn how to grow your cleaning business
+            Learn how to grow your car detailing business
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Expert insights on automated payroll software for maid services, cleaning business inventory management tools, and more.
+            Expert insights on automated payroll software for detailing services, car detailing business inventory management tools, and more.
           </p>
         </div>
 

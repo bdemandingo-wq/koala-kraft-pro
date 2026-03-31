@@ -242,7 +242,7 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
 
   // Load hidden items from localStorage
   useEffect(() => {
-    const savedHidden = localStorage.getItem('tidywise_nav_hidden');
+    const savedHidden = localStorage.getItem('wedetailnc_nav_hidden');
     if (savedHidden) {
       try {
         setHiddenItems(JSON.parse(savedHidden));
@@ -255,7 +255,7 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
   // Listen for changes to hidden items (from settings page)
   useEffect(() => {
     const handleStorageChange = () => {
-      const savedHidden = localStorage.getItem('tidywise_nav_hidden');
+      const savedHidden = localStorage.getItem('wedetailnc_nav_hidden');
       if (savedHidden) {
         try {
           setHiddenItems(JSON.parse(savedHidden));
@@ -278,7 +278,7 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
 
   // Load navigation order from localStorage
   useEffect(() => {
-    const savedOrder = localStorage.getItem('tidywise_nav_order');
+    const savedOrder = localStorage.getItem('wedetailnc_nav_order');
     if (savedOrder) {
       try {
         const hrefOrder: string[] = JSON.parse(savedOrder);
@@ -354,7 +354,7 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
         const newOrder = arrayMove(items, oldIndex, newIndex);
         
         // Save to localStorage
-        localStorage.setItem('tidywise_nav_order', JSON.stringify(newOrder.map(i => i.href)));
+        localStorage.setItem('wedetailnc_nav_order', JSON.stringify(newOrder.map(i => i.href)));
         
         return newOrder;
       });
@@ -454,8 +454,8 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
           </DndContext>
         )}
 
-        {/* Platform Admin Link - Only visible for support@tidywisecleaning.com */}
-        {user?.email === 'support@tidywisecleaning.com' && (
+        {/* Platform Admin Link - Only visible for support@wedetailnc.com */}
+        {user?.email === 'support@wedetailnc.com' && (
           <div className="mt-4 pt-4 border-t border-sidebar-border">
             <Link
               to="/dashboard/platform-analytics"

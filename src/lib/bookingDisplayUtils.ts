@@ -4,7 +4,7 @@
 
 /**
  * Returns the display name for a booking's service.
- * If no service is linked and total_amount is 0, it's a Re-clean.
+ * If no service is linked and total_amount is 0, it's a Re-detail.
  */
 export function getServiceDisplayName(
   serviceName: string | null | undefined,
@@ -12,7 +12,7 @@ export function getServiceDisplayName(
 ): string {
   if (serviceName) return serviceName;
   if (totalAmount === 0 || totalAmount === null || totalAmount === undefined) {
-    return 'Re-clean';
+    return 'Re-detail';
   }
   return 'Service';
 }

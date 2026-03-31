@@ -171,7 +171,7 @@ export function ServiceStep() {
             <Label className="text-sm font-medium">Service Type *</Label>
             <Select value={selectedServiceId} onValueChange={(value) => {
               setSelectedServiceId(value);
-              // Auto-set price to $0 for Re-clean (use special constant)
+              // Auto-set price to $0 for Re-detail (use special constant)
               if (value === 'reclean') {
                 setTotalAmount(0);
               }
@@ -181,7 +181,7 @@ export function ServiceStep() {
               </SelectTrigger>
               <SelectContent className="bg-popover border-border">
                 <SelectItem value="reclean">
-                  Re-clean ($0)
+                  Re-detail ($0)
                 </SelectItem>
                 {services?.map((service) => (
                   <SelectItem key={service.id} value={service.id}>

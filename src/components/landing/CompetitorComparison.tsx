@@ -4,59 +4,59 @@ import { useNavigate } from "react-router-dom";
 
 interface Feature {
   name: string;
-  tidywise: boolean | string;
+  wedetailnc: boolean | string;
   bookingKoala: boolean | string;
   jobber: boolean | string;
 }
 
 const features: Feature[] = [
-  { name: "Online Booking Form", tidywise: true, bookingKoala: true, jobber: true },
-  { name: "Recurring Bookings", tidywise: true, bookingKoala: true, jobber: true },
-  { name: "Staff Portal & App", tidywise: true, bookingKoala: true, jobber: true },
-  { name: "Client Portal (Self-Service)", tidywise: true, bookingKoala: false, jobber: "Add-on" },
-  { name: "GPS Check-ins", tidywise: true, bookingKoala: true, jobber: "Add-on" },
-  { name: "Stripe Payments", tidywise: true, bookingKoala: true, jobber: true },
-  { name: "SMS Notifications", tidywise: true, bookingKoala: "Add-on", jobber: "Add-on" },
-  { name: "Loyalty Tiers & Rewards", tidywise: true, bookingKoala: true, jobber: false },
-  { name: "Client Self-Cancellation", tidywise: true, bookingKoala: false, jobber: false },
-  { name: "Lead Management", tidywise: true, bookingKoala: true, jobber: true },
-  { name: "Quote Generator", tidywise: true, bookingKoala: true, jobber: true },
-  { name: "Invoicing & Auto-Reminders", tidywise: true, bookingKoala: true, jobber: true },
-  { name: "Drag & Drop Scheduler", tidywise: true, bookingKoala: false, jobber: true },
-  { name: "Payroll Management", tidywise: true, bookingKoala: false, jobber: false },
-  { name: "Expense Tracking", tidywise: true, bookingKoala: false, jobber: false },
-  { name: "Task Management", tidywise: true, bookingKoala: false, jobber: false },
-  { name: "Automated Email Campaigns", tidywise: true, bookingKoala: "Premium", jobber: false },
-  { name: "Client Feedback Collection", tidywise: true, bookingKoala: false, jobber: false },
-  { name: "Automation Center (Workflows)", tidywise: true, bookingKoala: false, jobber: false },
-  { name: "Tip & Deposit Collection", tidywise: true, bookingKoala: false, jobber: false },
-  { name: "Referral Program", tidywise: true, bookingKoala: false, jobber: false },
-  { name: "Data Import / Migration Wizard", tidywise: true, bookingKoala: false, jobber: true },
-  { name: "Email Template Builder", tidywise: true, bookingKoala: true, jobber: true },
-  { name: "Extras/Add-on Pricing", tidywise: true, bookingKoala: true, jobber: false },
-  { name: "Operations Tracker", tidywise: true, bookingKoala: false, jobber: false },
-  { name: "Inventory Tracking", tidywise: true, bookingKoala: false, jobber: false },
-  { name: "Photo Documentation", tidywise: true, bookingKoala: true, jobber: true },
-  { name: "Review Requests", tidywise: true, bookingKoala: "Premium", jobber: true },
-  { name: "Multi-location", tidywise: true, bookingKoala: true, jobber: true },
-  { name: "Custom Checklists", tidywise: true, bookingKoala: true, jobber: true },
-  { name: "P&L Reports", tidywise: true, bookingKoala: false, jobber: false },
-  { name: "Revenue Forecasting", tidywise: true, bookingKoala: false, jobber: false },
-  { name: "Platform Activity Analytics", tidywise: true, bookingKoala: false, jobber: false },
-  { name: "AI Business Intelligence", tidywise: true, bookingKoala: false, jobber: false },
-  { name: "Coupon Codes", tidywise: true, bookingKoala: true, jobber: true },
-  { name: "Sales Tax Automation", tidywise: true, bookingKoala: true, jobber: true },
-  { name: "Bed/Bath + SqFt Pricing", tidywise: true, bookingKoala: true, jobber: false },
-  { name: "Home Condition Pricing", tidywise: true, bookingKoala: false, jobber: false },
-  { name: "Demo/Test Mode", tidywise: true, bookingKoala: false, jobber: false },
-  { name: "Offline Mode", tidywise: true, bookingKoala: false, jobber: false },
-  { name: "In-App SMS Inbox", tidywise: true, bookingKoala: false, jobber: false },
+  { name: "Online Booking Form", wedetailnc: true, bookingKoala: true, jobber: true },
+  { name: "Recurring Bookings", wedetailnc: true, bookingKoala: true, jobber: true },
+  { name: "Staff Portal & App", wedetailnc: true, bookingKoala: true, jobber: true },
+  { name: "Client Portal (Self-Service)", wedetailnc: true, bookingKoala: false, jobber: "Add-on" },
+  { name: "GPS Check-ins", wedetailnc: true, bookingKoala: true, jobber: "Add-on" },
+  { name: "Stripe Payments", wedetailnc: true, bookingKoala: true, jobber: true },
+  { name: "SMS Notifications", wedetailnc: true, bookingKoala: "Add-on", jobber: "Add-on" },
+  { name: "Loyalty Tiers & Rewards", wedetailnc: true, bookingKoala: true, jobber: false },
+  { name: "Client Self-Cancellation", wedetailnc: true, bookingKoala: false, jobber: false },
+  { name: "Lead Management", wedetailnc: true, bookingKoala: true, jobber: true },
+  { name: "Quote Generator", wedetailnc: true, bookingKoala: true, jobber: true },
+  { name: "Invoicing & Auto-Reminders", wedetailnc: true, bookingKoala: true, jobber: true },
+  { name: "Drag & Drop Scheduler", wedetailnc: true, bookingKoala: false, jobber: true },
+  { name: "Payroll Management", wedetailnc: true, bookingKoala: false, jobber: false },
+  { name: "Expense Tracking", wedetailnc: true, bookingKoala: false, jobber: false },
+  { name: "Task Management", wedetailnc: true, bookingKoala: false, jobber: false },
+  { name: "Automated Email Campaigns", wedetailnc: true, bookingKoala: "Premium", jobber: false },
+  { name: "Client Feedback Collection", wedetailnc: true, bookingKoala: false, jobber: false },
+  { name: "Automation Center (Workflows)", wedetailnc: true, bookingKoala: false, jobber: false },
+  { name: "Tip & Deposit Collection", wedetailnc: true, bookingKoala: false, jobber: false },
+  { name: "Referral Program", wedetailnc: true, bookingKoala: false, jobber: false },
+  { name: "Data Import / Migration Wizard", wedetailnc: true, bookingKoala: false, jobber: true },
+  { name: "Email Template Builder", wedetailnc: true, bookingKoala: true, jobber: true },
+  { name: "Extras/Add-on Pricing", wedetailnc: true, bookingKoala: true, jobber: false },
+  { name: "Operations Tracker", wedetailnc: true, bookingKoala: false, jobber: false },
+  { name: "Inventory Tracking", wedetailnc: true, bookingKoala: false, jobber: false },
+  { name: "Photo Documentation", wedetailnc: true, bookingKoala: true, jobber: true },
+  { name: "Review Requests", wedetailnc: true, bookingKoala: "Premium", jobber: true },
+  { name: "Multi-location", wedetailnc: true, bookingKoala: true, jobber: true },
+  { name: "Custom Checklists", wedetailnc: true, bookingKoala: true, jobber: true },
+  { name: "P&L Reports", wedetailnc: true, bookingKoala: false, jobber: false },
+  { name: "Revenue Forecasting", wedetailnc: true, bookingKoala: false, jobber: false },
+  { name: "Platform Activity Analytics", wedetailnc: true, bookingKoala: false, jobber: false },
+  { name: "AI Business Intelligence", wedetailnc: true, bookingKoala: false, jobber: false },
+  { name: "Coupon Codes", wedetailnc: true, bookingKoala: true, jobber: true },
+  { name: "Sales Tax Automation", wedetailnc: true, bookingKoala: true, jobber: true },
+  { name: "Bed/Bath + SqFt Pricing", wedetailnc: true, bookingKoala: true, jobber: false },
+  { name: "Home Condition Pricing", wedetailnc: true, bookingKoala: false, jobber: false },
+  { name: "Demo/Test Mode", wedetailnc: true, bookingKoala: false, jobber: false },
+  { name: "Offline Mode", wedetailnc: true, bookingKoala: false, jobber: false },
+  { name: "In-App SMS Inbox", wedetailnc: true, bookingKoala: false, jobber: false },
 ];
 
 const pricingPlans = [
   {
-    name: "TIDYWISE",
-    tagline: "Built for cleaning businesses",
+    name: "WE DETAIL NC",
+    tagline: "Built for car detailing businesses",
     price: "$50",
     priceNote: "/month",
     trial: "2 months free",
@@ -98,10 +98,10 @@ export function CompetitorComparison() {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-            TIDYWISE vs Booking Koala vs Jobber: Which Cleaning Software Wins?
+            WE DETAIL NC vs Booking Koala vs Jobber: Which Cleaning Software Wins?
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Looking for Booking Koala alternatives or Jobber alternatives? Compare the best cleaning business software side by side. More features, 75% lower price.
+            Looking for Booking Koala alternatives or Jobber alternatives? Compare the best car detailing business software side by side. More features, 75% lower price.
           </p>
         </div>
 
@@ -157,7 +157,7 @@ export function CompetitorComparison() {
           <div className="p-6 border-b border-border">
             <h3 className="text-xl font-semibold text-foreground">Feature Comparison</h3>
             <p className="text-sm text-muted-foreground mt-1">
-              Every feature TIDYWISE offers compared to the competition
+              Every feature WE DETAIL NC offers compared to the competition
             </p>
           </div>
 
@@ -166,7 +166,7 @@ export function CompetitorComparison() {
               <thead>
                 <tr className="bg-muted/50">
                   <th className="text-left p-4 font-medium text-foreground">Feature</th>
-                  <th className="text-center p-4 font-medium text-primary">TIDYWISE</th>
+                  <th className="text-center p-4 font-medium text-primary">WE DETAIL NC</th>
                   <th className="text-center p-4 font-medium text-foreground">Booking Koala</th>
                   <th className="text-center p-4 font-medium text-foreground">Jobber</th>
                 </tr>
@@ -175,7 +175,7 @@ export function CompetitorComparison() {
                 {features.map((feature, index) => (
                   <tr key={feature.name} className={index % 2 === 0 ? "bg-background" : "bg-muted/20"}>
                     <td className="p-4 text-sm text-foreground">{feature.name}</td>
-                    <td className="p-4 text-center">{renderFeatureValue(feature.tidywise)}</td>
+                    <td className="p-4 text-center">{renderFeatureValue(feature.wedetailnc)}</td>
                     <td className="p-4 text-center">{renderFeatureValue(feature.bookingKoala)}</td>
                     <td className="p-4 text-center">{renderFeatureValue(feature.jobber)}</td>
                   </tr>
@@ -187,10 +187,10 @@ export function CompetitorComparison() {
 
         <div className="text-center mt-12">
           <Button size="lg" onClick={() => navigate("/auth?mode=signup")}>
-            Try TIDYWISE Free — No Credit Card Required
+            Try WE DETAIL NC Free — No Credit Card Required
           </Button>
           <p className="text-sm text-muted-foreground mt-3">
-            Trusted by cleaning businesses using TIDYWISE
+            Trusted by car detailing businesses using WE DETAIL NC
           </p>
         </div>
       </div>

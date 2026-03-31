@@ -14,7 +14,7 @@ interface AdminRouteProps {
  * SECURITY: Only allows users with 'owner' or 'admin' role in org_memberships.
  * Staff members (role='member') are redirected to the staff portal.
  * 
- * This prevents cleaners/staff from accidentally or intentionally accessing
+ * This prevents technicians/staff from accidentally or intentionally accessing
  * the admin dashboard even if they have valid authentication.
  */
 export function AdminRoute({ children }: AdminRouteProps) {

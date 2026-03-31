@@ -24,11 +24,11 @@ interface Review {
   } | null;
 }
 
-interface CleanerReviewsProps {
+interface TechnicianReviewsProps {
   staffId: string;
 }
 
-export function CleanerReviews({ staffId }: CleanerReviewsProps) {
+export function TechnicianReviews({ staffId }: TechnicianReviewsProps) {
   const { data: reviews = [], isLoading } = useQuery({
     queryKey: ['staff-reviews', staffId],
     queryFn: async () => {

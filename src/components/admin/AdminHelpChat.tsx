@@ -302,7 +302,7 @@ export default function AdminHelpChat() {
               <Bot className="h-5 w-5 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-sm font-semibold">{view === "history" ? "Chat History" : "TidyWise Help"}</h3>
+              <h3 className="text-sm font-semibold">{view === "history" ? "Chat History" : "We Detail NC Help"}</h3>
               <p className="text-xs text-muted-foreground truncate">
                 {view === "history" ? "Previous conversations" : "Ask anything • Attach photos"}
               </p>
@@ -374,7 +374,7 @@ export default function AdminHelpChat() {
                       <Bot className="h-6 w-6 text-primary" />
                     </div>
                     <p className="text-sm text-muted-foreground max-w-[260px]">
-                      Hi! I know everything about TidyWise. Ask me anything or send a photo for me to analyze.
+                      Hi! I know everything about We Detail NC. Ask me anything or send a photo for me to analyze.
                     </p>
                   </div>
                 )}

@@ -360,16 +360,16 @@ export default function PayrollPage() {
     enabled: !!organizationId,
   });
 
-  // Wage calculation — pay_share (per-cleaner) takes priority over cleaner_pay_expected (booking total)
+  // Wage calculation — pay_share (per-technician) takes priority over technician_pay_expected (booking total)
   const calcWage = (booking: any, staffMember: any, payShareOverride?: number | null) => {
     const baseResult = calculateBookingWage(booking, staffMember);
-    // PRIORITY 1: Individual cleaner pay from team assignments (pay_share)
+    // PRIORITY 1: Individual technician pay from team assignments (pay_share)
     if (payShareOverride != null && Number(payShareOverride) > 0) {
       return { calculatedPay: Number(payShareOverride), actualPay: Number(payShareOverride), wageType: 'actual', wageRate: Number(payShareOverride), hoursWorked: baseResult.hoursWorked, isMissingPay: false };
     }
-    // PRIORITY 2: cleaner_pay_expected is the booking-level source of truth (single-staff bookings)
-    if (booking.cleaner_pay_expected != null) {
-      return { calculatedPay: Number(booking.cleaner_pay_expected), actualPay: Number(booking.cleaner_pay_expected), wageType: baseResult.wageType, wageRate: baseResult.wageRate, hoursWorked: baseResult.hoursWorked, isMissingPay: false };
+    // PRIORITY 2: technician_pay_expected is the booking-level source of truth (single-staff bookings)
+    if (booking.technician_pay_expected != null) {
+      return { calculatedPay: Number(booking.technician_pay_expected), actualPay: Number(booking.technician_pay_expected), wageType: baseResult.wageType, wageRate: baseResult.wageRate, hoursWorked: baseResult.hoursWorked, isMissingPay: false };
     }
     // PRIORITY 3: Fallback calculation from rate/hours
     return { calculatedPay: baseResult.calculatedPay, actualPay: null, wageType: baseResult.wageType, wageRate: baseResult.wageRate, hoursWorked: baseResult.hoursWorked, isMissingPay: baseResult.isMissingPay };
@@ -402,7 +402,7 @@ export default function PayrollPage() {
     const assignedBookings = bookings.filter((b: any) => b.status !== 'cancelled' && b.staff_id);
 
     for (const b of assignedBookings) {
-      // Re-cleans (no service, $0 total) should show $0 across all financial columns
+      // Re-details (no service, $0 total) should show $0 across all financial columns
       const isReclean = !b.service_id && Number(b.total_amount) === 0;
       const staffMember = staff.find((s) => s.id === b.staff_id);
       const assignments = teamAssignments.filter((a: any) => a.booking_id === b.id);
@@ -494,7 +494,7 @@ export default function PayrollPage() {
       const totalHours = entries.reduce((sum, e) => sum + e.hours, 0);
       const totalPay = entries.reduce((sum, e) => sum + e.pay, 0);
 
-      // Revenue attributed to this cleaner
+      // Revenue attributed to this technician
       const revenueAttributed = entries.reduce((sum, e) => {
         const rev = Number(e.booking.subtotal || e.booking.total_amount) - Number(e.booking.discount_amount || 0);
         return sum + rev;
@@ -599,7 +599,7 @@ export default function PayrollPage() {
   const nextWeekForecast = useMemo(() => calcWeekForecast(nextWeekBookings, forecastTeamAssignments), [nextWeekBookings, forecastTeamAssignments, staff]);
 
   const exportCSV = () => {
-    const headers = ['Name', 'Email', 'Tax Classification', 'Base Wage', 'Hours', 'Assigned Cleans', 'Period Pay', 'Revenue', 'Profit', 'Labor %', 'Avg Pay/Clean', 'YTD Earnings'];
+    const headers = ['Name', 'Email', 'Tax Classification', 'Base Wage', 'Hours', 'Assigned Jobs', 'Period Pay', 'Revenue', 'Profit', 'Labor %', 'Avg Pay/Clean', 'YTD Earnings'];
     const rows = payrollData.map((s) => [
       s.name, s.email,
       s.tax_classification === 'w2' ? 'W-2 Employee' : '1099 Contractor',
@@ -786,7 +786,7 @@ export default function PayrollPage() {
                 <Briefcase className="w-5 h-5 text-green-500" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Assigned Cleans</p>
+                <p className="text-xs text-muted-foreground">Assigned Jobs</p>
                 <p className="text-xl font-bold">{isTestMode ? 'XX' : totalCleans}</p>
               </div>
             </div>
@@ -845,7 +845,7 @@ export default function PayrollPage() {
               <div>
                 <h3 className="font-semibold text-amber-800 dark:text-amber-400">Missing Pay Data</h3>
                 <p className="text-sm text-amber-700 dark:text-amber-500 mt-1">
-                  {missingPayCount} booking(s) have $0 cleaner pay configured.
+                  {missingPayCount} booking(s) have $0 technician pay configured.
                 </p>
               </div>
             </div>
@@ -986,10 +986,10 @@ export default function PayrollPage() {
               <div className="flex flex-wrap items-center gap-2 pb-3">
                 <Select value={staffFilterId} onValueChange={setStaffFilterId}>
                   <SelectTrigger className="w-[220px]">
-                    <SelectValue placeholder="Filter by cleaner" />
+                    <SelectValue placeholder="Filter by technician" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All cleaners</SelectItem>
+                    <SelectItem value="all">All technicians</SelectItem>
                     {staff.map((s: any) => (
                       <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
                     ))}

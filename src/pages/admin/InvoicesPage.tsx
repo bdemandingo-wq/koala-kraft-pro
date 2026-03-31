@@ -227,7 +227,7 @@ export default function InvoicesPage() {
     setSendingInvoice(invoice.id);
     try {
       // Build a combined service description from line items
-      const serviceName = invoice.invoice_items?.map(i => i.description).join(', ') || 'Cleaning Service';
+      const serviceName = invoice.invoice_items?.map(i => i.description).join(', ') || 'Detailing Service';
 
       const { data, error } = await supabase.functions.invoke('send-invoice', {
         body: {

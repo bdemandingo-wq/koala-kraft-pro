@@ -78,7 +78,7 @@ const statusColors: Record<string, string> = {
 
 const statusLabels: Record<string, string> = {
   pending: 'pending payment',
-  confirmed: 'uncleaned',
+  confirmed: 'unserviced',
   in_progress: 'in progress',
   completed: 'clean completed',
   cancelled: 'cancelled',
@@ -538,7 +538,7 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
     }
   };
 
-  const sendCleanerNotification = async (booking: BookingWithDetails) => {
+  const sendTechnicianNotification = async (booking: BookingWithDetails) => {
     setSendingEmail(true);
     try {
       const customerName = booking.customer 
@@ -571,7 +571,7 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
       }
 
       if (staffToNotify.length === 0) {
-        toast.error('No cleaners assigned or none have phone numbers');
+        toast.error('No technicians assigned or none have phone numbers');
         return;
       }
 
@@ -580,13 +580,13 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
 
       for (const staffMember of staffToNotify) {
         try {
-          const { data, error } = await supabase.functions.invoke('send-cleaner-notification', {
+          const { data, error } = await supabase.functions.invoke('send-technician-notification', {
             body: {
-              cleanerName: staffMember.name,
-              cleanerPhone: staffMember.phone,
+              technicianName: staffMember.name,
+              technicianPhone: staffMember.phone,
               customerName,
               customerPhone: booking.customer?.phone || 'Not provided',
-              serviceName: booking.service?.name || (booking.total_amount === 0 ? 'Re-clean' : 'Cleaning Service'),
+              serviceName: booking.service?.name || (booking.total_amount === 0 ? 'Re-detail' : 'Detailing Service'),
               appointmentDate: formatInTimezone(booking.scheduled_at, orgTimezone, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
               appointmentTime: formatInTimezone(booking.scheduled_at, orgTimezone, { hour: 'numeric', minute: '2-digit', hour12: true }),
               address: booking.address || 'Address not provided',
@@ -734,7 +734,7 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
                           </Badge>
                         </div>
                         <div className="text-sm text-muted-foreground mt-1">
-                          {booking.service?.name || (booking.total_amount === 0 ? 'Re-clean' : 'Service')} • {formatInTimezone(booking.scheduled_at, orgTimezone, { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })}
+                          {booking.service?.name || (booking.total_amount === 0 ? 'Re-detail' : 'Service')} • {formatInTimezone(booking.scheduled_at, orgTimezone, { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })}
                         </div>
                       </button>
                     ))
@@ -960,7 +960,7 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-lg font-semibold">
-                    {selectedBooking.service?.name || (selectedBooking.total_amount === 0 ? 'Re-clean' : 'Service')}
+                    {selectedBooking.service?.name || (selectedBooking.total_amount === 0 ? 'Re-detail' : 'Service')}
                   </span>
                   <Badge className={cn('capitalize', statusColors[selectedBooking.status])}>
                     {statusLabels[selectedBooking.status] || selectedBooking.status}
@@ -1069,7 +1069,7 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
                     <Button
                       variant="outline"
                       className="flex-1"
-                      onClick={() => sendCleanerNotification(selectedBooking)}
+                      onClick={() => sendTechnicianNotification(selectedBooking)}
                       disabled={sendingEmail}
                     >
                       {sendingEmail ? (
@@ -1077,7 +1077,7 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
                       ) : (
                         <Phone className="w-4 h-4 mr-2" />
                       )}
-                      Notify Cleaner
+                      Notify Technician
                     </Button>
                   )}
                 </div>

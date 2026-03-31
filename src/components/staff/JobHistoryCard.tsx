@@ -13,7 +13,7 @@ interface Booking {
   city: string | null;
   state: string | null;
   total_amount: number;
-  cleaner_actual_payment: number | null;
+  technician_actual_payment: number | null;
   customer: {
     first_name: string;
     last_name: string;
@@ -49,14 +49,14 @@ export function JobHistoryCard({ booking }: Props) {
                 <CheckCircle className="w-4 h-4 text-green-500" />
               )}
             </CardTitle>
-            <p className="text-sm text-muted-foreground">{booking.service?.name || (booking.total_amount === 0 ? 'Re-clean' : 'Service')}</p>
+            <p className="text-sm text-muted-foreground">{booking.service?.name || (booking.total_amount === 0 ? 'Re-detail' : 'Service')}</p>
           </div>
           {getStatusBadge(booking.status)}
         </div>
       </CardHeader>
       <CardContent className="space-y-2">
         {/* Your Earnings */}
-        {booking.cleaner_actual_payment && booking.cleaner_actual_payment > 0 && (
+        {booking.technician_actual_payment && booking.technician_actual_payment > 0 && (
           <div className="p-2 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-300">
@@ -64,7 +64,7 @@ export function JobHistoryCard({ booking }: Props) {
                 <span>You Earned</span>
               </div>
               <span className="font-bold text-green-700 dark:text-green-300">
-                ${booking.cleaner_actual_payment.toFixed(2)}
+                ${booking.technician_actual_payment.toFixed(2)}
               </span>
             </div>
           </div>

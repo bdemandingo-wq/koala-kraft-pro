@@ -153,7 +153,7 @@ const handler = async (req: Request): Promise<Response> => {
       let aiInsights = '';
       if (LOVABLE_API_KEY) {
         try {
-          const prompt = `You are a business analyst for a cleaning company. Based on this week's metrics, provide 2-3 brief, actionable insights (max 50 words each):
+          const prompt = `You are a business analyst for a detailing company. Based on this week's metrics, provide 2-3 brief, actionable insights (max 50 words each):
 
 Revenue: $${thisWeekRevenue} (${revenueChange}% vs last week)
 Jobs Completed: ${thisWeekCompleted} (${bookingsChange}% vs last week)
@@ -164,7 +164,7 @@ New Leads: ${newLeads || 0}
 Average Rating: ${avgRating ? avgRating.toFixed(1) : 'No reviews'}
 Top Performer: ${topPerformer ? `${topPerformer.name} (${topPerformer.jobs} jobs)` : 'N/A'}
 
-Give practical advice for a cleaning business owner.`;
+Give practical advice for a car detailing business owner.`;
 
           const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
             method: 'POST',

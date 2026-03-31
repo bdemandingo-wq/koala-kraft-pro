@@ -49,12 +49,12 @@ export const allArticles: RelatedArticle[] = [
   // Blog Posts
   {
     slug: "/blog/how-to-start-a-cleaning-business",
-    title: "How to Start a Cleaning Business in 2026",
+    title: "How to Start a Car Detailing Business in 2026",
     category: "Business Guide",
   },
   {
-    slug: "/blog/booking-koala-vs-jobber-vs-tidywise",
-    title: "Booking Koala vs Jobber vs TidyWise: Complete Comparison",
+    slug: "/blog/booking-koala-vs-jobber-vs-wedetailnc",
+    title: "Booking Koala vs Jobber vs We Detail NC: Complete Comparison",
     category: "Comparison",
   },
   // Feature Pages
@@ -65,12 +65,12 @@ export const allArticles: RelatedArticle[] = [
   },
   {
     slug: "/features/route-optimization",
-    title: "Route Optimization for Cleaning Businesses",
+    title: "Route Optimization for Car Detailing Businesses",
     category: "Features",
   },
   {
     slug: "/features/invoicing-software",
-    title: "Cleaning Business Invoicing Software",
+    title: "Car Detailing Business Invoicing Software",
     category: "Features",
   },
   {
@@ -80,12 +80,12 @@ export const allArticles: RelatedArticle[] = [
   },
   {
     slug: "/features/quote-software",
-    title: "Instant Quote Software for Cleaners",
+    title: "Instant Quote Software for Technicians",
     category: "Features",
   },
   {
     slug: "/features/sms-notifications",
-    title: "SMS Notifications for Cleaning Businesses",
+    title: "SMS Notifications for Car Detailing Businesses",
     category: "Features",
   },
   {
@@ -96,17 +96,17 @@ export const allArticles: RelatedArticle[] = [
   // Comparison Pages
   {
     slug: "/compare/jobber",
-    title: "TidyWise vs Jobber: Which Is Better?",
+    title: "We Detail NC vs Jobber: Which Is Better?",
     category: "Comparison",
   },
   {
     slug: "/compare/booking-koala",
-    title: "TidyWise vs Booking Koala: Feature Comparison",
+    title: "We Detail NC vs Booking Koala: Feature Comparison",
     category: "Comparison",
   },
   {
     slug: "/compare/housecall-pro",
-    title: "TidyWise vs Housecall Pro Alternative",
+    title: "We Detail NC vs Housecall Pro Alternative",
     category: "Comparison",
   },
 ];

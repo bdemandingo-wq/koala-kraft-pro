@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import tidywiseLogo from '/images/tidywise-logo.webp';
+import wedetailncLogo from '/images/wedetailnc-logo.webp';
 
 interface SplashScreenProps {
   onComplete?: () => void;
@@ -42,8 +42,8 @@ export function SplashScreen({ onComplete, minDuration = 800 }: SplashScreenProp
           {/* Logo */}
           <div className="relative animate-[scale-in_0.5s_ease-out]">
             <img 
-              src={tidywiseLogo} 
-              alt="TIDYWISE" 
+              src={wedetailncLogo} 
+              alt="WE DETAIL NC" 
               className="h-20 w-auto object-contain"
             />
           </div>
@@ -52,10 +52,10 @@ export function SplashScreen({ onComplete, minDuration = 800 }: SplashScreenProp
         {/* Brand name */}
         <div className="flex flex-col items-center gap-2 animate-[fade-in_0.6s_ease-out_0.2s_both]">
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            TIDYWISE
+            WE DETAIL NC
           </h1>
           <p className="text-sm text-muted-foreground">
-            Cleaning Business Management
+            Car Detailing Business Management
           </p>
         </div>
         

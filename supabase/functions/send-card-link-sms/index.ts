@@ -4,7 +4,7 @@ import Stripe from "https://esm.sh/stripe@18.5.0";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-const APP_URL = "https://jointidywise.lovable.app";
+const APP_URL = "https://joinwedetailnc.lovable.app";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -130,7 +130,7 @@ const handler = async (req: Request): Promise<Response> => {
       .eq('organization_id', organizationId)
       .maybeSingle();
 
-    const companyName = settings?.company_name || "Your cleaning service";
+    const companyName = settings?.company_name || "Your detailing service";
 
     // STRICT ISOLATION: Get organization-specific Stripe credentials
     const { data: orgStripeSettings } = await supabase

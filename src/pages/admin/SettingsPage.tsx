@@ -109,8 +109,8 @@ const defaultSettings: BusinessSettings = {
   accent_color: '#14b8a6',
   confirmation_email_subject: 'Your Booking Confirmation - {{booking_number}}',
   confirmation_email_body: 'Hi {{customer_name}},\n\nThank you for booking with us!\n\nYour booking details:\n- Booking #: {{booking_number}}\n- Service: {{service_name}}\n- Date: {{scheduled_date}}\n- Time: {{scheduled_time}}\n- Address: {{address}}\n- Total: ${{total_amount}}\n\nWe look forward to serving you!\n\nBest regards,\n{{company_name}}',
-  reminder_email_subject: 'Reminder: Your Cleaning is Tomorrow - {{booking_number}}',
-  reminder_email_body: 'Hi {{customer_name}},\n\nThis is a friendly reminder that your cleaning is scheduled for tomorrow.\n\nBooking Details:\n- Booking #: {{booking_number}}\n- Service: {{service_name}}\n- Date: {{scheduled_date}}\n- Time: {{scheduled_time}}\n- Address: {{address}}\n\nIf you need to reschedule or have any questions, please contact us.\n\nSee you soon!\n{{company_name}}',
+  reminder_email_subject: 'Reminder: Your Appointment is Tomorrow - {{booking_number}}',
+  reminder_email_body: 'Hi {{customer_name}},\n\nThis is a friendly reminder that your appointment is scheduled for tomorrow.\n\nBooking Details:\n- Booking #: {{booking_number}}\n- Service: {{service_name}}\n- Date: {{scheduled_date}}\n- Time: {{scheduled_time}}\n- Address: {{address}}\n\nIf you need to reschedule or have any questions, please contact us.\n\nSee you soon!\n{{company_name}}',
   google_review_url: '',
   review_sms_template: 'Hi {customer_name}, thank you for choosing {company_name}! We\'d love to hear about your experience. Please take a moment to leave us a review: {review_link}',
   resend_api_key: '',
@@ -811,7 +811,7 @@ export default function SettingsPage() {
                     <button
                       type="button"
                       onClick={() => updateField('review_sms_template', 
-                        `Hi {customer_name}, love to hear you had a 5-Star experience! We're having an office competition - {cleaner_name} is almost in 1st place! It would make their day if you left a 5-Star review: {review_link} - Please mention {cleaner_name} in your review and send us a screenshot! - {company_name}`
+                        `Hi {customer_name}, love to hear you had a 5-Star experience! We're having an office competition - {technician_name} is almost in 1st place! It would make their day if you left a 5-Star review: {review_link} - Please mention {technician_name} in your review and send us a screenshot! - {company_name}`
                       )}
                       className="p-3 text-left border rounded-lg hover:bg-muted/50 transition-colors group"
                     >
@@ -820,7 +820,7 @@ export default function SettingsPage() {
                         <span className="font-medium text-sm">Office Competition Method</span>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Frame as team competition to encourage mentioning cleaner by name
+                        Frame as team competition to encourage mentioning technician by name
                       </p>
                     </button>
                   </div>
@@ -839,7 +839,7 @@ export default function SettingsPage() {
                 <div className="flex flex-wrap gap-2 mt-1">
                   <code className="text-xs bg-muted px-2 py-1 rounded">{'{customer_name}'}</code>
                   <code className="text-xs bg-muted px-2 py-1 rounded">{'{company_name}'}</code>
-                  <code className="text-xs bg-muted px-2 py-1 rounded">{'{cleaner_name}'}</code>
+                  <code className="text-xs bg-muted px-2 py-1 rounded">{'{technician_name}'}</code>
                   <code className="text-xs bg-muted px-2 py-1 rounded">{'{service_name}'}</code>
                   <code className="text-xs bg-muted px-2 py-1 rounded">{'{review_link}'}</code>
                 </div>

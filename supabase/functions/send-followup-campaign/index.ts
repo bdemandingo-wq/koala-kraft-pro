@@ -171,7 +171,7 @@ serve(async (req) => {
                 <div style="background: #f8fafc; padding: 30px; border-radius: 0 0 12px 12px;">
                   <p style="font-size: 16px;">${htmlBody}</p>
                   <div style="text-align: center; margin-top: 30px;">
-                    <a href="https://tidywise.lovable.app/book" 
+                    <a href="https://wedetailnc.lovable.app/book" 
                        style="display: inline-block; background: #3b82f6; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold;">
                       Book Now
                     </a>

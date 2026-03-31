@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
 // Production domain for canonical URLs
-const PRODUCTION_DOMAIN = "https://www.jointidywise.com";
+const PRODUCTION_DOMAIN = "https://www.joinwedetailnc.com";
 
 type SeoProps = {
   title: string;
@@ -43,7 +43,7 @@ export function Seo({ title, description, canonicalPath, noIndex, ogImage, ogTyp
     setMetaTag("og:title", title, true);
     if (description) setMetaTag("og:description", description, true);
     setMetaTag("og:type", ogType, true);
-    setMetaTag("og:site_name", "TidyWise", true);
+    setMetaTag("og:site_name", "We Detail NC", true);
     
     if (canonicalPath) {
       const href = `${PRODUCTION_DOMAIN}${canonicalPath}`;

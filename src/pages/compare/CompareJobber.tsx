@@ -22,32 +22,32 @@ import {
 import { useState } from "react";
 
 const comparisonData = [
-  { feature: "Free Trial", tidywise: "2 months free", jobber: "14 days", winner: "tidywise" },
-  { feature: "Monthly Pricing", tidywise: "$50/month flat", jobber: "$69-$349/month", winner: "tidywise" },
-  { feature: "Online Booking", tidywise: true, jobber: true, winner: "tie" },
-  { feature: "Smart Scheduling", tidywise: true, jobber: true, winner: "tie" },
-  { feature: "GPS Check-ins", tidywise: true, jobber: true, winner: "tie" },
-  { feature: "Automated Payroll", tidywise: true, jobber: false, winner: "tidywise" },
-  { feature: "P&L Reports", tidywise: true, jobber: false, winner: "tidywise" },
-  { feature: "Demo/Test Mode", tidywise: true, jobber: false, winner: "tidywise" },
-  { feature: "In-App SMS Inbox", tidywise: true, jobber: "Add-on", winner: "tidywise" },
-  { feature: "AI Revenue Tools", tidywise: true, jobber: false, winner: "tidywise" },
-  { feature: "Photo Documentation", tidywise: true, jobber: true, winner: "tie" },
-  { feature: "Review Requests", tidywise: true, jobber: "Add-on", winner: "tidywise" },
-  { feature: "Loyalty Programs", tidywise: true, jobber: false, winner: "tidywise" },
-  { feature: "Multi-location", tidywise: true, jobber: "Higher tiers", winner: "tidywise" },
-  { feature: "Inventory Tracking", tidywise: true, jobber: false, winner: "tidywise" },
+  { feature: "Free Trial", wedetailnc: "2 months free", jobber: "14 days", winner: "wedetailnc" },
+  { feature: "Monthly Pricing", wedetailnc: "$50/month flat", jobber: "$69-$349/month", winner: "wedetailnc" },
+  { feature: "Online Booking", wedetailnc: true, jobber: true, winner: "tie" },
+  { feature: "Smart Scheduling", wedetailnc: true, jobber: true, winner: "tie" },
+  { feature: "GPS Check-ins", wedetailnc: true, jobber: true, winner: "tie" },
+  { feature: "Automated Payroll", wedetailnc: true, jobber: false, winner: "wedetailnc" },
+  { feature: "P&L Reports", wedetailnc: true, jobber: false, winner: "wedetailnc" },
+  { feature: "Demo/Test Mode", wedetailnc: true, jobber: false, winner: "wedetailnc" },
+  { feature: "In-App SMS Inbox", wedetailnc: true, jobber: "Add-on", winner: "wedetailnc" },
+  { feature: "AI Revenue Tools", wedetailnc: true, jobber: false, winner: "wedetailnc" },
+  { feature: "Photo Documentation", wedetailnc: true, jobber: true, winner: "tie" },
+  { feature: "Review Requests", wedetailnc: true, jobber: "Add-on", winner: "wedetailnc" },
+  { feature: "Loyalty Programs", wedetailnc: true, jobber: false, winner: "wedetailnc" },
+  { feature: "Multi-location", wedetailnc: true, jobber: "Higher tiers", winner: "wedetailnc" },
+  { feature: "Inventory Tracking", wedetailnc: true, jobber: false, winner: "wedetailnc" },
 ];
 
 const testimonials = [
   {
-    quote: "Switched from Jobber and saved $200/month. TIDYWISE has everything we needed plus automated payroll.",
+    quote: "Switched from Jobber and saved $200/month. WE DETAIL NC has everything we needed plus automated payroll.",
     author: "Marcus T.",
     role: "CleanPro Services",
     rating: 5
   },
   {
-    quote: "Jobber's pricing kept going up. TIDYWISE is half the cost with more features for cleaning businesses.",
+    quote: "Jobber's pricing kept going up. WE DETAIL NC is half the cost with more features for car detailing businesses.",
     author: "Lisa K.",
     role: "Sparkle Queens Cleaning",
     rating: 5
@@ -65,7 +65,7 @@ export default function CompareJobber() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleStartFreeTrial = () => {
-    sessionStorage.setItem("selectedIndustry", "Home Cleaning");
+    sessionStorage.setItem("selectedIndustry", "Car Detailing");
     navigate("/auth", { state: { mode: "signup" } });
   };
 
@@ -78,10 +78,10 @@ export default function CompareJobber() {
   return (
     <div className="min-h-screen bg-background">
       <Seo 
-        title="TIDYWISE vs Jobber (2026) | Comparison"
-        description="Compare TIDYWISE vs Jobber for cleaning businesses. Automated payroll, P&L reports, and $50/mo flat pricing vs Jobber's $69–$349/mo."
+        title="WE DETAIL NC vs Jobber (2026) | Comparison"
+        description="Compare WE DETAIL NC vs Jobber for car detailing businesses. Automated payroll, P&L reports, and $50/mo flat pricing vs Jobber's $69–$349/mo."
         canonicalPath="/compare/jobber"
-        ogImage="/images/tidywise-og.png"
+        ogImage="/images/wedetailnc-og.png"
       />
 
       {/* Navigation */}
@@ -89,7 +89,7 @@ export default function CompareJobber() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <a href="/" className="flex items-center gap-2">
-              <span className="font-bold text-xl text-foreground">TIDYWISE</span>
+              <span className="font-bold text-xl text-foreground">WE DETAIL NC</span>
             </a>
             <div className="hidden md:flex items-center gap-8">
               <a href="/#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
@@ -125,11 +125,11 @@ export default function CompareJobber() {
             2026 Comparison
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
-            TIDYWISE vs Jobber:<br/>
+            WE DETAIL NC vs Jobber:<br/>
             <span className="text-primary">The Best Jobber Alternative</span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Tired of Jobber's rising prices and limited cleaning features? TIDYWISE offers <strong>automated payroll, P&L reports, and loyalty programs</strong>—all for a flat $50/month. Compare the features and see why cleaning businesses are switching.
+            Tired of Jobber's rising prices and limited cleaning features? WE DETAIL NC offers <strong>automated payroll, P&L reports, and loyalty programs</strong>—all for a flat $50/month. Compare the features and see why car detailing businesses are switching.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="h-12 px-8" onClick={handleStartFreeTrial}>
@@ -174,7 +174,7 @@ export default function CompareJobber() {
             Feature-by-Feature Comparison
           </h2>
           <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
-            See exactly what you get with TIDYWISE vs Jobber. Green checkmarks mean included, red X means not available.
+            See exactly what you get with WE DETAIL NC vs Jobber. Green checkmarks mean included, red X means not available.
           </p>
 
           <div className="bg-card rounded-xl border border-border overflow-hidden">
@@ -183,7 +183,7 @@ export default function CompareJobber() {
                 <thead>
                   <tr className="bg-secondary/50">
                     <th className="text-left p-4 font-semibold text-foreground">Feature</th>
-                    <th className="text-center p-4 font-semibold text-primary">TIDYWISE</th>
+                    <th className="text-center p-4 font-semibold text-primary">WE DETAIL NC</th>
                     <th className="text-center p-4 font-semibold text-muted-foreground">Jobber</th>
                   </tr>
                 </thead>
@@ -192,7 +192,7 @@ export default function CompareJobber() {
                     <tr key={row.feature} className={i % 2 === 0 ? "bg-background" : "bg-secondary/20"}>
                       <td className="p-4 text-foreground font-medium">{row.feature}</td>
                       <td className="p-4 text-center">
-                        {renderValue(row.tidywise)}
+                        {renderValue(row.wedetailnc)}
                       </td>
                       <td className="p-4 text-center">
                         {renderValue(row.jobber)}
@@ -206,7 +206,7 @@ export default function CompareJobber() {
 
           <div className="mt-8 text-center">
             <Button size="lg" onClick={handleStartFreeTrial}>
-              Switch to TIDYWISE Today <ArrowRight className="ml-2 h-4 w-4" />
+              Switch to WE DETAIL NC Today <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -216,7 +216,7 @@ export default function CompareJobber() {
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-secondary/30">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl font-bold text-foreground text-center mb-12">
-            Why Cleaning Businesses Switch from Jobber
+            Why Car Detailing Businesses Switch from Jobber
           </h2>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -226,7 +226,7 @@ export default function CompareJobber() {
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-2">Save $200+/Month</h3>
               <p className="text-muted-foreground">
-                Jobber's Grow plan costs $349/month. TIDYWISE gives you more features for just $50/month flat.
+                Jobber's Grow plan costs $349/month. WE DETAIL NC gives you more features for just $50/month flat.
               </p>
             </div>
 
@@ -236,7 +236,7 @@ export default function CompareJobber() {
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-2">Real P&L Reports</h3>
               <p className="text-muted-foreground">
-                Jobber doesn't offer profit & loss tracking. TIDYWISE shows you exactly where your money goes.
+                Jobber doesn't offer profit & loss tracking. WE DETAIL NC shows you exactly where your money goes.
               </p>
             </div>
 
@@ -246,7 +246,7 @@ export default function CompareJobber() {
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-2">Automated Payroll</h3>
               <p className="text-muted-foreground">
-                Stop calculating pay manually. TIDYWISE auto-calculates cleaner wages from GPS check-ins.
+                Stop calculating pay manually. WE DETAIL NC auto-calculates technician wages from GPS check-ins.
               </p>
             </div>
           </div>
@@ -308,7 +308,7 @@ export default function CompareJobber() {
       <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-border">
         <div className="max-w-5xl mx-auto text-center">
           <p className="text-muted-foreground">
-            © 2026 TIDYWISE. A Jobber alternative for cleaning businesses.
+            © 2026 WE DETAIL NC. A Jobber alternative for car detailing businesses.
           </p>
           <div className="flex flex-wrap justify-center gap-6 mt-4">
             <Link to="/" className="text-muted-foreground hover:text-foreground">Home</Link>
@@ -326,7 +326,7 @@ export default function CompareJobber() {
         __html: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "SoftwareApplication",
-          "name": "TIDYWISE",
+          "name": "WE DETAIL NC",
           "applicationCategory": "BusinessApplication",
           "operatingSystem": "Web, iOS, Android",
           "offers": {
@@ -335,7 +335,7 @@ export default function CompareJobber() {
             "priceCurrency": "USD",
             "priceValidUntil": "2026-12-31"
           },
-          "description": "The best Jobber alternative for cleaning businesses. Automated payroll, P&L reports, and flat $50/month pricing."
+          "description": "The best Jobber alternative for car detailing businesses. Automated payroll, P&L reports, and flat $50/month pricing."
         })
       }} />
     </div>

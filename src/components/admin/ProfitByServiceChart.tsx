@@ -70,7 +70,7 @@ export function ProfitByServiceChart({ bookings }: ProfitByServiceChartProps) {
     const serviceMap = new Map<string, { 
       name: string; 
       revenue: number; 
-      cleanerPay: number; 
+      technicianPay: number; 
       profit: number; 
       count: number;
     }>();
@@ -84,36 +84,36 @@ export function ProfitByServiceChart({ bookings }: ProfitByServiceChartProps) {
         
         // Use team pay_share if available, then fall back to individual wage
         const teamPay = teamPaysByBooking.get(booking.id);
-        let cleanerPay = 0;
+        let technicianPay = 0;
         if (teamPay != null && teamPay > 0) {
-          cleanerPay = teamPay;
-        } else if (bookingAny.cleaner_actual_payment != null && Number(bookingAny.cleaner_actual_payment) > 0) {
-          cleanerPay = Number(bookingAny.cleaner_actual_payment);
-        } else if (bookingAny.cleaner_wage) {
-          const wage = Number(bookingAny.cleaner_wage);
-          const wageType = bookingAny.cleaner_wage_type || 'hourly';
+          technicianPay = teamPay;
+        } else if (bookingAny.technician_actual_payment != null && Number(bookingAny.technician_actual_payment) > 0) {
+          technicianPay = Number(bookingAny.technician_actual_payment);
+        } else if (bookingAny.technician_wage) {
+          const wage = Number(bookingAny.technician_wage);
+          const wageType = bookingAny.technician_wage_type || 'hourly';
           
           if (wageType === 'flat') {
-            cleanerPay = wage;
+            technicianPay = wage;
           } else if (wageType === 'percentage') {
-            cleanerPay = (revenue * wage) / 100;
+            technicianPay = (revenue * wage) / 100;
           } else {
-            const hours = bookingAny.cleaner_override_hours || (booking.duration / 60);
-            cleanerPay = wage * hours;
+            const hours = bookingAny.technician_override_hours || (booking.duration / 60);
+            technicianPay = wage * hours;
           }
         }
 
         const existing = serviceMap.get(serviceName) || { 
           name: serviceName, 
           revenue: 0, 
-          cleanerPay: 0, 
+          technicianPay: 0, 
           profit: 0, 
           count: 0 
         };
         
         existing.revenue += revenue;
-        existing.cleanerPay += cleanerPay;
-        existing.profit += (revenue - cleanerPay);
+        existing.technicianPay += technicianPay;
+        existing.profit += (revenue - technicianPay);
         existing.count += 1;
         
         serviceMap.set(serviceName, existing);
@@ -241,7 +241,7 @@ export function ProfitByServiceChart({ bookings }: ProfitByServiceChartProps) {
                               Revenue: ${data.revenue.toLocaleString()}
                             </p>
                             <p className="text-sm text-muted-foreground">
-                              Cleaner Pay: ${data.cleanerPay.toLocaleString()}
+                              Technician Pay: ${data.technicianPay.toLocaleString()}
                             </p>
                             <p className={cn("text-sm font-medium", data.profit < 0 ? "text-red-600" : "text-emerald-600")}>
                               Profit: {data.profit < 0 ? '-' : ''}${Math.abs(data.profit).toLocaleString()}

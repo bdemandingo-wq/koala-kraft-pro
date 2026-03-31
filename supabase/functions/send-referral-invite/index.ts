@@ -105,7 +105,7 @@ serve(async (req) => {
               <p style="font-size: 16px;">Hi${referral.referred_name ? ` ${referral.referred_name}` : ''}!</p>
               
               <p style="font-size: 16px;">
-                Your friend <strong>${referrerName}</strong> thinks you'd love our cleaning services, 
+                Your friend <strong>${referrerName}</strong> thinks you'd love our detailing services, 
                 and we're thrilled to offer you a special welcome gift:
               </p>
               

@@ -22,7 +22,7 @@ import { useTestMode } from '@/contexts/TestModeContext';
 interface DailyPnL {
   revenue: number;
   expenses: number;
-  cleanerPay: number;
+  technicianPay: number;
   fees: number;
   net: number;
 }
@@ -64,40 +64,40 @@ export function PnLCalendar({ bookings, expenses, teamPaysByBooking }: PnLCalend
       seenBookingIds.add(b.id);
 
       const dateKey = format(new Date(b.scheduled_at), 'yyyy-MM-dd');
-      const existing = map.get(dateKey) || { revenue: 0, expenses: 0, cleanerPay: 0, fees: 0, net: 0 };
+      const existing = map.get(dateKey) || { revenue: 0, expenses: 0, technicianPay: 0, fees: 0, net: 0 };
 
       const gross = Number(b.total_amount) || 0;
       const fee = (gross * 0.029) + 0.30;
 
-      let cleanerPay = 0;
+      let technicianPay = 0;
       const teamPay = teamPaysByBooking.get(b.id);
       if (teamPay != null && teamPay > 0) {
-        cleanerPay = teamPay;
-      } else if (b.cleaner_pay_expected != null && Number(b.cleaner_pay_expected) > 0) {
-        cleanerPay = Number(b.cleaner_pay_expected);
-      } else if (b.cleaner_actual_payment != null && Number(b.cleaner_actual_payment) > 0) {
-        cleanerPay = Number(b.cleaner_actual_payment);
-      } else if (b.cleaner_wage) {
-        const wage = Number(b.cleaner_wage);
-        const wageType = b.cleaner_wage_type || 'hourly';
-        if (wageType === 'flat') cleanerPay = wage;
-        else if (wageType === 'percentage') cleanerPay = (gross * wage) / 100;
-        else cleanerPay = wage * (b.cleaner_override_hours || (b.duration / 60));
+        technicianPay = teamPay;
+      } else if (b.technician_pay_expected != null && Number(b.technician_pay_expected) > 0) {
+        technicianPay = Number(b.technician_pay_expected);
+      } else if (b.technician_actual_payment != null && Number(b.technician_actual_payment) > 0) {
+        technicianPay = Number(b.technician_actual_payment);
+      } else if (b.technician_wage) {
+        const wage = Number(b.technician_wage);
+        const wageType = b.technician_wage_type || 'hourly';
+        if (wageType === 'flat') technicianPay = wage;
+        else if (wageType === 'percentage') technicianPay = (gross * wage) / 100;
+        else technicianPay = wage * (b.technician_override_hours || (b.duration / 60));
       }
 
       existing.revenue += gross;
       existing.fees += fee;
-      existing.cleanerPay += cleanerPay;
-      existing.net = existing.revenue - existing.fees - existing.cleanerPay - existing.expenses;
+      existing.technicianPay += technicianPay;
+      existing.net = existing.revenue - existing.fees - existing.technicianPay - existing.expenses;
       map.set(dateKey, existing);
     });
 
     expenses.forEach((e: any) => {
       const dateKey = e.expense_date;
       if (!dateKey) return;
-      const existing = map.get(dateKey) || { revenue: 0, expenses: 0, cleanerPay: 0, fees: 0, net: 0 };
+      const existing = map.get(dateKey) || { revenue: 0, expenses: 0, technicianPay: 0, fees: 0, net: 0 };
       existing.expenses += Number(e.amount) || 0;
-      existing.net = existing.revenue - existing.fees - existing.cleanerPay - existing.expenses;
+      existing.net = existing.revenue - existing.fees - existing.technicianPay - existing.expenses;
       map.set(dateKey, existing);
     });
 
@@ -108,8 +108,8 @@ export function PnLCalendar({ bookings, expenses, teamPaysByBooking }: PnLCalend
   const getDayValue = (pnl: DailyPnL | undefined): number => {
     if (!pnl) return 0;
     if (metricMode === 'revenue') return pnl.revenue;
-    // Profit = Client Pay − Cleaner Pay (no fees, no expenses)
-    return pnl.revenue - pnl.cleanerPay;
+    // Profit = Client Pay − Technician Pay (no fees, no expenses)
+    return pnl.revenue - pnl.technicianPay;
   };
 
   // Monthly totals for year view

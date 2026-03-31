@@ -1,7 +1,7 @@
 // Industry-specific service templates for onboarding
 
 export type IndustryType = 
-  | "Home Cleaning"
+  | "Car Detailing"
   | "Office Cleaning"
   | "Pet Grooming"
   | "Lawn Care"
@@ -30,28 +30,28 @@ export interface IndustryTemplate {
 }
 
 export const industryTemplates: Record<IndustryType, IndustryTemplate> = {
-  "Home Cleaning": {
-    name: "Home Cleaning",
-    description: "Residential cleaning services",
-    categories: ["Residential", "Deep Cleaning", "Specialty"],
+  "Car Detailing": {
+    name: "Car Detailing",
+    description: "Residential detailing services",
+    categories: ["Residential", "Full Detailing", "Specialty"],
     services: [
-      { name: "Standard Clean", description: "Regular maintenance cleaning for your home", price: 120, duration: 120, depositAmount: 25 },
-      { name: "Deep Clean", description: "Thorough top-to-bottom cleaning", price: 200, duration: 180, depositAmount: 50 },
-      { name: "Move In/Out Clean", description: "Complete cleaning for property transitions", price: 280, duration: 240, depositAmount: 75 },
+      { name: "Express Detail", description: "Regular maintenance cleaning for your home", price: 120, duration: 120, depositAmount: 25 },
+      { name: "Full Detail", description: "Thorough top-to-bottom cleaning", price: 200, duration: 180, depositAmount: 50 },
+      { name: "Pre-Sale Detail Clean", description: "Complete cleaning for property transitions", price: 280, duration: 240, depositAmount: 75 },
       { name: "Post Construction Clean", description: "Detailed cleaning after renovations or construction", price: 350, duration: 300, depositAmount: 100 },
       { name: "Airbnb Turnover", description: "Quick turnaround cleaning for short-term rentals", price: 100, duration: 90, depositAmount: 25 },
-      { name: "Spring Clean", description: "Seasonal deep cleaning service", price: 250, duration: 210, depositAmount: 60 },
+      { name: "Spring Clean", description: "Seasonal deep detailing service", price: 250, duration: 210, depositAmount: 60 },
     ]
   },
   "Office Cleaning": {
     name: "Office Cleaning",
-    description: "Commercial and office cleaning services",
-    categories: ["Daily Cleaning", "Deep Cleaning", "Specialty"],
+    description: "Commercial and office detailing services",
+    categories: ["Daily Cleaning", "Full Detailing", "Specialty"],
     services: [
       { name: "Daily Office Clean", description: "Regular daily maintenance cleaning", price: 150, duration: 120, depositAmount: 30 },
-      { name: "Weekly Deep Clean", description: "Comprehensive weekly cleaning service", price: 300, duration: 240, depositAmount: 75 },
+      { name: "Weekly Full Detail", description: "Comprehensive weekly detailing service", price: 300, duration: 240, depositAmount: 75 },
       { name: "Carpet Cleaning", description: "Professional carpet steam cleaning", price: 200, duration: 180, depositAmount: 50 },
-      { name: "Window Cleaning", description: "Interior and exterior window cleaning", price: 180, duration: 150, depositAmount: 40 },
+      { name: "Interior Detail", description: "Interior and exterior window cleaning", price: 180, duration: 150, depositAmount: 40 },
       { name: "Restroom Sanitization", description: "Deep sanitization of restroom facilities", price: 120, duration: 90, depositAmount: 25 },
       { name: "Post-Event Cleanup", description: "Cleaning after corporate events", price: 250, duration: 180, depositAmount: 60 },
     ]
@@ -157,7 +157,7 @@ export const industryTemplates: Record<IndustryType, IndustryTemplate> = {
   },
   "Laundry Service": {
     name: "Laundry Service",
-    description: "Professional laundry and dry cleaning services",
+    description: "Professional laundry and dry detailing services",
     categories: ["Wash & Fold", "Dry Cleaning", "Specialty"],
     services: [
       { name: "Wash & Fold - Small", description: "Up to 15 lbs of laundry", price: 25, duration: 60 },

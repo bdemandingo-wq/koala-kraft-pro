@@ -6,7 +6,7 @@ export function InteractiveDemo() {
   const navigate = useNavigate();
 
   const handleStartFreeTrial = () => {
-    sessionStorage.setItem("selectedIndustry", "Home Cleaning");
+    sessionStorage.setItem("selectedIndustry", "Car Detailing");
     navigate("/signup");
   };
 
@@ -19,10 +19,10 @@ export function InteractiveDemo() {
             Watch Demo
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-            See TidyWise in Action
+            See We Detail NC in Action
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Watch a full walkthrough of TIDYWISE before you sign up. See how it can transform your cleaning business.
+            Watch a full walkthrough of WE DETAIL NC before you sign up. See how it can transform your car detailing business.
           </p>
         </div>
 

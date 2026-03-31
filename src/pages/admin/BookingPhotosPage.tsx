@@ -105,7 +105,7 @@ export default function BookingPhotosPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold">Booking Photos</h1>
-          <p className="text-muted-foreground">All before & after photos uploaded by your cleaners</p>
+          <p className="text-muted-foreground">All before & after photos uploaded by your technicians</p>
         </div>
 
         {/* Filters */}
@@ -113,7 +113,7 @@ export default function BookingPhotosPage() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Search by customer, cleaner, or booking #..."
+              placeholder="Search by customer, technician, or booking #..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -149,7 +149,7 @@ export default function BookingPhotosPage() {
           <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
             <Camera className="w-12 h-12 mb-3" />
             <p className="text-lg font-medium">No photos yet</p>
-            <p className="text-sm">Photos will appear here when your cleaners upload them from the staff portal</p>
+            <p className="text-sm">Photos will appear here when your technicians upload them from the staff portal</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
@@ -185,7 +185,7 @@ export default function BookingPhotosPage() {
                       : `Booking #${photo.booking?.booking_number || '—'}`}
                   </p>
                   <p className="text-xs text-muted-foreground truncate">
-                    {photo.staff ? photo.staff.name : 'Unknown cleaner'}
+                    {photo.staff ? photo.staff.name : 'Unknown technician'}
                   </p>
                   {photo.created_at && (
                     <p className="text-xs text-muted-foreground">
@@ -234,7 +234,7 @@ export default function BookingPhotosPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <User className="w-4 h-4 text-muted-foreground" />
-                  <span>Cleaner: {selectedPhoto.staff ? selectedPhoto.staff.name : '—'}</span>
+                  <span>Technician: {selectedPhoto.staff ? selectedPhoto.staff.name : '—'}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-muted-foreground" />

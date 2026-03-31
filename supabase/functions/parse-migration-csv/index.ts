@@ -79,7 +79,7 @@ const KNOWN_MAPPINGS: Record<string, Record<string, string>> = {
     "booking status": "status",
     "address": "address",
     "service address": "address",
-    "cleaner": "staff_name",
+    "technician": "staff_name",
     "assigned to": "staff_name",
     "provider": "staff_name",
     "team member": "staff_name",

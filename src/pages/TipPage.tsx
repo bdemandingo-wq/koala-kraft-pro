@@ -121,7 +121,7 @@ export default function TipPage() {
   if (error || !tipDetails) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-4">
-        <Seo title="Tip" description="Leave a tip for your cleaner." />
+        <Seo title="Tip" description="Leave a tip for your technician." />
         <Card className="w-full max-w-md text-center shadow-xl">
           <CardContent className="pt-8 pb-8 space-y-4">
             <p className="text-muted-foreground">{error || 'This tip link is no longer valid.'}</p>
@@ -133,7 +133,7 @@ export default function TipPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-emerald-50 p-4">
-      <Seo title={`Leave a Tip - ${tipDetails.companyName}`} description="Thank your cleaner with a tip." />
+      <Seo title={`Leave a Tip - ${tipDetails.companyName}`} description="Thank your technician with a tip." />
       <Card className="w-full max-w-md shadow-xl border-emerald-200/50">
         <CardHeader className="text-center pb-2">
           {tipDetails.logoUrl && (
@@ -144,7 +144,7 @@ export default function TipPage() {
           </div>
           <CardTitle className="text-xl">Leave a Tip</CardTitle>
           <CardDescription>
-            Thank your cleaner from {tipDetails.companyName}!
+            Thank your technician from {tipDetails.companyName}!
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">

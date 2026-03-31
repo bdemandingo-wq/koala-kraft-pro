@@ -43,7 +43,7 @@ export default function DynamicBlogPost() {
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               <Link to="/" className="flex items-center gap-2">
-                <span className="font-bold text-xl text-foreground">TIDYWISE</span>
+                <span className="font-bold text-xl text-foreground">WE DETAIL NC</span>
               </Link>
               <Button asChild>
                 <Link to="/auth">Start Free Trial</Link>
@@ -65,7 +65,7 @@ export default function DynamicBlogPost() {
   return (
     <div className="min-h-screen bg-background">
       <Seo 
-        title={post.meta_title || `${post.title} | TIDYWISE Blog`}
+        title={post.meta_title || `${post.title} | WE DETAIL NC Blog`}
         description={post.meta_description || post.excerpt}
         canonicalPath={`/blog/post/${post.slug}`}
       />
@@ -75,7 +75,7 @@ export default function DynamicBlogPost() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link to="/" className="flex items-center gap-2">
-              <span className="font-bold text-xl text-foreground">TIDYWISE</span>
+              <span className="font-bold text-xl text-foreground">WE DETAIL NC</span>
             </Link>
             <Button asChild>
               <Link to="/auth">Start Free Trial</Link>
@@ -139,10 +139,10 @@ export default function DynamicBlogPost() {
           {/* CTA */}
           <div className="mt-16 bg-primary/5 rounded-2xl p-8 sm:p-12 text-center border border-primary/20">
             <h2 className="text-2xl font-bold text-foreground mb-4">
-              Ready to streamline your cleaning business?
+              Ready to streamline your car detailing business?
             </h2>
             <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
-              Try TIDYWISE to manage bookings, staff, and payments for your cleaning business.
+              Try WE DETAIL NC to manage bookings, staff, and payments for your car detailing business.
             </p>
             <Button size="lg" asChild>
               <Link to="/auth">Start Your Free Trial</Link>
@@ -154,7 +154,7 @@ export default function DynamicBlogPost() {
       {/* Footer */}
       <footer className="py-8 px-4 border-t border-border">
         <div className="max-w-7xl mx-auto text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} TIDYWISE. All rights reserved.
+          © {new Date().getFullYear()} WE DETAIL NC. All rights reserved.
         </div>
       </footer>
     </div>

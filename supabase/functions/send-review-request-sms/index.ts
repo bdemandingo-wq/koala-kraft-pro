@@ -94,17 +94,17 @@ const handler = async (req: Request): Promise<Response> => {
     const token = crypto.randomUUID();
     
     // Use org-specific app URL, fallback to global PROJECT_URL
-    const projectUrl = (businessSettings?.app_url || Deno.env.get("PROJECT_URL") || "https://jointidywise.lovable.app").replace(/\/+$/, '');
+    const projectUrl = (businessSettings?.app_url || Deno.env.get("PROJECT_URL") || "https://joinwedetailnc.lovable.app").replace(/\/+$/, '');
     const reviewPageUrl = `${projectUrl}/review/${token}`;
 
-    // Get staff_id and staff name from booking to associate review with cleaner
+    // Get staff_id and staff name from booking to associate review with technician
     const { data: bookingData } = await supabase
       .from("bookings")
       .select("staff_id, staff:staff_id(name)")
       .eq("id", bookingId)
       .single();
 
-    const cleanerName = (bookingData?.staff as any)?.name || 'your cleaner';
+    const technicianName = (bookingData?.staff as any)?.name || 'your technician';
 
     // Create review request record
     const { error: insertError } = await supabase
@@ -131,7 +131,7 @@ const handler = async (req: Request): Promise<Response> => {
     const message = template
       .replace(/{customer_name}/g, customerName)
       .replace(/{company_name}/g, companyName)
-      .replace(/{cleaner_name}/g, cleanerName)
+      .replace(/{technician_name}/g, technicianName)
       .replace(/{service_name}/g, serviceName)
       .replace(/{review_link}/g, reviewPageUrl);
 

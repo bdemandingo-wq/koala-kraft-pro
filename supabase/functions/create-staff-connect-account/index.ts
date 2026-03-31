@@ -128,7 +128,7 @@ serve(async (req: Request) => {
     }
 
     // Create an account link for onboarding
-    const baseReturnUrl = returnUrl || req.headers.get("origin") || "https://jointidywise.lovable.app";
+    const baseReturnUrl = returnUrl || req.headers.get("origin") || "https://joinwedetailnc.lovable.app";
 
     const accountLink = await stripe.accountLinks.create({
       account: stripeAccountId,

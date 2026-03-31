@@ -128,7 +128,7 @@ const handler = async (req: Request): Promise<Response> => {
         .eq("id", organizationId)
         .maybeSingle();
 
-      companyName = orgRecord?.name?.trim() || "Your cleaning service";
+      companyName = orgRecord?.name?.trim() || "Your detailing service";
     }
 
     // Fetch timezone for this org (stored in business_settings)
@@ -336,9 +336,9 @@ const handler = async (req: Request): Promise<Response> => {
           hours_before: Number(i.hours_before),
           label: i.label,
           send_to_client: i.send_to_client,
-          send_to_cleaner: i.send_to_cleaner,
+          send_to_technician: i.send_to_technician,
         }))
-      : [{ hours_before: 24, label: "24 Hours Before", send_to_client: true, send_to_cleaner: true }];
+      : [{ hours_before: 24, label: "24 Hours Before", send_to_client: true, send_to_technician: true }];
 
     const now = new Date();
     const sentReminders: string[] = [];
@@ -350,7 +350,7 @@ const handler = async (req: Request): Promise<Response> => {
       const windowEnd = new Date(now.getTime() + hoursMs + 15 * 60 * 1000);
 
       const reminderTypeClient = `client_${interval.hours_before}h`;
-      const reminderTypeCleaner = `cleaner_${interval.hours_before}h`;
+      const reminderTypeTechnician = `technician_${interval.hours_before}h`;
 
       const { data: bookings, error } = await supabase
         .from("bookings")
@@ -418,14 +418,14 @@ const handler = async (req: Request): Promise<Response> => {
         }
 
         // --- CLEANER REMINDER ---
-        if (interval.send_to_cleaner && booking.staff?.phone) {
-          const cleanerName = booking.staff.name || "there";
+        if (interval.send_to_technician && booking.staff?.phone) {
+          const technicianName = booking.staff.name || "there";
           const customerName = `${booking.customer?.first_name || ""} ${booking.customer?.last_name || ""}`.trim() || "Customer";
 
           const timeLabel = interval.hours_before >= 24 ? "upcoming" : "today";
-          const cleanerMsg =
+          const technicianMsg =
             `📋 REMINDER: You have a${interval.hours_before <= 2 ? " job starting soon" : ` ${timeLabel} job`}!\n\n` +
-            `Hi ${cleanerName},\n\n` +
+            `Hi ${technicianName},\n\n` +
             `Booking #${booking.booking_number}\n` +
             `Service: ${serviceName}\n` +
             `📅 ${formattedDate} at ${formattedTime}\n` +
@@ -433,23 +433,23 @@ const handler = async (req: Request): Promise<Response> => {
             `Customer: ${customerName}\n` +
             `\n- ${companyName}`;
 
-          const cleanerResult = await sendAndLog(
+          const technicianResult = await sendAndLog(
             booking.staff.phone,
-            cleanerMsg,
-            cleanerName,
+            technicianMsg,
+            technicianName,
             booking.id,
-            reminderTypeCleaner,
+            reminderTypeTechnician,
           );
 
-          if (cleanerResult.success) {
-            sentReminders.push(`#${booking.booking_number} cleaner ${interval.label}`);
+          if (technicianResult.success) {
+            sentReminders.push(`#${booking.booking_number} technician ${interval.label}`);
           } else {
-            console.error(`[send-booking-reminder] Cleaner SMS failed for #${booking.booking_number} (${interval.label}): ${cleanerResult.error}`);
+            console.error(`[send-booking-reminder] Technician SMS failed for #${booking.booking_number} (${interval.label}): ${technicianResult.error}`);
           }
         }
 
-        // Also check team assignments for additional cleaners
-        if (interval.send_to_cleaner) {
+        // Also check team assignments for additional technicians
+        if (interval.send_to_technician) {
           try {
             const { data: teamAssignments } = await supabase
               .from("booking_team_assignments")
@@ -461,7 +461,7 @@ const handler = async (req: Request): Promise<Response> => {
               const teamStaff = (assignment as any).staff;
               if (!teamStaff?.phone) continue;
 
-              const teamCleanerMsg =
+              const teamTechnicianMsg =
                 `📋 REMINDER: You have a job ${interval.hours_before <= 2 ? "starting soon" : interval.hours_before >= 24 ? "tomorrow" : "today"}!\n\n` +
                 `Hi ${teamStaff.name || "there"},\n\n` +
                 `Booking #${booking.booking_number}\n` +
@@ -473,10 +473,10 @@ const handler = async (req: Request): Promise<Response> => {
 
               const teamResult = await sendAndLog(
                 teamStaff.phone,
-                teamCleanerMsg,
+                teamTechnicianMsg,
                 teamStaff.name || "Team member",
                 booking.id,
-                `${reminderTypeCleaner}_${teamStaff.id}`,
+                `${reminderTypeTechnician}_${teamStaff.id}`,
               );
 
               if (teamResult.success) {

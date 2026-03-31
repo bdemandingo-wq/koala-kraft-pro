@@ -116,7 +116,7 @@ const handler = async (req: Request): Promise<Response> => {
 
         // Generate review token
         const token = crypto.randomUUID();
-        const projectUrl = (businessSettings?.app_url || Deno.env.get("PROJECT_URL") || "https://jointidywise.lovable.app").replace(/\/+$/, '');
+        const projectUrl = (businessSettings?.app_url || Deno.env.get("PROJECT_URL") || "https://joinwedetailnc.lovable.app").replace(/\/+$/, '');
         const reviewPageUrl = `${projectUrl}/review/${token}`.replace(/^https?:\/\//, '');
 
         // Create review request record
@@ -142,7 +142,7 @@ const handler = async (req: Request): Promise<Response> => {
 
         // Build SMS message
         const customerName = [customer.first_name, customer.last_name].filter(Boolean).join(" ") || "there";
-        const message = `Hi ${customerName}! This is ${businessSettings?.company_name || 'Your cleaning service'}. If you enjoyed your cleaning today, we'd really appreciate a quick review here: ${reviewPageUrl}. Thank you for supporting our small business!`;
+        const message = `Hi ${customerName}! This is ${businessSettings?.company_name || 'Your detailing service'}. If you enjoyed your appointment today, we'd really appreciate a quick review here: ${reviewPageUrl}. Thank you for supporting our small business!`;
 
         // Format phone
         let formattedPhone = customer.phone.replace(/\D/g, "");

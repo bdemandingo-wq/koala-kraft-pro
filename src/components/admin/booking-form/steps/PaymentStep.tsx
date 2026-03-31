@@ -34,7 +34,7 @@ import { preloadStripeModules } from '@/lib/stripe';
 import { useAuth } from '@/hooks/useAuth';
 
 /**
- * Compute cleaner_pay_expected from current form values.
+ * Compute technician_pay_expected from current form values.
  */
 function computeExpectedPay(
   wageType: string,
@@ -57,12 +57,12 @@ export function PaymentStep() {
     editingBookingId,
     notes,
     setNotes,
-    cleanerWage,
-    setCleanerWage,
-    cleanerWageType,
-    setCleanerWageType,
-    cleanerOverrideHours,
-    setCleanerOverrideHours,
+    technicianWage,
+    setTechnicianWage,
+    technicianWageType,
+    setTechnicianWageType,
+    technicianOverrideHours,
+    setTechnicianOverrideHours,
     cardInfo,
     setCardInfo,
     loadingCard,
@@ -95,7 +95,7 @@ export function PaymentStep() {
   const [validatingCoupon, setValidatingCoupon] = useState(false);
   const [couponError, setCouponError] = useState<string | null>(null);
   
-  // Autosave state for cleaner pay
+  // Autosave state for technician pay
   const [paySaveStatus, setPaySaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -108,23 +108,23 @@ export function PaymentStep() {
   const computedExpectedPay = useMemo(() => {
     const base = finalPrice > 0 ? finalPrice : (totalAmount > 0 ? totalAmount : calculatedPrice);
     return computeExpectedPay(
-      cleanerWageType,
-      cleanerWage,
-      cleanerOverrideHours,
+      technicianWageType,
+      technicianWage,
+      technicianOverrideHours,
       selectedService?.duration || 60,
       base,
     );
-  }, [cleanerWageType, cleanerWage, cleanerOverrideHours, selectedService, finalPrice, totalAmount, calculatedPrice]);
+  }, [technicianWageType, technicianWage, technicianOverrideHours, selectedService, finalPrice, totalAmount, calculatedPrice]);
 
-  // Autosave cleaner pay to DB when editing an existing booking (debounced 500ms)
+  // Autosave technician pay to DB when editing an existing booking (debounced 500ms)
   const autosavePayToDb = useCallback(async () => {
     if (!editingBookingId) return; // Only autosave for existing bookings
     
     const base = finalPrice > 0 ? finalPrice : (totalAmount > 0 ? totalAmount : calculatedPrice);
     const expectedPay = computeExpectedPay(
-      cleanerWageType,
-      cleanerWage,
-      cleanerOverrideHours,
+      technicianWageType,
+      technicianWage,
+      technicianOverrideHours,
       selectedService?.duration || 60,
       base,
     );
@@ -134,10 +134,10 @@ export function PaymentStep() {
       const { error } = await supabase
         .from('bookings')
         .update({
-          cleaner_wage: cleanerWage ? parseFloat(cleanerWage) : null,
-          cleaner_wage_type: cleanerWageType,
-          cleaner_override_hours: cleanerOverrideHours ? parseFloat(cleanerOverrideHours) : null,
-          cleaner_pay_expected: expectedPay,
+          technician_wage: technicianWage ? parseFloat(technicianWage) : null,
+          technician_wage_type: technicianWageType,
+          technician_override_hours: technicianOverrideHours ? parseFloat(technicianOverrideHours) : null,
+          technician_pay_expected: expectedPay,
           pay_last_saved_at: new Date().toISOString(),
           pay_last_saved_by: user?.id || null,
         })
@@ -148,10 +148,10 @@ export function PaymentStep() {
       // Reset to idle after 3 seconds
       setTimeout(() => setPaySaveStatus((prev) => prev === 'saved' ? 'idle' : prev), 3000);
     } catch (err) {
-      console.error('Failed to autosave cleaner pay:', err);
+      console.error('Failed to autosave technician pay:', err);
       setPaySaveStatus('error');
     }
-  }, [editingBookingId, cleanerWage, cleanerWageType, cleanerOverrideHours, selectedService, finalPrice, totalAmount, calculatedPrice, user?.id]);
+  }, [editingBookingId, technicianWage, technicianWageType, technicianOverrideHours, selectedService, finalPrice, totalAmount, calculatedPrice, user?.id]);
 
   // Trigger debounced save when pay fields change
   useEffect(() => {
@@ -163,7 +163,7 @@ export function PaymentStep() {
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
-  }, [cleanerWage, cleanerWageType, cleanerOverrideHours, editingBookingId, autosavePayToDb]);
+  }, [technicianWage, technicianWageType, technicianOverrideHours, editingBookingId, autosavePayToDb]);
 
   // Get customer phone
   const customerPhone = customerTab === 'existing' && selectedCustomer 
@@ -443,18 +443,18 @@ export function PaymentStep() {
         </CardContent>
       </Card>
 
-      {/* Cleaner Payment Section - Only show if NOT in team mode */}
+      {/* Technician Payment Section - Only show if NOT in team mode */}
       {!(isTeamMode && selectedTeamMembers.length > 0) && (
         <Card className="border-border/50 shadow-sm">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 mb-4">
               <DollarSign className="h-4 w-4 text-muted-foreground" />
-              <Label className="text-sm font-medium">Cleaner Payment (Optional)</Label>
+              <Label className="text-sm font-medium">Technician Payment (Optional)</Label>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label className="text-xs text-muted-foreground">Payment Type</Label>
-                <Select value={cleanerWageType} onValueChange={setCleanerWageType}>
+                <Select value={technicianWageType} onValueChange={setTechnicianWageType}>
                   <SelectTrigger className="mt-2 h-11 bg-secondary/30 border-border/50">
                     <SelectValue />
                   </SelectTrigger>
@@ -467,26 +467,26 @@ export function PaymentStep() {
               </div>
               <div>
                 <Label className="text-xs text-muted-foreground">
-                  {cleanerWageType === 'hourly' ? 'Hourly Rate ($)' : 
-                   cleanerWageType === 'flat' ? 'Flat Amount ($)' : 'Percentage (%)'}
+                  {technicianWageType === 'hourly' ? 'Hourly Rate ($)' : 
+                   technicianWageType === 'flat' ? 'Flat Amount ($)' : 'Percentage (%)'}
                 </Label>
                 <Input
                   type="number"
-                  value={cleanerWage}
-                  onChange={(e) => setCleanerWage(e.target.value)}
+                  value={technicianWage}
+                  onChange={(e) => setTechnicianWage(e.target.value)}
                   placeholder="0.00"
                   className="mt-2 h-11 bg-secondary/30 border-border/50"
                 />
               </div>
             </div>
             
-            {cleanerWageType === 'hourly' && (
+            {technicianWageType === 'hourly' && (
               <div className="mt-4">
                 <Label className="text-xs text-muted-foreground">Override Hours</Label>
                 <Input
                   type="number"
-                  value={cleanerOverrideHours}
-                  onChange={(e) => setCleanerOverrideHours(e.target.value)}
+                  value={technicianOverrideHours}
+                  onChange={(e) => setTechnicianOverrideHours(e.target.value)}
                   placeholder="Default: 5.0 hrs"
                   className="mt-2 h-11 bg-secondary/30 border-border/50"
                 />
@@ -510,9 +510,9 @@ export function PaymentStep() {
               </div>
             )}
 
-            {cleanerWage && (
+            {technicianWage && (
               <div className="mt-4 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-200 dark:border-emerald-800">
-                <p className="text-xs text-emerald-700 dark:text-emerald-300">Estimated Cleaner Pay</p>
+                <p className="text-xs text-emerald-700 dark:text-emerald-300">Estimated Technician Pay</p>
                 <p className="text-xl font-bold text-emerald-700 dark:text-emerald-300">
                   ${computedExpectedPay != null ? computedExpectedPay.toFixed(2) : '0.00'}
                 </p>
@@ -556,7 +556,7 @@ export function PaymentStep() {
               </div>
             </div>
             <p className="text-xs text-muted-foreground mt-3">
-              Individual pay was set in the Schedule step. Each cleaner will see their assigned amount.
+              Individual pay was set in the Schedule step. Each technician will see their assigned amount.
             </p>
           </CardContent>
         </Card>

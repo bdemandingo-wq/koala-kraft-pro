@@ -10,8 +10,8 @@ import { format } from "date-fns";
 const staticPosts = [
   {
     slug: "crm-for-cleaning-business",
-    title: "Best CRM for Cleaning Business: Complete Guide to Maid Service Software",
-    excerpt: "Find the best CRM for your cleaning business. Compare top cleaning business CRM software with scheduling, invoicing, GPS tracking & customer management.",
+    title: "Best CRM for Car Detailing Business: Complete Guide to Detailing Service Software",
+    excerpt: "Find the best CRM for your car detailing business. Compare top car detailing business CRM software with scheduling, invoicing, GPS tracking & customer management.",
     category: "CRM Software",
     readTime: "12 min read",
     date: "February 2026",
@@ -20,8 +20,8 @@ const staticPosts = [
   },
   {
     slug: "how-to-start-a-cleaning-business",
-    title: "The Ultimate Guide on How to Start a Cleaning Business in 2026",
-    excerpt: "Learn everything from automated payroll software for maid services to cleaning business inventory management. Complete step-by-step guide for aspiring entrepreneurs.",
+    title: "The Ultimate Guide on How to Start a Car Detailing Business in 2026",
+    excerpt: "Learn everything from automated payroll software for detailing services to car detailing business inventory management. Complete step-by-step guide for aspiring entrepreneurs.",
     category: "Business Guide",
     readTime: "15 min read",
     date: "January 2026",
@@ -29,9 +29,9 @@ const staticPosts = [
     isStatic: true
   },
   {
-    slug: "booking-koala-vs-jobber-vs-tidywise",
-    title: "Booking Koala vs Jobber vs TidyWise: Which Software Wins in 2026?",
-    excerpt: "Complete side-by-side comparison of pricing, features, and customer support. Find out which cleaning business software is best for your company.",
+    slug: "booking-koala-vs-jobber-vs-wedetailnc",
+    title: "Booking Koala vs Jobber vs We Detail NC: Which Software Wins in 2026?",
+    excerpt: "Complete side-by-side comparison of pricing, features, and customer support. Find out which car detailing business software is best for your company.",
     category: "Comparison",
     readTime: "10 min read",
     date: "January 2026",
@@ -40,8 +40,8 @@ const staticPosts = [
   },
   {
     slug: "how-to-grow-cleaning-business-2025",
-    title: "How to Grow Your Cleaning Business in 2025",
-    excerpt: "Proven strategies from online booking to referral programs. Learn how to scale your maid service profitably with smart technology and targeted marketing.",
+    title: "How to Grow Your Car Detailing Business in 2025",
+    excerpt: "Proven strategies from online booking to referral programs. Learn how to scale your detailing service profitably with smart technology and targeted marketing.",
     category: "Business Growth",
     readTime: "10 min read",
     date: "December 2025",
@@ -50,8 +50,8 @@ const staticPosts = [
   },
   {
     slug: "best-software-for-cleaning-business",
-    title: "Best Software for Cleaning Business Owners",
-    excerpt: "Compare the top cleaning business software in 2025. Scheduling, CRM, invoicing, and automation tools reviewed for maid services and janitorial companies.",
+    title: "Best Software for Car Detailing Business Owners",
+    excerpt: "Compare the top car detailing business software in 2025. Scheduling, CRM, invoicing, and automation tools reviewed for detailing services and detailing companies.",
     category: "Software Reviews",
     readTime: "12 min read",
     date: "November 2025",
@@ -60,8 +60,8 @@ const staticPosts = [
   },
   {
     slug: "how-to-automate-cleaning-company",
-    title: "How to Automate Your Cleaning Company",
-    excerpt: "Save 15+ hours per week by automating booking, scheduling, invoicing, and client communication. A complete automation guide for cleaning business owners.",
+    title: "How to Automate Your Detailing Company",
+    excerpt: "Save 15+ hours per week by automating booking, scheduling, invoicing, and client communication. A complete automation guide for car detailing business owners.",
     category: "Automation",
     readTime: "8 min read",
     date: "October 2025",
@@ -75,7 +75,7 @@ const featureArticles = [
   {
     slug: "/features/scheduling-software",
     title: "Cleaning Scheduling Software That Reduces No-Shows by 40%",
-    excerpt: "Automated scheduling, smart reminders, and drag-and-drop calendars for cleaning businesses.",
+    excerpt: "Automated scheduling, smart reminders, and drag-and-drop calendars for car detailing businesses.",
     category: "Features",
     readTime: "5 min read",
     date: "January 2026",
@@ -84,7 +84,7 @@ const featureArticles = [
   },
   {
     slug: "/features/route-optimization",
-    title: "Route Optimization Software for Cleaning Businesses",
+    title: "Route Optimization Software for Car Detailing Businesses",
     excerpt: "Save 2+ hours daily with AI-powered route planning. Reduce fuel costs and maximize jobs per day.",
     category: "Features",
     readTime: "5 min read",
@@ -94,7 +94,7 @@ const featureArticles = [
   },
   {
     slug: "/features/invoicing-software",
-    title: "Cleaning Business Invoicing Software: Get Paid Faster",
+    title: "Car Detailing Business Invoicing Software: Get Paid Faster",
     excerpt: "Professional invoices, automatic payment reminders, and seamless Stripe integration.",
     category: "Features",
     readTime: "5 min read",
@@ -104,8 +104,8 @@ const featureArticles = [
   },
   {
     slug: "/compare/jobber",
-    title: "TidyWise vs Jobber: Complete 2026 Comparison",
-    excerpt: "See how TidyWise stacks up against Jobber on pricing, features, and ease of use.",
+    title: "We Detail NC vs Jobber: Complete 2026 Comparison",
+    excerpt: "See how We Detail NC stacks up against Jobber on pricing, features, and ease of use.",
     category: "Comparison",
     readTime: "8 min read",
     date: "January 2026",
@@ -114,8 +114,8 @@ const featureArticles = [
   },
   {
     slug: "/compare/booking-koala",
-    title: "TidyWise vs Booking Koala: Feature-by-Feature Breakdown",
-    excerpt: "Detailed comparison of two popular cleaning business software platforms.",
+    title: "We Detail NC vs Booking Koala: Feature-by-Feature Breakdown",
+    excerpt: "Detailed comparison of two popular car detailing business software platforms.",
     category: "Comparison",
     readTime: "8 min read",
     date: "January 2026",
@@ -124,8 +124,8 @@ const featureArticles = [
   },
   {
     slug: "/compare/housecall-pro",
-    title: "Best Housecall Pro Alternative for Cleaning Businesses",
-    excerpt: "Looking for a Housecall Pro alternative? See why cleaning companies are switching to TidyWise.",
+    title: "Best Housecall Pro Alternative for Car Detailing Businesses",
+    excerpt: "Looking for a Housecall Pro alternative? See why detailing companies are switching to We Detail NC.",
     category: "Comparison",
     readTime: "6 min read",
     date: "January 2026",
@@ -171,10 +171,10 @@ export default function BlogIndex() {
   return (
     <div className="min-h-screen bg-background">
       <Seo 
-        title="Cleaning Business Resources & Guides | TIDYWISE Blog"
-        description="Expert guides on starting and growing a cleaning business. Learn about automated payroll software for maid services, inventory management, scheduling tips, and more."
+        title="Car Detailing Business Resources & Guides | WE DETAIL NC Blog"
+        description="Expert guides on starting and growing a car detailing business. Learn about automated payroll software for detailing services, inventory management, scheduling tips, and more."
         canonicalPath="/blog"
-        ogImage="/images/tidywise-og.png"
+        ogImage="/images/wedetailnc-og.png"
       />
 
       {/* Navigation */}
@@ -182,7 +182,7 @@ export default function BlogIndex() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link to="/" className="flex items-center gap-2">
-              <span className="font-bold text-xl text-foreground">TIDYWISE</span>
+              <span className="font-bold text-xl text-foreground">WE DETAIL NC</span>
             </Link>
             <Button asChild>
               <Link to="/auth">Start Free Trial</Link>
@@ -207,10 +207,10 @@ export default function BlogIndex() {
               Resources & Guides
             </div>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">
-              Cleaning Business Resources
+              Car Detailing Business Resources
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl">
-              Expert insights on growing your cleaning business. From automated payroll to inventory management, we&apos;ve got you covered.
+              Expert insights on growing your car detailing business. From automated payroll to inventory management, we&apos;ve got you covered.
             </p>
           </div>
 
@@ -267,10 +267,10 @@ export default function BlogIndex() {
           {/* Newsletter CTA */}
           <div className="mt-16 bg-secondary/50 rounded-2xl p-8 sm:p-12 text-center border border-border">
             <h2 className="text-2xl font-bold text-foreground mb-4">
-              Get cleaning business tips in your inbox
+              Get car detailing business tips in your inbox
             </h2>
             <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
-              Join 5,000+ cleaning business owners who receive weekly insights on growing their business.
+              Join 5,000+ car detailing business owners who receive weekly insights on growing their business.
             </p>
             <Button size="lg" asChild>
               <Link to="/auth">
@@ -284,7 +284,7 @@ export default function BlogIndex() {
       {/* Footer */}
       <footer className="py-8 px-4 border-t border-border">
         <div className="max-w-7xl mx-auto text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} TIDYWISE. All rights reserved.
+          © {new Date().getFullYear()} WE DETAIL NC. All rights reserved.
         </div>
       </footer>
     </div>

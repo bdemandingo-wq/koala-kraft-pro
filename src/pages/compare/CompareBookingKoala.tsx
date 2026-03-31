@@ -17,26 +17,26 @@ import {
 import { useState } from "react";
 
 const comparisonData = [
-  { feature: "Free Trial", tidywise: "2 months free", bookingkoala: "14 days", winner: "tidywise" },
-  { feature: "Monthly Pricing", tidywise: "$50/month flat", bookingkoala: "$79-$379/month", winner: "tidywise" },
-  { feature: "Online Booking", tidywise: true, bookingkoala: true, winner: "tie" },
-  { feature: "Smart Scheduling", tidywise: true, bookingkoala: true, winner: "tie" },
-  { feature: "GPS Check-ins", tidywise: true, bookingkoala: true, winner: "tie" },
-  { feature: "Automated Payroll", tidywise: true, bookingkoala: "Manual", winner: "tidywise" },
-  { feature: "P&L Reports", tidywise: true, bookingkoala: false, winner: "tidywise" },
-  { feature: "Demo/Test Mode", tidywise: true, bookingkoala: false, winner: "tidywise" },
-  { feature: "In-App SMS Inbox", tidywise: true, bookingkoala: "Extra cost", winner: "tidywise" },
-  { feature: "AI Revenue Tools", tidywise: true, bookingkoala: false, winner: "tidywise" },
-  { feature: "Photo Documentation", tidywise: true, bookingkoala: true, winner: "tie" },
-  { feature: "Review Requests", tidywise: true, bookingkoala: true, winner: "tie" },
-  { feature: "Loyalty Programs", tidywise: true, bookingkoala: false, winner: "tidywise" },
-  { feature: "Revenue Forecasting", tidywise: true, bookingkoala: false, winner: "tidywise" },
-  { feature: "Inventory Tracking", tidywise: true, bookingkoala: false, winner: "tidywise" },
+  { feature: "Free Trial", wedetailnc: "2 months free", bookingkoala: "14 days", winner: "wedetailnc" },
+  { feature: "Monthly Pricing", wedetailnc: "$50/month flat", bookingkoala: "$79-$379/month", winner: "wedetailnc" },
+  { feature: "Online Booking", wedetailnc: true, bookingkoala: true, winner: "tie" },
+  { feature: "Smart Scheduling", wedetailnc: true, bookingkoala: true, winner: "tie" },
+  { feature: "GPS Check-ins", wedetailnc: true, bookingkoala: true, winner: "tie" },
+  { feature: "Automated Payroll", wedetailnc: true, bookingkoala: "Manual", winner: "wedetailnc" },
+  { feature: "P&L Reports", wedetailnc: true, bookingkoala: false, winner: "wedetailnc" },
+  { feature: "Demo/Test Mode", wedetailnc: true, bookingkoala: false, winner: "wedetailnc" },
+  { feature: "In-App SMS Inbox", wedetailnc: true, bookingkoala: "Extra cost", winner: "wedetailnc" },
+  { feature: "AI Revenue Tools", wedetailnc: true, bookingkoala: false, winner: "wedetailnc" },
+  { feature: "Photo Documentation", wedetailnc: true, bookingkoala: true, winner: "tie" },
+  { feature: "Review Requests", wedetailnc: true, bookingkoala: true, winner: "tie" },
+  { feature: "Loyalty Programs", wedetailnc: true, bookingkoala: false, winner: "wedetailnc" },
+  { feature: "Revenue Forecasting", wedetailnc: true, bookingkoala: false, winner: "wedetailnc" },
+  { feature: "Inventory Tracking", wedetailnc: true, bookingkoala: false, winner: "wedetailnc" },
 ];
 
 const testimonials = [
   {
-    quote: "BookingKoala was overpriced for what you get. TIDYWISE has better payroll features at a third of the cost.",
+    quote: "BookingKoala was overpriced for what you get. WE DETAIL NC has better payroll features at a third of the cost.",
     author: "Amanda S.",
     role: "Pristine Clean Co.",
     rating: 5
@@ -44,11 +44,11 @@ const testimonials = [
   {
     quote: "The P&L reports were the dealbreaker. BookingKoala couldn't show me my profit margins by service.",
     author: "James W.",
-    role: "Elite Maid Services",
+    role: "Elite Detailing Services",
     rating: 5
   },
   {
-    quote: "Migrating from BookingKoala was seamless. TIDYWISE support helped me import everything in an hour.",
+    quote: "Migrating from BookingKoala was seamless. WE DETAIL NC support helped me import everything in an hour.",
     author: "Nicole P.",
     role: "Green Clean Atlanta",
     rating: 5
@@ -60,7 +60,7 @@ export default function CompareBookingKoala() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleStartFreeTrial = () => {
-    sessionStorage.setItem("selectedIndustry", "Home Cleaning");
+    sessionStorage.setItem("selectedIndustry", "Car Detailing");
     navigate("/auth", { state: { mode: "signup" } });
   };
 
@@ -73,10 +73,10 @@ export default function CompareBookingKoala() {
   return (
     <div className="min-h-screen bg-background">
       <Seo 
-        title="TIDYWISE vs BookingKoala (2026)"
-        description="Compare TIDYWISE vs BookingKoala for cleaning businesses. Payroll, P&L reports, and AI tools for $50/mo vs BookingKoala's $79–$379/mo."
+        title="WE DETAIL NC vs BookingKoala (2026)"
+        description="Compare WE DETAIL NC vs BookingKoala for car detailing businesses. Payroll, P&L reports, and AI tools for $50/mo vs BookingKoala's $79–$379/mo."
         canonicalPath="/compare/booking-koala"
-        ogImage="/images/tidywise-og.png"
+        ogImage="/images/wedetailnc-og.png"
       />
 
       {/* Navigation */}
@@ -84,7 +84,7 @@ export default function CompareBookingKoala() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <a href="/" className="flex items-center gap-2">
-              <span className="font-bold text-xl text-foreground">TIDYWISE</span>
+              <span className="font-bold text-xl text-foreground">WE DETAIL NC</span>
             </a>
             <div className="hidden md:flex items-center gap-8">
               <a href="/#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
@@ -120,11 +120,11 @@ export default function CompareBookingKoala() {
             2026 Comparison
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
-            TIDYWISE vs BookingKoala:<br/>
+            WE DETAIL NC vs BookingKoala:<br/>
             <span className="text-primary">The Better Alternative</span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Looking for a BookingKoala alternative? TIDYWISE offers <strong>automated payroll, P&L reports, and AI revenue tools</strong>—all for a flat $50/month vs BookingKoala's $79-$379/month.
+            Looking for a BookingKoala alternative? WE DETAIL NC offers <strong>automated payroll, P&L reports, and AI revenue tools</strong>—all for a flat $50/month vs BookingKoala's $79-$379/month.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="h-12 px-8" onClick={handleStartFreeTrial}>
@@ -169,7 +169,7 @@ export default function CompareBookingKoala() {
             Feature-by-Feature Comparison
           </h2>
           <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
-            Compare TIDYWISE vs BookingKoala feature by feature. See what's included vs what costs extra.
+            Compare WE DETAIL NC vs BookingKoala feature by feature. See what's included vs what costs extra.
           </p>
 
           <div className="bg-card rounded-xl border border-border overflow-hidden">
@@ -178,7 +178,7 @@ export default function CompareBookingKoala() {
                 <thead>
                   <tr className="bg-secondary/50">
                     <th className="text-left p-4 font-semibold text-foreground">Feature</th>
-                    <th className="text-center p-4 font-semibold text-primary">TIDYWISE</th>
+                    <th className="text-center p-4 font-semibold text-primary">WE DETAIL NC</th>
                     <th className="text-center p-4 font-semibold text-muted-foreground">BookingKoala</th>
                   </tr>
                 </thead>
@@ -187,7 +187,7 @@ export default function CompareBookingKoala() {
                     <tr key={row.feature} className={i % 2 === 0 ? "bg-background" : "bg-secondary/20"}>
                       <td className="p-4 text-foreground font-medium">{row.feature}</td>
                       <td className="p-4 text-center">
-                        {renderValue(row.tidywise)}
+                        {renderValue(row.wedetailnc)}
                       </td>
                       <td className="p-4 text-center">
                         {renderValue(row.bookingkoala)}
@@ -201,7 +201,7 @@ export default function CompareBookingKoala() {
 
           <div className="mt-8 text-center">
             <Button size="lg" onClick={handleStartFreeTrial}>
-              Switch to TIDYWISE Today <ArrowRight className="ml-2 h-4 w-4" />
+              Switch to WE DETAIL NC Today <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -211,7 +211,7 @@ export default function CompareBookingKoala() {
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-secondary/30">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl font-bold text-foreground text-center mb-12">
-            Why Switch from BookingKoala to TIDYWISE?
+            Why Switch from BookingKoala to WE DETAIL NC?
           </h2>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -221,7 +221,7 @@ export default function CompareBookingKoala() {
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-2">Save $300+/Month</h3>
               <p className="text-muted-foreground">
-                BookingKoala Pro costs $379/month. TIDYWISE includes everything for just $50/month.
+                BookingKoala Pro costs $379/month. WE DETAIL NC includes everything for just $50/month.
               </p>
             </div>
 
@@ -303,7 +303,7 @@ export default function CompareBookingKoala() {
       <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-border">
         <div className="max-w-5xl mx-auto text-center">
           <p className="text-muted-foreground">
-            © 2026 TIDYWISE. A Booking Koala alternative for cleaning businesses.
+            © 2026 WE DETAIL NC. A Booking Koala alternative for car detailing businesses.
           </p>
           <div className="flex flex-wrap justify-center gap-6 mt-4">
             <Link to="/" className="text-muted-foreground hover:text-foreground">Home</Link>
@@ -321,7 +321,7 @@ export default function CompareBookingKoala() {
         __html: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "SoftwareApplication",
-          "name": "TIDYWISE",
+          "name": "WE DETAIL NC",
           "applicationCategory": "BusinessApplication",
           "operatingSystem": "Web, iOS, Android",
           "offers": {
@@ -330,7 +330,7 @@ export default function CompareBookingKoala() {
             "priceCurrency": "USD",
             "priceValidUntil": "2026-12-31"
           },
-          "description": "The best BookingKoala alternative for cleaning businesses. Automated payroll, P&L reports, and flat $50/month pricing."
+          "description": "The best BookingKoala alternative for car detailing businesses. Automated payroll, P&L reports, and flat $50/month pricing."
         })
       }} />
     </div>

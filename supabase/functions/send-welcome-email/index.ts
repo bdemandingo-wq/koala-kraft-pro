@@ -42,14 +42,14 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("[send-welcome-email] Sending welcome email to:", email);
 
-    // Welcome emails for NEW signups use the main TidyWise account
+    // Welcome emails for NEW signups use the main We Detail NC account
     // This is a platform-level email, not organization-specific
     // (Users create their organization AFTER signup, so no org context exists yet)
-    const TIDYWISE_DEFAULT_EMAIL = "support@jointidywise.com";
-    const TIDYWISE_DEFAULT_NAME = "TidyWise";
+    const WE DETAIL NC_DEFAULT_EMAIL = "support@joinwedetailnc.com";
+    const WE DETAIL NC_DEFAULT_NAME = "We Detail NC";
     
-    const senderEmail = TIDYWISE_DEFAULT_EMAIL;
-    const companyName = TIDYWISE_DEFAULT_NAME;
+    const senderEmail = WE DETAIL NC_DEFAULT_EMAIL;
+    const companyName = WE DETAIL NC_DEFAULT_NAME;
     const primaryColor = "#1e5bb0";
     const accentColor = "#14b8a6";
 
@@ -91,7 +91,7 @@ const handler = async (req: Request): Promise<Response> => {
               
               <p style="margin:0 0 20px 0;font-size:16px;color:#4b5563;">Welcome to <strong>${companyName}</strong>! We're thrilled to have you join our community of cleaning professionals.</p>
               
-              <p style="margin:0 0 25px 0;font-size:16px;color:#4b5563;">Your account has been successfully created and you're ready to start managing your cleaning business like a pro.</p>
+              <p style="margin:0 0 25px 0;font-size:16px;color:#4b5563;">Your account has been successfully created and you're ready to start managing your car detailing business like a pro.</p>
               
               <!-- Features Card -->
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:#f9fafb;border-radius:12px;margin-bottom:25px;border:1px solid #e5e7eb;">
@@ -114,7 +114,7 @@ const handler = async (req: Request): Promise<Response> => {
                       <tr>
                         <td style="padding:12px 0;border-bottom:1px solid #e5e7eb;">
                           <span style="color:${accentColor};font-size:18px;margin-right:10px;">👷</span>
-                          <span style="color:#1f2937;font-size:15px;">Manage your cleaning staff</span>
+                          <span style="color:#1f2937;font-size:15px;">Manage your detailing staff</span>
                         </td>
                       </tr>
                       <tr>
@@ -138,7 +138,7 @@ const handler = async (req: Request): Promise<Response> => {
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin:30px 0;">
                 <tr>
                   <td style="text-align:center;">
-                    <a href="https://tidywise.lovable.app/dashboard" style="display:inline-block;background:linear-gradient(135deg, ${primaryColor} 0%, ${accentColor} 100%);color:#ffffff;text-decoration:none;padding:16px 40px;border-radius:8px;font-size:16px;font-weight:600;box-shadow:0 4px 14px rgba(30,91,176,0.4);">Go to Dashboard</a>
+                    <a href="https://wedetailnc.lovable.app/dashboard" style="display:inline-block;background:linear-gradient(135deg, ${primaryColor} 0%, ${accentColor} 100%);color:#ffffff;text-decoration:none;padding:16px 40px;border-radius:8px;font-size:16px;font-weight:600;box-shadow:0 4px 14px rgba(30,91,176,0.4);">Go to Dashboard</a>
                   </td>
                 </tr>
               </table>

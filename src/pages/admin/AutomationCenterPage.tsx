@@ -29,7 +29,7 @@ const automationMeta: Record<string, {
 }> = {
   review_request: {
     icon: Star,
-    trigger: 'Cleaning marked completed',
+    trigger: 'Service marked completed',
     action: 'Sends customer a review request SMS 30 minutes after job completion',
     benefit: 'Increases Google reviews automatically and builds online reputation.',
     color: 'text-amber-500',
@@ -50,7 +50,7 @@ const automationMeta: Record<string, {
   },
   recurring_upsell: {
     icon: Repeat,
-    trigger: 'Successful cleaning completed',
+    trigger: 'Successful service completed',
     action: 'Offers recurring service plan 2 hours after completion',
     benefit: 'Builds predictable recurring revenue without manual follow-up.',
     color: 'text-purple-500',
@@ -80,9 +80,9 @@ const sidebarGuide = [
   { icon: Zap, name: 'Campaigns', description: 'Create and send SMS marketing campaigns to targeted customer segments.' },
   { icon: MessageSquare, name: 'Feedback', description: 'Track client complaints, feedback, and resolution status.' },
   { icon: Briefcase, name: 'Services', description: 'Configure your service offerings, pricing, and duration settings.' },
-  { icon: UserCircle, name: 'Staff', description: 'Manage your cleaning team — profiles, assignments, availability, and performance.' },
-  { icon: CheckSquare, name: 'Checklists', description: 'Create cleaning checklists that staff follow during each job for quality control.' },
-  { icon: Package, name: 'Inventory', description: 'Track cleaning supplies, equipment, and reorder levels.' },
+  { icon: UserCircle, name: 'Staff', description: 'Manage your appointment team — profiles, assignments, availability, and performance.' },
+  { icon: CheckSquare, name: 'Checklists', description: 'Create service checklists that staff follow during each job for quality control.' },
+  { icon: Package, name: 'Inventory', description: 'Track detailing supplies, equipment, and reorder levels.' },
   { icon: Tag, name: 'Discounts', description: 'Create and manage discount codes for promotions and special offers.' },
   { icon: DollarSign, name: 'Payroll', description: 'Track staff wages, hours worked, and process payroll payments.' },
   { icon: Receipt, name: 'Expenses', description: 'Log and categorize business expenses for P&L tracking.' },

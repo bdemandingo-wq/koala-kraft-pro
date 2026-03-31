@@ -7,7 +7,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const PLATFORM_ADMIN_EMAIL = "support@tidywisecleaning.com";
+const PLATFORM_ADMIN_EMAIL = "support@wedetailnc.com";
 
 // Safe date formatter
 function safeFormatDate(timestamp: number | undefined | null): string {
@@ -90,9 +90,9 @@ serve(async (req) => {
       .gte('created_at', thirtyDaysAgo.toISOString())
       .order('created_at', { ascending: false });
 
-    // Get subscription data - ONLY TidyWise CRM subscribers (filter by product ID)
-    // TIDYWISE Pro Subscription product ID - only count these as CRM subscribers
-    const TIDYWISE_CRM_PRODUCT_ID = "prod_Tg3zSKe9hRHLZy";
+    // Get subscription data - ONLY We Detail NC CRM subscribers (filter by product ID)
+    // WE DETAIL NC Pro Subscription product ID - only count these as CRM subscribers
+    const WE DETAIL NC_CRM_PRODUCT_ID = "prod_Tg3zSKe9hRHLZy";
     
     let activeSubscriptions = 0;
     let trialSubscriptions = 0;
@@ -105,7 +105,7 @@ serve(async (req) => {
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (stripeKey) {
       console.log("[PLATFORM-ANALYTICS] Fetching Stripe subscription data...");
-      console.log("[PLATFORM-ANALYTICS] Filtering for TidyWise CRM product:", TIDYWISE_CRM_PRODUCT_ID);
+      console.log("[PLATFORM-ANALYTICS] Filtering for We Detail NC CRM product:", WE DETAIL NC_CRM_PRODUCT_ID);
       const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
       const thirtyDaysAgoTimestamp = Math.floor(thirtyDaysAgo.getTime() / 1000);
       
@@ -117,10 +117,10 @@ serve(async (req) => {
         });
         console.log("[PLATFORM-ANALYTICS] Found total subscriptions:", allSubscriptions.data.length);
         
-        // Filter to only TidyWise CRM subscriptions
+        // Filter to only We Detail NC CRM subscriptions
         const crmSubscriptions = allSubscriptions.data.filter((sub: Stripe.Subscription) => {
           const productId = sub.items.data[0]?.price?.product;
-          return productId === TIDYWISE_CRM_PRODUCT_ID;
+          return productId === WE DETAIL NC_CRM_PRODUCT_ID;
         });
         console.log("[PLATFORM-ANALYTICS] Filtered to CRM subscriptions:", crmSubscriptions.length);
         
@@ -177,12 +177,12 @@ serve(async (req) => {
               created: safeFormatDate(customerCreated),
               subscriptionStatus: sub.status,
               subscriptionCreated: safeFormatDate(sub.created),
-              source: 'tidywise_subscriber',
+              source: 'wedetailnc_subscriber',
             });
           }
         }
 
-        console.log("[PLATFORM-ANALYTICS] Total TidyWise subscribers:", totalSubscribers);
+        console.log("[PLATFORM-ANALYTICS] Total We Detail NC subscribers:", totalSubscribers);
         
         // Sort by subscription created date (most recent first)
         subscribersList.sort((a, b) => {

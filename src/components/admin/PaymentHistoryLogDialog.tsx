@@ -117,14 +117,14 @@ export function PaymentHistoryLogDialog({ open, onOpenChange, booking }: Payment
         });
       }
 
-      // Check cleaner payment
-      const cleanerPayment = (booking as any).cleaner_actual_payment;
-      if (cleanerPayment && cleanerPayment > 0) {
+      // Check technician payment
+      const technicianPayment = (booking as any).technician_actual_payment;
+      if (technicianPayment && technicianPayment > 0) {
         paymentEvents.push({
-          id: `cleaner-${booking.id}`,
+          id: `technician-${booking.id}`,
           type: 'charge',
-          description: 'Cleaner payment processed',
-          amount: cleanerPayment,
+          description: 'Technician payment processed',
+          amount: technicianPayment,
           status: 'success',
           timestamp: booking.updated_at,
           details: `Paid to: ${booking.staff?.name || 'Staff member'}`

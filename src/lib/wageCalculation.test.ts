@@ -3,13 +3,13 @@ import { describe, it, expect } from 'vitest';
 import { calculateBookingWage, getActualHours, type WageBooking, type WageStaff } from '@/lib/wageCalculation';
 
 const makeBooking = (overrides: Partial<WageBooking> = {}): WageBooking => ({
-  cleaner_actual_payment: null,
-  cleaner_pay_expected: null,
-  cleaner_wage: null,
-  cleaner_wage_type: null,
-  cleaner_checkin_at: null,
-  cleaner_checkout_at: null,
-  cleaner_override_hours: null,
+  technician_actual_payment: null,
+  technician_pay_expected: null,
+  technician_wage: null,
+  technician_wage_type: null,
+  technician_checkin_at: null,
+  technician_checkout_at: null,
+  technician_override_hours: null,
   duration: 120, // 2 hours in minutes
   total_amount: 200,
   ...overrides,
@@ -25,14 +25,14 @@ const makeStaff = (overrides: Partial<WageStaff> = {}): WageStaff => ({
 describe('getActualHours', () => {
   it('uses check-in/out timestamps when available', () => {
     const booking = makeBooking({
-      cleaner_checkin_at: '2026-02-10T09:00:00Z',
-      cleaner_checkout_at: '2026-02-10T12:30:00Z',
+      technician_checkin_at: '2026-02-10T09:00:00Z',
+      technician_checkout_at: '2026-02-10T12:30:00Z',
     });
     expect(getActualHours(booking)).toBeCloseTo(3.5);
   });
 
   it('falls back to override hours', () => {
-    const booking = makeBooking({ cleaner_override_hours: 4 });
+    const booking = makeBooking({ technician_override_hours: 4 });
     expect(getActualHours(booking)).toBe(4);
   });
 
@@ -49,9 +49,9 @@ describe('getActualHours', () => {
 
   it('priority: timestamps > override > default > duration', () => {
     const booking = makeBooking({
-      cleaner_checkin_at: '2026-02-10T08:00:00Z',
-      cleaner_checkout_at: '2026-02-10T09:30:00Z',
-      cleaner_override_hours: 5,
+      technician_checkin_at: '2026-02-10T08:00:00Z',
+      technician_checkout_at: '2026-02-10T09:30:00Z',
+      technician_override_hours: 5,
       duration: 240,
     });
     const staff = makeStaff({ default_hours: 8 });
@@ -62,22 +62,22 @@ describe('getActualHours', () => {
 
 describe('calculateBookingWage', () => {
   it('uses explicit actual_payment when set', () => {
-    const booking = makeBooking({ cleaner_actual_payment: 100 });
+    const booking = makeBooking({ technician_actual_payment: 100 });
     const result = calculateBookingWage(booking, makeStaff());
     expect(result.calculatedPay).toBe(100);
     expect(result.wageType).toBe('actual');
   });
 
   it('respects actual_payment of 0 as explicit override', () => {
-    const booking = makeBooking({ cleaner_actual_payment: 0, cleaner_wage: 30, cleaner_wage_type: 'hourly' });
+    const booking = makeBooking({ technician_actual_payment: 0, technician_wage: 30, technician_wage_type: 'hourly' });
     const result = calculateBookingWage(booking);
     // $0 is a valid explicit admin override — should be respected
     expect(result.calculatedPay).toBe(0);
     expect(result.wageType).toBe('actual');
   });
 
-  it('uses cleaner_pay_expected as single source of truth', () => {
-    const booking = makeBooking({ cleaner_pay_expected: 150, cleaner_wage: 30, cleaner_wage_type: 'hourly' });
+  it('uses technician_pay_expected as single source of truth', () => {
+    const booking = makeBooking({ technician_pay_expected: 150, technician_wage: 30, technician_wage_type: 'hourly' });
     const result = calculateBookingWage(booking, makeStaff());
     expect(result.calculatedPay).toBe(150);
     expect(result.wageType).toBe('hourly');
@@ -86,17 +86,17 @@ describe('calculateBookingWage', () => {
   });
 
   it('flags missing pay when no snapshot exists', () => {
-    const booking = makeBooking({ cleaner_wage: null, cleaner_pay_expected: null });
+    const booking = makeBooking({ technician_wage: null, technician_pay_expected: null });
     const result = calculateBookingWage(booking, makeStaff());
     expect(result.isMissingPay).toBe(true);
   });
 
   it('calculates hourly pay from timestamps', () => {
     const booking = makeBooking({
-      cleaner_checkin_at: '2026-02-10T09:00:00Z',
-      cleaner_checkout_at: '2026-02-10T11:00:00Z', // 2 hours
-      cleaner_wage: 50,
-      cleaner_wage_type: 'hourly',
+      technician_checkin_at: '2026-02-10T09:00:00Z',
+      technician_checkout_at: '2026-02-10T11:00:00Z', // 2 hours
+      technician_wage: 50,
+      technician_wage_type: 'hourly',
     });
     const result = calculateBookingWage(booking);
     expect(result.calculatedPay).toBe(100); // 2h × $50
@@ -104,15 +104,15 @@ describe('calculateBookingWage', () => {
   });
 
   it('calculates flat rate pay', () => {
-    const booking = makeBooking({ cleaner_wage: 150, cleaner_wage_type: 'flat' });
+    const booking = makeBooking({ technician_wage: 150, technician_wage_type: 'flat' });
     const result = calculateBookingWage(booking);
     expect(result.calculatedPay).toBe(150);
   });
 
   it('calculates percentage pay', () => {
     const booking = makeBooking({
-      cleaner_wage: 50, // 50%
-      cleaner_wage_type: 'percentage',
+      technician_wage: 50, // 50%
+      technician_wage_type: 'percentage',
       total_amount: 200,
     });
     const result = calculateBookingWage(booking);
@@ -121,8 +121,8 @@ describe('calculateBookingWage', () => {
 
   it('falls back to staff hourly_rate when booking wage is null', () => {
     const booking = makeBooking({
-      cleaner_checkin_at: '2026-02-10T09:00:00Z',
-      cleaner_checkout_at: '2026-02-10T11:00:00Z',
+      technician_checkin_at: '2026-02-10T09:00:00Z',
+      technician_checkout_at: '2026-02-10T11:00:00Z',
     });
     const staff = makeStaff({ hourly_rate: 30 });
     const result = calculateBookingWage(booking, staff);
@@ -138,10 +138,10 @@ describe('calculateBookingWage', () => {
 
   it('portal and payroll get identical results for same inputs', () => {
     const booking = makeBooking({
-      cleaner_checkin_at: '2026-02-10T08:00:00Z',
-      cleaner_checkout_at: '2026-02-10T11:30:00Z',
-      cleaner_wage: 25,
-      cleaner_wage_type: 'hourly',
+      technician_checkin_at: '2026-02-10T08:00:00Z',
+      technician_checkout_at: '2026-02-10T11:30:00Z',
+      technician_wage: 25,
+      technician_wage_type: 'hourly',
     });
     const staff = makeStaff({ hourly_rate: 25 });
 

@@ -87,10 +87,10 @@ const handler = async (req: Request): Promise<Response> => {
     const token = crypto.randomUUID();
     
     // Use org-specific app URL, fallback to global PROJECT_URL
-    const projectUrl = (businessSettings?.app_url || Deno.env.get("PROJECT_URL") || "https://jointidywise.lovable.app").replace(/\/+$/, '');
+    const projectUrl = (businessSettings?.app_url || Deno.env.get("PROJECT_URL") || "https://joinwedetailnc.lovable.app").replace(/\/+$/, '');
     const reviewPageUrl = `${projectUrl}/review/${token}`;
 
-    // Get staff_id from booking to associate review with cleaner
+    // Get staff_id from booking to associate review with technician
     const { data: bookingData } = await supabase
       .from("bookings")
       .select("staff_id")
@@ -143,7 +143,7 @@ const handler = async (req: Request): Promise<Response> => {
               <div style="font-size:32px;font-weight:bold;color:#ffffff;">
                 ${companyName}
               </div>
-              <p style="color:#ffffff;font-size:14px;margin:5px 0 0 0;">Professional Cleaning Services</p>
+              <p style="color:#ffffff;font-size:14px;margin:5px 0 0 0;">Professional Detailing Services</p>
             </td>
           </tr>
           
@@ -153,7 +153,7 @@ const handler = async (req: Request): Promise<Response> => {
               <h1 style="margin:0 0 20px 0;color:#1e5bb0;font-size:28px;">How was your ${serviceName}?</h1>
               
               <p style="font-size:16px;margin:0 0 30px 0;color:#666;">
-                Hi ${customerName}! We'd love to hear about your experience. Your feedback helps us improve and helps others find great cleaning services.
+                Hi ${customerName}! We'd love to hear about your experience. Your feedback helps us improve and helps others find great detailing services.
               </p>
               
               <p style="font-size:16px;margin:0 0 20px 0;color:#333;font-weight:600;">

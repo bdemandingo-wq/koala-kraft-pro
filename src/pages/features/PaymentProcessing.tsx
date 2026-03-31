@@ -22,24 +22,24 @@ export default function PaymentProcessing() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleStartFreeTrial = () => {
-    sessionStorage.setItem("selectedIndustry", "Home Cleaning");
+    sessionStorage.setItem("selectedIndustry", "Car Detailing");
     navigate("/auth", { state: { mode: "signup" } });
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Seo 
-        title="Automated Payments for Cleaning Businesses | TidyWise"
-        description="Get paid faster with TidyWise. Send invoices, accept online payments, and set up recurring billing — all in one place."
+        title="Automated Payments for Car Detailing Businesses | We Detail NC"
+        description="Get paid faster with We Detail NC. Send invoices, accept online payments, and set up recurring billing — all in one place."
         canonicalPath="/features/payment-processing"
-        ogImage="/images/tidywise-og.png"
+        ogImage="/images/wedetailnc-og.png"
         jsonLd={{
           "@type": "SoftwareApplication",
-          "name": "TidyWise Payment Processing",
+          "name": "We Detail NC Payment Processing",
           "applicationCategory": "BusinessApplication",
           "operatingSystem": "Web, iOS, Android",
           "offers": { "@type": "Offer", "price": "50", "priceCurrency": "USD" },
-          "description": "Automated payment processing for cleaning businesses with Stripe, invoicing, and recurring billing."
+          "description": "Automated payment processing for car detailing businesses with Stripe, invoicing, and recurring billing."
         }}
       />
 
@@ -47,7 +47,7 @@ export default function PaymentProcessing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <a href="/" className="flex items-center gap-2">
-              <span className="font-bold text-xl text-foreground">TIDYWISE</span>
+              <span className="font-bold text-xl text-foreground">WE DETAIL NC</span>
             </a>
             <div className="hidden md:flex items-center gap-8">
               <a href="/#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
@@ -83,14 +83,14 @@ export default function PaymentProcessing() {
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
             Get Paid Faster With Automated<br/>
-            <span className="text-primary">Cleaning Business Payments</span>
+            <span className="text-primary">Car Detailing Business Payments</span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Chasing invoices is the worst part of running a cleaning business. TidyWise handles billing automatically so you get paid on time, every time — without lifting a finger.
+            Chasing invoices is the worst part of running a car detailing business. We Detail NC handles billing automatically so you get paid on time, every time — without lifting a finger.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="text-lg px-8 h-14" onClick={handleStartFreeTrial}>
-              Try TidyWise Free <ArrowRight className="ml-2 h-5 w-5" />
+              Try We Detail NC Free <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
             <Button size="lg" variant="outline" className="text-lg px-8 h-14" onClick={() => navigate("/pricing")}>
               See Pricing
@@ -120,9 +120,9 @@ export default function PaymentProcessing() {
       {/* Built for cleaning */}
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-foreground mb-4">Built for Cleaning Businesses</h2>
+          <h2 className="text-3xl font-bold text-foreground mb-4">Built for Car Detailing Businesses</h2>
           <p className="text-lg text-muted-foreground">
-            Whether you charge per job, weekly, or on a subscription basis, TidyWise flexes to match how you run your business.
+            Whether you charge per job, weekly, or on a subscription basis, We Detail NC flexes to match how you run your business.
           </p>
         </div>
       </section>
@@ -133,7 +133,7 @@ export default function PaymentProcessing() {
           <h2 className="text-3xl font-bold text-foreground mb-4">Start Getting Paid on Time</h2>
           <p className="text-lg text-muted-foreground mb-8">Automatic charging and professional invoicing. Start your free trial today.</p>
           <Button size="lg" className="text-lg px-8 h-14" onClick={handleStartFreeTrial}>
-            Try TidyWise Free <ArrowRight className="ml-2 h-5 w-5" />
+            Try We Detail NC Free <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
         </div>
       </section>
@@ -146,7 +146,7 @@ export default function PaymentProcessing() {
 
       <footer className="border-t border-border py-8 px-4 text-center text-sm text-muted-foreground">
         <div className="max-w-5xl mx-auto">
-          <p>© {new Date().getFullYear()} TidyWise. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} We Detail NC. All rights reserved.</p>
           <div className="flex justify-center gap-6 mt-4">
             <Link to="/" className="text-muted-foreground hover:text-foreground">Home</Link>
             <Link to="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</Link>

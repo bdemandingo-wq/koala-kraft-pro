@@ -53,15 +53,15 @@ const handler = async (req: Request): Promise<Response> => {
       .eq('organization_id', organizationId)
       .eq('is_active', true);
 
-    const companyName = businessSettings?.company_name || 'Our Cleaning Company';
+    const companyName = businessSettings?.company_name || 'Our Detailing Company';
     const companyPhone = businessSettings?.company_phone || '';
     const companyEmail = businessSettings?.company_email || '';
 
     const servicesInfo = services?.map(s => 
-      `- ${s.name}: ${s.description || 'Professional cleaning service'} - Starting at $${s.price} (${s.duration} min)`
-    ).join('\n') || 'Various cleaning services available';
+      `- ${s.name}: ${s.description || 'Professional detailing service'} - Starting at $${s.price} (${s.duration} min)`
+    ).join('\n') || 'Various detailing services available';
 
-    const systemPrompt = `You are a friendly, helpful customer service chatbot for ${companyName}, a professional cleaning service. Your job is to:
+    const systemPrompt = `You are a friendly, helpful customer service chatbot for ${companyName}, a professional detailing service. Your job is to:
 
 1. Answer questions about our services
 2. Help customers understand pricing

@@ -141,7 +141,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Build dynamic success/cancel URLs using the app's published URL
-    const appUrl = Deno.env.get("APP_URL") || "https://jointidywise.lovable.app";
+    const appUrl = Deno.env.get("APP_URL") || "https://joinwedetailnc.lovable.app";
 
     // Create a Stripe Checkout session in setup mode to collect card details
     const session = await stripe.checkout.sessions.create({
@@ -190,7 +190,7 @@ const handler = async (req: Request): Promise<Response> => {
               
               <div class="info-box">
                 <p><strong>Why do we need this?</strong></p>
-                <p style="margin: 0; color: #666;">Your card will be securely saved for your upcoming cleaning service. You won't be charged until after your service is completed.</p>
+                <p style="margin: 0; color: #666;">Your card will be securely saved for your upcoming detailing service. You won't be charged until after your service is completed.</p>
               </div>
               
               <center>

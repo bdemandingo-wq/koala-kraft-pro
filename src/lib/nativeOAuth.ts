@@ -5,8 +5,8 @@
 import { Capacitor } from '@capacitor/core';
 import { supabase } from '@/integrations/supabase/client';
 
-const NATIVE_CALLBACK_URL = 'com.jointidywise.app://auth/callback';
-const WEB_CALLBACK_URL = 'https://www.jointidywise.com';
+const NATIVE_CALLBACK_URL = 'com.joinwedetailnc.app://auth/callback';
+const WEB_CALLBACK_URL = 'https://www.joinwedetailnc.com';
 
 export function getOAuthRedirectUrl(): string {
   return Capacitor.isNativePlatform() ? NATIVE_CALLBACK_URL : WEB_CALLBACK_URL;

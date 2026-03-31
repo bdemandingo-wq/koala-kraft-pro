@@ -36,7 +36,7 @@ interface Props {
   onSaved?: () => void;
 }
 
-export function CleanerAvailabilityManager({ staffId, onSaved }: Props) {
+export function TechnicianAvailabilityManager({ staffId, onSaved }: Props) {
   const queryClient = useQueryClient();
   const { organization } = useOrganization();
   const organizationId = organization?.id;

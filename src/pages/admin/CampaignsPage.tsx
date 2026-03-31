@@ -237,8 +237,8 @@ export default function CampaignsPage() {
       setAiTemplates([]);
       const { data, error } = await supabase.functions.invoke("generate-campaign-templates", {
         body: {
-          companyName: businessSettings?.company_name || "Your Cleaning Service",
-          serviceType: "cleaning",
+          companyName: businessSettings?.company_name || "Your Detailing Service",
+          serviceType: "detailing",
           audience: campaignForm.audience,
           tone: aiTone,
           timestamp: Date.now(),
@@ -386,10 +386,10 @@ export default function CampaignsPage() {
     const map: Record<string, { label: string; description: string; icon: typeof Zap }> = {
       winback_60day: { label: "Win Back Inactive", description: "Fires after 60+ days of no booking", icon: RefreshCw },
       review_request: { label: "Post-Clean Review Request", description: "Fires 30 min after booking marked complete", icon: Star },
-      appointment_reminder: { label: "Appointment Reminder", description: "Fires 24 hours before scheduled cleaning", icon: CalendarDays },
+      appointment_reminder: { label: "Appointment Reminder", description: "Fires 24 hours before scheduled appointment", icon: CalendarDays },
       
-      rebooking_reminder: { label: "Recurring Reminder", description: "Fires 28 days after completed cleaning", icon: Clock },
-      recurring_upsell: { label: "Recurring Service Upsell", description: "Fires 2 hours after completed cleaning", icon: TrendingUp },
+      rebooking_reminder: { label: "Recurring Reminder", description: "Fires 28 days after completed service", icon: Clock },
+      recurring_upsell: { label: "Recurring Service Upsell", description: "Fires 2 hours after completed service", icon: TrendingUp },
     };
     return map[type] || { label: type.replace(/_/g, " "), description: "", icon: Zap };
   };
@@ -651,7 +651,7 @@ export default function CampaignsPage() {
                 <Input
                   value={campaignForm.name}
                   onChange={e => setCampaignForm(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="e.g., Spring Cleaning Promo"
+                  placeholder="e.g., Spring Detail Promo"
                 />
               </div>
 
@@ -811,7 +811,7 @@ export default function CampaignsPage() {
                     <Input
                       value={campaignForm.emailSubject}
                       onChange={e => setCampaignForm(prev => ({ ...prev, emailSubject: e.target.value }))}
-                      placeholder="Your next cleaning is waiting!"
+                      placeholder="Your next detail is waiting!"
                     />
                   </div>
                   <div className="space-y-2">
@@ -840,7 +840,7 @@ export default function CampaignsPage() {
                         .replace(/\{last_name\}/g, "Johnson")
                         .replace(/\{company_name\}/g, businessSettings?.company_name || "Your Company")
                         .replace(/\{booking_date\}/g, "Jan 15")
-                        .replace(/\{service_type\}/g, "Deep Clean")}
+                        .replace(/\{service_type\}/g, "Full Detail")}
                     </div>
                   </div>
                 </div>

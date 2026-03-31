@@ -95,55 +95,55 @@ const allCities = [...majorCities, ...additionalCities];
 
 // Long-tail keyword variations
 const keywordVariations = [
-  "cleaning business CRM software",
-  "maid service management software", 
-  "house cleaning scheduling software",
-  "janitorial service CRM",
-  "residential cleaning business software",
+  "car detailing business CRM software",
+  "detailing service management software", 
+  "house detailing scheduling software",
+  "detailing service CRM",
+  "residential car detailing business software",
   "commercial cleaning CRM",
-  "cleaning company management system",
-  "cleaning service booking software"
+  "detailing company management system",
+  "detailing service booking software"
 ];
 
 // FAQ data for schema markup
 const faqs = [
   {
-    question: "What is the best CRM for a small cleaning business?",
-    answer: "TIDYWISE is the best CRM for small cleaning businesses because it's affordable ($50/month), easy to use, and includes all essential features like scheduling, invoicing, customer management, and automated reminders without expensive add-ons or per-user fees."
+    question: "What is the best CRM for a small car detailing business?",
+    answer: "WE DETAIL NC is the best CRM for small car detailing businesses because it's affordable ($50/month), easy to use, and includes all essential features like scheduling, invoicing, customer management, and automated reminders without expensive add-ons or per-user fees."
   },
   {
-    question: "Do I need a CRM for my maid service?",
+    question: "Do I need a CRM for my detailing service?",
     answer: "Yes, if you have more than 5-10 recurring clients. A CRM helps you avoid double-bookings, reduces no-shows by 40% with automated reminders, tracks customer preferences, manages payments, and saves 2+ hours daily on admin tasks."
   },
   {
-    question: "Can I use a free CRM for my cleaning business?",
-    answer: "Free CRMs like HubSpot or Zoho aren't designed for cleaning businesses and lack scheduling, dispatching, invoicing, and route optimization features. TIDYWISE offers a 60-day free trial so you can test all features before committing to a paid plan."
+    question: "Can I use a free CRM for my car detailing business?",
+    answer: "Free CRMs like HubSpot or Zoho aren't designed for car detailing businesses and lack scheduling, dispatching, invoicing, and route optimization features. WE DETAIL NC offers a 60-day free trial so you can test all features before committing to a paid plan."
   },
   {
-    question: "How much does cleaning business software cost?",
-    answer: "Cleaning business software ranges from $50 to $500+ per month. TIDYWISE starts at $50/month with unlimited users. Competitors like Jobber charge $349/month and Booking Koala charges $197/month for similar features."
+    question: "How much does car detailing business software cost?",
+    answer: "Cleaning business software ranges from $50 to $500+ per month. WE DETAIL NC starts at $50/month with unlimited users. Competitors like Jobber charge $349/month and Booking Koala charges $197/month for similar features."
   },
   {
-    question: "What features should I look for in cleaning business CRM software?",
-    answer: "Essential features include: customer database, drag-and-drop scheduling, automated SMS/email reminders, online booking, payment processing, invoicing, route optimization, staff management, and business analytics. TIDYWISE includes all of these."
+    question: "What features should I look for in car detailing business CRM software?",
+    answer: "Essential features include: customer database, drag-and-drop scheduling, automated SMS/email reminders, online booking, payment processing, invoicing, route optimization, staff management, and business analytics. WE DETAIL NC includes all of these."
   },
   {
-    question: "Can cleaning business CRM software help me get more customers?",
+    question: "Can car detailing business CRM software help me get more customers?",
     answer: "Yes. CRM software with automated review requests can triple your online reviews. Lead capture forms, follow-up campaigns, and professional online booking increase conversion rates by 25-40% according to industry studies."
   },
   {
-    question: "Is there a CRM specifically designed for cleaning companies?",
-    answer: "Yes, TIDYWISE is built specifically for cleaning businesses including maid services, janitorial companies, and residential cleaning businesses. It includes industry-specific features like recurring booking management, square footage pricing, and cleaning checklists."
+    question: "Is there a CRM specifically designed for detailing companies?",
+    answer: "Yes, WE DETAIL NC is built specifically for car detailing businesses including detailing services, detailing companies, and residential car detailing businesses. It includes industry-specific features like recurring booking management, square footage pricing, and service checklists."
   },
   {
-    question: "How do I switch from spreadsheets to cleaning business software?",
-    answer: "TIDYWISE offers free data import assistance. You can upload your customer list via CSV, and our system will organize your data automatically. Most cleaning businesses complete the transition in under 24 hours."
+    question: "How do I switch from spreadsheets to car detailing business software?",
+    answer: "WE DETAIL NC offers free data import assistance. You can upload your customer list via CSV, and our system will organize your data automatically. Most car detailing businesses complete the transition in under 24 hours."
   }
 ];
 
 // Comparison data for competitors
 const competitorComparison = [
-  { name: "TIDYWISE", price: "$50/mo", users: "Unlimited", trial: "60 days", cleaning: true, mobile: true, rating: "4.9/5" },
+  { name: "WE DETAIL NC", price: "$50/mo", users: "Unlimited", trial: "60 days", cleaning: true, mobile: true, rating: "4.9/5" },
   { name: "Jobber", price: "$349/mo", users: "Up to 15", trial: "14 days", cleaning: false, mobile: true, rating: "4.5/5" },
   { name: "Booking Koala", price: "$197/mo", users: "Unlimited", trial: "14 days", cleaning: true, mobile: true, rating: "4.3/5" },
   { name: "Housecall Pro", price: "$129/mo", users: "1 user", trial: "14 days", cleaning: false, mobile: true, rating: "4.5/5" },
@@ -165,10 +165,10 @@ export default function CleaningBusinessCRM() {
   return (
     <div className="min-h-screen bg-background">
       <Seo 
-        title="Best CRM for Cleaning Business (2026)"
-        description="Compare top cleaning business CRM software with scheduling, invoicing, GPS tracking, and customer management. Find the right fit for your maid service."
+        title="Best CRM for Car Detailing Business (2026)"
+        description="Compare top car detailing business CRM software with scheduling, invoicing, GPS tracking, and customer management. Find the right fit for your detailing service."
         canonicalPath="/blog/crm-for-cleaning-business"
-        ogImage="/images/tidywise-og.png"
+        ogImage="/images/wedetailnc-og.png"
         ogType="article"
         article={{ publishedTime: "2026-02-01", modifiedTime: "2026-02-04", section: "CRM Software" }}
       />
@@ -178,7 +178,7 @@ export default function CleaningBusinessCRM() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link to="/" className="flex items-center gap-2">
-              <span className="font-bold text-xl text-foreground">TIDYWISE</span>
+              <span className="font-bold text-xl text-foreground">WE DETAIL NC</span>
             </Link>
             <div className="hidden md:flex items-center gap-6">
               <Link to="/blog" className="text-muted-foreground hover:text-foreground transition-colors">Blog</Link>
@@ -204,7 +204,7 @@ export default function CleaningBusinessCRM() {
               <li>/</li>
               <li><Link to="/blog" className="hover:text-foreground">Blog</Link></li>
               <li>/</li>
-              <li className="text-foreground">CRM for Cleaning Business</li>
+              <li className="text-foreground">CRM for Car Detailing Business</li>
             </ol>
           </nav>
 
@@ -227,10 +227,10 @@ export default function CleaningBusinessCRM() {
               </span>
             </div>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight mb-6">
-              Best CRM for Cleaning Business: The Ultimate Guide to Maid Service Software in 2026
+              Best CRM for Car Detailing Business: The Ultimate Guide to Detailing Service Software in 2026
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              A comprehensive <strong>CRM for cleaning business</strong> is essential for managing customers, scheduling jobs, processing payments, and growing your maid service. This ultimate guide covers everything you need to choose the right <strong>cleaning business CRM software</strong>—including feature comparisons, pricing, and expert recommendations.
+              A comprehensive <strong>CRM for car detailing business</strong> is essential for managing customers, scheduling jobs, processing payments, and growing your detailing service. This ultimate guide covers everything you need to choose the right <strong>car detailing business CRM software</strong>—including feature comparisons, pricing, and expert recommendations.
             </p>
           </header>
 
@@ -239,13 +239,13 @@ export default function CleaningBusinessCRM() {
             <div className="flex items-start gap-4">
               <Award className="h-8 w-8 text-primary flex-shrink-0 mt-1" />
               <div>
-                <h2 className="text-xl font-bold text-foreground mb-3">🏆 Best CRM for Cleaning Business 2026: Quick Answer</h2>
+                <h2 className="text-xl font-bold text-foreground mb-3">🏆 Best CRM for Car Detailing Business 2026: Quick Answer</h2>
                 <p className="text-muted-foreground mb-4">
-                  <strong>TIDYWISE</strong> is a top-rated CRM built specifically for cleaning businesses. It combines customer management, smart scheduling, automated invoicing, GPS tracking, and team coordination in one platform—starting at just <strong>$50/month with unlimited users</strong> and a 60-day free trial (no credit card required).
+                  <strong>WE DETAIL NC</strong> is a top-rated CRM built specifically for car detailing businesses. It combines customer management, smart scheduling, automated invoicing, GPS tracking, and team coordination in one platform—starting at just <strong>$50/month with unlimited users</strong> and a 60-day free trial (no credit card required).
                 </p>
                 <div className="flex flex-wrap gap-3">
                   <Button asChild size="lg">
-                    <Link to="/auth">Try TIDYWISE Free for 60 Days <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                    <Link to="/auth">Try WE DETAIL NC Free for 60 Days <ArrowRight className="ml-2 h-4 w-4" /></Link>
                   </Button>
                   <Button variant="outline" asChild>
                     <Link to="/compare/jobber">Compare to Jobber</Link>
@@ -263,16 +263,16 @@ export default function CleaningBusinessCRM() {
             </h2>
             <div className="grid md:grid-cols-2 gap-2 text-muted-foreground">
               <ul className="space-y-2">
-                <li>• <a href="#what-is-crm" className="text-primary hover:underline">What is a CRM for cleaning business?</a></li>
+                <li>• <a href="#what-is-crm" className="text-primary hover:underline">What is a CRM for car detailing business?</a></li>
                 <li>• <a href="#key-features" className="text-primary hover:underline">8 must-have features in cleaning CRM software</a></li>
-                <li>• <a href="#benefits" className="text-primary hover:underline">Benefits: How CRMs grow maid service revenue</a></li>
+                <li>• <a href="#benefits" className="text-primary hover:underline">Benefits: How CRMs grow detailing service revenue</a></li>
                 <li>• <a href="#comparison" className="text-primary hover:underline">2026 cleaning CRM software comparison</a></li>
               </ul>
               <ul className="space-y-2">
                 <li>• <a href="#how-to-choose" className="text-primary hover:underline">How to choose the right CRM</a></li>
-                <li>• <a href="#local-crm" className="text-primary hover:underline">CRM for cleaning business near you</a></li>
+                <li>• <a href="#local-crm" className="text-primary hover:underline">CRM for car detailing business near you</a></li>
                 <li>• <a href="#faq" className="text-primary hover:underline">Frequently asked questions</a></li>
-                <li>• <a href="#get-started" className="text-primary hover:underline">Get started with TIDYWISE</a></li>
+                <li>• <a href="#get-started" className="text-primary hover:underline">Get started with WE DETAIL NC</a></li>
               </ul>
             </div>
           </nav>
@@ -284,10 +284,10 @@ export default function CleaningBusinessCRM() {
             <section id="what-is-crm" className="mb-16">
               <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-6 flex items-center gap-3">
                 <Building2 className="h-8 w-8 text-primary" />
-                What is a CRM for Cleaning Business?
+                What is a CRM for Car Detailing Business?
               </h2>
               <p className="text-muted-foreground mb-6">
-                A <strong>CRM (Customer Relationship Management) for cleaning business</strong> is specialized software designed to help maid services, janitorial companies, and residential cleaning businesses manage their entire operation from one platform. Unlike generic CRMs like Salesforce or HubSpot, a <strong>cleaning business CRM</strong> includes industry-specific features that address the unique challenges of service-based businesses:
+                A <strong>CRM (Customer Relationship Management) for car detailing business</strong> is specialized software designed to help detailing services, detailing companies, and residential car detailing businesses manage their entire operation from one platform. Unlike generic CRMs like Salesforce or HubSpot, a <strong>car detailing business CRM</strong> includes industry-specific features that address the unique challenges of service-based businesses:
               </p>
               <div className="grid md:grid-cols-2 gap-4 not-prose mb-8">
                 <div className="bg-card border border-border rounded-lg p-5">
@@ -312,14 +312,14 @@ export default function CleaningBusinessCRM() {
                     Who Needs This Software
                   </h3>
                   <ul className="space-y-2 text-sm text-muted-foreground">
-                    <li>→ Residential maid services</li>
-                    <li>→ Commercial janitorial companies</li>
+                    <li>→ Residential detailing services</li>
+                    <li>→ Commercial detailing companies</li>
                     <li>→ Move-in/move-out cleaning</li>
                     <li>→ Carpet & window cleaning</li>
                     <li>→ Post-construction cleanup</li>
                     <li>→ Vacation rental turnover</li>
-                    <li>→ Office cleaning services</li>
-                    <li>→ Specialty cleaning businesses</li>
+                    <li>→ Office detailing services</li>
+                    <li>→ Specialty car detailing businesses</li>
                   </ul>
                 </div>
               </div>
@@ -336,10 +336,10 @@ export default function CleaningBusinessCRM() {
             <section id="key-features" className="mb-16">
               <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-6 flex items-center gap-3">
                 <Zap className="h-8 w-8 text-primary" />
-                8 Must-Have Features in Cleaning Business CRM Software
+                8 Must-Have Features in Car Detailing Business CRM Software
               </h2>
               <p className="text-muted-foreground mb-6">
-                When evaluating <strong>CRM software for your cleaning company</strong>, look for these essential features that separate industry-specific solutions from generic tools:
+                When evaluating <strong>CRM software for your detailing company</strong>, look for these essential features that separate industry-specific solutions from generic tools:
               </p>
               <div className="grid md:grid-cols-2 gap-4 not-prose">
                 {crmFeatures.map((feature, index) => (
@@ -363,10 +363,10 @@ export default function CleaningBusinessCRM() {
             <section id="benefits" className="mb-16">
               <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-6 flex items-center gap-3">
                 <TrendingUp className="h-8 w-8 text-primary" />
-                How a CRM Helps Cleaning Businesses Grow Revenue
+                How a CRM Helps Car Detailing Businesses Grow Revenue
               </h2>
               <p className="text-muted-foreground mb-6">
-                Cleaning companies using dedicated <strong>maid service CRM software</strong> report significant improvements across key business metrics:
+                Cleaning companies using dedicated <strong>detailing service CRM software</strong> report significant improvements across key business metrics:
               </p>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 not-prose mb-8">
                 {benefits.map((benefit) => (
@@ -382,7 +382,7 @@ export default function CleaningBusinessCRM() {
               <div className="bg-card border border-border rounded-xl p-6 not-prose">
                 <h3 className="font-bold text-foreground mb-4">💡 Real-World Example</h3>
                 <blockquote className="border-l-4 border-primary pl-4 italic text-muted-foreground">
-                  "Before TIDYWISE, I was spending 3 hours every evening on scheduling and invoicing. Now it's all automated. I've grown from 15 to 40 recurring clients in 6 months without hiring office staff."
+                  "Before WE DETAIL NC, I was spending 3 hours every evening on scheduling and invoicing. Now it's all automated. I've grown from 15 to 40 recurring clients in 6 months without hiring office staff."
                 </blockquote>
                 <p className="text-sm text-muted-foreground mt-3">— Maria S., Owner of Sparkle Clean Pros (Phoenix, AZ)</p>
               </div>
@@ -392,10 +392,10 @@ export default function CleaningBusinessCRM() {
             <section id="comparison" className="mb-16">
               <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-6 flex items-center gap-3">
                 <BarChart3 className="h-8 w-8 text-primary" />
-                2026 Cleaning Business CRM Software Comparison
+                2026 Car Detailing Business CRM Software Comparison
               </h2>
               <p className="text-muted-foreground mb-6">
-                Compare the top <strong>CRM solutions for cleaning companies</strong> based on pricing, features, and user ratings:
+                Compare the top <strong>CRM solutions for detailing companies</strong> based on pricing, features, and user ratings:
               </p>
               <div className="bg-card rounded-xl border border-border overflow-x-auto not-prose">
                 <table className="w-full min-w-[800px]">
@@ -433,14 +433,14 @@ export default function CleaningBusinessCRM() {
                 </table>
               </div>
               <p className="text-sm text-muted-foreground mt-4">
-                * Prices shown are for comparable feature sets. Some providers charge additional fees for features included free with TIDYWISE.
+                * Prices shown are for comparable feature sets. Some providers charge additional fees for features included free with WE DETAIL NC.
               </p>
 
               {/* Internal links to comparison pages */}
               <div className="flex flex-wrap gap-3 mt-6 not-prose">
-                <Link to="/compare/jobber" className="text-primary hover:underline text-sm">TIDYWISE vs Jobber →</Link>
-                <Link to="/compare/booking-koala" className="text-primary hover:underline text-sm">TIDYWISE vs Booking Koala →</Link>
-                <Link to="/compare/housecall-pro" className="text-primary hover:underline text-sm">TIDYWISE vs Housecall Pro →</Link>
+                <Link to="/compare/jobber" className="text-primary hover:underline text-sm">WE DETAIL NC vs Jobber →</Link>
+                <Link to="/compare/booking-koala" className="text-primary hover:underline text-sm">WE DETAIL NC vs Booking Koala →</Link>
+                <Link to="/compare/housecall-pro" className="text-primary hover:underline text-sm">WE DETAIL NC vs Housecall Pro →</Link>
               </div>
             </section>
 
@@ -448,7 +448,7 @@ export default function CleaningBusinessCRM() {
             <section id="how-to-choose" className="mb-16">
               <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-6 flex items-center gap-3">
                 <Target className="h-8 w-8 text-primary" />
-                How to Choose the Right CRM for Your Cleaning Business
+                How to Choose the Right CRM for Your Car Detailing Business
               </h2>
               <div className="space-y-6 not-prose">
                 <div className="bg-card border border-border rounded-lg p-5">
@@ -463,21 +463,21 @@ export default function CleaningBusinessCRM() {
                     <span className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold">2</span>
                     Consider Your Service Types
                   </h3>
-                  <p className="text-muted-foreground">Recurring residential cleaning needs different features than one-time commercial jobs. Look for software with flexible pricing (per hour, per room, per sqft) and recurring booking management.</p>
+                  <p className="text-muted-foreground">Recurring residential detailing needs different features than one-time commercial jobs. Look for software with flexible pricing (per hour, per room, per sqft) and recurring booking management.</p>
                 </div>
                 <div className="bg-card border border-border rounded-lg p-5">
                   <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
                     <span className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold">3</span>
                     Evaluate Total Cost
                   </h3>
-                  <p className="text-muted-foreground">Look beyond the base price. Many competitors charge per user, charge extra for SMS, or limit features on lower tiers. TIDYWISE includes unlimited users and all features for $50/month.</p>
+                  <p className="text-muted-foreground">Look beyond the base price. Many competitors charge per user, charge extra for SMS, or limit features on lower tiers. WE DETAIL NC includes unlimited users and all features for $50/month.</p>
                 </div>
                 <div className="bg-card border border-border rounded-lg p-5">
                   <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
                     <span className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold">4</span>
                     Test Before You Commit
                   </h3>
-                  <p className="text-muted-foreground">A 14-day trial often isn't enough to truly evaluate software. TIDYWISE offers 60 days free—enough time to run your business through a full billing cycle and see real results.</p>
+                  <p className="text-muted-foreground">A 14-day trial often isn't enough to truly evaluate software. WE DETAIL NC offers 60 days free—enough time to run your business through a full billing cycle and see real results.</p>
                 </div>
               </div>
             </section>
@@ -486,10 +486,10 @@ export default function CleaningBusinessCRM() {
             <section id="local-crm" className="mb-16">
               <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-6 flex items-center gap-3">
                 <Globe className="h-8 w-8 text-primary" />
-                CRM for Cleaning Business Near You
+                CRM for Car Detailing Business Near You
               </h2>
               <p className="text-muted-foreground mb-6">
-                Whether you're searching for <strong>"CRM for cleaning business near me"</strong> or looking for software that works in your specific city, TIDYWISE serves cleaning companies across all 50 states. Our cloud-based <strong>cleaning business software</strong> works anywhere you have internet—no local installation required.
+                Whether you're searching for <strong>"CRM for car detailing business near me"</strong> or looking for software that works in your specific city, WE DETAIL NC serves detailing companies across all 50 states. Our cloud-based <strong>car detailing business software</strong> works anywhere you have internet—no local installation required.
               </p>
               
               <h3 className="text-lg font-semibold text-foreground mb-4">Major Cities We Serve:</h3>
@@ -526,7 +526,7 @@ export default function CleaningBusinessCRM() {
             {/* Section 7: FAQ */}
             <section id="faq" className="mb-16">
               <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-6">
-                Frequently Asked Questions About Cleaning Business CRMs
+                Frequently Asked Questions About Car Detailing Business CRMs
               </h2>
               <div className="space-y-4 not-prose">
                 {faqs.map((faq, index) => (
@@ -543,15 +543,15 @@ export default function CleaningBusinessCRM() {
               <h2 className="text-xl font-bold text-foreground mb-4">Related Articles</h2>
               <div className="grid md:grid-cols-2 gap-4 not-prose">
                 <Link to="/blog/how-to-start-a-cleaning-business" className="bg-card border border-border rounded-lg p-4 hover:border-primary/50 transition-colors group">
-                  <p className="font-medium text-foreground group-hover:text-primary transition-colors">How to Start a Cleaning Business</p>
+                  <p className="font-medium text-foreground group-hover:text-primary transition-colors">How to Start a Car Detailing Business</p>
                   <p className="text-sm text-muted-foreground">Complete step-by-step guide for 2026</p>
                 </Link>
-                <Link to="/blog/booking-koala-vs-jobber-vs-tidywise" className="bg-card border border-border rounded-lg p-4 hover:border-primary/50 transition-colors group">
-                  <p className="font-medium text-foreground group-hover:text-primary transition-colors">Booking Koala vs Jobber vs TIDYWISE</p>
+                <Link to="/blog/booking-koala-vs-jobber-vs-wedetailnc" className="bg-card border border-border rounded-lg p-4 hover:border-primary/50 transition-colors group">
+                  <p className="font-medium text-foreground group-hover:text-primary transition-colors">Booking Koala vs Jobber vs WE DETAIL NC</p>
                   <p className="text-sm text-muted-foreground">In-depth software comparison</p>
                 </Link>
                 <Link to="/features/scheduling-software" className="bg-card border border-border rounded-lg p-4 hover:border-primary/50 transition-colors group">
-                  <p className="font-medium text-foreground group-hover:text-primary transition-colors">Cleaning Business Scheduling Software</p>
+                  <p className="font-medium text-foreground group-hover:text-primary transition-colors">Car Detailing Business Scheduling Software</p>
                   <p className="text-sm text-muted-foreground">Automate your calendar management</p>
                 </Link>
                 <Link to="/features/invoicing-software" className="bg-card border border-border rounded-lg p-4 hover:border-primary/50 transition-colors group">
@@ -565,10 +565,10 @@ export default function CleaningBusinessCRM() {
           {/* Final CTA */}
           <section id="get-started" className="bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 rounded-2xl p-8 md:p-12 text-center">
             <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
-              Ready to Grow Your Cleaning Business?
+              Ready to Grow Your Car Detailing Business?
             </h2>
             <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-              Try TIDYWISE to manage customers, schedule jobs, and get paid faster. Start your 60-day free trial today—no credit card required.
+              Try WE DETAIL NC to manage customers, schedule jobs, and get paid faster. Start your 60-day free trial today—no credit card required.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" asChild>
@@ -594,26 +594,26 @@ export default function CleaningBusinessCRM() {
             "@graph": [
               {
                 "@type": "Article",
-                "headline": "Best CRM for Cleaning Business: The Ultimate Guide to Maid Service Software in 2026",
-                "description": "Find the best CRM for your cleaning business. Compare top cleaning business CRM software with scheduling, invoicing, GPS tracking, customer management & automation.",
+                "headline": "Best CRM for Car Detailing Business: The Ultimate Guide to Detailing Service Software in 2026",
+                "description": "Find the best CRM for your car detailing business. Compare top car detailing business CRM software with scheduling, invoicing, GPS tracking, customer management & automation.",
                 "datePublished": "2026-02-01",
                 "dateModified": "2026-02-04",
                 "author": {
                   "@type": "Organization",
-                  "name": "TIDYWISE"
+                  "name": "WE DETAIL NC"
                 },
                 "publisher": {
                   "@type": "Organization",
-                  "name": "TIDYWISE",
-                  "url": "https://www.jointidywise.com",
+                  "name": "WE DETAIL NC",
+                  "url": "https://www.joinwedetailnc.com",
                   "logo": {
                     "@type": "ImageObject",
-                    "url": "https://www.jointidywise.com/images/tidywise-logo.png"
+                    "url": "https://www.joinwedetailnc.com/images/wedetailnc-logo.png"
                   }
                 },
                 "mainEntityOfPage": {
                   "@type": "WebPage",
-                  "@id": "https://www.jointidywise.com/blog/crm-for-cleaning-business"
+                  "@id": "https://www.joinwedetailnc.com/blog/crm-for-cleaning-business"
                 }
               },
               {
@@ -629,7 +629,7 @@ export default function CleaningBusinessCRM() {
               },
               {
                 "@type": "SoftwareApplication",
-                "name": "TIDYWISE",
+                "name": "WE DETAIL NC",
                 "applicationCategory": "BusinessApplication",
                 "operatingSystem": "Web, iOS, Android",
                 "offers": {
@@ -646,19 +646,19 @@ export default function CleaningBusinessCRM() {
                     "@type": "ListItem",
                     "position": 1,
                     "name": "Home",
-                    "item": "https://www.jointidywise.com"
+                    "item": "https://www.joinwedetailnc.com"
                   },
                   {
                     "@type": "ListItem",
                     "position": 2,
                     "name": "Blog",
-                    "item": "https://www.jointidywise.com/blog"
+                    "item": "https://www.joinwedetailnc.com/blog"
                   },
                   {
                     "@type": "ListItem",
                     "position": 3,
-                    "name": "CRM for Cleaning Business",
-                    "item": "https://www.jointidywise.com/blog/crm-for-cleaning-business"
+                    "name": "CRM for Car Detailing Business",
+                    "item": "https://www.joinwedetailnc.com/blog/crm-for-cleaning-business"
                   }
                 ]
               }
@@ -672,8 +672,8 @@ export default function CleaningBusinessCRM() {
         <div className="max-w-5xl mx-auto">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
-              <p className="font-bold text-foreground mb-3">TIDYWISE</p>
-              <p className="text-sm text-muted-foreground">A CRM built for cleaning business owners. Simplify scheduling, invoicing, and customer management.</p>
+              <p className="font-bold text-foreground mb-3">WE DETAIL NC</p>
+              <p className="text-sm text-muted-foreground">A CRM built for car detailing business owners. Simplify scheduling, invoicing, and customer management.</p>
             </div>
             <div>
               <p className="font-semibold text-foreground mb-3">Product</p>
@@ -696,13 +696,13 @@ export default function CleaningBusinessCRM() {
               <p className="font-semibold text-foreground mb-3">Resources</p>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link to="/blog" className="hover:text-foreground">Blog</Link></li>
-                <li><Link to="/blog/how-to-start-a-cleaning-business" className="hover:text-foreground">Start a Cleaning Business</Link></li>
+                <li><Link to="/blog/how-to-start-a-cleaning-business" className="hover:text-foreground">Start a Car Detailing Business</Link></li>
                 <li><Link to="/privacy-policy" className="hover:text-foreground">Privacy Policy</Link></li>
               </ul>
             </div>
           </div>
           <div className="border-t border-border pt-8 text-center text-sm text-muted-foreground">
-            © 2026 TIDYWISE. A CRM for cleaning business owners.
+            © 2026 WE DETAIL NC. A CRM for car detailing business owners.
           </div>
         </div>
       </footer>

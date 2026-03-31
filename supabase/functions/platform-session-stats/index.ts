@@ -6,7 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const PLATFORM_ADMIN_EMAIL = "support@tidywisecleaning.com";
+const PLATFORM_ADMIN_EMAIL = "support@wedetailnc.com";
 
 type SessionRow = {
   user_id: string | null;

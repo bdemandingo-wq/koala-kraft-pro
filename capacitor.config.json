@@ -1,20 +1,20 @@
 {
-  "appId": "com.jointidywise.app",
-  "appName": "TidyWise",
+  "appId": "com.joinwedetailnc.app",
+  "appName": "We Detail NC",
   "webDir": "dist",
   "bundledWebRuntime": false,
   "ios": {
     "contentInset": "automatic",
     "allowsLinkPreview": false,
-    "appendUserAgent": "TidyWise-iOS",
+    "appendUserAgent": "We Detail NC-iOS",
     "backgroundColor": "#ffffff",
     "preferredContentMode": "mobile",
     "limitsNavigationsToAppBoundDomains": true,
     "scrollEnabled": true,
     "allowNavigation": [
       "slwfkaqczvwvvvavkgpr.supabase.co",
-      "jointidywise.com",
-      "*.jointidywise.com",
+      "joinwedetailnc.com",
+      "*.joinwedetailnc.com",
       "js.stripe.com",
       "*.stripe.com"
     ]
@@ -29,6 +29,6 @@
   "server": {
     "androidScheme": "https",
     "iosScheme": "https",
-    "hostname": "app.jointidywise.com"
+    "hostname": "app.joinwedetailnc.com"
   }
 }

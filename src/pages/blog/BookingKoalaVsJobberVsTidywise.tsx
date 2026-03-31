@@ -13,51 +13,51 @@ import {
 } from "lucide-react";
 
 const features = [
-  { name: "Online Booking Form", tidywise: true, bookingKoala: true, jobber: true },
-  { name: "Smart Scheduling & Auto-Assignment", tidywise: true, bookingKoala: true, jobber: true },
-  { name: "Staff Mobile App", tidywise: true, bookingKoala: true, jobber: true },
-  { name: "Client Portal (Self-Service)", tidywise: true, bookingKoala: false, jobber: "Add-on" },
-  { name: "GPS Check-ins & Route Optimization", tidywise: true, bookingKoala: true, jobber: "Add-on $$$" },
-  { name: "SMS Notifications", tidywise: true, bookingKoala: "Add-on", jobber: "Add-on" },
-  { name: "Invoicing & Auto-Reminders", tidywise: true, bookingKoala: true, jobber: true },
-  { name: "Drag & Drop Scheduler", tidywise: true, bookingKoala: false, jobber: true },
-  { name: "Payroll Management", tidywise: true, bookingKoala: false, jobber: false },
-  { name: "Expense Tracking", tidywise: true, bookingKoala: false, jobber: false },
-  { name: "Task Management", tidywise: true, bookingKoala: false, jobber: false },
-  { name: "Automated Email Campaigns", tidywise: true, bookingKoala: "Premium", jobber: false },
-  { name: "Client Feedback Collection", tidywise: true, bookingKoala: false, jobber: false },
-  { name: "Automation Center (Workflows)", tidywise: true, bookingKoala: false, jobber: false },
-  { name: "Tip & Deposit Collection", tidywise: true, bookingKoala: false, jobber: false },
-  { name: "Referral Program", tidywise: true, bookingKoala: false, jobber: false },
-  { name: "Automated Quote Follow-ups", tidywise: true, bookingKoala: "Premium", jobber: true },
-  { name: "P&L Reports & Revenue Forecasting", tidywise: true, bookingKoala: false, jobber: false },
-  { name: "AI Business Intelligence", tidywise: true, bookingKoala: false, jobber: false },
-  { name: "Inventory Tracking", tidywise: true, bookingKoala: false, jobber: false },
-  { name: "Operations Tracker", tidywise: true, bookingKoala: false, jobber: false },
-  { name: "Demo/Test Mode", tidywise: true, bookingKoala: false, jobber: false },
-  { name: "Offline Mode", tidywise: true, bookingKoala: false, jobber: false },
-  { name: "In-App SMS Inbox", tidywise: true, bookingKoala: false, jobber: false },
-  { name: "Home Condition Pricing", tidywise: true, bookingKoala: false, jobber: false },
+  { name: "Online Booking Form", wedetailnc: true, bookingKoala: true, jobber: true },
+  { name: "Smart Scheduling & Auto-Assignment", wedetailnc: true, bookingKoala: true, jobber: true },
+  { name: "Staff Mobile App", wedetailnc: true, bookingKoala: true, jobber: true },
+  { name: "Client Portal (Self-Service)", wedetailnc: true, bookingKoala: false, jobber: "Add-on" },
+  { name: "GPS Check-ins & Route Optimization", wedetailnc: true, bookingKoala: true, jobber: "Add-on $$$" },
+  { name: "SMS Notifications", wedetailnc: true, bookingKoala: "Add-on", jobber: "Add-on" },
+  { name: "Invoicing & Auto-Reminders", wedetailnc: true, bookingKoala: true, jobber: true },
+  { name: "Drag & Drop Scheduler", wedetailnc: true, bookingKoala: false, jobber: true },
+  { name: "Payroll Management", wedetailnc: true, bookingKoala: false, jobber: false },
+  { name: "Expense Tracking", wedetailnc: true, bookingKoala: false, jobber: false },
+  { name: "Task Management", wedetailnc: true, bookingKoala: false, jobber: false },
+  { name: "Automated Email Campaigns", wedetailnc: true, bookingKoala: "Premium", jobber: false },
+  { name: "Client Feedback Collection", wedetailnc: true, bookingKoala: false, jobber: false },
+  { name: "Automation Center (Workflows)", wedetailnc: true, bookingKoala: false, jobber: false },
+  { name: "Tip & Deposit Collection", wedetailnc: true, bookingKoala: false, jobber: false },
+  { name: "Referral Program", wedetailnc: true, bookingKoala: false, jobber: false },
+  { name: "Automated Quote Follow-ups", wedetailnc: true, bookingKoala: "Premium", jobber: true },
+  { name: "P&L Reports & Revenue Forecasting", wedetailnc: true, bookingKoala: false, jobber: false },
+  { name: "AI Business Intelligence", wedetailnc: true, bookingKoala: false, jobber: false },
+  { name: "Inventory Tracking", wedetailnc: true, bookingKoala: false, jobber: false },
+  { name: "Operations Tracker", wedetailnc: true, bookingKoala: false, jobber: false },
+  { name: "Demo/Test Mode", wedetailnc: true, bookingKoala: false, jobber: false },
+  { name: "Offline Mode", wedetailnc: true, bookingKoala: false, jobber: false },
+  { name: "In-App SMS Inbox", wedetailnc: true, bookingKoala: false, jobber: false },
+  { name: "Home Condition Pricing", wedetailnc: true, bookingKoala: false, jobber: false },
 ];
 
 export default function BookingKoalaVsJobberVsTidywise() {
   return (
     <div className="min-h-screen bg-background">
       <Seo 
-        title="Booking Koala vs Jobber vs TIDYWISE (2026)"
-        description="Side-by-side comparison of Booking Koala, Jobber, and TIDYWISE. Pricing, features, and support for cleaning businesses."
-        canonicalPath="/blog/booking-koala-vs-jobber-vs-tidywise"
-        ogImage="/images/tidywise-og.png"
+        title="Booking Koala vs Jobber vs WE DETAIL NC (2026)"
+        description="Side-by-side comparison of Booking Koala, Jobber, and WE DETAIL NC. Pricing, features, and support for car detailing businesses."
+        canonicalPath="/blog/booking-koala-vs-jobber-vs-wedetailnc"
+        ogImage="/images/wedetailnc-og.png"
         ogType="article"
         article={{ publishedTime: "2026-01-10", section: "Comparison" }}
         jsonLd={{
           "@type": "Article",
-          "headline": "Booking Koala vs Jobber vs TIDYWISE: 2026 Comparison",
+          "headline": "Booking Koala vs Jobber vs WE DETAIL NC: 2026 Comparison",
           "datePublished": "2026-01-10",
           "dateModified": "2026-03-01",
-          "author": { "@type": "Organization", "name": "TIDYWISE" },
-          "publisher": { "@type": "Organization", "name": "TIDYWISE", "url": "https://www.jointidywise.com", "logo": { "@type": "ImageObject", "url": "https://www.jointidywise.com/images/tidywise-logo.png" } },
-          "mainEntityOfPage": { "@type": "WebPage", "@id": "https://www.jointidywise.com/blog/booking-koala-vs-jobber-vs-tidywise" }
+          "author": { "@type": "Organization", "name": "WE DETAIL NC" },
+          "publisher": { "@type": "Organization", "name": "WE DETAIL NC", "url": "https://www.joinwedetailnc.com", "logo": { "@type": "ImageObject", "url": "https://www.joinwedetailnc.com/images/wedetailnc-logo.png" } },
+          "mainEntityOfPage": { "@type": "WebPage", "@id": "https://www.joinwedetailnc.com/blog/booking-koala-vs-jobber-vs-wedetailnc" }
         }}
       />
 
@@ -66,7 +66,7 @@ export default function BookingKoalaVsJobberVsTidywise() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link to="/" className="flex items-center gap-2">
-              <span className="font-bold text-xl text-foreground">TIDYWISE</span>
+              <span className="font-bold text-xl text-foreground">WE DETAIL NC</span>
             </Link>
             <Button asChild>
               <Link to="/auth">Start Free Trial</Link>
@@ -103,10 +103,10 @@ export default function BookingKoalaVsJobberVsTidywise() {
               </span>
             </div>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight mb-6">
-              Booking Koala vs Jobber vs TIDYWISE: Which Cleaning Business Software Is Best in 2026?
+              Booking Koala vs Jobber vs WE DETAIL NC: Which Car Detailing Business Software Is Best in 2026?
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Choosing the right <strong>cleaning business software</strong> can make or break your maid service. We compare Booking Koala, Jobber, and TIDYWISE on price, features, and ease of use to help you decide.
+              Choosing the right <strong>car detailing business software</strong> can make or break your detailing service. We compare Booking Koala, Jobber, and WE DETAIL NC on price, features, and ease of use to help you decide.
             </p>
           </header>
 
@@ -114,10 +114,10 @@ export default function BookingKoalaVsJobberVsTidywise() {
           <div className="bg-primary/10 border border-primary/20 rounded-xl p-6 mb-12">
             <h2 className="text-xl font-bold text-foreground mb-3">🏆 Quick Verdict</h2>
             <p className="text-muted-foreground mb-4">
-              <strong>TIDYWISE wins</strong> for cleaning businesses looking for the best value. At $50/month (vs $197-$349 for competitors), you get more features including P&L reports, inventory tracking, and offline mode—features neither Booking Koala nor Jobber offer.
+              <strong>WE DETAIL NC wins</strong> for car detailing businesses looking for the best value. At $50/month (vs $197-$349 for competitors), you get more features including P&L reports, inventory tracking, and offline mode—features neither Booking Koala nor Jobber offer.
             </p>
             <Button asChild>
-              <Link to="/auth">Try TIDYWISE Free for 2 Months <ArrowRight className="ml-2 h-4 w-4" /></Link>
+              <Link to="/auth">Try WE DETAIL NC Free for 2 Months <ArrowRight className="ml-2 h-4 w-4" /></Link>
             </Button>
           </div>
 
@@ -130,7 +130,7 @@ export default function BookingKoalaVsJobberVsTidywise() {
             
             <div className="grid md:grid-cols-3 gap-6 mb-8">
               <div className="bg-primary text-primary-foreground rounded-xl p-6">
-                <h3 className="text-xl font-bold mb-2">TIDYWISE</h3>
+                <h3 className="text-xl font-bold mb-2">WE DETAIL NC</h3>
                 <p className="text-4xl font-bold mb-2">$50<span className="text-lg">/mo</span></p>
                 <p className="text-primary-foreground/80 text-sm">2 months free trial</p>
                 <p className="text-primary-foreground/80 text-sm mt-2">All features included</p>
@@ -150,7 +150,7 @@ export default function BookingKoalaVsJobberVsTidywise() {
             </div>
 
             <p className="text-muted-foreground">
-              <strong>Annual savings with TIDYWISE:</strong> Compared to Booking Koala, you save $1,764/year. Compared to Jobber, you save $3,588/year—enough to hire another part-time cleaner.
+              <strong>Annual savings with WE DETAIL NC:</strong> Compared to Booking Koala, you save $1,764/year. Compared to Jobber, you save $3,588/year—enough to hire another part-time technician.
             </p>
           </section>
 
@@ -165,7 +165,7 @@ export default function BookingKoalaVsJobberVsTidywise() {
                 <thead>
                   <tr className="bg-muted/50">
                     <th className="text-left p-4 font-medium text-foreground">Feature</th>
-                    <th className="text-center p-4 font-medium text-primary">TIDYWISE</th>
+                    <th className="text-center p-4 font-medium text-primary">WE DETAIL NC</th>
                     <th className="text-center p-4 font-medium text-foreground">Booking Koala</th>
                     <th className="text-center p-4 font-medium text-foreground">Jobber</th>
                   </tr>
@@ -175,7 +175,7 @@ export default function BookingKoalaVsJobberVsTidywise() {
                     <tr key={feature.name} className={index % 2 === 0 ? "bg-background" : "bg-muted/20"}>
                       <td className="p-4 text-sm text-foreground">{feature.name}</td>
                       <td className="p-4 text-center">
-                        {feature.tidywise === true ? (
+                        {feature.wedetailnc === true ? (
                           <Check className="h-5 w-5 text-success mx-auto" />
                         ) : (
                           <X className="h-5 w-5 text-destructive/60 mx-auto" />
@@ -214,12 +214,12 @@ export default function BookingKoalaVsJobberVsTidywise() {
             
             <div className="space-y-6">
               <div className="bg-primary/5 border border-primary/20 rounded-xl p-6">
-                <h3 className="text-lg font-semibold text-foreground mb-2">Choose TIDYWISE if...</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-2">Choose WE DETAIL NC if...</h3>
                 <ul className="space-y-2 text-muted-foreground">
                   <li>• You want the <strong>best value</strong> with all features included</li>
                   <li>• You need <strong>P&L reports and revenue forecasting</strong></li>
-                  <li>• Your cleaners work in <strong>areas with poor cell coverage</strong> (offline mode)</li>
-                  <li>• You're a <strong>cleaning business owner</strong> looking for software built specifically for your industry</li>
+                  <li>• Your technicians work in <strong>areas with poor cell coverage</strong> (offline mode)</li>
+                  <li>• You're a <strong>car detailing business owner</strong> looking for software built specifically for your industry</li>
                 </ul>
               </div>
               
@@ -246,10 +246,10 @@ export default function BookingKoalaVsJobberVsTidywise() {
           {/* CTA */}
           <div className="bg-gradient-to-r from-primary/20 to-accent/20 rounded-2xl p-8 text-center">
             <h2 className="text-2xl font-bold text-foreground mb-4">
-              Ready to try the best cleaning business software?
+              Ready to try the best car detailing business software?
             </h2>
             <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
-              Try TIDYWISE for your cleaning business. Start your 2-month free trial today—no credit card required.
+              Try WE DETAIL NC for your car detailing business. Start your 2-month free trial today—no credit card required.
             </p>
             <Button size="lg" asChild>
               <Link to="/auth">Start Free Trial <ArrowRight className="ml-2 h-4 w-4" /></Link>
@@ -261,14 +261,14 @@ export default function BookingKoalaVsJobberVsTidywise() {
       {/* Related Articles */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-secondary/30">
         <div className="max-w-4xl mx-auto">
-          <RelatedArticles articles={allArticles} currentSlug="/blog/booking-koala-vs-jobber-vs-tidywise" />
+          <RelatedArticles articles={allArticles} currentSlug="/blog/booking-koala-vs-jobber-vs-wedetailnc" />
         </div>
       </section>
 
       {/* Footer */}
       <footer className="border-t border-border py-8 px-4">
         <div className="max-w-4xl mx-auto text-center text-sm text-muted-foreground">
-          © 2026 TIDYWISE. A cleaning business software alternative to Booking Koala & Jobber.
+          © 2026 WE DETAIL NC. A car detailing business software alternative to Booking Koala & Jobber.
         </div>
       </footer>
     </div>

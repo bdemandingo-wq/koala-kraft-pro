@@ -89,7 +89,7 @@ serve(async (req) => {
         await supabaseClient.from('customers').delete().eq('organization_id', orgId);
         
         // Delete staff and related data
-        await supabaseClient.from('cleaner_notifications').delete().eq('organization_id', orgId);
+        await supabaseClient.from('technician_notifications').delete().eq('organization_id', orgId);
         await supabaseClient.from('staff').delete().eq('organization_id', orgId);
         
         // Delete services

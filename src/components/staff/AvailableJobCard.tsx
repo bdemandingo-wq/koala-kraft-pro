@@ -32,8 +32,8 @@ interface Booking {
   city: string | null;
   state: string | null;
   total_amount: number;
-  cleaner_wage: number | null;
-  cleaner_wage_type: string | null;
+  technician_wage: number | null;
+  technician_wage_type: string | null;
   square_footage?: string | null;
   bedrooms?: string | null;
   bathrooms?: string | null;
@@ -82,21 +82,21 @@ export function AvailableJobCard({ booking, staffInfo, onAssign, isAssigning, cl
     }
 
     // No staff-level rate set — fall back to booking-level wage
-    if (booking.cleaner_wage && booking.cleaner_wage_type) {
-      if (booking.cleaner_wage_type === 'percentage') {
+    if (booking.technician_wage && booking.technician_wage_type) {
+      if (booking.technician_wage_type === 'percentage') {
         return {
-          amount: (booking.total_amount * booking.cleaner_wage) / 100,
-          type: `${booking.cleaner_wage}% of job value`,
+          amount: (booking.total_amount * booking.technician_wage) / 100,
+          type: `${booking.technician_wage}% of job value`,
         };
-      } else if (booking.cleaner_wage_type === 'flat') {
+      } else if (booking.technician_wage_type === 'flat') {
         return {
-          amount: booking.cleaner_wage,
+          amount: booking.technician_wage,
           type: 'Flat rate',
         };
       } else {
         return {
-          amount: booking.cleaner_wage * defaultHours,
-          type: `$${booking.cleaner_wage}/hr × ${defaultHours}hrs`,
+          amount: booking.technician_wage * defaultHours,
+          type: `$${booking.technician_wage}/hr × ${defaultHours}hrs`,
         };
       }
     }
@@ -122,7 +122,7 @@ export function AvailableJobCard({ booking, staffInfo, onAssign, isAssigning, cl
           <div className="flex items-start justify-between">
             <div>
               <CardTitle className="text-lg">#{booking.booking_number}</CardTitle>
-              <p className="text-sm text-muted-foreground">{booking.service?.name || (booking.total_amount === 0 ? 'Re-clean' : 'Service')}</p>
+              <p className="text-sm text-muted-foreground">{booking.service?.name || (booking.total_amount === 0 ? 'Re-detail' : 'Service')}</p>
             </div>
             <Badge variant="outline" className="bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">
               Open

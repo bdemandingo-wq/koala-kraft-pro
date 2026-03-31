@@ -40,7 +40,7 @@ export interface CleaningService {
 export const cleaningServices: CleaningService[] = [
   {
     id: 'deep_clean',
-    name: 'Deep Clean (First Cleaning)',
+    name: 'Full Detail (First Cleaning)',
     description: 'Thorough first-time deep cleaning including inside oven',
     color: '#3b82f6',
     minimumPrice: 200,
@@ -48,7 +48,7 @@ export const cleaningServices: CleaningService[] = [
   },
   {
     id: 'standard_clean',
-    name: 'Standard Clean',
+    name: 'Express Detail',
     description: 'Regular maintenance cleaning for your home',
     color: '#10b981',
     minimumPrice: 150,
@@ -65,7 +65,7 @@ export const cleaningServices: CleaningService[] = [
   {
     id: 'construction',
     name: 'Construction Clean Up',
-    description: 'Heavy-duty cleaning after construction or renovation (50% more than Move In/Out)',
+    description: 'Heavy-duty cleaning after construction or renovation (50% more than Pre-Sale Detail)',
     color: '#f97316',
     minimumPrice: 400,
     prices: [450, 502, 555, 607, 660, 712, 795, 877, 960, 1042, 1125, 1207, 1290],

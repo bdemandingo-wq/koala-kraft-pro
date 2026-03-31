@@ -33,14 +33,14 @@ export function TrialExpiredBanner({ onManageOnWeb }: TrialExpiredBannerProps) {
         </div>
         <h3 className="text-lg font-semibold mb-2">Your Trial Has Ended</h3>
         <p className="text-muted-foreground mb-4 max-w-sm">
-          Manage your subscription at jointidywise.lovable.app to continue using all features.
+          Manage your subscription at joinwedetailnc.lovable.app to continue using all features.
         </p>
         <Button onClick={handleManageSubscription} variant="outline" className="gap-2">
           <ExternalLink className="h-4 w-4" />
           Manage Subscription on Web
         </Button>
         <p className="text-xs text-muted-foreground mt-4">
-          Open jointidywise.lovable.app/dashboard/subscription in your browser
+          Open joinwedetailnc.lovable.app/dashboard/subscription in your browser
         </p>
       </CardContent>
     </Card>

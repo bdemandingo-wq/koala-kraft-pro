@@ -570,7 +570,7 @@ export default function PublicBookingPage() {
               {/* Service Selection */}
               <div>
                 <h2 className="text-2xl font-bold mb-2">Select a Service</h2>
-                <p className="text-muted-foreground mb-4">Choose the cleaning type you need</p>
+                <p className="text-muted-foreground mb-4">Choose the service type you need</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {services.map((svc) => {
                     const price = selectedSqFtIndex !== null 

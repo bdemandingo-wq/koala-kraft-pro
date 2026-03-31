@@ -94,7 +94,7 @@ const BookingKoalaVsJobberVsTidywise = lazy(() => import("./pages/blog/BookingKo
 const CleaningBusinessCRM = lazy(() => import("./pages/blog/CleaningBusinessCRM"));
 const DynamicBlogPost = lazy(() => import("./pages/blog/DynamicBlogPost"));
 const GrowCleaningBusiness2025 = lazy(() => import("./pages/blog/GrowCleaningBusiness2025"));
-const BestSoftwareForCleaners = lazy(() => import("./pages/blog/BestSoftwareForCleaners"));
+const BestSoftwareForTechnicians = lazy(() => import("./pages/blog/BestSoftwareForTechnicians"));
 const AutomateCleaningCompany = lazy(() => import("./pages/blog/AutomateCleaningCompany"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const CompareJobber = lazy(() => import("./pages/compare/CompareJobber"));
@@ -180,11 +180,11 @@ const App = () => (
                       <Route path="/review/:token" element={<ReviewPage />} />
                       <Route path="/blog" element={<BlogIndex />} />
                       <Route path="/blog/how-to-start-a-cleaning-business" element={<HowToStartCleaningBusiness />} />
-                      <Route path="/blog/booking-koala-vs-jobber-vs-tidywise" element={<BookingKoalaVsJobberVsTidywise />} />
+                      <Route path="/blog/booking-koala-vs-jobber-vs-wedetailnc" element={<BookingKoalaVsJobberVsTidywise />} />
                       <Route path="/blog/crm-for-cleaning-business" element={<CleaningBusinessCRM />} />
                       <Route path="/blog/post/:slug" element={<DynamicBlogPost />} />
                       <Route path="/blog/how-to-grow-cleaning-business-2025" element={<GrowCleaningBusiness2025 />} />
-                      <Route path="/blog/best-software-for-cleaning-business" element={<BestSoftwareForCleaners />} />
+                      <Route path="/blog/best-software-for-cleaning-business" element={<BestSoftwareForTechnicians />} />
                       <Route path="/blog/how-to-automate-cleaning-company" element={<AutomateCleaningCompany />} />
                       
                       {/* Comparison Pages */}
@@ -284,11 +284,11 @@ const App = () => (
                     <Route path="/review/:token" element={<ReviewPage />} />
                     <Route path="/blog" element={<BlogIndex />} />
                     <Route path="/blog/how-to-start-a-cleaning-business" element={<HowToStartCleaningBusiness />} />
-                    <Route path="/blog/booking-koala-vs-jobber-vs-tidywise" element={<BookingKoalaVsJobberVsTidywise />} />
+                    <Route path="/blog/booking-koala-vs-jobber-vs-wedetailnc" element={<BookingKoalaVsJobberVsTidywise />} />
                     <Route path="/blog/crm-for-cleaning-business" element={<CleaningBusinessCRM />} />
                     <Route path="/blog/post/:slug" element={<DynamicBlogPost />} />
                     <Route path="/blog/how-to-grow-cleaning-business-2025" element={<GrowCleaningBusiness2025 />} />
-                    <Route path="/blog/best-software-for-cleaning-business" element={<BestSoftwareForCleaners />} />
+                    <Route path="/blog/best-software-for-cleaning-business" element={<BestSoftwareForTechnicians />} />
                     <Route path="/blog/how-to-automate-cleaning-company" element={<AutomateCleaningCompany />} />
                     
                     {/* Comparison Pages */}

@@ -38,14 +38,14 @@ const prebuiltTemplates: EmailTemplate[] = [
     category: 'Marketing',
     icon: Gift,
     subject: '🎉 Special Offer from {{company_name}}!',
-    body: 'Hi {{customer_name}},\n\nWe have exciting news! For a limited time, we\'re offering exclusive discounts on our cleaning services.\n\nBook your next {{service_name}} this month and save!\n\nDon\'t miss out — spots fill up fast during this season.\n\nReply to this email or call us to book your appointment today!\n\nCheers,\n{{company_name}} Team',
+    body: 'Hi {{customer_name}},\n\nWe have exciting news! For a limited time, we\'re offering exclusive discounts on our detailing services.\n\nBook your next {{service_name}} this month and save!\n\nDon\'t miss out — spots fill up fast during this season.\n\nReply to this email or call us to book your appointment today!\n\nCheers,\n{{company_name}} Team',
   },
   {
     id: 'rebooking',
     name: 'Rebooking Reminder',
     category: 'Retention',
     icon: CalendarCheck,
-    subject: 'Time for your next cleaning, {{customer_name}}!',
+    subject: 'Time for your next detailing, {{customer_name}}!',
     body: 'Hi {{customer_name}},\n\nIt\'s been a while since your last {{service_name}}. We\'d love to get you back on the schedule!\n\nRegular cleanings keep your home healthy and save you time. Book now and we\'ll make sure everything sparkles.\n\nSimply reply to this email with your preferred date and time, and we\'ll take care of the rest.\n\nBest,\n{{company_name}} Team',
   },
   {

@@ -218,7 +218,7 @@ const handler = async (req: Request): Promise<Response> => {
           <tr>
             <td style="background:linear-gradient(135deg, ${primaryColor} 0%, ${accentColor} 100%);padding:40px 30px;text-align:center;">
               ${logoHtml}
-              <p style="color:rgba(255,255,255,0.9);font-size:14px;margin:10px 0 0 0;letter-spacing:0.5px;">Professional Cleaning Services</p>
+              <p style="color:rgba(255,255,255,0.9);font-size:14px;margin:10px 0 0 0;letter-spacing:0.5px;">Professional Detailing Services</p>
             </td>
           </tr>
           
@@ -246,7 +246,7 @@ const handler = async (req: Request): Promise<Response> => {
                     <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                       <tr>
                         <td style="padding:12px 0;border-bottom:1px solid #e5e7eb;color:#6b7280;font-size:14px;width:40%;">Service</td>
-                        <td style="padding:12px 0;border-bottom:1px solid #e5e7eb;text-align:right;font-weight:600;color:#1f2937;font-size:14px;">${booking.serviceName || "Cleaning Service"}</td>
+                        <td style="padding:12px 0;border-bottom:1px solid #e5e7eb;text-align:right;font-weight:600;color:#1f2937;font-size:14px;">${booking.serviceName || "Detailing Service"}</td>
                       </tr>
                       <tr>
                         <td style="padding:12px 0;border-bottom:1px solid #e5e7eb;color:#6b7280;font-size:14px;">Date</td>
@@ -285,17 +285,17 @@ const handler = async (req: Request): Promise<Response> => {
               <!-- Important Reminders -->
               <h3 style="margin:30px 0 15px 0;color:${primaryColor};font-size:14px;text-transform:uppercase;letter-spacing:1px;font-weight:600;border-bottom:2px solid ${primaryColor};padding-bottom:10px;">Important Reminders</h3>
               <ul style="margin:0 0 25px 0;padding-left:20px;color:#4b5563;font-size:14px;">
-                <li style="margin-bottom:10px;">If you would like to add extras not included in your cleaning, please notify us as quickly as possible.</li>
-                <li style="margin-bottom:10px;">Communicate your expectations with your cleaner when they arrive. Please do a review with the cleaner(s) prior to letting them go.</li>
-                <li style="margin-bottom:10px;">Make sure the cleaner(s) has space to clean. Children, pets, and other adults in the way can be hazardous.</li>
-                <li style="margin-bottom:10px;">We recommend minimizing clutter as much as possible. The cleaners will need access to surfaces to clean.</li>
-                <li style="margin-bottom:10px;"><strong>Please be home when the cleaners finish cleaning.</strong> If the client is not home for the final walkthrough, they surrender the right to a reclean.</li>
+                <li style="margin-bottom:10px;">If you would like to add extras not included in your appointment, please notify us as quickly as possible.</li>
+                <li style="margin-bottom:10px;">Communicate your expectations with your technician when they arrive. Please do a review with the technician(s) prior to letting them go.</li>
+                <li style="margin-bottom:10px;">Make sure the technician(s) has space to clean. Children, pets, and other adults in the way can be hazardous.</li>
+                <li style="margin-bottom:10px;">We recommend minimizing clutter as much as possible. The technicians will need access to surfaces to clean.</li>
+                <li style="margin-bottom:10px;"><strong>Please be home when the technicians finish detailing.</strong> If the client is not home for the final walkthrough, they surrender the right to a reclean.</li>
               </ul>
               
               <!-- Pricing & Adjustments -->
               <h3 style="margin:30px 0 15px 0;color:${primaryColor};font-size:14px;text-transform:uppercase;letter-spacing:1px;font-weight:600;border-bottom:2px solid ${primaryColor};padding-bottom:10px;">Pricing &amp; Adjustments</h3>
               <p style="margin:0 0 10px 0;font-size:14px;color:#4b5563;">The price quoted is based on the home being accurately represented at the time of booking.</p>
-              <p style="margin:0 0 25px 0;font-size:14px;color:#4b5563;">If the cleaner determines a more in-depth cleaning is needed, the cost may be subject to increase. <strong>This will never be done without a conversation and your consent.</strong></p>
+              <p style="margin:0 0 25px 0;font-size:14px;color:#4b5563;">If the technician determines a more in-depth cleaning is needed, the cost may be subject to increase. <strong>This will never be done without a conversation and your consent.</strong></p>
               
               <!-- Cancellation Policy -->
               <h3 style="margin:30px 0 15px 0;color:${primaryColor};font-size:14px;text-transform:uppercase;letter-spacing:1px;font-weight:600;border-bottom:2px solid ${primaryColor};padding-bottom:10px;">Cancellation &amp; Rescheduling Policy</h3>
@@ -318,7 +318,7 @@ const handler = async (req: Request): Promise<Response> => {
               <h3 style="margin:30px 0 15px 0;color:${primaryColor};font-size:14px;text-transform:uppercase;letter-spacing:1px;font-weight:600;border-bottom:2px solid ${primaryColor};padding-bottom:10px;">Satisfaction Policy</h3>
               <ul style="margin:0 0 25px 0;padding-left:20px;color:#4b5563;font-size:14px;">
                 <li style="margin-bottom:8px;">If you are not happy with the service, you have a <strong>24-hour period</strong> to notify us.</li>
-                <li style="margin-bottom:8px;">The cleaner(s) will return to handle any issues at no additional charge.</li>
+                <li style="margin-bottom:8px;">The technician(s) will return to handle any issues at no additional charge.</li>
                 <li style="margin-bottom:8px;">There are no refunds for any services provided.</li>
               </ul>
               

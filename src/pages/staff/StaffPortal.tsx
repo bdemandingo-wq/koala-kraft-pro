@@ -11,13 +11,13 @@ import { LogOut, Briefcase, CalendarCheck, Clock, DollarSign, Bell, History, Spa
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { MyJobCard } from '@/components/staff/MyJobCard';
 import { AvailableJobCard } from '@/components/staff/AvailableJobCard';
-import { CleanerAvailabilityManager } from '@/components/staff/CleanerAvailabilityManager';
-import { CleanerEarnings } from '@/components/staff/CleanerEarnings';
+import { TechnicianAvailabilityManager } from '@/components/staff/TechnicianAvailabilityManager';
+import { TechnicianEarnings } from '@/components/staff/TechnicianEarnings';
 import { JobHistoryCard } from '@/components/staff/JobHistoryCard';
-import { CleanerProfile } from '@/components/staff/CleanerProfile';
-import { CleanerCalendar } from '@/components/staff/CleanerCalendar';
+import { TechnicianProfile } from '@/components/staff/TechnicianProfile';
+import { TechnicianCalendar } from '@/components/staff/TechnicianCalendar';
 import { NotificationBell } from '@/components/staff/NotificationBell';
-import { CleanerReviews } from '@/components/staff/CleanerReviews';
+import { TechnicianReviews } from '@/components/staff/TechnicianReviews';
 import { BookingChecklist } from '@/components/staff/BookingChecklist';
 import { StaffDocumentUpload } from '@/components/staff/StaffDocumentUpload';
 import { StaffSignatureManager } from '@/components/staff/StaffSignatureManager';
@@ -35,9 +35,9 @@ interface Booking {
   state: string | null;
   zip_code: string | null;
   total_amount: number;
-  cleaner_wage: number | null;
-  cleaner_wage_type: string | null;
-  cleaner_actual_payment: number | null;
+  technician_wage: number | null;
+  technician_wage_type: string | null;
+  technician_actual_payment: number | null;
   square_footage?: string | null;
   bedrooms?: string | null;
   bathrooms?: string | null;
@@ -184,8 +184,8 @@ export default function StaffPortal() {
         .from('bookings')
         .select(`
           id, booking_number, scheduled_at, duration, status, address, city, state, zip_code,
-          total_amount, cleaner_wage, cleaner_wage_type, cleaner_actual_payment,
-          cleaner_checkin_at, cleaner_checkout_at, notes,
+          total_amount, technician_wage, technician_wage_type, technician_actual_payment,
+          technician_checkin_at, technician_checkout_at, notes,
           customer:customers(first_name, last_name, phone),
           service:services(name)
         `)
@@ -203,8 +203,8 @@ export default function StaffPortal() {
           is_primary,
           booking:bookings(
             id, booking_number, scheduled_at, duration, status, address, city, state, zip_code,
-            total_amount, cleaner_wage, cleaner_wage_type, cleaner_actual_payment,
-            cleaner_checkin_at, cleaner_checkout_at, notes,
+            total_amount, technician_wage, technician_wage_type, technician_actual_payment,
+            technician_checkin_at, technician_checkout_at, notes,
             customer:customers(first_name, last_name, phone),
             service:services(name)
           )
@@ -286,7 +286,7 @@ export default function StaffPortal() {
         .from('bookings')
         .select(`
           id, booking_number, scheduled_at, duration, status, address, city, state, zip_code,
-          total_amount, cleaner_wage, cleaner_wage_type, cleaner_actual_payment,
+          total_amount, technician_wage, technician_wage_type, technician_actual_payment,
           square_footage, bedrooms, bathrooms, notes,
           customer:customers(first_name, last_name, phone),
           service:services(name)
@@ -314,7 +314,7 @@ export default function StaffPortal() {
         .from('bookings')
         .select(`
           id, booking_number, scheduled_at, duration, status, address, city, state, zip_code,
-          total_amount, cleaner_actual_payment,
+          total_amount, technician_actual_payment,
           customer:customers(first_name, last_name),
           service:services(name)
         `)
@@ -372,7 +372,7 @@ export default function StaffPortal() {
     onError: (error: Error) => {
       setClaimingBookingId(null);
       if (error.message === 'Job was already claimed by someone else') {
-        toast.error('This job was already claimed by another cleaner');
+        toast.error('This job was already claimed by another technician');
         queryClient.invalidateQueries({ queryKey: ['staff-bookings', 'unassigned'] });
       } else {
         toast.error('Failed to claim job');
@@ -391,18 +391,18 @@ export default function StaffPortal() {
       
       // TIMESHEET: When starting a job, record check-in time
       if (status === 'in_progress') {
-        updateData.cleaner_checkin_at = now;
+        updateData.technician_checkin_at = now;
       }
       
       // TIMESHEET: When completing a job, record check-out time and calculate pay
       if (status === 'completed') {
-        updateData.cleaner_checkout_at = now;
+        updateData.technician_checkout_at = now;
         
         // Get booking details to calculate actual payment
         const { data: bookingData } = await supabase
           .from('bookings')
           .select(`
-            id, organization_id, cleaner_checkin_at, cleaner_wage, cleaner_wage_type, 
+            id, organization_id, technician_checkin_at, technician_wage, technician_wage_type, 
             total_amount, duration, staff_id,
             customer:customers(id, email, first_name, last_name),
             service:services(name),
@@ -414,8 +414,8 @@ export default function StaffPortal() {
         if (bookingData) {
           // Calculate actual hours worked
           let actualHours = bookingData.duration / 60; // Default to scheduled duration
-          if (bookingData.cleaner_checkin_at) {
-            const checkinTime = new Date(bookingData.cleaner_checkin_at).getTime();
+          if (bookingData.technician_checkin_at) {
+            const checkinTime = new Date(bookingData.technician_checkin_at).getTime();
             const checkoutTime = new Date(now).getTime();
             actualHours = (checkoutTime - checkinTime) / (1000 * 60 * 60); // Convert ms to hours
           }
@@ -424,14 +424,14 @@ export default function StaffPortal() {
           let calculatedPayment = 0;
           const staff = bookingData.staff as { hourly_rate: number | null; percentage_rate: number | null; base_wage: number | null } | null;
           
-          if (bookingData.cleaner_wage && bookingData.cleaner_wage_type) {
-            if (bookingData.cleaner_wage_type === 'percentage') {
-              calculatedPayment = (bookingData.total_amount * bookingData.cleaner_wage) / 100;
-            } else if (bookingData.cleaner_wage_type === 'flat') {
-              calculatedPayment = bookingData.cleaner_wage;
+          if (bookingData.technician_wage && bookingData.technician_wage_type) {
+            if (bookingData.technician_wage_type === 'percentage') {
+              calculatedPayment = (bookingData.total_amount * bookingData.technician_wage) / 100;
+            } else if (bookingData.technician_wage_type === 'flat') {
+              calculatedPayment = bookingData.technician_wage;
             } else {
               // Hourly - use actual hours worked
-              calculatedPayment = bookingData.cleaner_wage * actualHours;
+              calculatedPayment = bookingData.technician_wage * actualHours;
             }
           } else if (staff?.percentage_rate && staff.percentage_rate > 0) {
             calculatedPayment = (bookingData.total_amount * staff.percentage_rate) / 100;
@@ -440,15 +440,15 @@ export default function StaffPortal() {
           }
           
           // Only set if payment wasn't already manually set by admin
-          // Check current booking to see if cleaner_actual_payment is already set
+          // Check current booking to see if technician_actual_payment is already set
           const { data: currentBooking } = await supabase
             .from('bookings')
-            .select('cleaner_actual_payment')
+            .select('technician_actual_payment')
             .eq('id', bookingId)
             .single();
           
-          if (currentBooking?.cleaner_actual_payment == null && calculatedPayment > 0) {
-            updateData.cleaner_actual_payment = Math.round(calculatedPayment * 100) / 100;
+          if (currentBooking?.technician_actual_payment == null && calculatedPayment > 0) {
+            updateData.technician_actual_payment = Math.round(calculatedPayment * 100) / 100;
           }
         }
       }
@@ -536,7 +536,7 @@ export default function StaffPortal() {
       <header className="border-b bg-card sticky top-0 z-10">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold">Cleaner Portal</h1>
+            <h1 className="text-xl font-bold">Technician Portal</h1>
             <p className="text-sm text-muted-foreground">Welcome, {staffInfo?.name || 'Loading...'}</p>
           </div>
           <div className="flex items-center gap-3">
@@ -737,7 +737,7 @@ export default function StaffPortal() {
           {/* Availability Tab */}
           <TabsContent value="availability" className="space-y-4">
             {staffInfo?.id ? (
-              <CleanerAvailabilityManager
+              <TechnicianAvailabilityManager
                 staffId={staffInfo.id}
                 onSaved={() => setHasSetAvailability(true)}
               />
@@ -749,7 +749,7 @@ export default function StaffPortal() {
           {/* Earnings Tab */}
           <TabsContent value="earnings" className="space-y-4">
             {staffInfo?.id ? (
-              <CleanerEarnings staffId={staffInfo.id} staffName={staffInfo.name} />
+              <TechnicianEarnings staffId={staffInfo.id} staffName={staffInfo.name} />
             ) : (
               <p className="text-muted-foreground">Loading earnings...</p>
             )}
@@ -758,7 +758,7 @@ export default function StaffPortal() {
           {/* Calendar Tab */}
           <TabsContent value="calendar" className="space-y-4">
             {staffInfo?.id ? (
-              <CleanerCalendar staffId={staffInfo.id} />
+              <TechnicianCalendar staffId={staffInfo.id} />
             ) : (
               <p className="text-muted-foreground">Loading calendar...</p>
             )}
@@ -767,7 +767,7 @@ export default function StaffPortal() {
           {/* Reviews Tab */}
           <TabsContent value="reviews" className="space-y-4">
             {staffInfo?.id ? (
-              <CleanerReviews staffId={staffInfo.id} />
+              <TechnicianReviews staffId={staffInfo.id} />
             ) : (
               <p className="text-muted-foreground">Loading reviews...</p>
             )}
@@ -776,7 +776,7 @@ export default function StaffPortal() {
           {/* Profile Tab */}
           <TabsContent value="profile" className="space-y-4">
             {staffInfo && user ? (
-              <CleanerProfile staffInfo={staffInfo} userId={user.id} />
+              <TechnicianProfile staffInfo={staffInfo} userId={user.id} />
             ) : (
               <p className="text-muted-foreground">Loading profile...</p>
             )}
