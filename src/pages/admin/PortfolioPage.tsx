@@ -122,11 +122,6 @@ export default function PortfolioPage() {
   return (
     <AdminLayout title="Portfolio" subtitle="Before & after gallery across all jobs">
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold">Portfolio</h1>
-          <p className="text-muted-foreground text-sm">Before & after gallery across all jobs</p>
-        </div>
-
         {/* Filters */}
         <div className="flex flex-wrap gap-3">
           <div className="relative flex-1 min-w-[200px]">
