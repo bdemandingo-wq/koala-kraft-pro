@@ -18,6 +18,7 @@ import {
 import { useMemo, useState, useEffect } from 'react';
 import { format, subMonths, isAfter, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 import { ProfitMarginReport } from '@/components/admin/ProfitMarginReport';
 import { TechnicianPerformanceDashboard } from '@/components/admin/CleanerPerformanceDashboard';
 import { ProfitByServiceChart } from '@/components/admin/ProfitByServiceChart';
