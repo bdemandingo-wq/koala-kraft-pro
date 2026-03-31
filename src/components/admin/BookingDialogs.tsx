@@ -16,10 +16,11 @@ import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/lib/supabase";
 
 const STATUS_OPTIONS: Array<{ value: BookingWithDetails["status"]; label: string }> = [
-  { value: "pending", label: "Pending Payment" },
-  { value: "confirmed", label: "Unserviceded" },
+  { value: "pending", label: "Pending" },
+  { value: "confirmed", label: "Scheduled" },
+  { value: "en_route", label: "En Route" },
   { value: "in_progress", label: "In Progress" },
-  { value: "completed", label: "Clean Completed" },
+  { value: "completed", label: "Completed" },
   { value: "cancelled", label: "Cancelled" },
   { value: "no_show", label: "No Show" },
 ];
