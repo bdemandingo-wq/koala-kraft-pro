@@ -235,8 +235,8 @@ export default function ReportsPage() {
         conversionRate,
         totalBookings,
       },
-      recurringCleansCount,
-      recurringCleansRevenue,
+      recurringServicesCount,
+      recurringServicesRevenue,
     };
   }, [filteredBookings, staff, customers, recurringBookings]);
 
