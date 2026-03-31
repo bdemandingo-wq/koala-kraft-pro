@@ -296,6 +296,54 @@ export function CustomerStep() {
         onOpenChange={(open) => { if (!open) setEditCustomerId(null); }}
         customer={(customers || []).find(c => c.id === editCustomerId) || null}
       />
+
+      {/* Inline Add Vehicle Dialog */}
+      <Dialog open={addVehicleOpen} onOpenChange={setAddVehicleOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Car className="w-5 h-5" /> Add Vehicle
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleAddVehicle} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2"><Label>Year</Label><Input value={vehicleForm.year} onChange={e => setVehicleForm(f => ({ ...f, year: e.target.value }))} placeholder="2024" /></div>
+              <div className="space-y-2"><Label>Make *</Label><Input value={vehicleForm.make} onChange={e => setVehicleForm(f => ({ ...f, make: e.target.value }))} placeholder="Toyota" /></div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2"><Label>Model</Label><Input value={vehicleForm.model} onChange={e => setVehicleForm(f => ({ ...f, model: e.target.value }))} placeholder="Camry" /></div>
+              <div className="space-y-2"><Label>Color</Label><Input value={vehicleForm.color} onChange={e => setVehicleForm(f => ({ ...f, color: e.target.value }))} placeholder="Black" /></div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Vehicle Type</Label>
+                <Select value={vehicleForm.vehicle_type} onValueChange={v => setVehicleForm(f => ({ ...f, vehicle_type: v }))}>
+                  <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
+                  <SelectContent>{VEHICLE_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Condition</Label>
+                <Select value={vehicleForm.condition} onValueChange={v => setVehicleForm(f => ({ ...f, condition: v }))}>
+                  <SelectTrigger><SelectValue placeholder="Select condition" /></SelectTrigger>
+                  <SelectContent>{VEHICLE_CONDITIONS.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Notes</Label>
+              <Textarea value={vehicleForm.notes} onChange={e => setVehicleForm(f => ({ ...f, notes: e.target.value }))} placeholder="Any special notes..." rows={2} />
+            </div>
+            <div className="flex justify-end gap-3 pt-2">
+              <Button type="button" variant="outline" onClick={() => setAddVehicleOpen(false)}>Cancel</Button>
+              <Button type="submit" disabled={savingVehicle}>
+                {savingVehicle && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Add Vehicle
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
