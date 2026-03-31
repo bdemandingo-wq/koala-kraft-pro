@@ -164,7 +164,7 @@ export default function ReportsPage() {
     const serviceStats = Array.from(serviceMap.values());
     const serviceStatsAllTime = Array.from(serviceAllTimeMap.values());
 
-    // Staff performance - include ALL staff members and show upcoming cleans
+    // Staff performance - include ALL staff members and show upcoming jobs
     const now = new Date();
     const staffStatsData = staff.map((s, index) => {
       // Get all bookings for this staff member within date range
@@ -176,8 +176,8 @@ export default function ReportsPage() {
         return sum + Number(bAny.cleaner_pay_expected || bAny.cleaner_actual_payment || 0);
       }, 0);
       
-      // Count upcoming cleans (scheduled_at > now and not cancelled/completed)
-      const upcomingCleans = staffBookings.filter(b => {
+      // Count upcoming jobs (scheduled_at > now and not cancelled/completed)
+      const upcomingJobs = staffBookings.filter(b => {
         const scheduledDate = new Date(b.scheduled_at);
         return isAfter(scheduledDate, now) && 
                !['completed', 'cancelled', 'no_show'].includes(b.status);
