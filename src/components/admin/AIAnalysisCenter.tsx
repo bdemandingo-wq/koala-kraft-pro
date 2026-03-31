@@ -108,9 +108,9 @@ export function AIAnalysisCenter() {
       const { data: bookings } = await supabase.from('bookings').select('total_amount, vehicle_id').eq('organization_id', orgId).eq('status', 'completed').gte('scheduled_at', monthStart).not('vehicle_id', 'is', null);
       if (!bookings?.length) return [];
       const vehicleIds = [...new Set(bookings.map(b => b.vehicle_id).filter(Boolean))];
-      const { data: vehicles } = await supabase.from('customer_vehicles').select('id, vehicle_type').in('id', vehicleIds as string[]);
+      const { data: vehicles } = await supabase.from('vehicles').select('id, vehicle_type').in('id', vehicleIds as string[]);
       if (!vehicles?.length) return [];
-      const vMap = Object.fromEntries(vehicles.map(v => [v.id, v.vehicle_type || 'Unknown']));
+      const vMap = Object.fromEntries((vehicles as any[]).map(v => [v.id, v.vehicle_type || 'Unknown']));
       const agg: Record<string, { type: string; jobs: number; revenue: number }> = {};
       bookings.forEach(b => {
         const type = vMap[b.vehicle_id || ''] || 'Unknown';
