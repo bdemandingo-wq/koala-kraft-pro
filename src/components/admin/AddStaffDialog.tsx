@@ -45,6 +45,7 @@ export function AddStaffDialog({ open, onOpenChange }: AddStaffDialogProps) {
     percentage_rate: '',
     default_hours: '5',
     tax_classification: 'w2' as 'w2' | '1099',
+    pay_type: 'per_job',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
