@@ -301,7 +301,7 @@ export default function StaffPage() {
             <div className="text-center py-8 text-muted-foreground">Loading staff...</div>
           ) : filteredStaff.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              {searchTerm ? 'No staff found matching your search' : statusFilter === 'inactive' ? 'No inactive staff members' : 'No staff members yet. Add your first team member!'}
+              {searchTerm ? 'No technicians found matching your search' : statusFilter === 'inactive' ? 'No inactive technicians' : 'No technicians yet. Add your first team member!'}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
