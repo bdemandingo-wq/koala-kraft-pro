@@ -238,12 +238,12 @@ export default function StaffPage() {
 
   return (
     <AdminLayout
-      title="Staff"
+      title="Technicians"
       subtitle={`${staff.length} team members`}
       actions={
         <Button className="gap-2" onClick={() => setAddDialogOpen(true)}>
           <Plus className="w-4 h-4" />
-          Add Staff
+          Add Technician
         </Button>
       }
     >
