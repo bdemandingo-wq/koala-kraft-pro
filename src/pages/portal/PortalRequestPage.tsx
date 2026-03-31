@@ -366,7 +366,7 @@ export default function PortalRequestPage() {
               <Textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Any special requests or preferences..."
+                placeholder="Any special requests, vehicle details, or areas to focus on..."
                 rows={4}
               />
             </div>
