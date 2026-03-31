@@ -149,9 +149,9 @@ export function AvailableJobCard({ booking, staffInfo, onAssign, isAssigning, cl
 
           {/* Vehicle Details */}
           <div className="flex flex-wrap gap-2 text-xs">
-            {booking.vehicle && (
+            {(booking as any).vehicle && (
               <Badge variant="outline" className="bg-background">
-                {[booking.vehicle.year, booking.vehicle.make, booking.vehicle.model].filter(Boolean).join(' ')}
+                {[(booking as any).vehicle.year, (booking as any).vehicle.make, (booking as any).vehicle.model].filter(Boolean).join(' ')}
               </Badge>
             )}
           </div>
