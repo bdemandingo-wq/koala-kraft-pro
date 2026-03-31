@@ -786,8 +786,9 @@ export default function LandingPage() {
             <div className="md:col-span-1">
               <span className="font-bold text-xl text-foreground mb-4 block">WE DETAIL NC</span>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                The complete platform to grow your car detailing business.
+                Premium, fully mobile detailing in Charlotte, NC. We come directly to you — delivering luxury-level results on every vehicle.
               </p>
+              <p className="text-sm text-muted-foreground mt-2">📞 (984) 332-8570</p>
             </div>
             <div>
               <h4 className="font-semibold text-foreground mb-4">Product</h4>
