@@ -152,7 +152,7 @@ export default function CompareHousecallPro() {
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-primary">10+</div>
-              <p className="text-sm text-muted-foreground">Cleaning Features</p>
+              <p className="text-sm text-muted-foreground">Detailing Features</p>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-primary">4.9★</div>
