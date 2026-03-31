@@ -119,7 +119,7 @@ export default function QuoteSoftware() {
             Quote Software
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
-            Cleaning Quote Software<br/>
+            Detailing Quote Software<br/>
             <span className="text-primary">That Closes Deals</span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
