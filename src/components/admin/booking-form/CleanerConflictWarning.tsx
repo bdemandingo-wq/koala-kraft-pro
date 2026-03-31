@@ -4,7 +4,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { format, parseISO } from 'date-fns';
-import { ConflictInfo } from '@/hooks/useTechnicianConflicts';
+import { ConflictInfo } from '@/hooks/useCleanerConflicts';
 
 interface TechnicianConflictWarningProps {
   technicianName: string;

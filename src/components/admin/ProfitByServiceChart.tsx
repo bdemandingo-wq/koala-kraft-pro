@@ -87,18 +87,18 @@ export function ProfitByServiceChart({ bookings }: ProfitByServiceChartProps) {
         let technicianPay = 0;
         if (teamPay != null && teamPay > 0) {
           technicianPay = teamPay;
-        } else if (bookingAny.technician_actual_payment != null && Number(bookingAny.technician_actual_payment) > 0) {
-          technicianPay = Number(bookingAny.technician_actual_payment);
-        } else if (bookingAny.technician_wage) {
-          const wage = Number(bookingAny.technician_wage);
-          const wageType = bookingAny.technician_wage_type || 'hourly';
+        } else if (bookingAny.cleaner_actual_payment != null && Number(bookingAny.cleaner_actual_payment) > 0) {
+          technicianPay = Number(bookingAny.cleaner_actual_payment);
+        } else if (bookingAny.cleaner_wage) {
+          const wage = Number(bookingAny.cleaner_wage);
+          const wageType = bookingAny.cleaner_wage_type || 'hourly';
           
           if (wageType === 'flat') {
             technicianPay = wage;
           } else if (wageType === 'percentage') {
             technicianPay = (revenue * wage) / 100;
           } else {
-            const hours = bookingAny.technician_override_hours || (booking.duration / 60);
+            const hours = bookingAny.cleaner_override_hours || (booking.duration / 60);
             technicianPay = wage * hours;
           }
         }

@@ -12,8 +12,8 @@ import { useBookingForm } from '../BookingFormContext';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useEffect, useMemo, useState, useRef, useCallback } from 'react';
-import { useTechnicianConflicts } from '@/hooks/useTechnicianConflicts';
-import { TechnicianConflictWarning } from '../TechnicianConflictWarning';
+import { useTechnicianConflicts } from '@/hooks/useCleanerConflicts';
+import { TechnicianConflictWarning } from '../CleanerConflictWarning';
 import { calculateDistanceMiles, estimateDriveMinutes, formatDistance, formatDriveTime, geocodeAddress } from '@/lib/distanceUtils';
 
 type Coordinates = { lat: number; lng: number };

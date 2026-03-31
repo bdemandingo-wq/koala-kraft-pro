@@ -94,7 +94,7 @@ import { format, isWithinInterval, startOfDay, endOfDay, differenceInDays, diffe
 import { AddBookingDialog } from '@/components/admin/AddBookingDialog';
 import { BookingDetailsDialog, AdjustPaymentDialog } from '@/components/admin/BookingDialogs';
 import { PaymentHistoryLogDialog } from '@/components/admin/PaymentHistoryLogDialog';
-import { BulkEditTechnicianWages } from '@/components/admin/BulkEditTechnicianWages';
+import { BulkEditTechnicianWages } from '@/components/admin/BulkEditCleanerWages';
 import { supabase } from '@/lib/supabase';
 import { QuotesTabContent } from '@/components/admin/QuotesTabContent';
 import { AdditionalChargesDialog } from '@/components/admin/AdditionalChargesDialog';

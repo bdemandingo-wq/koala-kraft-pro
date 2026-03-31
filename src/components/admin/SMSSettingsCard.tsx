@@ -27,7 +27,7 @@ interface ReminderInterval {
   hours_before: number;
   is_active: boolean;
   send_to_client: boolean;
-  send_to_technician: boolean;
+  send_to_cleaner: boolean;
 }
 
 const defaultSettings: SMSSettings = {
@@ -100,7 +100,7 @@ export function SMSSettingsCard() {
           hours_before: Number(d.hours_before),
           is_active: d.is_active,
           send_to_client: d.send_to_client,
-          send_to_technician: d.send_to_technician,
+          send_to_cleaner: d.send_to_cleaner,
         })));
       }
     } catch (error) {
@@ -119,7 +119,7 @@ export function SMSSettingsCard() {
             .update({
               is_active: interval.is_active,
               send_to_client: interval.send_to_client,
-              send_to_technician: interval.send_to_technician,
+              send_to_cleaner: interval.send_to_cleaner,
             })
             .eq('id', interval.id);
         }
@@ -388,10 +388,10 @@ export function SMSSettingsCard() {
                         </label>
                         <label className="flex items-center gap-1.5">
                           <Switch
-                            checked={interval.send_to_technician}
+                            checked={interval.send_to_cleaner}
                             onCheckedChange={(checked) => {
                               const updated = [...reminderIntervals];
-                              updated[index] = { ...updated[index], send_to_technician: checked };
+                              updated[index] = { ...updated[index], send_to_cleaner: checked };
                               setReminderIntervals(updated);
                             }}
                             className="scale-75"

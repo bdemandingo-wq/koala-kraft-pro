@@ -382,7 +382,7 @@ export function PnLOverview({ bookings, customers, recurringStats }: PnLOverview
         
         // Calculate actual labor cost from booking
         const bookingData = b as any;
-        const laborCost = Number(bookingData.technician_actual_payment || bookingData.technician_wage || 0);
+        const laborCost = Number(bookingData.cleaner_actual_payment || bookingData.cleaner_wage || 0);
         monthlyLaborCost[month] += laborCost;
         
         // Determine first-time vs recurring based on address

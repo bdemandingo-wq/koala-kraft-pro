@@ -39,7 +39,7 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useTestMode } from '@/contexts/TestModeContext';
-import { TechnicianCalendar } from '@/components/staff/TechnicianCalendar';
+import { TechnicianCalendar } from '@/components/staff/CleanerCalendar';
 import { useOrgId } from '@/hooks/useOrgId';
 import { cn } from '@/lib/utils';
 import { StaffEventNotifications } from '@/components/admin/StaffEventNotifications';

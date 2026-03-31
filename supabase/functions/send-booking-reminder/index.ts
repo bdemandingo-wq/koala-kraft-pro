@@ -336,9 +336,9 @@ const handler = async (req: Request): Promise<Response> => {
           hours_before: Number(i.hours_before),
           label: i.label,
           send_to_client: i.send_to_client,
-          send_to_technician: i.send_to_technician,
+          send_to_cleaner: i.send_to_cleaner,
         }))
-      : [{ hours_before: 24, label: "24 Hours Before", send_to_client: true, send_to_technician: true }];
+      : [{ hours_before: 24, label: "24 Hours Before", send_to_client: true, send_to_cleaner: true }];
 
     const now = new Date();
     const sentReminders: string[] = [];
@@ -418,7 +418,7 @@ const handler = async (req: Request): Promise<Response> => {
         }
 
         // --- CLEANER REMINDER ---
-        if (interval.send_to_technician && booking.staff?.phone) {
+        if (interval.send_to_cleaner && booking.staff?.phone) {
           const technicianName = booking.staff.name || "there";
           const customerName = `${booking.customer?.first_name || ""} ${booking.customer?.last_name || ""}`.trim() || "Customer";
 
@@ -449,7 +449,7 @@ const handler = async (req: Request): Promise<Response> => {
         }
 
         // Also check team assignments for additional technicians
-        if (interval.send_to_technician) {
+        if (interval.send_to_cleaner) {
           try {
             const { data: teamAssignments } = await supabase
               .from("booking_team_assignments")

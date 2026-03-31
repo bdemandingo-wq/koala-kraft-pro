@@ -65,19 +65,19 @@ const handler = async (req: Request): Promise<Response> => {
           staffPayroll[staffId] = { name: staff.name, hours: 0, pay: 0, jobs: 0 };
         }
 
-        const hoursWorked = booking.technician_override_hours || (booking.duration / 60);
+        const hoursWorked = booking.cleaner_override_hours || (booking.duration / 60);
         let pay = 0;
 
-        // SINGLE SOURCE OF TRUTH: technician_pay_expected
-        if (booking.technician_pay_expected != null) {
-          pay = Number(booking.technician_pay_expected);
-        } else if (booking.technician_actual_payment != null) {
+        // SINGLE SOURCE OF TRUTH: cleaner_pay_expected
+        if (booking.cleaner_pay_expected != null) {
+          pay = Number(booking.cleaner_pay_expected);
+        } else if (booking.cleaner_actual_payment != null) {
           // Legacy fallback
-          pay = Number(booking.technician_actual_payment);
+          pay = Number(booking.cleaner_actual_payment);
         } else {
           // Final fallback: compute from rate/type
-          const wageType = booking.technician_wage_type || 'hourly';
-          const wageRate = booking.technician_wage || staff.base_wage || staff.hourly_rate || 0;
+          const wageType = booking.cleaner_wage_type || 'hourly';
+          const wageRate = booking.cleaner_wage || staff.base_wage || staff.hourly_rate || 0;
 
           if (wageType === 'flat') {
             pay = Number(wageRate);

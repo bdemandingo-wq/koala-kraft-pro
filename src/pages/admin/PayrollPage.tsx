@@ -360,16 +360,16 @@ export default function PayrollPage() {
     enabled: !!organizationId,
   });
 
-  // Wage calculation — pay_share (per-technician) takes priority over technician_pay_expected (booking total)
+  // Wage calculation — pay_share (per-technician) takes priority over cleaner_pay_expected (booking total)
   const calcWage = (booking: any, staffMember: any, payShareOverride?: number | null) => {
     const baseResult = calculateBookingWage(booking, staffMember);
     // PRIORITY 1: Individual technician pay from team assignments (pay_share)
     if (payShareOverride != null && Number(payShareOverride) > 0) {
       return { calculatedPay: Number(payShareOverride), actualPay: Number(payShareOverride), wageType: 'actual', wageRate: Number(payShareOverride), hoursWorked: baseResult.hoursWorked, isMissingPay: false };
     }
-    // PRIORITY 2: technician_pay_expected is the booking-level source of truth (single-staff bookings)
-    if (booking.technician_pay_expected != null) {
-      return { calculatedPay: Number(booking.technician_pay_expected), actualPay: Number(booking.technician_pay_expected), wageType: baseResult.wageType, wageRate: baseResult.wageRate, hoursWorked: baseResult.hoursWorked, isMissingPay: false };
+    // PRIORITY 2: cleaner_pay_expected is the booking-level source of truth (single-staff bookings)
+    if (booking.cleaner_pay_expected != null) {
+      return { calculatedPay: Number(booking.cleaner_pay_expected), actualPay: Number(booking.cleaner_pay_expected), wageType: baseResult.wageType, wageRate: baseResult.wageRate, hoursWorked: baseResult.hoursWorked, isMissingPay: false };
     }
     // PRIORITY 3: Fallback calculation from rate/hours
     return { calculatedPay: baseResult.calculatedPay, actualPay: null, wageType: baseResult.wageType, wageRate: baseResult.wageRate, hoursWorked: baseResult.hoursWorked, isMissingPay: baseResult.isMissingPay };

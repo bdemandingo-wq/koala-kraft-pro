@@ -47,7 +47,7 @@ import { PropertyStep } from './steps/PropertyStep';
 import { ServiceStep } from './steps/ServiceStep';
 import { ScheduleStep } from './steps/ScheduleStep';
 import { PaymentStep } from './steps/PaymentStep';
-import { useTechnicianConflicts } from '@/hooks/useTechnicianConflicts';
+import { useTechnicianConflicts } from '@/hooks/useCleanerConflicts';
 import {
   DndContext,
   closestCenter,
@@ -632,11 +632,11 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
       square_footage: squareFootage || null,
       extras: selectedExtras,
       is_draft: isDraft,
-      technician_wage: technicianWage ? parseFloat(technicianWage) : null,
-      technician_wage_type: technicianWageType,
-      technician_override_hours: technicianOverrideHours ? parseFloat(technicianOverrideHours) : null,
-      // Compute and persist technician_pay_expected — SINGLE SOURCE OF TRUTH for payroll
-      technician_pay_expected: (() => {
+      cleaner_wage: technicianWage ? parseFloat(technicianWage) : null,
+      cleaner_wage_type: technicianWageType,
+      cleaner_override_hours: technicianOverrideHours ? parseFloat(technicianOverrideHours) : null,
+      // Compute and persist cleaner_pay_expected — SINGLE SOURCE OF TRUTH for payroll
+      cleaner_pay_expected: (() => {
         const wage = technicianWage ? parseFloat(technicianWage) : null;
         if (wage == null || wage === 0) return null;
         if (technicianWageType === 'flat') return wage;
@@ -859,7 +859,7 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
           }
         } else if (bookingData.staff_id) {
           // Single staff → one primary assignment
-          // Use null (not 0) when no wage is set, so technician_actual_payment remains the source of truth
+          // Use null (not 0) when no wage is set, so cleaner_actual_payment remains the source of truth
           await supabase.from('booking_team_assignments').insert({
             booking_id: booking.id,
             staff_id: bookingData.staff_id,
@@ -1021,7 +1021,7 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
             }
           } else if (bookingData.staff_id) {
             // Single staff → one primary assignment only
-            // Use null (not 0) when no wage is set, so technician_actual_payment remains the source of truth
+            // Use null (not 0) when no wage is set, so cleaner_actual_payment remains the source of truth
             await supabase.from('booking_team_assignments').insert({
               booking_id: newBooking.id,
               staff_id: bookingData.staff_id,

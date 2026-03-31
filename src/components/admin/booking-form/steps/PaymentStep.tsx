@@ -34,7 +34,7 @@ import { preloadStripeModules } from '@/lib/stripe';
 import { useAuth } from '@/hooks/useAuth';
 
 /**
- * Compute technician_pay_expected from current form values.
+ * Compute cleaner_pay_expected from current form values.
  */
 function computeExpectedPay(
   wageType: string,
@@ -134,10 +134,10 @@ export function PaymentStep() {
       const { error } = await supabase
         .from('bookings')
         .update({
-          technician_wage: technicianWage ? parseFloat(technicianWage) : null,
-          technician_wage_type: technicianWageType,
-          technician_override_hours: technicianOverrideHours ? parseFloat(technicianOverrideHours) : null,
-          technician_pay_expected: expectedPay,
+          cleaner_wage: technicianWage ? parseFloat(technicianWage) : null,
+          cleaner_wage_type: technicianWageType,
+          cleaner_override_hours: technicianOverrideHours ? parseFloat(technicianOverrideHours) : null,
+          cleaner_pay_expected: expectedPay,
           pay_last_saved_at: new Date().toISOString(),
           pay_last_saved_by: user?.id || null,
         })
