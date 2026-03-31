@@ -427,7 +427,7 @@ export default function ReportsPage() {
 
             {/* Staff Performance Table */}
             <div className="bg-card rounded-xl border border-border shadow-sm p-4 h-[420px] overflow-auto">
-              <h3 className="font-semibold mb-4">Staff Performance</h3>
+              <h3 className="font-semibold mb-4">Technician Performance</h3>
               {staffStats.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   No staff performance data available
