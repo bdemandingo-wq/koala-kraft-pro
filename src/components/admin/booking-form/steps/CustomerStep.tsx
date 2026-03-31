@@ -227,6 +227,19 @@ export function CustomerStep() {
                   Loading last booking...
                 </div>
               )}
+
+              {/* Vehicle Selection */}
+              {selectedCustomerId && organizationId && (
+                <div className="mt-4 pt-4 border-t border-border/50">
+                  <VehicleSelectDropdown
+                    customerId={selectedCustomerId}
+                    organizationId={organizationId}
+                    value={selectedVehicleId}
+                    onChange={setSelectedVehicleId}
+                    onAddNew={() => setAddVehicleOpen(true)}
+                  />
+                </div>
+              )}
             </TabsContent>
             
             <TabsContent value="new" className="mt-6 space-y-4">

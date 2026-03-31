@@ -310,6 +310,10 @@ export function EditCustomerDialog({ open, onOpenChange, customer }: EditCustome
             )}
           </div>
 
+          {/* Vehicles */}
+          <Separator />
+          {customer && <VehicleManager customerId={customer.id} />}
+
           {/* Add Card on File */}
           <Separator />
           <div className="space-y-3">
