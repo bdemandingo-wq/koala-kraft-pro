@@ -116,7 +116,7 @@ export function CRMSuggestionsPanel() {
     suggestions.push({
       id: 'followup-inactive',
       title: `Follow Up with ${inactiveCustomerCount} Inactive Clients`,
-      description: 'These customers haven\'t booked in 60+ days. Send a win-back campaign to bring them back.',
+      description: 'These customers haven\'t booked a detail in 60+ days. Send a win-back campaign with a returning customer offer.',
       action: 'Create Campaign',
       href: '/dashboard/campaigns',
       icon: Users,
@@ -127,8 +127,8 @@ export function CRMSuggestionsPanel() {
   if (nonRecurringCount > 5) {
     suggestions.push({
       id: 'recurring-offer',
-      title: `${nonRecurringCount} Customers Without Recurring Service`,
-      description: 'Offer recurring cleaning plans to convert one-time customers into predictable recurring revenue.',
+      title: `${nonRecurringCount} Customers Without Maintenance Plan`,
+      description: 'Offer maintenance plans to keep vehicles detailed regularly and build predictable recurring revenue.',
       action: 'View Customers',
       href: '/dashboard/customers',
       icon: Repeat,
