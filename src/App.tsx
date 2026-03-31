@@ -352,6 +352,7 @@ const App = () => (
                     <Route path="/dashboard/automation-center" element={<AdminRoute><ErrorBoundary featureName="Automation Center"><AutomationCenterPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/import" element={<AdminRoute><ErrorBoundary featureName="Data Import"><DataImportPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/booking-photos" element={<AdminRoute><ErrorBoundary featureName="Booking Photos"><BookingPhotosPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/portfolio" element={<AdminRoute><ErrorBoundary featureName="Portfolio"><PortfolioPage /></ErrorBoundary></AdminRoute>} />
 
                     {/* Legacy admin routes */}
                     <Route path="/admin" element={<AdminRoute><ErrorBoundary featureName="Dashboard"><AdminDashboard /></ErrorBoundary></AdminRoute>} />
