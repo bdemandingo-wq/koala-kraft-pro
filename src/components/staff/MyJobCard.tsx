@@ -319,23 +319,54 @@ export function MyJobCard({ booking, staffInfo, onUpdateStatus, isUpdating, onEn
         )}
 
         <div className="flex flex-wrap gap-2 pt-2">
-          {/* On The Way Button - only show for confirmed jobs */}
-          {booking.status === 'confirmed' && booking.customer?.phone && (
+          {/* Status progression: Confirmed → En Route → In Progress → Completed */}
+          {booking.status === 'confirmed' && onUpdateStatus && (
+            <>
+              {/* On The Way + Mark En Route combined */}
+              <Button
+                size="sm"
+                className="flex-1 gap-2 bg-cyan-600 hover:bg-cyan-700 text-white"
+                onClick={async () => {
+                  // Send SMS and update status
+                  if (booking.customer?.phone) {
+                    await handleOnTheWayClick();
+                  }
+                  onUpdateStatus(booking.id, 'en_route');
+                }}
+                disabled={isUpdating || isSendingOnTheWay}
+              >
+                {isSendingOnTheWay ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Car className="w-4 h-4" />
+                )}
+                I'm En Route
+              </Button>
+            </>
+          )}
+          
+          {booking.status === 'en_route' && onUpdateStatus && (
             <Button
-              variant={onTheWaySent ? "secondary" : "default"}
               size="sm"
-              className="gap-2 bg-blue-600 hover:bg-blue-700"
-              onClick={handleOnTheWayClick}
-              disabled={isSendingOnTheWay || onTheWaySent}
+              className="flex-1"
+              onClick={() => onUpdateStatus(booking.id, 'in_progress')}
+              disabled={isUpdating}
             >
-              {isSendingOnTheWay ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Car className="w-4 h-4" />
-              )}
-              {onTheWaySent ? 'Sent!' : 'On The Way'}
+              Job Started
             </Button>
           )}
+          
+          {booking.status === 'in_progress' && onUpdateStatus && (
+            <Button
+              size="sm"
+              className="flex-1"
+              onClick={() => onUpdateStatus(booking.id, 'completed')}
+              disabled={isUpdating}
+            >
+              Job Complete
+            </Button>
+          )}
+
           {hasAddress && (
             <Button 
               variant="outline" 
@@ -344,10 +375,10 @@ export function MyJobCard({ booking, staffInfo, onUpdateStatus, isUpdating, onEn
               onClick={handleDirectionsClick}
             >
               <Navigation className="w-4 h-4" />
-              Directions
+              Navigate
             </Button>
           )}
-          {staffInfo.id && (booking.status === 'in_progress' || booking.status === 'confirmed') && (
+          {staffInfo.id && ['en_route', 'in_progress', 'confirmed'].includes(booking.status) && (
             <Dialog open={checklistOpen} onOpenChange={setChecklistOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm" className="gap-2">
@@ -374,26 +405,6 @@ export function MyJobCard({ booking, staffInfo, onUpdateStatus, isUpdating, onEn
               staffId={staffInfo.id}
               organizationId={booking.organization_id || ''}
             />
-          )}
-          {booking.status === 'confirmed' && onUpdateStatus && (
-            <Button
-              size="sm"
-              className="flex-1"
-              onClick={() => onUpdateStatus(booking.id, 'in_progress')}
-              disabled={isUpdating}
-            >
-              Start Job
-            </Button>
-          )}
-          {booking.status === 'in_progress' && onUpdateStatus && (
-            <Button
-              size="sm"
-              className="flex-1"
-              onClick={() => onUpdateStatus(booking.id, 'completed')}
-              disabled={isUpdating}
-            >
-              Complete Job
-            </Button>
           )}
         </div>
       </CardContent>
