@@ -383,7 +383,7 @@ export default function StaffPortal() {
 
   // Update booking status mutation with timesheet tracking
   const updateStatus = useMutation({
-    mutationFn: async ({ bookingId, status }: { bookingId: string; status: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'no_show' }) => {
+    mutationFn: async ({ bookingId, status }: { bookingId: string; status: 'pending' | 'confirmed' | 'en_route' | 'in_progress' | 'completed' | 'cancelled' | 'no_show' }) => {
       const now = new Date().toISOString();
       
       // Build the update object based on status
