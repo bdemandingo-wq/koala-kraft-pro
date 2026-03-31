@@ -664,7 +664,11 @@ export default function LeadsPage() {
                       </div>
                     </TableCell>
                     <TableCell>{lead.service_interest || '-'}</TableCell>
-                    <TableCell className="capitalize">{lead.source}</TableCell>
+                    <TableCell>
+                      <Badge className={SOURCE_BADGE_CONFIG[lead.source]?.className || 'bg-muted text-foreground'}>
+                        {SOURCE_BADGE_CONFIG[lead.source]?.label || lead.source}
+                      </Badge>
+                    </TableCell>
                     <TableCell>
                       <Select
                         value={lead.status}

@@ -518,6 +518,7 @@ export default function SettingsPage() {
             <TabsTrigger className="shrink-0" value="mobile-nav">Mobile Nav</TabsTrigger>
             <TabsTrigger className="shrink-0" value="import">Import Data</TabsTrigger>
             
+            <TabsTrigger className="shrink-0" value="facebook">Facebook</TabsTrigger>
             <TabsTrigger className="shrink-0" value="security">Security</TabsTrigger>
           </TabsList>
         </div>
