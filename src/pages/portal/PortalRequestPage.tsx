@@ -353,7 +353,7 @@ export default function PortalRequestPage() {
                   <Alert variant="destructive" className="border-destructive/50 bg-destructive/5">
                     <AlertTriangle className="h-4 w-4" />
                     <AlertDescription className="text-xs">
-                      Please ensure the selected time is accurate — turnover cleans are time-sensitive and must be completed before the next guest arrives.
+                      Please ensure the selected time is accurate — turnover services are time-sensitive and must be completed before the next guest arrives.
                     </AlertDescription>
                   </Alert>
                 )}
