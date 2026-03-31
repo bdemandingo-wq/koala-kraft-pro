@@ -16,7 +16,7 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const { companyName, serviceType = "cleaning", audience = "all_eligible", timestamp } = await req.json();
+    const { companyName, serviceType = "detailing", audience = "all_eligible", timestamp } = await req.json();
     
     const uniqueId = timestamp || Date.now();
 
