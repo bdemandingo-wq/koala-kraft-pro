@@ -915,8 +915,8 @@ export default function PublicBookingPage() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="notes">Special Instructions (Optional)</Label>
-                    <Textarea id="notes" placeholder="Any special requests or access instructions..." value={customerInfo.notes} onChange={(e) => setCustomerInfo({ ...customerInfo, notes: e.target.value })} />
+                    <Label htmlFor="notes">Special Notes (Optional)</Label>
+                    <Textarea id="notes" placeholder="Feel free to describe any specific concerns or areas to focus on." value={customerInfo.notes} onChange={(e) => setCustomerInfo({ ...customerInfo, notes: e.target.value })} />
                   </div>
                 </CardContent>
               </Card>
