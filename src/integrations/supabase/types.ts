@@ -2759,6 +2759,7 @@ export type Database = {
           organization_id: string | null
           quantity: number
           supplier: string | null
+          supplier_link: string | null
           unit: string | null
           updated_at: string
         }
@@ -2775,6 +2776,7 @@ export type Database = {
           organization_id?: string | null
           quantity?: number
           supplier?: string | null
+          supplier_link?: string | null
           unit?: string | null
           updated_at?: string
         }
@@ -2791,6 +2793,7 @@ export type Database = {
           organization_id?: string | null
           quantity?: number
           supplier?: string | null
+          supplier_link?: string | null
           unit?: string | null
           updated_at?: string
         }
@@ -2800,6 +2803,78 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventory_usage: {
+        Row: {
+          booking_id: string | null
+          created_at: string
+          id: string
+          inventory_id: string
+          notes: string | null
+          organization_id: string
+          quantity_used: number
+          used_at: string
+          used_by: string | null
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string
+          id?: string
+          inventory_id: string
+          notes?: string | null
+          organization_id: string
+          quantity_used?: number
+          used_at?: string
+          used_by?: string | null
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string
+          id?: string
+          inventory_id?: string
+          notes?: string | null
+          organization_id?: string
+          quantity_used?: number
+          used_at?: string
+          used_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_usage_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_usage_inventory_id_fkey"
+            columns: ["inventory_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_usage_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_usage_used_by_fkey"
+            columns: ["used_by"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_usage_used_by_fkey"
+            columns: ["used_by"]
+            isOneToOne: false
+            referencedRelation: "staff_safe"
             referencedColumns: ["id"]
           },
         ]
