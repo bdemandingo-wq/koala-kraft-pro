@@ -349,7 +349,7 @@ export default function ReportsPage() {
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="pnl">P&L Overview</TabsTrigger>
           <TabsTrigger value="clv">Customer LTV</TabsTrigger>
-          <TabsTrigger value="staff-productivity">Staff Productivity</TabsTrigger>
+          <TabsTrigger value="staff-productivity">Technician Productivity</TabsTrigger>
           <TabsTrigger value="forecasting">Revenue Forecast</TabsTrigger>
           <TabsTrigger value="profit-margin">Profit Margin</TabsTrigger>
           <TabsTrigger value="technician-performance">Technician Performance</TabsTrigger>
