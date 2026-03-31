@@ -79,7 +79,7 @@ export default function CampaignsPage() {
     schedule: "now" as "now" | "later",
     scheduledDate: undefined as Date | undefined,
     scheduledTime: "09:00",
-    smsBody: 'Hi {first_name}! This is {company_name}. We wanted to reach out — we\'d love to have you back! Reply STOP to opt out.',
+    smsBody: 'Hey {first_name}! This is We Detail NC. Ready to get your vehicle looking fresh again? Book here: {booking_link} Reply STOP to opt out.',
     emailSubject: "",
     emailBody: "",
     days_inactive: 30,
