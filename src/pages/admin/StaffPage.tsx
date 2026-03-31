@@ -333,9 +333,9 @@ export default function StaffPage() {
                           <div>
                             <h3 className="font-semibold">{maskName(member.name)}</h3>
                             <div className="flex items-center gap-2">
-                              {(member.base_wage || member.hourly_rate) && (
+                                {(member.base_wage || member.hourly_rate) && (
                                 <span className="text-sm text-muted-foreground">
-                                  {isTestMode ? '$XX/hr' : `$${member.base_wage || member.hourly_rate}/hr`}
+                                  {isTestMode ? '$XX' : `$${member.base_wage || member.hourly_rate}`}
                                 </span>
                               )}
                               <Badge variant={member.tax_classification === '1099' ? 'secondary' : 'default'} className="text-xs">
