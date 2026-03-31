@@ -286,6 +286,7 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
     staff,
     conflictOverride,
     selectedChecklistId,
+    selectedVehicleId,
   } = useBookingForm();
 
   // Get customer phone for quote SMS
