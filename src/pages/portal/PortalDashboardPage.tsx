@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { format, isPast, isFuture, isToday, isTomorrow } from "date-fns";
+import { format, isToday, isTomorrow } from "date-fns";
 import { 
   CalendarDays, 
   Clock, 
@@ -20,7 +20,12 @@ import {
   X,
   RotateCcw,
   CalendarClock,
-  ChevronRight
+  ChevronRight,
+  Car,
+  DollarSign,
+  ChevronDown,
+  ChevronUp,
+  Phone
 } from "lucide-react";
 import {
   AlertDialog,
@@ -44,6 +49,8 @@ import { useClientPortal } from "@/contexts/ClientPortalContext";
 import { supabase } from "@/lib/supabase";
 import { PortalSettingsTab } from "@/components/portal/PortalSettingsTab";
 import { PortalProfileTab } from "@/components/portal/PortalProfileTab";
+import { PortalVehiclesTab } from "@/components/portal/PortalVehiclesTab";
+import { PortalBookingMedia } from "@/components/portal/PortalBookingMedia";
 import { usePlatform } from "@/hooks/usePlatform";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
@@ -87,6 +94,7 @@ export default function PortalDashboardPage() {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [bookingToCancel, setBookingToCancel] = useState<Booking | null>(null);
   const [cancelling, setCancelling] = useState(false);
+  const [expandedBooking, setExpandedBooking] = useState<string | null>(null);
   const { isNative } = usePlatform();
 
   useEffect(() => {
@@ -245,6 +253,8 @@ export default function PortalDashboardPage() {
   const pastBookings = bookings.filter(
     (b) => new Date(b.scheduled_at) < new Date() || b.status === "cancelled"
   );
+  const completedBookings = bookings.filter((b) => b.status === "completed");
+  const totalSpent = completedBookings.reduce((sum, b) => sum + Number(b.total_amount), 0);
 
   const displayLoyalty = loyalty || { points: 0, lifetime_points: 0, tier: "bronze" };
 
@@ -262,8 +272,8 @@ export default function PortalDashboardPage() {
       case "pending": return <Badge variant="secondary">Pending</Badge>;
       case "approved": return <Badge variant="default" className="bg-primary">Approved</Badge>;
       case "rejected": return <Badge variant="destructive">Rejected</Badge>;
-      case "confirmed": return <Badge variant="default">Confirmed</Badge>;
-      case "completed": return <Badge variant="default" className="bg-primary">Completed</Badge>;
+      case "confirmed": return <Badge className="bg-blue-600 text-white">Upcoming</Badge>;
+      case "completed": return <Badge className="bg-emerald-600 text-white">Completed</Badge>;
       case "cancelled": return <Badge variant="destructive">Cancelled</Badge>;
       default: return <Badge variant="outline">{status}</Badge>;
     }
@@ -280,24 +290,63 @@ export default function PortalDashboardPage() {
     ? upcomingBookings.sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime())[0]
     : null;
 
-  // Tier progress percentage (rough estimate for visual)
   const tierProgressMap: Record<string, number> = { bronze: 25, silver: 50, gold: 75, platinum: 100 };
   const tierProgress = tierProgressMap[displayLoyalty.tier?.toLowerCase()] ?? 25;
+
+  // ─── CANCEL DIALOG (shared) ───
+  const cancelDialog = (
+    <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Cancel Booking?</AlertDialogTitle>
+          <AlertDialogDescription>
+            {bookingToCancel && (
+              <>
+                Are you sure you want to cancel your{" "}
+                <strong>{bookingToCancel.service?.name || "detail"}</strong> scheduled for{" "}
+                <strong>{format(new Date(bookingToCancel.scheduled_at), "MMM d, yyyy 'at' h:mm a")}</strong>?
+                <br /><br />
+                <span className="text-muted-foreground text-sm">
+                  Note: Same day or next day cancellations (within 48 hours) may incur a fee unless you are a Platinum member.
+                </span>
+              </>
+            )}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={cancelling}>Keep Booking</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={confirmCancelBooking}
+            disabled={cancelling}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            {cancelling ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Cancelling...
+              </>
+            ) : (
+              "Yes, Cancel"
+            )}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
 
   // ─── NATIVE PORTAL LAYOUT ───
   if (isNative) {
     return (
       <main className="min-h-screen bg-background">
         <Seo
-          title="My Dashboard | Client Portal"
-          description="View your bookings, loyalty status, and manage appointments."
+          title="We Detail NC — Client Portal"
+          description="View your vehicles, service history, and book your next detail."
           canonicalPath="/portal/dashboard"
         />
 
-        {/* Native header */}
         <div className="px-4 pt-[calc(env(safe-area-inset-top)+12px)] pb-2 flex items-center justify-between">
           <h1 className="text-xl font-bold text-foreground">
-            Hey {customer.first_name} 👋
+            Welcome back, {customer.first_name} 👋
           </h1>
           <Sheet>
             <SheetTrigger asChild>
@@ -322,6 +371,24 @@ export default function PortalDashboardPage() {
         </div>
 
         <div className="px-4 pb-28 space-y-3">
+          {/* Summary cards */}
+          <div className="grid grid-cols-2 gap-3">
+            <Card className="rounded-2xl shadow-none border-border/40">
+              <CardContent className="p-3 text-center">
+                <CheckCircle2 className="h-5 w-5 mx-auto text-emerald-500 mb-1" />
+                <p className="text-lg font-bold">{completedBookings.length}</p>
+                <p className="text-[10px] text-muted-foreground uppercase">Services Done</p>
+              </CardContent>
+            </Card>
+            <Card className="rounded-2xl shadow-none border-border/40">
+              <CardContent className="p-3 text-center">
+                <DollarSign className="h-5 w-5 mx-auto text-primary mb-1" />
+                <p className="text-lg font-bold">${totalSpent.toFixed(0)}</p>
+                <p className="text-[10px] text-muted-foreground uppercase">Total Spent</p>
+              </CardContent>
+            </Card>
+          </div>
+
           {/* Loyalty card */}
           <Card className="rounded-2xl overflow-hidden shadow-none border-border/40">
             <div className={`h-1 ${getTierColor(displayLoyalty.tier)}`} />
@@ -339,14 +406,14 @@ export default function PortalDashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Upcoming booking card */}
+          {/* Next appointment */}
           {nextBooking ? (
             <Card className="rounded-2xl overflow-hidden shadow-none border-border/40">
               <CardContent className="p-4">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">Next Appointment</p>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-semibold">{nextBooking.service?.name || "Service"}</p>
+                    <p className="text-sm font-semibold">{nextBooking.service?.name || "Detail Service"}</p>
                     {getStatusBadge(nextBooking.status)}
                   </div>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -376,113 +443,109 @@ export default function PortalDashboardPage() {
           ) : (
             <Card className="rounded-2xl text-center shadow-none border-border/40 py-12">
               <CalendarDays className="h-10 w-10 mx-auto text-muted-foreground/40 mb-2" />
-              <p className="text-sm text-muted-foreground">No upcoming bookings</p>
+              <p className="text-sm text-muted-foreground">No upcoming appointments</p>
+              <Button variant="link" className="mt-1" onClick={() => navigate("/portal/request")}>
+                Book a Detail →
+              </Button>
             </Card>
           )}
 
           {/* Action buttons */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <Button
               className="rounded-xl h-11 text-sm font-semibold gap-2"
               onClick={() => navigate("/portal/request")}
             >
               <Plus className="h-4 w-4" />
-              Book Again
+              Book
             </Button>
             <Button
               variant="outline"
               className="rounded-xl h-11 text-sm font-semibold gap-2 border-border"
-              onClick={() => {/* scroll to past bookings below */}}
+              onClick={() => {
+                const el = document.getElementById("mobile-vehicles-section");
+                el?.scrollIntoView({ behavior: "smooth" });
+              }}
+            >
+              <Car className="h-4 w-4" />
+              Vehicles
+            </Button>
+            <Button
+              variant="outline"
+              className="rounded-xl h-11 text-sm font-semibold gap-2 border-border"
+              onClick={() => {
+                const el = document.getElementById("mobile-history-section");
+                el?.scrollIntoView({ behavior: "smooth" });
+              }}
             >
               <CalendarDays className="h-4 w-4" />
-              All Bookings
+              History
             </Button>
           </div>
 
+          {/* My Vehicles */}
+          <div id="mobile-vehicles-section" className="space-y-3">
+            <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">My Vehicles</h2>
+            <PortalVehiclesTab />
+          </div>
+
           {/* Past bookings */}
-          {pastBookings.length > 0 && (
-            <div className="space-y-3">
-              <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground mb-3">Past Bookings</h2>
-              {pastBookings.map((booking) => (
-                <Card key={booking.id} className="rounded-2xl p-4 shadow-none border-border/40">
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium">{booking.service?.name || "Service"}</p>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Calendar className="h-4 w-4" />
-                        {format(new Date(booking.scheduled_at), "MMM d, yyyy")}
+          <div id="mobile-history-section">
+            {pastBookings.length > 0 && (
+              <div className="space-y-3">
+                <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground mb-3">Service History</h2>
+                {pastBookings.map((booking) => (
+                  <Card key={booking.id} className="rounded-2xl p-4 shadow-none border-border/40">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium">{booking.service?.name || "Detail Service"}</p>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <Calendar className="h-4 w-4" />
+                          {format(new Date(booking.scheduled_at), "MMM d, yyyy")}
+                        </div>
+                      </div>
+                      <div className="text-right flex flex-col items-end gap-2">
+                        {getStatusBadge(booking.status)}
+                        <p className="text-sm font-semibold">${booking.total_amount}</p>
+                        {booking.status === "completed" && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-xs gap-1 h-8 rounded-lg"
+                            onClick={() => handleRebook(booking)}
+                          >
+                            <RotateCcw className="h-3 w-3" />
+                            Rebook
+                          </Button>
+                        )}
                       </div>
                     </div>
-                    <div className="text-right flex flex-col items-end gap-2">
-                      {getStatusBadge(booking.status)}
-                      <p className="text-sm font-semibold">${booking.total_amount}</p>
-                      {booking.status === "completed" && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-xs gap-1 h-8 rounded-lg"
-                          onClick={() => handleRebook(booking)}
-                        >
-                          <RotateCcw className="h-3 w-3" />
-                          Rebook
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          )}
+                    {booking.status === "completed" && (
+                      <PortalBookingMedia bookingId={booking.id} />
+                    )}
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Cancel Booking Dialog */}
-        <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Cancel Booking?</AlertDialogTitle>
-              <AlertDialogDescription>
-                {bookingToCancel && (
-                  <>
-                    Are you sure you want to cancel your{" "}
-                    <strong>{bookingToCancel.service?.name || "cleaning"}</strong> scheduled for{" "}
-                    <strong>{format(new Date(bookingToCancel.scheduled_at), "MMM d, yyyy 'at' h:mm a")}</strong>?
-                    <br /><br />
-                    <span className="text-muted-foreground text-sm">
-                      Note: Same day or next day cancellations (within 48 hours) may incur a fee unless you are a Platinum member.
-                    </span>
-                  </>
-                )}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel disabled={cancelling}>Keep Booking</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={confirmCancelBooking}
-                disabled={cancelling}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              >
-                {cancelling ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Cancelling...
-                  </>
-                ) : (
-                  "Yes, Cancel"
-                )}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        {/* Footer */}
+        <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-2 text-center text-[10px] text-muted-foreground pb-[calc(env(safe-area-inset-bottom)+8px)]">
+          Powered by We Detail NC | <a href="tel:9843328570" className="underline">(984) 332-8570</a>
+        </div>
+
+        {cancelDialog}
       </main>
     );
   }
 
-  // ─── WEB / DESKTOP LAYOUT (unchanged) ───
+  // ─── WEB / DESKTOP LAYOUT ───
   return (
     <main className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5">
       <Seo
-        title="My Dashboard | Client Portal"
-        description="View your bookings, loyalty status, and manage appointments."
+        title="We Detail NC — Client Portal"
+        description="View your vehicles, service history, and book your next detail."
         canonicalPath="/portal/dashboard"
       />
 
@@ -491,9 +554,9 @@ export default function PortalDashboardPage() {
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div>
             <h1 className="text-lg font-bold">
-              Welcome, {customer.first_name}!
+              Welcome back, {customer.first_name} 👋
             </h1>
-            <p className="text-sm text-muted-foreground">Client Portal</p>
+            <p className="text-sm text-muted-foreground">Here's your vehicle history with We Detail NC</p>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" className="relative" onClick={() => {}}>
@@ -512,51 +575,50 @@ export default function PortalDashboardPage() {
       </header>
 
       <div className="container mx-auto px-4 py-6 space-y-6">
-        {/* Next Booking Hero Card */}
-        {nextBooking && (
-          <Card className="overflow-hidden border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5">
-            <CardContent className="p-4">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Next Appointment</p>
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <p className="font-semibold text-lg">{nextBooking.service?.name || "Service"}</p>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Calendar className="h-4 w-4 text-primary" />
-                    <span className="font-medium text-foreground">{getDateLabel(nextBooking.scheduled_at)}</span>
-                    <span>at {format(new Date(nextBooking.scheduled_at), "h:mm a")}</span>
-                  </div>
-                  {nextBooking.address && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <MapPin className="h-4 w-4" />
-                      {nextBooking.address}
-                    </div>
-                  )}
-                </div>
-                <div className="flex flex-col gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="gap-1 text-xs"
-                    onClick={() => handleReschedule(nextBooking)}
-                  >
-                    <CalendarClock className="h-3.5 w-3.5" />
-                    Reschedule
-                  </Button>
-                </div>
-              </div>
+        {/* Summary Cards Row */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="p-4 text-center">
+              <CheckCircle2 className="h-6 w-6 mx-auto text-emerald-500 mb-1" />
+              <p className="text-2xl font-bold">{completedBookings.length}</p>
+              <p className="text-xs text-muted-foreground">Services Completed</p>
             </CardContent>
           </Card>
-        )}
-
-        {/* Loyalty + Request Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Card>
+            <CardContent className="p-4 text-center">
+              <DollarSign className="h-6 w-6 mx-auto text-primary mb-1" />
+              <p className="text-2xl font-bold">${totalSpent.toFixed(0)}</p>
+              <p className="text-xs text-muted-foreground">Total Spent</p>
+            </CardContent>
+          </Card>
+          <Card className="sm:col-span-1 col-span-2">
+            <CardContent className="p-4">
+              {nextBooking ? (
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase mb-1">Next Appointment</p>
+                  <p className="font-semibold">{nextBooking.service?.name || "Detail"}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {getDateLabel(nextBooking.scheduled_at)} at {format(new Date(nextBooking.scheduled_at), "h:mm a")}
+                  </p>
+                </div>
+              ) : (
+                <div className="text-center">
+                  <CalendarDays className="h-6 w-6 mx-auto text-muted-foreground mb-1" />
+                  <p className="text-xs text-muted-foreground">No upcoming</p>
+                  <Button variant="link" size="sm" className="text-xs p-0 h-auto" onClick={() => navigate("/portal/request")}>
+                    Book Now
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
           <Card className="overflow-hidden">
             <div className={`h-1.5 ${getTierColor(displayLoyalty.tier)}`} />
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Trophy className="h-5 w-5 text-primary" />
-                  <span className="font-semibold capitalize">{displayLoyalty.tier}</span>
+                  <span className="font-semibold capitalize text-sm">{displayLoyalty.tier}</span>
                 </div>
                 <Badge variant="outline" className="text-sm px-2.5 py-0.5">
                   {displayLoyalty.points} pts
@@ -564,14 +626,20 @@ export default function PortalDashboardPage() {
               </div>
             </CardContent>
           </Card>
+        </div>
 
-          <Button
-            className="w-full gap-2 h-auto py-4"
-            size="lg"
-            onClick={() => navigate("/portal/request")}
-          >
+        {/* Quick Action Buttons */}
+        <div className="flex gap-3">
+          <Button className="gap-2" size="lg" onClick={() => navigate("/portal/request")}>
             <Plus className="h-5 w-5" />
-            Request a Booking
+            Book a Detail
+          </Button>
+          <Button variant="outline" className="gap-2" size="lg" onClick={() => {
+            const tabsEl = document.querySelector('[data-value="vehicles"]') as HTMLButtonElement;
+            tabsEl?.click();
+          }}>
+            <Car className="h-5 w-5" />
+            View My Vehicles
           </Button>
         </div>
 
@@ -579,8 +647,12 @@ export default function PortalDashboardPage() {
         <Tabs defaultValue="upcoming" className="w-full">
           <TabsList className="w-full overflow-x-auto flex justify-start gap-1 h-auto p-1">
             <TabsTrigger value="upcoming" className="text-xs sm:text-sm shrink-0">Upcoming</TabsTrigger>
-            <TabsTrigger value="requests" className="text-xs sm:text-sm shrink-0">Requests</TabsTrigger>
+            <TabsTrigger value="vehicles" data-value="vehicles" className="text-xs sm:text-sm shrink-0 gap-1">
+              <Car className="h-3.5 w-3.5" />
+              My Vehicles
+            </TabsTrigger>
             <TabsTrigger value="history" className="text-xs sm:text-sm shrink-0">History</TabsTrigger>
+            <TabsTrigger value="requests" className="text-xs sm:text-sm shrink-0">Requests</TabsTrigger>
             <TabsTrigger value="notifications" className="relative text-xs sm:text-sm shrink-0">
               Alerts
               {unreadCount > 0 && (
@@ -606,9 +678,9 @@ export default function PortalDashboardPage() {
             ) : upcomingBookings.length === 0 ? (
               <Card className="p-8 text-center">
                 <CalendarDays className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-                <p className="text-muted-foreground">No upcoming bookings</p>
+                <p className="text-muted-foreground">No upcoming appointments</p>
                 <Button variant="link" className="mt-2" onClick={() => navigate("/portal/request")}>
-                  Request a booking
+                  Book a detail
                 </Button>
               </Card>
             ) : (
@@ -616,7 +688,7 @@ export default function PortalDashboardPage() {
                 <Card key={booking.id} className="p-4">
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
-                      <p className="font-medium">{booking.service?.name || "Service"}</p>
+                      <p className="font-medium">{booking.service?.name || "Detail Service"}</p>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Calendar className="h-4 w-4" />
                         {getDateLabel(booking.scheduled_at)}
@@ -661,6 +733,83 @@ export default function PortalDashboardPage() {
             )}
           </TabsContent>
 
+          {/* My Vehicles */}
+          <TabsContent value="vehicles" className="mt-4">
+            <PortalVehiclesTab />
+          </TabsContent>
+
+          {/* History */}
+          <TabsContent value="history" className="space-y-3 mt-4">
+            {loadingData ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : pastBookings.length === 0 ? (
+              <Card className="p-8 text-center">
+                <Star className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+                <p className="text-muted-foreground">No service history yet</p>
+              </Card>
+            ) : (
+              pastBookings.map((booking) => {
+                const isExpanded = expandedBooking === booking.id;
+                return (
+                  <Card key={booking.id} className="overflow-hidden">
+                    <button
+                      className="w-full p-4 text-left"
+                      onClick={() => setExpandedBooking(isExpanded ? null : booking.id)}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-1">
+                          <p className="font-medium">{booking.service?.name || "Detail Service"}</p>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Calendar className="h-4 w-4" />
+                            {format(new Date(booking.scheduled_at), "MMM d, yyyy")}
+                          </div>
+                          {booking.address && (
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <MapPin className="h-4 w-4" />
+                              {booking.address}
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-right flex flex-col items-end gap-2">
+                          {getStatusBadge(booking.status)}
+                          <p className="text-lg font-semibold">${booking.total_amount}</p>
+                          {isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                        </div>
+                      </div>
+                    </button>
+                    {isExpanded && (
+                      <div className="border-t px-4 pb-4 space-y-3">
+                        {/* Before & After media */}
+                        {booking.status === "completed" && (
+                          <PortalBookingMedia bookingId={booking.id} />
+                        )}
+                        {/* Action buttons */}
+                        <div className="flex gap-2 pt-2">
+                          {booking.status === "completed" && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-xs gap-1"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRebook(booking);
+                              }}
+                            >
+                              <RotateCcw className="h-3 w-3" />
+                              Book Same Service Again
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </Card>
+                );
+              })
+            )}
+          </TabsContent>
+
           {/* Booking Requests */}
           <TabsContent value="requests" className="space-y-3 mt-4">
             {loadingData ? (
@@ -670,7 +819,7 @@ export default function PortalDashboardPage() {
             ) : requests.length === 0 ? (
               <Card className="p-8 text-center">
                 <Clock className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-                <p className="text-muted-foreground">No booking requests yet</p>
+                <p className="text-muted-foreground">No service requests yet</p>
               </Card>
             ) : (
               requests.map((request) => (
@@ -703,55 +852,6 @@ export default function PortalDashboardPage() {
                       <span className="text-xs text-muted-foreground">
                         {format(new Date(request.created_at), "MMM d")}
                       </span>
-                    </div>
-                  </div>
-                </Card>
-              ))
-            )}
-          </TabsContent>
-
-          {/* History */}
-          <TabsContent value="history" className="space-y-3 mt-4">
-            {loadingData ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              </div>
-            ) : pastBookings.length === 0 ? (
-              <Card className="p-8 text-center">
-                <Star className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-                <p className="text-muted-foreground">No booking history yet</p>
-              </Card>
-            ) : (
-              pastBookings.map((booking) => (
-                <Card key={booking.id} className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-1">
-                      <p className="font-medium">{booking.service?.name || "Service"}</p>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Calendar className="h-4 w-4" />
-                        {format(new Date(booking.scheduled_at), "MMM d, yyyy")}
-                      </div>
-                      {booking.address && (
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <MapPin className="h-4 w-4" />
-                          {booking.address}
-                        </div>
-                      )}
-                    </div>
-                    <div className="text-right flex flex-col items-end gap-2">
-                      {getStatusBadge(booking.status)}
-                      <p className="text-lg font-semibold">${booking.total_amount}</p>
-                      {booking.status === "completed" && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-xs gap-1 h-7"
-                          onClick={() => handleRebook(booking)}
-                        >
-                          <RotateCcw className="h-3 w-3" />
-                          Rebook
-                        </Button>
-                      )}
                     </div>
                   </div>
                 </Card>
@@ -824,44 +924,12 @@ export default function PortalDashboardPage() {
         </Tabs>
       </div>
 
-      {/* Cancel Booking Confirmation Dialog */}
-      <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Cancel Booking?</AlertDialogTitle>
-            <AlertDialogDescription>
-              {bookingToCancel && (
-                <>
-                  Are you sure you want to cancel your{" "}
-                  <strong>{bookingToCancel.service?.name || "cleaning"}</strong> scheduled for{" "}
-                  <strong>{format(new Date(bookingToCancel.scheduled_at), "MMM d, yyyy 'at' h:mm a")}</strong>?
-                  <br /><br />
-                  <span className="text-muted-foreground text-sm">
-                    Note: Same day or next day cancellations (within 48 hours) may incur a fee unless you are a Platinum member.
-                  </span>
-                </>
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={cancelling}>Keep Booking</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmCancelBooking}
-              disabled={cancelling}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {cancelling ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Cancelling...
-                </>
-              ) : (
-                "Yes, Cancel"
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Footer */}
+      <footer className="border-t mt-8 py-4 text-center text-sm text-muted-foreground">
+        Powered by We Detail NC | <a href="tel:9843328570" className="underline">(984) 332-8570</a>
+      </footer>
+
+      {cancelDialog}
     </main>
   );
 }
