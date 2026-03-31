@@ -226,9 +226,9 @@ export default function PortalRequestPage() {
       <div className="container mx-auto px-4 py-6 max-w-md">
         <Card>
           <CardHeader>
-            <CardTitle>{isReschedule ? "Reschedule Request" : "New Booking Request"}</CardTitle>
+            <CardTitle>{isReschedule ? "Reschedule Request" : "New Service Request"}</CardTitle>
             <CardDescription>
-              {isReschedule ? "Submit a reschedule request and we'll confirm within 24 hours." : "Submit a request and we'll confirm your appointment within 24 hours."}
+              {isReschedule ? "Submit a reschedule request and we'll confirm within 24 hours." : "Submit a request and we'll confirm your detailing appointment within 24 hours."}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
