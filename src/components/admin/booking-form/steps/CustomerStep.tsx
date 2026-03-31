@@ -7,11 +7,18 @@ import { Badge } from '@/components/ui/badge';
 import { User, RotateCcw, Loader2 } from 'lucide-react';
 import { CustomerSearchInput } from '@/components/admin/CustomerSearchInput';
 import { EditCustomerDialog } from '@/components/admin/EditCustomerDialog';
+import { VehicleSelectDropdown } from '@/components/admin/VehicleManager';
 import { useBookingForm } from '../BookingFormContext';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useOrgId } from '@/hooks/useOrgId';
 import { toast } from 'sonner';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Car } from 'lucide-react';
 
 interface LastBookingInfo {
   address: string | null;
