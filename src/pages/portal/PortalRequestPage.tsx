@@ -199,8 +199,8 @@ export default function PortalRequestPage() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5">
       <Seo
-        title="Request a Booking | Client Portal"
-        description="Submit a booking request for your preferred date and service."
+        title="Book a Detail | We Detail NC"
+        description="Submit a service request for your preferred date and detailing package."
         canonicalPath="/portal/request"
       />
 
