@@ -25,8 +25,8 @@ export function PropertyStep() {
           <MapPin className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
         </div>
         <div>
-          <h3 className="text-lg font-semibold">Property Details</h3>
-          <p className="text-sm text-muted-foreground">Enter the service location address</p>
+          <h3 className="text-lg font-semibold">Service Location</h3>
+          <p className="text-sm text-muted-foreground">Where would you like us to come?</p>
         </div>
       </div>
 
