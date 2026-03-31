@@ -138,11 +138,11 @@ export default function ReportsPage() {
       existing.revenue += Number(booking.total_amount || 0);
       serviceMap.set(serviceId, existing);
 
-      // Count recurring cleans - bookings from recurring customers
+      // Count recurring services - bookings from recurring customers
       const customerId = booking.customer?.id;
       if (customerId && recurringCustomerIds.has(customerId)) {
-        recurringCleansCount += 1;
-        recurringCleansRevenue += Number(booking.total_amount || 0);
+        recurringServicesCount += 1;
+        recurringServicesRevenue += Number(booking.total_amount || 0);
       }
     });
 
