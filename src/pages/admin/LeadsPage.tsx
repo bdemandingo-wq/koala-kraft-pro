@@ -78,9 +78,21 @@ const SOURCE_OPTIONS = [
   { value: 'website', label: 'Website' },
   { value: 'referral', label: 'Referral' },
   { value: 'google', label: 'Google' },
-  { value: 'facebook', label: 'Facebook' },
+  { value: 'facebook', label: 'Facebook Lead Ad' },
+  { value: 'booking_form', label: 'Booking Form' },
+  { value: 'manual', label: 'Manual' },
   { value: 'other', label: 'Other' },
 ];
+
+const SOURCE_BADGE_CONFIG: Record<string, { label: string; className: string; icon?: string }> = {
+  facebook: { label: 'Facebook Lead Ad', className: 'bg-blue-600 text-white', icon: 'facebook' },
+  website: { label: 'Website', className: 'bg-emerald-500 text-white' },
+  referral: { label: 'Referral', className: 'bg-purple-500 text-white' },
+  google: { label: 'Google', className: 'bg-red-500 text-white' },
+  booking_form: { label: 'Booking Form', className: 'bg-amber-500 text-white' },
+  manual: { label: 'Manual', className: 'bg-muted text-foreground' },
+  other: { label: 'Other', className: 'bg-muted text-foreground' },
+};
 
 export default function LeadsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
