@@ -436,12 +436,12 @@ export default function ReportsPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="text-left border-b border-border">
-                        <th className="pb-3 font-medium text-muted-foreground">Staff Member</th>
+                     <tr className="text-left border-b border-border">
+                        <th className="pb-3 font-medium text-muted-foreground">Technician</th>
                         <th className="pb-3 font-medium text-muted-foreground text-right">Completed</th>
                         <th className="pb-3 font-medium text-muted-foreground text-right">Upcoming</th>
-                        <th className="pb-3 font-medium text-muted-foreground text-right">Total Payment</th>
-                        <th className="pb-3 font-medium text-muted-foreground text-right">Avg/Booking</th>
+                        <th className="pb-3 font-medium text-muted-foreground text-right">Total Pay</th>
+                        <th className="pb-3 font-medium text-muted-foreground text-right">Avg/Job</th>
                       </tr>
                     </thead>
                     <tbody>
