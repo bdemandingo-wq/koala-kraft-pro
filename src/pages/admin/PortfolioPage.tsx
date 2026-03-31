@@ -120,7 +120,7 @@ export default function PortfolioPage() {
   }, [rawMedia, serviceFilter, search]);
 
   return (
-    <AdminLayout>
+    <AdminLayout title="Portfolio" subtitle="Before & after gallery across all jobs">
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold">Portfolio</h1>
