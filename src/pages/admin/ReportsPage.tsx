@@ -430,7 +430,7 @@ export default function ReportsPage() {
               <h3 className="font-semibold mb-4">Technician Performance</h3>
               {staffStats.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  No staff performance data available
+                  No technician performance data available
                 </div>
               ) : (
                 <div className="overflow-x-auto">
