@@ -384,12 +384,11 @@ export default function CampaignsPage() {
 
   const getAutomationMeta = (type: string) => {
     const map: Record<string, { label: string; description: string; icon: typeof Zap }> = {
-      winback_60day: { label: "Win Back Inactive", description: "Fires after 60+ days of no booking", icon: RefreshCw },
-      review_request: { label: "Post-Clean Review Request", description: "Fires 30 min after booking marked complete", icon: Star },
-      appointment_reminder: { label: "Appointment Reminder", description: "Fires 24 hours before scheduled appointment", icon: CalendarDays },
-      
-      rebooking_reminder: { label: "Recurring Reminder", description: "Fires 28 days after completed service", icon: Clock },
-      recurring_upsell: { label: "Recurring Service Upsell", description: "Fires 2 hours after completed service", icon: TrendingUp },
+      winback_60day: { label: "Win-Back (90 Days)", description: "Fires after 90+ days of no booking — sends returning customer offer", icon: RefreshCw },
+      review_request: { label: "Post-Detail Review Request", description: "Fires 30 min after detail completed — sends Google review link", icon: Star },
+      appointment_reminder: { label: "Appointment Reminder", description: "Fires 24 hours before scheduled detail with vehicle & address info", icon: CalendarDays },
+      rebooking_reminder: { label: "Rebooking Reminder", description: "Fires 30–90 days after detail based on package type", icon: Clock },
+      recurring_upsell: { label: "Maintenance Plan Upsell", description: "Fires 2 hours after completed detail — offers recurring maintenance", icon: TrendingUp },
     };
     return map[type] || { label: type.replace(/_/g, " "), description: "", icon: Zap };
   };
