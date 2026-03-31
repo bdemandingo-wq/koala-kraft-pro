@@ -151,7 +151,7 @@ export default function PortalRequestPage() {
       const addressLine = selectedLoc
         ? `Address: ${[selectedLoc.name, selectedLoc.address, selectedLoc.apt_suite, selectedLoc.city, selectedLoc.state, selectedLoc.zip_code].filter(Boolean).join(", ")}`
         : null;
-      const turnoverLine = isAirbnb && isTurnover ? "⚡ TURNOVER CLEAN — Time-sensitive, must be cleaned at scheduled time" : null;
+      const turnoverLine = isAirbnb && isTurnover ? "⚡ TURNOVER SERVICE — Time-sensitive, must be serviced at scheduled time" : null;
       const combinedNotes = [addressLine, turnoverLine, notes.trim()].filter(Boolean).join("\n") || null;
 
       // Use security definer RPC to bypass RLS (client portal users aren't authenticated via Supabase Auth)
