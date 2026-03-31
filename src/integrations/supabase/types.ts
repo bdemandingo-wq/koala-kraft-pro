@@ -1201,6 +1201,7 @@ export type Database = {
           confirmation_email_subject: string | null
           created_at: string
           currency: string | null
+          facebook_page_id: string | null
           google_review_url: string | null
           id: string
           logo_url: string | null
@@ -1241,6 +1242,7 @@ export type Database = {
           confirmation_email_subject?: string | null
           created_at?: string
           currency?: string | null
+          facebook_page_id?: string | null
           google_review_url?: string | null
           id?: string
           logo_url?: string | null
@@ -1281,6 +1283,7 @@ export type Database = {
           confirmation_email_subject?: string | null
           created_at?: string
           currency?: string | null
+          facebook_page_id?: string | null
           google_review_url?: string | null
           id?: string
           logo_url?: string | null

@@ -4,7 +4,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 serve(async (req: Request) => {
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
   const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-  const FACEBOOK_VERIFY_TOKEN = "footprint_leads_2025";
+  const FACEBOOK_VERIFY_TOKEN = Deno.env.get("FACEBOOK_VERIFY_TOKEN") || "footprint_leads_2025";
 
   // ── GET: Meta webhook verification ──
   if (req.method === 'GET') {
@@ -38,20 +38,19 @@ serve(async (req: Request) => {
 
     console.log("[facebook-lead-webhook] POST payload:", JSON.stringify(body).slice(0, 1000));
 
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
     // Store raw event
     try {
-      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
       await supabase.from('facebook_lead_webhook_events').insert({ payload: body });
     } catch (err) {
       console.error("[facebook-lead-webhook] DB insert error:", err);
     }
 
-    // Process leads in background (same logic as before)
+    // Process leads
     try {
       const FACEBOOK_PAGE_ACCESS_TOKEN = Deno.env.get("FACEBOOK_PAGE_ACCESS_TOKEN");
       if (body.object === 'page' && FACEBOOK_PAGE_ACCESS_TOKEN) {
-        const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-
         for (const entry of body.entry || []) {
           for (const change of entry.changes || []) {
             if (change.field !== 'leadgen') continue;
@@ -79,7 +78,11 @@ serve(async (req: Request) => {
             const lastName = fields['last_name'] || fields['full_name']?.split(' ').slice(1).join(' ') || 'Lead';
             const email = fields['email'] || '';
             const phone = fields['phone_number'] || fields['phone'] || '';
+            const vehicleType = fields['vehicle_type'] || fields['car_type'] || '';
+            const serviceInterest = fields['service_interested_in'] || fields['service'] || fields['package'] || '';
+            const message = fields['message'] || fields['comments'] || fields['additional_info'] || '';
 
+            // Determine organization
             let organizationId: string | null = null;
             const { data: orgMatch } = await supabase
               .from('business_settings')
@@ -99,6 +102,7 @@ serve(async (req: Request) => {
               continue;
             }
 
+            // De-duplicate by email
             if (email) {
               const { data: existing } = await supabase
                 .from('leads')
@@ -106,19 +110,126 @@ serve(async (req: Request) => {
                 .eq('email', email.toLowerCase())
                 .eq('organization_id', organizationId)
                 .maybeSingle();
-              if (existing) continue;
+              if (existing) {
+                console.log("[facebook-lead-webhook] Duplicate lead skipped:", email);
+                continue;
+              }
             }
 
-            await supabase.from('leads').insert({
+            // Build notes from custom fields
+            const notesParts: string[] = [];
+            notesParts.push(`Auto-captured from Facebook Lead Ad (leadgen_id: ${leadgenId})`);
+            if (vehicleType) notesParts.push(`Vehicle Type: ${vehicleType}`);
+            if (serviceInterest) notesParts.push(`Service Interest: ${serviceInterest}`);
+            if (message) notesParts.push(`Message: ${message}`);
+
+            const fullName = `${firstName} ${lastName}`.trim();
+
+            // Insert lead
+            const { data: newLead, error: leadError } = await supabase.from('leads').insert({
               first_name: firstName.slice(0, 100),
               last_name: lastName.slice(0, 100),
+              name: fullName.slice(0, 200),
               email: email ? email.toLowerCase().slice(0, 255) : null,
               phone: phone ? phone.slice(0, 20) : null,
               source: 'facebook',
               status: 'new',
-              notes: `Auto-captured from Facebook Lead Ad (leadgen_id: ${leadgenId})`,
+              service_interest: serviceInterest || null,
+              notes: notesParts.join('\n'),
               organization_id: organizationId,
-            });
+            }).select('id').single();
+
+            if (leadError) {
+              console.error("[facebook-lead-webhook] Lead insert error:", leadError);
+              continue;
+            }
+
+            console.log("[facebook-lead-webhook] Lead created:", newLead?.id);
+
+            // ── Follow-up: SMS via OpenPhone ──
+            if (phone && organizationId) {
+              try {
+                const { data: smsSettings } = await supabase
+                  .from('organization_sms_settings')
+                  .select('openphone_api_key, openphone_phone_number_id')
+                  .eq('organization_id', organizationId)
+                  .maybeSingle();
+
+                const { data: bizSettings } = await supabase
+                  .from('business_settings')
+                  .select('company_name')
+                  .eq('organization_id', organizationId)
+                  .maybeSingle();
+
+                const companyName = bizSettings?.company_name || 'We Detail NC';
+
+                if (smsSettings?.openphone_api_key && smsSettings?.openphone_phone_number_id) {
+                  const smsBody = `Hey ${firstName}! Thanks for reaching out to ${companyName} 🚗 We'll be in touch shortly to get your vehicle looking brand new. Reply STOP to opt out.`;
+
+                  await fetch('https://api.openphone.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': smsSettings.openphone_api_key,
+                    },
+                    body: JSON.stringify({
+                      content: smsBody,
+                      to: [phone],
+                      from: smsSettings.openphone_phone_number_id,
+                    }),
+                  });
+                  console.log("[facebook-lead-webhook] SMS sent to:", phone);
+                }
+              } catch (smsErr) {
+                console.error("[facebook-lead-webhook] SMS error:", smsErr);
+              }
+            }
+
+            // ── Follow-up: Email ──
+            if (email && organizationId) {
+              try {
+                const { data: bizSettings } = await supabase
+                  .from('business_settings')
+                  .select('company_name, resend_api_key')
+                  .eq('organization_id', organizationId)
+                  .maybeSingle();
+
+                const companyName = bizSettings?.company_name || 'We Detail NC';
+                const resendKey = bizSettings?.resend_api_key || Deno.env.get("RESEND_API_KEY");
+
+                if (resendKey) {
+                  await fetch('https://api.resend.com/emails', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${resendKey}`,
+                    },
+                    body: JSON.stringify({
+                      from: `${companyName} <noreply@resend.dev>`,
+                      to: [email.toLowerCase()],
+                      subject: `We got your request — ${companyName} will be in touch soon!`,
+                      html: `<p>Hi ${firstName},</p><p>Thanks for reaching out to <strong>${companyName}</strong>! We received your inquiry and will be in touch shortly to discuss your detailing needs.</p><p>In the meantime, feel free to reply to this email if you have any questions.</p><p>Best,<br/>${companyName}</p>`,
+                    }),
+                  });
+                  console.log("[facebook-lead-webhook] Email sent to:", email);
+                }
+              } catch (emailErr) {
+                console.error("[facebook-lead-webhook] Email error:", emailErr);
+              }
+            }
+
+            // ── Create follow-up task ──
+            try {
+              await supabase.from('tasks_and_notes').insert({
+                organization_id: organizationId,
+                type: 'daily',
+                content: `Follow up with ${fullName} — Facebook Lead`,
+                is_completed: false,
+              });
+              console.log("[facebook-lead-webhook] Task created for:", fullName);
+            } catch (taskErr) {
+              console.error("[facebook-lead-webhook] Task creation error:", taskErr);
+            }
           }
         }
       }

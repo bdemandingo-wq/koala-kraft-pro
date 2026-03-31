@@ -78,9 +78,21 @@ const SOURCE_OPTIONS = [
   { value: 'website', label: 'Website' },
   { value: 'referral', label: 'Referral' },
   { value: 'google', label: 'Google' },
-  { value: 'facebook', label: 'Facebook' },
+  { value: 'facebook', label: 'Facebook Lead Ad' },
+  { value: 'booking_form', label: 'Booking Form' },
+  { value: 'manual', label: 'Manual' },
   { value: 'other', label: 'Other' },
 ];
+
+const SOURCE_BADGE_CONFIG: Record<string, { label: string; className: string; icon?: string }> = {
+  facebook: { label: 'Facebook Lead Ad', className: 'bg-blue-600 text-white', icon: 'facebook' },
+  website: { label: 'Website', className: 'bg-emerald-500 text-white' },
+  referral: { label: 'Referral', className: 'bg-purple-500 text-white' },
+  google: { label: 'Google', className: 'bg-red-500 text-white' },
+  booking_form: { label: 'Booking Form', className: 'bg-amber-500 text-white' },
+  manual: { label: 'Manual', className: 'bg-muted text-foreground' },
+  other: { label: 'Other', className: 'bg-muted text-foreground' },
+};
 
 export default function LeadsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -631,7 +643,14 @@ export default function LeadsPage() {
               ) : (
               filteredLeads.map((lead) => (
                   <TableRow key={lead.id} className="[&>td]:py-3 @[pointer:coarse]:min-h-[52px]">
-                    <TableCell className="font-medium min-h-[44px]">{maskName(lead.name)}</TableCell>
+                    <TableCell className="font-medium min-h-[44px]">
+                      <div className="flex items-center gap-1.5">
+                        {lead.source === 'facebook' && (
+                          <svg className="w-4 h-4 text-blue-600 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                        )}
+                        {maskName(lead.name)}
+                      </div>
+                    </TableCell>
                     <TableCell>
                       <div className="space-y-1">
                         <div className="flex items-center gap-1 text-sm">
@@ -645,7 +664,11 @@ export default function LeadsPage() {
                       </div>
                     </TableCell>
                     <TableCell>{lead.service_interest || '-'}</TableCell>
-                    <TableCell className="capitalize">{lead.source}</TableCell>
+                    <TableCell>
+                      <Badge className={SOURCE_BADGE_CONFIG[lead.source]?.className || 'bg-muted text-foreground'}>
+                        {SOURCE_BADGE_CONFIG[lead.source]?.label || lead.source}
+                      </Badge>
+                    </TableCell>
                     <TableCell>
                       <Select
                         value={lead.status}
