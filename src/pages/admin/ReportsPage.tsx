@@ -189,7 +189,7 @@ export default function ReportsPage() {
       return {
         name: s.name,
         bookings: completedBookings,
-        upcomingCleans,
+        upcomingJobs,
         payment: totalPayment,
       };
     });
