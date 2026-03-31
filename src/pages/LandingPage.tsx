@@ -73,7 +73,7 @@ function useScrollReveal() {
 const cleaningConfig = {
   jobLabel: "Details",
   staffLabel: "Technicians",
-  serviceExamples: ["Full Detail", "Express Detail", "Pre-Sale Detail"],
+  serviceExamples: ["Express Package", "Reset Package", "Deluxe Package", "Elite Package"],
   dashboardStats: {
     bookings: 12,
     revenue: "$2,450",
@@ -81,25 +81,32 @@ const cleaningConfig = {
   },
   testimonials: [
     {
-      quote: "This platform transformed how we run our car detailing business. Bookings increased 40% in the first month!",
-      author: "Sarah M.",
-      role: "Owner, Elite Auto Detail",
+      quote: "We Detail NC transformed my car — it looked brand new! The mobile service is incredibly convenient.",
+      author: "Arlene Green",
+      role: "Charlotte, NC",
       rating: 5,
-      avatar: "SM"
+      avatar: "AG"
     },
     {
-      quote: "The staff portal is amazing. My team can manage their own schedules and I can track everything in real-time.",
-      author: "Michael R.",
-      role: "Founder, Pristine Auto Care",
+      quote: "Hands down the best detailing service in Charlotte. Professional, thorough, and they come right to your door.",
+      author: "Rohan Rudolph",
+      role: "Charlotte, NC",
       rating: 5,
-      avatar: "MR"
+      avatar: "RR"
     },
     {
-      quote: "Finally, a platform that understands car detailing businesses. The automated invoicing alone saves me hours every week.",
-      author: "Jennifer L.",
-      role: "CEO, Premium Detail Works",
+      quote: "The Elite Package was worth every penny. My paint looks flawless and the ceramic coating is incredible.",
+      author: "Danie Pearce",
+      role: "Charlotte, NC",
       rating: 5,
-      avatar: "JL"
+      avatar: "DP"
+    },
+    {
+      quote: "I've been on the Maintenance Plan for months — my car has never looked this good consistently. Highly recommend!",
+      author: "Lisa Rems",
+      role: "Charlotte, NC",
+      rating: 5,
+      avatar: "LR"
     },
   ],
   features: [

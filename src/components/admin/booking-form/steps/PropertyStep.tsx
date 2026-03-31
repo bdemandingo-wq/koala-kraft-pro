@@ -33,7 +33,7 @@ export function PropertyStep() {
       <Card className="border-border/50 shadow-sm">
         <CardContent className="pt-6 space-y-5">
           <div>
-            <Label htmlFor="address" className="text-sm font-medium">Street Address</Label>
+            <Label htmlFor="address" className="text-sm font-medium">Where would you like us to come?</Label>
             <Input
               id="address"
               value={address}
