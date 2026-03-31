@@ -1085,10 +1085,11 @@ export default function PublicBookingPage() {
                       <p className="font-medium">{service?.name}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Home Size</p>
+                      <p className="text-sm text-muted-foreground">Vehicle</p>
                       <p className="font-medium">
-                        {selectedSqFtIndex !== null ? squareFootageRanges[selectedSqFtIndex].label : '-'}
+                        {vehicleYear ? `${vehicleYear} ` : ''}{vehicleMake} {vehicleModel}{vehicleColor ? ` (${vehicleColor})` : ''}
                       </p>
+                      <p className="text-sm text-muted-foreground">{vehicleType}{vehicleCondition ? ` — ${vehicleCondition}` : ''}</p>
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Total Price</p>
