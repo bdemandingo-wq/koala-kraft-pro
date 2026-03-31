@@ -887,8 +887,8 @@ export default function PayrollPage() {
       {/* Tabs */}
       <Tabs defaultValue="summary" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="summary">Staff Summary</TabsTrigger>
-          <TabsTrigger value="details">Booking Details</TabsTrigger>
+          <TabsTrigger value="summary">Technician Summary</TabsTrigger>
+          <TabsTrigger value="details">Job Details</TabsTrigger>
           <TabsTrigger value="settings">Payroll Settings</TabsTrigger>
         </TabsList>
 
