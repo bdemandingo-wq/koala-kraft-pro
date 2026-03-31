@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
+import { JobMediaSection } from "@/components/admin/JobMediaSection";
 
 import { BookingWithDetails, useStaff, useUpdateBooking } from "@/hooks/useBookings";
 import { useOrgId } from "@/hooks/useOrgId";
@@ -163,7 +164,7 @@ export function BookingDetailsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl">
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Booking #{booking.booking_number}</DialogTitle>
         </DialogHeader>
@@ -224,6 +225,14 @@ export function BookingDetailsDialog({
               <p className="text-sm whitespace-pre-wrap">{booking.notes}</p>
             </div>
           ) : null}
+
+          {/* Before & After Media */}
+          {booking.id && organizationId && (
+            <JobMediaSection
+              bookingId={booking.id}
+              organizationId={organizationId}
+            />
+          )}
         </div>
 
         <DialogFooter className="flex-col sm:flex-row gap-2">

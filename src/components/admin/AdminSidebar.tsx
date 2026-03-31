@@ -82,6 +82,7 @@ const defaultNavigation = [
   { name: 'Staff', href: '/dashboard/staff', icon: UserCircle },
   { name: 'Checklists', href: '/dashboard/checklists', icon: CheckSquare },
   { name: 'Booking Photos', href: '/dashboard/booking-photos', icon: Camera },
+  { name: 'Portfolio', href: '/dashboard/portfolio', icon: Camera },
   { name: 'Inventory', href: '/dashboard/inventory', icon: Package },
   { name: 'Discounts', href: '/dashboard/discounts', icon: Tag },
   { name: 'Payroll', href: '/dashboard/payroll', icon: DollarSign },
