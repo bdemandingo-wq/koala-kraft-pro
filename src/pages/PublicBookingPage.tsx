@@ -70,7 +70,7 @@ export default function PublicBookingPage() {
   const [selectedHomeCondition, setSelectedHomeCondition] = useState<string | null>(null);
   const [selectedFrequency, setSelectedFrequency] = useState<string>('one-time');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [selectedTime, setSelectedTime] = useState<string | null>(null); // "HH:mm" 24h format
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmationNumber, setConfirmationNumber] = useState<string>('');
   const [cardSaved, setCardSaved] = useState(false);
@@ -78,6 +78,16 @@ export default function PublicBookingPage() {
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [orgTimezone, setOrgTimezone] = useState<string>('America/New_York');
   const [customerTimezone] = useState<string>(() => Intl.DateTimeFormat().resolvedOptions().timeZone);
+  
+  // Vehicle info fields
+  const [vehicleType, setVehicleType] = useState<string>('');
+  const [vehicleMake, setVehicleMake] = useState('');
+  const [vehicleModel, setVehicleModel] = useState('');
+  const [vehicleYear, setVehicleYear] = useState('');
+  const [vehicleColor, setVehicleColor] = useState('');
+  const [vehicleCondition, setVehicleCondition] = useState<string>('');
+  const [serviceLocation, setServiceLocation] = useState<string>('mobile');
+
   const [customerInfo, setCustomerInfo] = useState({
     name: '',
     email: '',
