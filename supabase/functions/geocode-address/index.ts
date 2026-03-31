@@ -304,7 +304,7 @@ serve(async (req) => {
         console.log('Trying structured search:', structuredParts);
         const response = await fetch(
           `https://nominatim.openstreetmap.org/search?${params.toString()}`,
-          { headers: { 'Accept': 'application/json', 'User-Agent': 'TidywiseApp/1.0' } }
+          { headers: { 'Accept': 'application/json', 'User-Agent': 'WeDetailNCApp/1.0' } }
         );
         const contentType = response.headers.get('content-type') || '';
         if (response.ok && contentType.includes('application/json')) {
