@@ -5,7 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SYSTEM_PROMPT = `You are We Detail NC AI — the built-in help assistant for the We Detail NC car detailing business management platform. You answer questions from business owners / admins who use We Detail NC to run their detailing company. You can also analyze images — screenshots, photos of cleaning sites, receipts, etc.
+const SYSTEM_PROMPT = `You are We Detail NC AI — the built-in help assistant for the We Detail NC car detailing business management platform. You answer questions from business owners / admins who use We Detail NC to run their detailing company. You can also analyze images — screenshots, photos of detailing jobs, vehicles, receipts, etc.
 
 ## Platform Knowledge
 

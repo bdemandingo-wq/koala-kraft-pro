@@ -6,14 +6,14 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Cleaning business blog topics for variety
+// Car detailing business blog topics for variety
 const blogTopics = [
-  { category: "Cleaning Tips", topics: [
-    "Deep cleaning secrets professionals use",
-    "How to clean stubborn stains from any surface", 
-    "The best cleaning products for eco-conscious businesses",
-    "Speed cleaning techniques that save hours",
-    "Kitchen cleaning hacks every pro should know"
+  { category: "Detailing Tips", topics: [
+    "Paint correction secrets professionals use",
+    "How to remove stubborn water spots and swirl marks", 
+    "The best detailing products for eco-conscious businesses",
+    "Interior detailing techniques that save hours",
+    "Ceramic coating maintenance tips every detailer should know"
   ]},
   { category: "Business Growth", topics: [
     "How to price your detailing services competitively",
@@ -30,9 +30,9 @@ const blogTopics = [
     "Time tracking and productivity tips"
   ]},
   { category: "Industry Insights", topics: [
-    "Trends shaping the cleaning industry",
+    "Trends shaping the car detailing industry",
     "How technology is changing car detailing businesses",
-    "Green cleaning: Meeting client demands",
+    "Eco-friendly detailing: Meeting client demands",
     "Commercial vs residential detailing pros and cons",
     "Insurance and liability for car detailing businesses"
   ]}
