@@ -72,8 +72,8 @@ export default function PortalLoginPage() {
       </Button>
       
       <Seo
-        title="Client Portal | Sign In"
-        description="Sign in to your client portal to view bookings, request appointments, and more."
+        title="We Detail NC — Client Portal"
+        description="Sign in to view your vehicles, service history, and book your next detail."
         canonicalPath="/portal"
       />
 
@@ -84,9 +84,9 @@ export default function PortalLoginPage() {
               <Users className="w-8 h-8 text-primary-foreground" />
             </div>
             <div>
-              <CardTitle className="text-2xl font-bold">Client Portal</CardTitle>
+              <CardTitle className="text-2xl font-bold">We Detail NC</CardTitle>
               <CardDescription className="mt-2">
-                Sign in to view your bookings and schedule appointments
+                Sign in to view your vehicles, service history, and book your next detail
               </CardDescription>
             </div>
           </CardHeader>
@@ -144,7 +144,7 @@ export default function PortalLoginPage() {
             </form>
 
             <p className="mt-6 text-center text-sm text-muted-foreground">
-              Need access? Contact the business to get your portal login.
+              Need access? Contact We Detail NC at (984) 332-8570 to get your portal login.
             </p>
           </CardContent>
         </Card>

@@ -151,7 +151,7 @@ export default function PortalRequestPage() {
       const addressLine = selectedLoc
         ? `Address: ${[selectedLoc.name, selectedLoc.address, selectedLoc.apt_suite, selectedLoc.city, selectedLoc.state, selectedLoc.zip_code].filter(Boolean).join(", ")}`
         : null;
-      const turnoverLine = isAirbnb && isTurnover ? "⚡ TURNOVER CLEAN — Time-sensitive, must be cleaned at scheduled time" : null;
+      const turnoverLine = isAirbnb && isTurnover ? "⚡ TURNOVER SERVICE — Time-sensitive, must be serviced at scheduled time" : null;
       const combinedNotes = [addressLine, turnoverLine, notes.trim()].filter(Boolean).join("\n") || null;
 
       // Use security definer RPC to bypass RLS (client portal users aren't authenticated via Supabase Auth)
@@ -178,7 +178,7 @@ export default function PortalRequestPage() {
         },
       }).catch((err) => console.error("SMS notification error:", err));
 
-      toast.success("Booking request submitted! We'll get back to you soon.");
+      toast.success("Service request submitted! We'll get back to you soon.");
       navigate("/portal/dashboard");
     } catch (err: unknown) {
       console.error("Submit error:", err);
@@ -199,8 +199,8 @@ export default function PortalRequestPage() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5">
       <Seo
-        title="Request a Booking | Client Portal"
-        description="Submit a booking request for your preferred date and service."
+        title="Book a Detail | We Detail NC"
+        description="Submit a service request for your preferred date and detailing package."
         canonicalPath="/portal/request"
       />
 
@@ -215,9 +215,9 @@ export default function PortalRequestPage() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-lg font-bold">{isReschedule ? "Reschedule Booking" : "Request a Booking"}</h1>
+            <h1 className="text-lg font-bold">{isReschedule ? "Reschedule Service" : "Book a Detail"}</h1>
             <p className="text-sm text-muted-foreground">
-              {isReschedule ? "Pick a new date and time" : "Choose your preferred date"}
+              {isReschedule ? "Pick a new date and time" : "Choose your preferred date for service"}
             </p>
           </div>
         </div>
@@ -226,9 +226,9 @@ export default function PortalRequestPage() {
       <div className="container mx-auto px-4 py-6 max-w-md">
         <Card>
           <CardHeader>
-            <CardTitle>{isReschedule ? "Reschedule Request" : "New Booking Request"}</CardTitle>
+            <CardTitle>{isReschedule ? "Reschedule Request" : "New Service Request"}</CardTitle>
             <CardDescription>
-              {isReschedule ? "Submit a reschedule request and we'll confirm within 24 hours." : "Submit a request and we'll confirm your appointment within 24 hours."}
+              {isReschedule ? "Submit a reschedule request and we'll confirm within 24 hours." : "Submit a request and we'll confirm your detailing appointment within 24 hours."}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -285,7 +285,7 @@ export default function PortalRequestPage() {
             {/* Address Selection */}
             {locations.length >= 1 && (
               <div className="space-y-2">
-                <Label>Address *</Label>
+                <Label>Where would you like us to come? *</Label>
                 <Select value={selectedLocation} onValueChange={setSelectedLocation}>
                   <SelectTrigger>
                     <div className="flex items-center">
@@ -312,10 +312,10 @@ export default function PortalRequestPage() {
             {/* Service Selection */}
             {services.length > 0 && (
               <div className="space-y-2">
-                <Label>Service (Optional)</Label>
+                <Label>Detailing Package (Optional)</Label>
                 <Select value={selectedService} onValueChange={setSelectedService}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a service" />
+                    <SelectValue placeholder="Select a detailing package" />
                   </SelectTrigger>
                   <SelectContent>
                     {services.map((service) => (
@@ -345,7 +345,7 @@ export default function PortalRequestPage() {
                       This is a turnover clean
                     </label>
                     <p className="text-xs text-muted-foreground">
-                      Turnover cleans must be completed at a specific time between guests
+                      Turnover services must be completed at a specific time between guests
                     </p>
                   </div>
                 </div>
@@ -353,7 +353,7 @@ export default function PortalRequestPage() {
                   <Alert variant="destructive" className="border-destructive/50 bg-destructive/5">
                     <AlertTriangle className="h-4 w-4" />
                     <AlertDescription className="text-xs">
-                      Please ensure the selected time is accurate — turnover cleans are time-sensitive and must be completed before the next guest arrives.
+                      Please ensure the selected time is accurate — turnover services are time-sensitive and must be completed before the next guest arrives.
                     </AlertDescription>
                   </Alert>
                 )}
@@ -366,7 +366,7 @@ export default function PortalRequestPage() {
               <Textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Any special requests or preferences..."
+                placeholder="Any special requests, vehicle details, or areas to focus on..."
                 rows={4}
               />
             </div>

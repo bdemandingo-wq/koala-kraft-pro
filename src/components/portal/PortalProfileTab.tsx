@@ -257,19 +257,19 @@ export function PortalProfileTab() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="property-type">Property Type</Label>
+            <Label htmlFor="property-type">Customer Type</Label>
             <Select value={propertyType} onValueChange={setPropertyType}>
               <SelectTrigger id="property-type">
-                <SelectValue placeholder="Select property type" />
+                <SelectValue placeholder="Select customer type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="residential">Residential</SelectItem>
-                <SelectItem value="airbnb">Airbnb / Vacation Rental</SelectItem>
-                <SelectItem value="commercial">Commercial</SelectItem>
+                <SelectItem value="residential">Personal Vehicle</SelectItem>
+                <SelectItem value="airbnb">Fleet / Rental</SelectItem>
+                <SelectItem value="commercial">Commercial / Dealership</SelectItem>
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              This helps us tailor our services to your property
+              This helps us tailor our detailing services for you
             </p>
           </div>
 
@@ -623,7 +623,7 @@ function TaxReportCard({ clientUserId }: { clientUserId?: string }) {
           <CardTitle>Tax Reports</CardTitle>
         </div>
         <CardDescription>
-          Download a summary of your bookings for tax purposes
+          Download a summary of your detailing services for tax purposes
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -653,7 +653,7 @@ function TaxReportCard({ clientUserId }: { clientUserId?: string }) {
           </Button>
         </div>
         <p className="text-xs text-muted-foreground">
-          Report includes all completed bookings with payment details for the selected year.
+          Report includes all completed detailing services with payment details for the selected year.
         </p>
       </CardContent>
     </Card>
