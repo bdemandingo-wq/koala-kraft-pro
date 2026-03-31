@@ -116,6 +116,143 @@ const defaultSettings: BusinessSettings = {
   resend_api_key: '',
 };
 
+// Facebook Integration Card Component
+function FacebookIntegrationCard({ organizationId }: { organizationId: string }) {
+  const [fbPageId, setFbPageId] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [fbLoading, setFbLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
+
+  const webhookUrl = `https://ymbxlrhyggretbgvpwjf.supabase.co/functions/v1/facebook-lead-webhook`;
+  const isConnected = !!fbPageId;
+
+  useEffect(() => {
+    if (!organizationId) return;
+    (async () => {
+      const { data } = await supabase
+        .from('business_settings')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .maybeSingle();
+      if (data) {
+        setFbPageId((data as any).facebook_page_id || '');
+      }
+      setFbLoading(false);
+    })();
+  }, [organizationId]);
+
+  const handleSave = async () => {
+    if (!organizationId) return;
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from('business_settings')
+        .update({ facebook_page_id: fbPageId || null } as any)
+        .eq('organization_id', organizationId);
+      if (error) throw error;
+      toast.success('Facebook integration settings saved');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to save');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const copyUrl = () => {
+    navigator.clipboard.writeText(webhookUrl);
+    setCopied(true);
+    toast.success('Webhook URL copied');
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  if (fbLoading) return <Card><CardContent className="py-8 text-center text-muted-foreground"><Loader2 className="w-5 h-5 animate-spin mx-auto" /></CardContent></Card>;
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <svg className="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                Facebook Lead Ads Integration
+              </CardTitle>
+              <CardDescription>
+                Automatically capture leads from Facebook and Instagram ad campaigns
+              </CardDescription>
+            </div>
+            <Badge variant={isConnected ? "default" : "secondary"} className={isConnected ? "bg-green-600" : ""}>
+              {isConnected ? '● Connected' : '○ Not Connected'}
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-2">
+            <Label>Webhook URL</Label>
+            <div className="flex gap-2">
+              <Input value={webhookUrl} readOnly className="font-mono text-xs bg-muted" />
+              <Button variant="outline" size="icon" onClick={copyUrl} className="shrink-0">
+                {copied ? <span className="text-green-600 text-xs">✓</span> : <Copy className="w-4 h-4" />}
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">Paste this URL into your Facebook Developer Portal webhook settings</p>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Facebook Page ID</Label>
+            <Input
+              value={fbPageId}
+              onChange={(e) => setFbPageId(e.target.value)}
+              placeholder="e.g. 123456789012345"
+            />
+            <p className="text-xs text-muted-foreground">
+              Find it in your Facebook Page → About → Page ID. Used to match incoming webhooks to your organization.
+            </p>
+          </div>
+
+          <Button className="gap-2" onClick={handleSave} disabled={saving}>
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            Save Facebook Settings
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">How to Connect Facebook Lead Ads</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ol className="space-y-3 text-sm">
+            <li className="flex gap-3">
+              <Badge variant="outline" className="shrink-0 h-6 w-6 rounded-full flex items-center justify-center text-xs">1</Badge>
+              <span>Go to <strong>Facebook Developer Portal</strong> → Your App → Webhooks</span>
+            </li>
+            <li className="flex gap-3">
+              <Badge variant="outline" className="shrink-0 h-6 w-6 rounded-full flex items-center justify-center text-xs">2</Badge>
+              <span>Subscribe to the <strong>"leadgen"</strong> webhook event for your Page</span>
+            </li>
+            <li className="flex gap-3">
+              <Badge variant="outline" className="shrink-0 h-6 w-6 rounded-full flex items-center justify-center text-xs">3</Badge>
+              <span>Paste the <strong>Webhook URL</strong> above into Facebook</span>
+            </li>
+            <li className="flex gap-3">
+              <Badge variant="outline" className="shrink-0 h-6 w-6 rounded-full flex items-center justify-center text-xs">4</Badge>
+              <span>Enter your <strong>Verify Token</strong> (the one stored in your backend secrets) and click Verify</span>
+            </li>
+            <li className="flex gap-3">
+              <Badge variant="outline" className="shrink-0 h-6 w-6 rounded-full flex items-center justify-center text-xs">5</Badge>
+              <span>Copy your <strong>Facebook Page ID</strong> and paste it above, then save</span>
+            </li>
+          </ol>
+          <div className="mt-4 p-3 bg-muted/50 rounded-lg text-xs text-muted-foreground">
+            <strong>What happens when a lead comes in:</strong> A new lead record is created automatically, an SMS is sent to the lead, a follow-up email is sent, and a task is created in your Tasks module.
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 // Account Deletion Card Component - Required for App Store compliance (Guideline 5.1.1(v))
 function AccountDeletionCard() {
   const { user, signOut } = useAuth();
