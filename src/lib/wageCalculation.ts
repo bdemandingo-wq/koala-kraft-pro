@@ -108,7 +108,7 @@ function computePayFromDefaults(booking: WageBooking, staff?: WageStaff | null, 
  * 2. cleaner_actual_payment (legacy override — treat as expected pay)
  * 3. Fallback: compute from wage type/rate/hours (only when no snapshot exists)
  */
-export function calculateBookingWage(booking: WageBooking, staff?: WageStaff | null): WageResult {
+export function calculateBookingWage(booking: WageBooking, staff?: WageStaff | null, serviceName?: string | null): WageResult {
   const hoursWorked = getActualHours(booking, staff);
   const wageType = booking.cleaner_wage_type || 'hourly';
   const wageRate = Number(booking.cleaner_wage || staff?.base_wage || staff?.hourly_rate || 0);
@@ -136,7 +136,7 @@ export function calculateBookingWage(booking: WageBooking, staff?: WageStaff | n
   }
 
   // 3. Fallback: compute from defaults (no pay snapshot exists)
-  const fallback = computePayFromDefaults(booking, staff);
+  const fallback = computePayFromDefaults(booking, staff, serviceName);
   return {
     calculatedPay: fallback.pay,
     hoursWorked,
