@@ -167,7 +167,7 @@ export default function QuoteSoftware() {
             Quote Software Built for Car Detailing Businesses
           </h2>
           <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
-            From lead to booked job in minutes. Everything you need to win more cleaning contracts.
+            From lead to booked job in minutes. Everything you need to win more detailing contracts.
           </p>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
