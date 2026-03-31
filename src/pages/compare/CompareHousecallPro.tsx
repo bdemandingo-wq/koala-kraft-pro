@@ -330,7 +330,7 @@ export default function CompareHousecallPro() {
             "priceCurrency": "USD",
             "priceValidUntil": "2027-12-31"
           },
-          "description": "The best Housecall Pro alternative for car detailing businesses. Cleaning-specific features, automated payroll, and flat $50/month pricing."
+          "description": "The best Housecall Pro alternative for car detailing businesses. Detailing-specific features, automated payroll, and flat $50/month pricing."
         })
       }} />
     </div>
