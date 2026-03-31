@@ -344,7 +344,7 @@ export default function BookingsPage() {
       supabase.functions.invoke('send-cancellation-sms-notification', {
         body: {
           customerName: booking.customer ? `${booking.customer.first_name} ${booking.customer.last_name}` : 'Customer',
-          serviceName: booking.service?.name || 'Cleaning',
+          serviceName: booking.service?.name || 'Detailing',
           scheduledAt: booking.scheduled_at,
           formattedDate,
           formattedTime,

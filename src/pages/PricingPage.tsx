@@ -200,7 +200,7 @@ export default function PricingPage() {
           <div className="max-w-2xl mx-auto text-center">
             <h2 className="text-2xl font-bold text-foreground mb-4">Why Car Detailing Businesses Choose We Detail NC</h2>
             <p className="text-muted-foreground">
-              Most cleaning software was built for general field service companies. We Detail NC was built from the ground up for car detailing businesses — by someone who runs one. Every feature was designed with your daily workflow in mind.
+              Most detailing software was built for general field service companies. We Detail NC was built from the ground up for car detailing businesses — by someone who runs one. Every feature was designed with your daily workflow in mind.
             </p>
           </div>
         </section>

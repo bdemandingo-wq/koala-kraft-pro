@@ -37,7 +37,7 @@ function randomSuffix(length = 5) {
   return Math.random().toString(36).slice(2, 2 + length);
 }
 
-// Cleaning-only template
+// Car Detailing template
 const cleaningTemplate = getIndustryTemplate("Car Detailing")!;
 
 export default function OnboardingPage() {

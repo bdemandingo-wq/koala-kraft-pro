@@ -238,7 +238,7 @@ export default function CampaignsPage() {
       const { data, error } = await supabase.functions.invoke("generate-campaign-templates", {
         body: {
           companyName: businessSettings?.company_name || "Your Detailing Service",
-          serviceType: "cleaning",
+          serviceType: "detailing",
           audience: campaignForm.audience,
           tone: aiTone,
           timestamp: Date.now(),
@@ -811,7 +811,7 @@ export default function CampaignsPage() {
                     <Input
                       value={campaignForm.emailSubject}
                       onChange={e => setCampaignForm(prev => ({ ...prev, emailSubject: e.target.value }))}
-                      placeholder="Your next cleaning is waiting!"
+                      placeholder="Your next detail is waiting!"
                     />
                   </div>
                   <div className="space-y-2">
