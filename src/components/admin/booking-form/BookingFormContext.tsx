@@ -92,6 +92,9 @@ interface BookingFormState {
   
   // Discount
   appliedDiscount: AppliedDiscount | null;
+  
+  // Vehicle
+  selectedVehicleId: string;
 }
 
 interface BookingFormContextType extends BookingFormState {
