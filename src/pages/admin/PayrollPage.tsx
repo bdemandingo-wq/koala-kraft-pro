@@ -977,7 +977,7 @@ export default function PayrollPage() {
         <TabsContent value="details">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Booking Payroll Details</CardTitle>
+              <CardTitle>Job Payroll Details</CardTitle>
               <Button variant="outline" size="sm" onClick={exportDetailedCSV} className="gap-2">
                 <Download className="w-4 h-4" />
                 Export Details
