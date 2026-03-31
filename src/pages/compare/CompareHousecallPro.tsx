@@ -74,7 +74,7 @@ export default function CompareHousecallPro() {
     <div className="min-h-screen bg-background">
       <Seo 
         title="WE DETAIL NC vs Housecall Pro (2026)"
-        description="Compare WE DETAIL NC vs Housecall Pro for car detailing businesses. Cleaning-specific features, payroll, and $50/mo flat pricing vs Housecall Pro's $59–$199/mo."
+        description="Compare WE DETAIL NC vs Housecall Pro for car detailing businesses. Detailing-specific features, payroll, and $50/mo flat pricing vs Housecall Pro's $59–$199/mo."
         canonicalPath="/compare/housecall-pro"
         ogImage="/images/wedetailnc-og.png"
       />

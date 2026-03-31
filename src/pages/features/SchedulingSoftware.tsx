@@ -20,7 +20,7 @@ const benefits = [
 const results = [
   "Less no-shows",
   "Fewer mix-ups",
-  "A cleaning operation that runs like clockwork",
+  "A detailing operation that runs like clockwork",
 ];
 
 export default function SchedulingSoftware() {
