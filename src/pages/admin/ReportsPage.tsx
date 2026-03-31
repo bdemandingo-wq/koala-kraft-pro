@@ -456,7 +456,7 @@ export default function ReportsPage() {
                           <td className="py-3 text-right">{isTestMode ? 'X' : staffMember.bookings}</td>
                           <td className="py-3 text-right">
                             <span className="px-2 py-1 rounded-full text-xs bg-info/10 text-info">
-                              {isTestMode ? 'X' : staffMember.upcomingCleans}
+                              {isTestMode ? 'X' : staffMember.upcomingJobs}
                             </span>
                           </td>
                           <td className="py-3 text-right font-semibold text-success">
