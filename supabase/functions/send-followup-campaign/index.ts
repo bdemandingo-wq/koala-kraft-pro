@@ -165,17 +165,19 @@ serve(async (req) => {
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
               </head>
               <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-                <div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
-                  <h1 style="color: white; margin: 0; font-size: 24px;">We Miss You! 💙</h1>
+                <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
+                  <h1 style="color: #d4af37; margin: 0; font-size: 24px;">We Detail NC 🚗</h1>
+                  <p style="color: #ffffff; margin: 8px 0 0; font-size: 14px;">Your vehicle deserves the best</p>
                 </div>
                 <div style="background: #f8fafc; padding: 30px; border-radius: 0 0 12px 12px;">
                   <p style="font-size: 16px;">${htmlBody}</p>
                   <div style="text-align: center; margin-top: 30px;">
                     <a href="https://wedetailnc.lovable.app/book" 
-                       style="display: inline-block; background: #3b82f6; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold;">
-                      Book Now
+                       style="display: inline-block; background: #d4af37; color: #1a1a2e; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold;">
+                      Book Your Detail
                     </a>
                   </div>
+                  <p style="text-align: center; margin-top: 20px; font-size: 13px; color: #6b7280;">We Detail NC | (984) 332-8570 | Charlotte, NC</p>
                   ${emailSettings.email_footer ? `<hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;"><p style="font-size: 12px; color: #9ca3af;">${emailSettings.email_footer}</p>` : ''}
                 </div>
               </body>
