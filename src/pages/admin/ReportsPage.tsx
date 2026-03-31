@@ -123,8 +123,8 @@ export default function ReportsPage() {
     // Service breakdown (all time)
     const serviceAllTimeMap = new Map<string, { name: string; count: number; revenue: number; color: string }>();
 
-    let recurringCleansCount = 0;
-    let recurringCleansRevenue = 0;
+    let recurringServicesCount = 0;
+    let recurringServicesRevenue = 0;
 
     filteredBookings.forEach((booking, index) => {
       const serviceId = booking.service?.id || 'refund';
