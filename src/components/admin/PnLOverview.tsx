@@ -27,7 +27,7 @@ import {
 
 interface RecurringStats {
   recurringClients: number;
-  recurringCleans: number;
+  recurringServices: number;
   recurringRevenue: number;
 }
 
