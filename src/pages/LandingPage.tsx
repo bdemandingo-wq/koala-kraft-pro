@@ -759,7 +759,7 @@ export default function LandingPage() {
             Ready to grow your car detailing business?
           </h2>
           <p className="text-lg sm:text-xl text-primary-foreground/80 mb-10 max-w-2xl mx-auto">
-            Join detailing companies that trust WE DETAIL NC to manage their operations.
+            Join car owners in Charlotte, NC who trust WE DETAIL NC for premium mobile detailing.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
