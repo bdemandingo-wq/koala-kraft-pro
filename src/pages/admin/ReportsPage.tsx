@@ -384,7 +384,7 @@ export default function ReportsPage() {
 
             {/* Revenue by Service Pie Chart */}
             <div className="bg-card rounded-xl border border-border shadow-sm p-4 h-[380px]">
-              <h3 className="font-semibold mb-4">Revenue by Service (All time)</h3>
+              <h3 className="font-semibold mb-4">Revenue by Package (All time)</h3>
               <div className="h-[300px]">
                 {serviceStatsAllTime.length === 0 ? (
                   <div className="flex items-center justify-center h-full text-muted-foreground">
