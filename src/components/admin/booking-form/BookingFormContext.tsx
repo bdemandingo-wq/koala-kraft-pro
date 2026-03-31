@@ -430,6 +430,7 @@ export function BookingFormProvider({
     setPetOption('no_pets');
     setConflictOverride(false);
     setSelectedChecklistId(null);
+    setSelectedVehicleId('');
   };
 
   const prefillFromBooking = (booking: BookingWithDetails) => {
