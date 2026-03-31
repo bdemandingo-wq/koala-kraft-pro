@@ -9,8 +9,8 @@ import {
 import { useState } from "react";
 
 const benefits = [
-  { icon: MousePointer, title: "Drag-and-Drop Scheduling", description: "See your entire week at a glance. Drag jobs to reschedule. Assign cleaners with a click." },
-  { icon: Users, title: "Assign Jobs to Specific Cleaners", description: "Match the right cleaner to the right job based on skills, location, and availability." },
+  { icon: MousePointer, title: "Drag-and-Drop Scheduling", description: "See your entire week at a glance. Drag jobs to reschedule. Assign technicians with a click." },
+  { icon: Users, title: "Assign Jobs to Specific Technicians", description: "Match the right technician to the right job based on skills, location, and availability." },
   { icon: Bell, title: "Automatic Reminders", description: "Your team and clients get SMS/email reminders before appointments. Reduce no-shows dramatically." },
   { icon: CalendarCheck, title: "Handle Changes in Seconds", description: "Reschedules and cancellations handled instantly. No more frantic phone calls." },
   { icon: Calendar, title: "Full Week or Month View", description: "View your full week or month at a glance. Know exactly what's happening across your business." },
@@ -28,24 +28,24 @@ export default function SchedulingSoftware() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleStartFreeTrial = () => {
-    sessionStorage.setItem("selectedIndustry", "Home Cleaning");
+    sessionStorage.setItem("selectedIndustry", "Car Detailing");
     navigate("/auth", { state: { mode: "signup" } });
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Seo 
-        title="Cleaning Business Scheduling Software | TidyWise"
-        description="Schedule your cleaning team in minutes with TidyWise. Drag-and-drop scheduling, automatic reminders, and real-time updates for your whole team."
+        title="Car Detailing Business Scheduling Software | We Detail NC"
+        description="Schedule your cleaning team in minutes with We Detail NC. Drag-and-drop scheduling, automatic reminders, and real-time updates for your whole team."
         canonicalPath="/features/scheduling-software"
-        ogImage="/images/tidywise-og.png"
+        ogImage="/images/wedetailnc-og.png"
         jsonLd={{
           "@type": "SoftwareApplication",
-          "name": "TidyWise Scheduling Software",
+          "name": "We Detail NC Scheduling Software",
           "applicationCategory": "BusinessApplication",
           "operatingSystem": "Web, iOS, Android",
           "offers": { "@type": "Offer", "price": "50", "priceCurrency": "USD" },
-          "description": "Cleaning scheduling software with visual calendar, recurring bookings, and automatic SMS reminders."
+          "description": "Detailing scheduling software with visual calendar, recurring bookings, and automatic SMS reminders."
         }}
       />
 
@@ -53,7 +53,7 @@ export default function SchedulingSoftware() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <a href="/" className="flex items-center gap-2">
-              <span className="font-bold text-xl text-foreground">TIDYWISE</span>
+              <span className="font-bold text-xl text-foreground">WE DETAIL NC</span>
             </a>
             <div className="hidden md:flex items-center gap-8">
               <a href="/#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
@@ -92,7 +92,7 @@ export default function SchedulingSoftware() {
             <span className="text-primary">Your Cleaning Operation</span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Juggling cleaners, clients, and jobs manually is costing you time and money. TidyWise makes scheduling effortless — assign jobs, manage your team, and handle last-minute changes without the headache.
+            Juggling technicians, clients, and jobs manually is costing you time and money. We Detail NC makes scheduling effortless — assign jobs, manage your team, and handle last-minute changes without the headache.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="text-lg px-8 h-14" onClick={handleStartFreeTrial}>
@@ -157,7 +157,7 @@ export default function SchedulingSoftware() {
 
       <footer className="border-t border-border py-8 px-4 text-center text-sm text-muted-foreground">
         <div className="max-w-5xl mx-auto">
-          <p>© {new Date().getFullYear()} TidyWise. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} We Detail NC. All rights reserved.</p>
           <div className="flex flex-wrap justify-center gap-6 mt-4">
             <Link to="/" className="text-muted-foreground hover:text-foreground">Home</Link>
             <Link to="/features/booking" className="text-muted-foreground hover:text-foreground">Booking</Link>

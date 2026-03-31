@@ -97,7 +97,7 @@ export function SubscriptionDialog({ open, onOpenChange, onSubscriptionActive }:
 
           <div className="space-y-6 py-4">
             <p className="text-muted-foreground text-center">
-              Manage your subscription at jointidywise.lovable.app to unlock all features.
+              Manage your subscription at joinwedetailnc.lovable.app to unlock all features.
             </p>
 
             <div className="space-y-3">
@@ -143,8 +143,8 @@ export function SubscriptionDialog({ open, onOpenChange, onSubscriptionActive }:
         <div className="space-y-6">
           <div className="flex items-center justify-between p-4 bg-secondary/30 rounded-lg">
             <div>
-              <h3 className="font-semibold text-foreground">TIDYWISE Pro</h3>
-              <p className="text-sm text-muted-foreground">Complete cleaning business management</p>
+              <h3 className="font-semibold text-foreground">WE DETAIL NC Pro</h3>
+              <p className="text-sm text-muted-foreground">Complete car detailing business management</p>
             </div>
             <div className="text-right">
               <p className="text-2xl font-bold text-foreground">$50</p>

@@ -6,9 +6,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface CleanerNotificationRequest {
-  cleanerName: string;
-  cleanerPhone: string;
+interface TechnicianNotificationRequest {
+  technicianName: string;
+  technicianPhone: string;
   customerName: string;
   customerPhone: string;
   serviceName: string;
@@ -29,7 +29,7 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
     if (!supabaseUrl || !supabaseServiceKey) {
-      console.error("[send-cleaner-notification] Missing Supabase configuration");
+      console.error("[send-technician-notification] Missing Supabase configuration");
       return new Response(
         JSON.stringify({ success: false, error: "Server configuration error" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -38,26 +38,26 @@ const handler = async (req: Request): Promise<Response> => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const notification: CleanerNotificationRequest = await req.json();
+    const notification: TechnicianNotificationRequest = await req.json();
 
     // CRITICAL: organizationId is REQUIRED for multi-tenant isolation
     if (!notification.organizationId) {
-      console.error("[send-cleaner-notification] Missing organizationId");
+      console.error("[send-technician-notification] Missing organizationId");
       return new Response(
         JSON.stringify({ success: false, error: "Missing organizationId" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    if (!notification.cleanerPhone) {
-      console.error("[send-cleaner-notification] Missing cleaner phone number");
+    if (!notification.technicianPhone) {
+      console.error("[send-technician-notification] Missing technician phone number");
       return new Response(
-        JSON.stringify({ success: false, error: "Cleaner has no phone number" }),
+        JSON.stringify({ success: false, error: "Technician has no phone number" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log("[send-cleaner-notification] Sending SMS to:", notification.cleanerPhone, "for org:", notification.organizationId);
+    console.log("[send-technician-notification] Sending SMS to:", notification.technicianPhone, "for org:", notification.organizationId);
 
     // Fetch SMS settings for the organization
     const { data: smsSettings, error: settingsError } = await supabase
@@ -67,7 +67,7 @@ const handler = async (req: Request): Promise<Response> => {
       .maybeSingle();
 
     if (settingsError) {
-      console.error("[send-cleaner-notification] Error fetching SMS settings:", settingsError);
+      console.error("[send-technician-notification] Error fetching SMS settings:", settingsError);
       return new Response(
         JSON.stringify({ success: false, error: "Failed to fetch SMS settings" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -75,7 +75,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     if (!smsSettings?.sms_enabled) {
-      console.log("[send-cleaner-notification] SMS disabled for organization:", notification.organizationId);
+      console.log("[send-technician-notification] SMS disabled for organization:", notification.organizationId);
       return new Response(
         JSON.stringify({ success: false, error: "SMS notifications are disabled" }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -83,7 +83,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     if (!smsSettings.openphone_api_key || !smsSettings.openphone_phone_number_id) {
-      console.log("[send-cleaner-notification] OpenPhone not configured for org:", notification.organizationId);
+      console.log("[send-technician-notification] OpenPhone not configured for org:", notification.organizationId);
       return new Response(
         JSON.stringify({ success: false, error: "OpenPhone not configured" }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -101,7 +101,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Build SMS message
     const message = `📋 UPCOMING JOB\n\n` +
-      `Hi ${notification.cleanerName}!\n\n` +
+      `Hi ${notification.technicianName}!\n\n` +
       `Booking #${notification.bookingNumber}\n` +
       `Service: ${notification.serviceName}\n` +
       `Date: ${notification.appointmentDate}\n` +
@@ -110,8 +110,8 @@ const handler = async (req: Request): Promise<Response> => {
       `Customer: ${notification.customerName}\n\n` +
       `- ${companyName}`;
 
-    // Format cleaner phone
-    let formattedPhone = notification.cleanerPhone.replace(/\D/g, '');
+    // Format technician phone
+    let formattedPhone = notification.technicianPhone.replace(/\D/g, '');
     if (formattedPhone.length === 10) {
       formattedPhone = `+1${formattedPhone}`;
     } else if (!formattedPhone.startsWith('+')) {
@@ -127,7 +127,7 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    console.log(`[send-cleaner-notification] Sending SMS to ${formattedPhone}`);
+    console.log(`[send-technician-notification] Sending SMS to ${formattedPhone}`);
 
     // OpenPhone expects the raw API key in the Authorization header
     const authHeader = smsSettings.openphone_api_key.trim().replace(/^Bearer\s+/i, '');
@@ -148,7 +148,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`[send-cleaner-notification] OpenPhone API error: ${response.status} - ${errorText}`);
+      console.error(`[send-technician-notification] OpenPhone API error: ${response.status} - ${errorText}`);
 
       let provider: any = null;
       try {
@@ -182,7 +182,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const result = await response.json();
-    console.log(`[send-cleaner-notification] SMS sent successfully:`, result);
+    console.log(`[send-technician-notification] SMS sent successfully:`, result);
 
     return new Response(
       JSON.stringify({ success: true, messageId: result.data?.id }),
@@ -191,7 +191,7 @@ const handler = async (req: Request): Promise<Response> => {
 
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    console.error("[send-cleaner-notification] Error:", errorMessage);
+    console.error("[send-technician-notification] Error:", errorMessage);
     return new Response(
       JSON.stringify({ success: false, error: errorMessage }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }

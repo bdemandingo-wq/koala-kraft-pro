@@ -22,7 +22,7 @@ const benefits = [
   {
     icon: MapPin,
     title: "GPS-Based Assignment",
-    description: "Automatically assign cleaners based on their proximity to job locations. Reduce travel time by 30%."
+    description: "Automatically assign technicians based on their proximity to job locations. Reduce travel time by 30%."
   },
   {
     icon: Clock,
@@ -32,12 +32,12 @@ const benefits = [
   {
     icon: Users,
     title: "Skill-Based Matching",
-    description: "Match cleaners to jobs based on their skills, certifications, and customer preferences."
+    description: "Match technicians to jobs based on their skills, certifications, and customer preferences."
   },
   {
     icon: Bell,
     title: "Instant Notifications",
-    description: "Cleaners get push notifications for new jobs. Accept or decline with one tap."
+    description: "Technicians get push notifications for new jobs. Accept or decline with one tap."
   },
   {
     icon: Route,
@@ -53,7 +53,7 @@ const benefits = [
 
 const features = [
   "Drag-and-drop scheduling",
-  "Cleaner availability calendar",
+  "Technician availability calendar",
   "Automatic conflict detection",
   "Customer preference matching",
   "Real-time job status updates",
@@ -67,15 +67,15 @@ export default function AutomatedDispatching() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleStartFreeTrial = () => {
-    sessionStorage.setItem("selectedIndustry", "Home Cleaning");
+    sessionStorage.setItem("selectedIndustry", "Car Detailing");
     navigate("/auth", { state: { mode: "signup" } });
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Seo 
-        title="Automated Dispatching for Cleaning Businesses | TIDYWISE"
-        description="Smart dispatching software for cleaning companies. GPS-based cleaner assignment, route optimization, and real-time job tracking. Start your free trial."
+        title="Automated Dispatching for Car Detailing Businesses | WE DETAIL NC"
+        description="Smart dispatching software for detailing companies. GPS-based technician assignment, route optimization, and real-time job tracking. Start your free trial."
         canonicalPath="/features/automated-dispatching"
       />
 
@@ -84,7 +84,7 @@ export default function AutomatedDispatching() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <a href="/" className="flex items-center gap-2">
-              <span className="font-bold text-xl text-foreground">TIDYWISE</span>
+              <span className="font-bold text-xl text-foreground">WE DETAIL NC</span>
             </a>
             <div className="hidden md:flex items-center gap-8">
               <a href="/#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
@@ -121,10 +121,10 @@ export default function AutomatedDispatching() {
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
             Automated Dispatching<br/>
-            <span className="text-primary">for Cleaning Businesses</span>
+            <span className="text-primary">for Car Detailing Businesses</span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Stop manually assigning jobs. TIDYWISE automatically dispatches cleaners based on location, skills, and availability. <strong>Save 5+ hours per week</strong> on scheduling.
+            Stop manually assigning jobs. WE DETAIL NC automatically dispatches technicians based on location, skills, and availability. <strong>Save 5+ hours per week</strong> on scheduling.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="h-12 px-8" onClick={handleStartFreeTrial}>
@@ -168,7 +168,7 @@ export default function AutomatedDispatching() {
             How Smart Dispatching Works
           </h2>
           <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
-            TIDYWISE uses AI to assign the right cleaner to every job automatically.
+            WE DETAIL NC uses AI to assign the right technician to every job automatically.
           </p>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -210,7 +210,7 @@ export default function AutomatedDispatching() {
             Stop Wasting Time on Manual Scheduling
           </h2>
           <p className="text-lg text-primary-foreground/80 mb-8">
-            Try automated dispatching for your cleaning business. Start your free trial today.
+            Try automated dispatching for your car detailing business. Start your free trial today.
           </p>
           <Button size="lg" variant="secondary" className="h-12 px-8" onClick={handleStartFreeTrial}>
             Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
@@ -228,7 +228,7 @@ export default function AutomatedDispatching() {
       {/* Footer */}
       <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-border">
         <div className="max-w-5xl mx-auto text-center">
-          <p className="text-muted-foreground">© 2026 TIDYWISE. Smart dispatching for cleaning businesses.</p>
+          <p className="text-muted-foreground">© 2026 WE DETAIL NC. Smart dispatching for car detailing businesses.</p>
           <div className="flex justify-center gap-6 mt-4">
             <Link to="/" className="text-muted-foreground hover:text-foreground">Home</Link>
             <Link to="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</Link>
@@ -242,11 +242,11 @@ export default function AutomatedDispatching() {
         __html: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "SoftwareApplication",
-          "name": "TIDYWISE Automated Dispatching",
+          "name": "WE DETAIL NC Automated Dispatching",
           "applicationCategory": "BusinessApplication",
           "operatingSystem": "Web, iOS, Android",
           "offers": { "@type": "Offer", "price": "50", "priceCurrency": "USD" },
-          "description": "Automated dispatching software for cleaning businesses with GPS-based assignment and route optimization."
+          "description": "Automated dispatching software for car detailing businesses with GPS-based assignment and route optimization."
         })
       }} />
     </div>

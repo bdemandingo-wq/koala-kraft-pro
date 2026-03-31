@@ -12,8 +12,8 @@ import { useBookingForm } from '../BookingFormContext';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useEffect, useMemo, useState, useRef, useCallback } from 'react';
-import { useCleanerConflicts } from '@/hooks/useCleanerConflicts';
-import { CleanerConflictWarning } from '../CleanerConflictWarning';
+import { useTechnicianConflicts } from '@/hooks/useTechnicianConflicts';
+import { TechnicianConflictWarning } from '../TechnicianConflictWarning';
 import { calculateDistanceMiles, estimateDriveMinutes, formatDistance, formatDriveTime, geocodeAddress } from '@/lib/distanceUtils';
 
 type Coordinates = { lat: number; lng: number };
@@ -74,8 +74,8 @@ export function ScheduleStep({ currentBookingId }: { currentBookingId?: string }
     teamMemberPay,
     updateTeamMemberPay,
     staff,
-    cleanerWage,
-    cleanerWageType,
+    technicianWage,
+    technicianWageType,
     totalAmount,
     calculatedPrice,
     selectedService,
@@ -202,7 +202,7 @@ export function ScheduleStep({ currentBookingId }: { currentBookingId?: string }
   };
 
   // Use conflict detection hook
-  const { checkConflictsForStaff, getStaffAvailability, isStaffWithinWorkingHours, loading: conflictLoading } = useCleanerConflicts(
+  const { checkConflictsForStaff, getStaffAvailability, isStaffWithinWorkingHours, loading: conflictLoading } = useTechnicianConflicts(
     selectedDate,
     selectedTime,
     selectedService?.duration || 120,
@@ -300,8 +300,8 @@ export function ScheduleStep({ currentBookingId }: { currentBookingId?: string }
     const teamSize = selectedTeamMembers.length || 1;
 
     // Use booking-level wage if set, otherwise use staff's default
-    const wageToUse = cleanerWage ? parseFloat(cleanerWage) : null;
-    const wageTypeToUse = cleanerWageType;
+    const wageToUse = technicianWage ? parseFloat(technicianWage) : null;
+    const wageTypeToUse = technicianWageType;
 
     if (wageToUse) {
       if (wageTypeToUse === 'flat') {
@@ -456,7 +456,7 @@ export function ScheduleStep({ currentBookingId }: { currentBookingId?: string }
             <>
               <Select value={selectedStaffId || "unassigned"} onValueChange={(val) => setSelectedStaffId(val === "unassigned" ? "" : val)}>
                 <SelectTrigger className="h-12 bg-secondary/30 border-border/50">
-                  <SelectValue placeholder="Select a cleaner (optional)">
+                  <SelectValue placeholder="Select a technician (optional)">
                     {selectedStaffId && (staff?.find(s => s.id === selectedStaffId)?.name || availableStaff.find(s => s.id === selectedStaffId)?.name)}
                   </SelectValue>
                 </SelectTrigger>
@@ -505,8 +505,8 @@ export function ScheduleStep({ currentBookingId }: { currentBookingId?: string }
               {/* Conflict Warning for Single Staff */}
               {currentConflicts.length > 0 && (
                 <div className="mt-4">
-                  <CleanerConflictWarning
-                    cleanerName={availableStaff.find(s => s.id === selectedStaffId)?.name || 'Selected cleaner'}
+                  <TechnicianConflictWarning
+                    technicianName={availableStaff.find(s => s.id === selectedStaffId)?.name || 'Selected technician'}
                     conflicts={currentConflicts}
                     overrideConflict={conflictOverride}
                     onOverrideChange={setConflictOverride}
@@ -581,9 +581,9 @@ export function ScheduleStep({ currentBookingId }: { currentBookingId?: string }
                   {Array.from(teamConflicts.entries()).map(([staffId, conflicts]) => {
                     const member = activeStaff.find(s => s.id === staffId);
                     return (
-                      <CleanerConflictWarning
+                      <TechnicianConflictWarning
                         key={staffId}
-                        cleanerName={member?.name || 'Team member'}
+                        technicianName={member?.name || 'Team member'}
                         conflicts={conflicts}
                         overrideConflict={conflictOverride}
                         onOverrideChange={setConflictOverride}

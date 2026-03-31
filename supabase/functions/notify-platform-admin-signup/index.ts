@@ -67,7 +67,7 @@ const handler = async (req: Request): Promise<Response> => {
       `Phone: ${phone || 'Not provided'}\n` +
       `Method: ${signupMethod || 'Email'}\n` +
       `Time: ${timestamp}\n\n` +
-      `New potential customer just signed up for TidyWise! 🎉`;
+      `New potential customer just signed up for We Detail NC! 🎉`;
 
     console.log(`[notify-platform-admin-signup] Sending notification to platform admin: ${PLATFORM_ADMIN_PHONE}`);
 

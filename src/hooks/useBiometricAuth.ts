@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { toast } from 'sonner';
 
-const CREDENTIALS_SERVER = 'app.tidywise.staff';
+const CREDENTIALS_SERVER = 'app.wedetailnc.staff';
 
 interface BiometricCredentials {
   email: string;
@@ -96,7 +96,7 @@ export function useBiometricAuth() {
 
       // Verify with biometrics first
       await NativeBiometric.verifyIdentity({
-        reason: 'Sign in to TidyWise',
+        reason: 'Sign in to We Detail NC',
         title: 'Biometric Login',
         subtitle: 'Use Face ID or Touch ID to sign in',
         description: 'Quick and secure login',

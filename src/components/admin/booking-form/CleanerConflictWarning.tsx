@@ -4,21 +4,21 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { format, parseISO } from 'date-fns';
-import { ConflictInfo } from '@/hooks/useCleanerConflicts';
+import { ConflictInfo } from '@/hooks/useTechnicianConflicts';
 
-interface CleanerConflictWarningProps {
-  cleanerName: string;
+interface TechnicianConflictWarningProps {
+  technicianName: string;
   conflicts: ConflictInfo[];
   overrideConflict: boolean;
   onOverrideChange: (checked: boolean) => void;
 }
 
-export function CleanerConflictWarning({
-  cleanerName,
+export function TechnicianConflictWarning({
+  technicianName,
   conflicts,
   overrideConflict,
   onOverrideChange
-}: CleanerConflictWarningProps) {
+}: TechnicianConflictWarningProps) {
   if (conflicts.length === 0) return null;
 
   const hasOverlap = conflicts.some(c => c.overlapType === 'overlap');
@@ -27,7 +27,7 @@ export function CleanerConflictWarning({
     <Alert variant="destructive" className="border-destructive/50 bg-destructive/10">
       <AlertTriangle className="h-5 w-5" />
       <AlertTitle className="text-base font-semibold">
-        Conflict Detected: {cleanerName} is already assigned
+        Conflict Detected: {technicianName} is already assigned
       </AlertTitle>
       <AlertDescription className="mt-3 space-y-3">
         <div className="space-y-2">
@@ -82,7 +82,7 @@ export function CleanerConflictWarning({
 
         {!overrideConflict && (
           <p className="text-xs text-muted-foreground">
-            You must either change the time/cleaner or check the override box to proceed.
+            You must either change the time/technician or check the override box to proceed.
           </p>
         )}
       </AlertDescription>

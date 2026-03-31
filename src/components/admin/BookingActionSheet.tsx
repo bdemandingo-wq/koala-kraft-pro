@@ -35,8 +35,8 @@ interface BookingActionSheetProps {
   onEdit: (booking: BookingWithDetails) => void;
   onDuplicate: (booking: BookingWithDetails) => void;
   onMarkCompleteAdjustPay: (booking: BookingWithDetails) => void;
-  onMarkUncleaned: (booking: BookingWithDetails) => void;
-  onAdjustCleanerPay: (booking: BookingWithDetails) => void;
+  onMarkUnserviceded: (booking: BookingWithDetails) => void;
+  onAdjustTechnicianPay: (booking: BookingWithDetails) => void;
   onDelete: (booking: BookingWithDetails) => void;
   onMarkUnpaid: (booking: BookingWithDetails) => void;
   onAdditionalCharge: (booking: BookingWithDetails) => void;
@@ -47,19 +47,19 @@ interface BookingActionSheetProps {
   onRefund: (booking: BookingWithDetails) => void;
   onPaymentHistory: (booking: BookingWithDetails) => void;
   onSendReminder: (booking: BookingWithDetails) => void;
-  onNotifyCleaner: (booking: BookingWithDetails) => void;
+  onNotifyTechnician: (booking: BookingWithDetails) => void;
   onNotifyOpenJob: (booking: BookingWithDetails) => void;
   onSendReview: (booking: BookingWithDetails) => void;
   onSendTipLink: (booking: BookingWithDetails) => void;
   onSendDepositLink: (booking: BookingWithDetails) => void;
-  onAssignCleaner: (booking: BookingWithDetails) => void;
+  onAssignTechnician: (booking: BookingWithDetails) => void;
   // Loading/disabled states
   chargingCard?: string | null;
   placingHold?: string | null;
   capturingPayment?: string | null;
   cancelingHold?: string | null;
   sendingReminder?: string | null;
-  sendingCleanerNotification?: string | null;
+  sendingTechnicianNotification?: string | null;
   notifyingOpenJob?: string | null;
   sendingReviewRequest?: string | null;
   sendingTipRequest?: string | null;
@@ -159,12 +159,12 @@ export function BookingActionSheet({
   maskAmount,
   maskName,
   onViewDetails, onMarkPaid, onMarkComplete, onEdit, onDuplicate,
-  onMarkCompleteAdjustPay, onMarkUncleaned, onAdjustCleanerPay, onDelete,
+  onMarkCompleteAdjustPay, onMarkUnserviceded, onAdjustTechnicianPay, onDelete,
   onMarkUnpaid, onAdditionalCharge, onChargeCard, onPlaceHold, onCaptureHold,
-  onReleaseHold, onRefund, onPaymentHistory, onSendReminder, onNotifyCleaner,
-  onNotifyOpenJob, onSendReview, onSendTipLink, onSendDepositLink, onAssignCleaner,
+  onReleaseHold, onRefund, onPaymentHistory, onSendReminder, onNotifyTechnician,
+  onNotifyOpenJob, onSendReview, onSendTipLink, onSendDepositLink, onAssignTechnician,
   chargingCard, placingHold, capturingPayment, cancelingHold,
-  sendingReminder, sendingCleanerNotification, notifyingOpenJob,
+  sendingReminder, sendingTechnicianNotification, notifyingOpenJob,
   sendingReviewRequest, sendingTipRequest,
 }: BookingActionSheetProps) {
   if (!booking) return null;
@@ -266,11 +266,11 @@ export function BookingActionSheet({
             <ActionBtn colorClass="text-teal-500 hover:bg-teal-500/10" onClick={() => onMarkCompleteAdjustPay(booking)} disabled={booking.status === 'completed'}>
               <CheckCircle className="w-4 h-4" /> Mark Complete & Adjust Pay
             </ActionBtn>
-            <ActionBtn colorClass="text-orange-500 hover:bg-orange-500/10" onClick={() => onMarkUncleaned(booking)} disabled={booking.status === 'confirmed'}>
-              <XCircle className="w-4 h-4" /> Mark Uncleaned
+            <ActionBtn colorClass="text-orange-500 hover:bg-orange-500/10" onClick={() => onMarkUnserviceded(booking)} disabled={booking.status === 'confirmed'}>
+              <XCircle className="w-4 h-4" /> Mark Unserviceded
             </ActionBtn>
-            <ActionBtn colorClass="text-emerald-500 hover:bg-emerald-500/10" onClick={() => onAdjustCleanerPay(booking)}>
-              <DollarSign className="w-4 h-4" /> Adjust Cleaner Pay
+            <ActionBtn colorClass="text-emerald-500 hover:bg-emerald-500/10" onClick={() => onAdjustTechnicianPay(booking)}>
+              <DollarSign className="w-4 h-4" /> Adjust Technician Pay
             </ActionBtn>
             <ActionBtn variant="destructive" onClick={() => onDelete(booking)}>
               <Trash2 className="w-4 h-4" /> Delete
@@ -329,14 +329,14 @@ export function BookingActionSheet({
             <ActionBtn
               variant="pill"
               colorClass="bg-teal-500 hover:bg-teal-600"
-              onClick={() => onNotifyCleaner(booking)}
-              disabled={sendingCleanerNotification === booking.id || !booking.staff?.phone}
+              onClick={() => onNotifyTechnician(booking)}
+              disabled={sendingTechnicianNotification === booking.id || !booking.staff?.phone}
             >
-              <Phone className="w-4 h-4" /> Notify Cleaner
+              <Phone className="w-4 h-4" /> Notify Technician
             </ActionBtn>
             {!booking.staff && (
               <ActionBtn colorClass="text-emerald-500 hover:bg-emerald-500/10" onClick={() => onNotifyOpenJob(booking)} disabled={notifyingOpenJob === booking.id}>
-                <Bell className="w-4 h-4" /> Notify Cleaners (Open Job)
+                <Bell className="w-4 h-4" /> Notify Technicians (Open Job)
               </ActionBtn>
             )}
             <ActionBtn colorClass="text-amber-400 hover:bg-amber-500/10" onClick={() => onSendReview(booking)} disabled={sendingReviewRequest === booking.id || !booking.customer?.phone || booking.status !== 'completed'}>
@@ -357,8 +357,8 @@ export function BookingActionSheet({
 
           {/* Staff Section */}
           <ActionSection label="Staff" sectionKey="staff" isOpen={!!openSections['staff']} onToggle={onToggleSection} iconColor="text-indigo-400">
-            <ActionBtn colorClass="text-teal-500 hover:bg-teal-500/10" onClick={() => onAssignCleaner(booking)}>
-              <UserPlus className="w-4 h-4" /> Assign Cleaner
+            <ActionBtn colorClass="text-teal-500 hover:bg-teal-500/10" onClick={() => onAssignTechnician(booking)}>
+              <UserPlus className="w-4 h-4" /> Assign Technician
             </ActionBtn>
           </ActionSection>
         </div>

@@ -26,7 +26,7 @@ npx cap sync
 ## Verify in Xcode
 
 1. `npx cap open ios`
-2. In Xcode: **App Icons and Launch Images** → confirm the icon set is populated with your TidyWise icon.
+2. In Xcode: **App Icons and Launch Images** → confirm the icon set is populated with your We Detail NC icon.
 
 ## Notes
 
@@ -35,4 +35,4 @@ npx cap sync
 
 ## Important: Bundle ID
 
-Apple also expects a real bundle identifier. Update it in your native project before archiving (e.g. `com.jointidywise.tidywise`).
+Apple also expects a real bundle identifier. Update it in your native project before archiving (e.g. `com.joinwedetailnc.wedetailnc`).

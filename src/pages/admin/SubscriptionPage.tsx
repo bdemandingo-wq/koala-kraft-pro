@@ -129,7 +129,7 @@ export default function SubscriptionPage() {
 
   if (loading) {
     return (
-      <AdminLayout title="Subscription" subtitle="Manage your TIDYWISE subscription">
+      <AdminLayout title="Subscription" subtitle="Manage your WE DETAIL NC subscription">
         <div className="flex items-center justify-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
@@ -138,7 +138,7 @@ export default function SubscriptionPage() {
   }
 
   return (
-    <AdminLayout title="Subscription" subtitle="Manage your TIDYWISE subscription">
+    <AdminLayout title="Subscription" subtitle="Manage your WE DETAIL NC subscription">
       <div className="max-w-3xl mx-auto space-y-6">
         {/* Current Status */}
         <Card>
@@ -155,7 +155,7 @@ export default function SubscriptionPage() {
                   <CheckCircle2 className="h-6 w-6 text-success" />
                   <div>
                     <p className="font-semibold text-foreground">
-                      {status.trial_active ? "Free Trial Active" : "TIDYWISE Pro"}
+                      {status.trial_active ? "Free Trial Active" : "WE DETAIL NC Pro"}
                     </p>
                     {status.trial_active && status.trial_end && (
                       <p className="text-sm text-muted-foreground">
@@ -247,9 +247,9 @@ export default function SubscriptionPage() {
                 <div>
                   <CardTitle className="flex items-center gap-2">
                     <Sparkles className="h-5 w-5 text-primary" />
-                    TIDYWISE Pro
+                    WE DETAIL NC Pro
                   </CardTitle>
-                  <CardDescription>Complete cleaning business management</CardDescription>
+                  <CardDescription>Complete car detailing business management</CardDescription>
                 </div>
                 <div className="text-right">
                   <p className="text-3xl font-bold text-foreground">$50</p>

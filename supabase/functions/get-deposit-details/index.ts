@@ -70,7 +70,7 @@ const handler = async (req: Request): Promise<Response> => {
           bookingNumber: booking?.booking_number,
           scheduledAt: booking?.scheduled_at,
           serviceName: service?.name,
-          companyName: settings?.company_name || 'Your Cleaning Service',
+          companyName: settings?.company_name || 'Your Detailing Service',
           logoUrl: settings?.logo_url,
           primaryColor: settings?.primary_color,
         },

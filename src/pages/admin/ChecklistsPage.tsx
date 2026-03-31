@@ -420,7 +420,7 @@ export default function ChecklistsPage() {
             <div>
               <Label>Template Name</Label>
               <Input
-                placeholder="Standard Home Cleaning Checklist"
+                placeholder="Standard Car Detailing Checklist"
                 value={formData.name}
                 onChange={e => setFormData({ ...formData, name: e.target.value })}
               />

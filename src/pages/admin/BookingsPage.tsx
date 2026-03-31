@@ -94,7 +94,7 @@ import { format, isWithinInterval, startOfDay, endOfDay, differenceInDays, diffe
 import { AddBookingDialog } from '@/components/admin/AddBookingDialog';
 import { BookingDetailsDialog, AdjustPaymentDialog } from '@/components/admin/BookingDialogs';
 import { PaymentHistoryLogDialog } from '@/components/admin/PaymentHistoryLogDialog';
-import { BulkEditCleanerWages } from '@/components/admin/BulkEditCleanerWages';
+import { BulkEditTechnicianWages } from '@/components/admin/BulkEditTechnicianWages';
 import { supabase } from '@/lib/supabase';
 import { QuotesTabContent } from '@/components/admin/QuotesTabContent';
 import { AdditionalChargesDialog } from '@/components/admin/AdditionalChargesDialog';
@@ -119,7 +119,7 @@ const statusConfig: Record<string, { bg: string; text: string; dot: string }> = 
 
 const statusLabels: Record<string, string> = {
   pending: 'pending payment',
-  confirmed: 'uncleaned',
+  confirmed: 'unserviced',
   in_progress: 'in progress',
   completed: 'clean completed',
   cancelled: 'cancelled',
@@ -176,12 +176,12 @@ export default function BookingsPage() {
   const [paymentHistoryOpen, setPaymentHistoryOpen] = useState(false);
   const [paymentHistoryBooking, setPaymentHistoryBooking] = useState<BookingWithDetails | null>(null);
   const [sendingReminder, setSendingReminder] = useState<string | null>(null);
-  const [sendingCleanerNotification, setSendingCleanerNotification] = useState<string | null>(null);
-  const [bulkNotifyingCleaners, setBulkNotifyingCleaners] = useState(false);
+  const [sendingTechnicianNotification, setSendingTechnicianNotification] = useState<string | null>(null);
+  const [bulkNotifyingTechnicians, setBulkNotifyingTechnicians] = useState(false);
   const [notifyingOpenJob, setNotifyingOpenJob] = useState<string | null>(null);
-  const [cleanerPickerOpen, setCleanerPickerOpen] = useState(false);
-  const [cleanerPickerBooking, setCleanerPickerBooking] = useState<BookingWithDetails | null>(null);
-  const [selectedCleanerIds, setSelectedCleanerIds] = useState<Set<string>>(new Set());
+  const [technicianPickerOpen, setTechnicianPickerOpen] = useState(false);
+  const [technicianPickerBooking, setTechnicianPickerBooking] = useState<BookingWithDetails | null>(null);
+  const [selectedTechnicianIds, setSelectedTechnicianIds] = useState<Set<string>>(new Set());
   const [sendingReviewRequest, setSendingReviewRequest] = useState<string | null>(null);
   const [sendingTipRequest, setSendingTipRequest] = useState<string | null>(null);
   const [bulkNotifyingWeek, setBulkNotifyingWeek] = useState(false);
@@ -197,8 +197,8 @@ export default function BookingsPage() {
   const [depositDialogBooking, setDepositDialogBooking] = useState<BookingWithDetails | null>(null);
   const [depositAmount, setDepositAmount] = useState('');
   const [sendingDepositRequest, setSendingDepositRequest] = useState(false);
-  const [assignCleanerBooking, setAssignCleanerBooking] = useState<BookingWithDetails | null>(null);
-  const [assigningCleaner, setAssigningCleaner] = useState(false);
+  const [assignTechnicianBooking, setAssignTechnicianBooking] = useState<BookingWithDetails | null>(null);
+  const [assigningTechnician, setAssigningTechnician] = useState(false);
   const [actionSheetBooking, setActionSheetBooking] = useState<BookingWithDetails | null>(null);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const [bulkEditOpen, setBulkEditOpen] = useState(false);
@@ -237,7 +237,7 @@ export default function BookingsPage() {
     };
 
     return [...bookings].sort((a, b) => {
-      // Pin today's active (uncleaned/in-progress) bookings to the very top
+      // Pin today's active (unserviced/in-progress) bookings to the very top
       const aTodayActive = isTodayActive(a);
       const bTodayActive = isTodayActive(b);
       if (aTodayActive !== bTodayActive) return aTodayActive ? -1 : 1;
@@ -309,7 +309,7 @@ export default function BookingsPage() {
     return matchesSearch && matchesStatus && matchesDate && matchesTab;
   });
 
-  // Stats - pending payment based on payment_status, uncleaned based on status
+  // Stats - pending payment based on payment_status, unserviced based on status
   const stats = {
     total: bookings.length,
     pending: bookings.filter(b => b.payment_status === 'pending').length,
@@ -406,7 +406,7 @@ export default function BookingsPage() {
       setSelectedBookings(new Set());
       setBulkAssignDialogOpen(false);
       setSelectedStaffId('');
-      toast({ title: "Assigned", description: `${count} bookings assigned to cleaner successfully` });
+      toast({ title: "Assigned", description: `${count} bookings assigned to technician successfully` });
     } catch (error) {
       toast({ title: "Error", description: "Failed to assign some bookings", variant: "destructive" });
     } finally {
@@ -860,7 +860,7 @@ export default function BookingsPage() {
           bookingId: booking.id,
           customerPhone: booking.customer.phone,
           customerName: `${booking.customer.first_name} ${booking.customer.last_name}`,
-          serviceName: booking.service?.name || 'Cleaning Service',
+          serviceName: booking.service?.name || 'Detailing Service',
           scheduledAt: booking.scheduled_at,
           formattedDate,
           formattedTime,
@@ -883,8 +883,8 @@ export default function BookingsPage() {
     }
   };
 
-  const handleSendCleanerNotification = async (booking: BookingWithDetails) => {
-    setSendingCleanerNotification(booking.id);
+  const handleSendTechnicianNotification = async (booking: BookingWithDetails) => {
+    setSendingTechnicianNotification(booking.id);
     
     try {
       const scheduledDate = new Date(booking.scheduled_at);
@@ -918,7 +918,7 @@ export default function BookingsPage() {
       }
 
       if (staffToNotify.length === 0) {
-        toast({ title: "Error", description: "No cleaners assigned or none have phone numbers", variant: "destructive" });
+        toast({ title: "Error", description: "No technicians assigned or none have phone numbers", variant: "destructive" });
         return;
       }
 
@@ -927,13 +927,13 @@ export default function BookingsPage() {
 
       for (const staffMember of staffToNotify) {
         try {
-          const response = await supabase.functions.invoke('send-cleaner-notification', {
+          const response = await supabase.functions.invoke('send-technician-notification', {
             body: {
-              cleanerName: staffMember.name,
-              cleanerPhone: staffMember.phone,
+              technicianName: staffMember.name,
+              technicianPhone: staffMember.phone,
               customerName: booking.customer ? `${booking.customer.first_name} ${booking.customer.last_name}` : 'Customer',
               customerPhone: booking.customer?.phone || 'N/A',
-              serviceName: booking.service?.name || 'Cleaning Service',
+              serviceName: booking.service?.name || 'Detailing Service',
               appointmentDate: format(scheduledDate, 'EEEE, MMMM d, yyyy'),
               appointmentTime: format(scheduledDate, 'h:mm a'),
               address: fullAddress || 'Address not provided',
@@ -964,43 +964,43 @@ export default function BookingsPage() {
         toast({ title: "SMS Not Sent", description: "All notifications failed", variant: "destructive" });
       }
     } catch (error: any) {
-      console.error('Failed to send cleaner notification:', error);
-      toast({ title: "Error", description: error.message || "Failed to send cleaner notification", variant: "destructive" });
+      console.error('Failed to send technician notification:', error);
+      toast({ title: "Error", description: error.message || "Failed to send technician notification", variant: "destructive" });
     } finally {
-      setSendingCleanerNotification(null);
+      setSendingTechnicianNotification(null);
     }
   };
 
-  const handleBulkNotifyCleaners = async () => {
+  const handleBulkNotifyTechnicians = async () => {
     if (selectedBookings.size === 0) return;
     
     const selectedBookingsList = filteredBookings.filter(b => selectedBookings.has(b.id));
-    const bookingsWithCleaners = selectedBookingsList.filter(b => b.staff?.phone);
+    const bookingsWithTechnicians = selectedBookingsList.filter(b => b.staff?.phone);
     
-    if (bookingsWithCleaners.length === 0) {
-      toast({ title: "No Cleaners to Notify", description: "None of the selected bookings have assigned cleaners with phone numbers.", variant: "destructive" });
+    if (bookingsWithTechnicians.length === 0) {
+      toast({ title: "No Technicians to Notify", description: "None of the selected bookings have assigned technicians with phone numbers.", variant: "destructive" });
       return;
     }
 
-    setBulkNotifyingCleaners(true);
+    setBulkNotifyingTechnicians(true);
     let successCount = 0;
     let failCount = 0;
 
     try {
-      for (const booking of bookingsWithCleaners) {
+      for (const booking of bookingsWithTechnicians) {
         try {
           const scheduledDate = new Date(booking.scheduled_at);
           const fullAddress = [booking.address, booking.apt_suite, booking.city, booking.state, booking.zip_code]
             .filter(Boolean)
             .join(', ');
 
-          const { data, error } = await supabase.functions.invoke('send-cleaner-notification', {
+          const { data, error } = await supabase.functions.invoke('send-technician-notification', {
             body: {
-              cleanerName: booking.staff!.name,
-              cleanerPhone: booking.staff!.phone,
+              technicianName: booking.staff!.name,
+              technicianPhone: booking.staff!.phone,
               customerName: booking.customer ? `${booking.customer.first_name} ${booking.customer.last_name}` : 'Customer',
               customerPhone: booking.customer?.phone || 'N/A',
-              serviceName: booking.service?.name || 'Cleaning Service',
+              serviceName: booking.service?.name || 'Detailing Service',
               appointmentDate: format(scheduledDate, 'EEEE, MMMM d, yyyy'),
               appointmentTime: format(scheduledDate, 'h:mm a'),
               address: fullAddress || 'Address not provided',
@@ -1013,7 +1013,7 @@ export default function BookingsPage() {
           if (!data?.success) throw new Error(data?.error || 'SMS delivery failed');
           successCount++;
         } catch (error) {
-          console.error(`Failed to notify cleaner for booking #${booking.booking_number}:`, error);
+          console.error(`Failed to notify technician for booking #${booking.booking_number}:`, error);
           failCount++;
         }
       }
@@ -1021,20 +1021,20 @@ export default function BookingsPage() {
       if (successCount > 0) {
         toast({ 
           title: "Notifications Sent", 
-          description: `Successfully notified ${successCount} cleaner(s) via SMS${failCount > 0 ? `. ${failCount} failed.` : '.'}`
+          description: `Successfully notified ${successCount} technician(s) via SMS${failCount > 0 ? `. ${failCount} failed.` : '.'}`
         });
       } else {
         toast({ title: "Error", description: "Failed to send notifications", variant: "destructive" });
       }
     } finally {
-      setBulkNotifyingCleaners(false);
+      setBulkNotifyingTechnicians(false);
     }
   };
 
-  // Open the cleaner picker dialog for an open job
-  const handleOpenCleanerPicker = (booking: BookingWithDetails) => {
+  // Open the technician picker dialog for an open job
+  const handleOpenTechnicianPicker = (booking: BookingWithDetails) => {
     if (booking.staff) {
-      toast({ title: "Already Assigned", description: "This job is already assigned to a cleaner.", variant: "destructive" });
+      toast({ title: "Already Assigned", description: "This job is already assigned to a technician.", variant: "destructive" });
       return;
     }
     if (!organization?.id) {
@@ -1043,17 +1043,17 @@ export default function BookingsPage() {
     }
     // Pre-select all active staff
     const allActiveIds = new Set(staffList.filter(s => s.is_active).map(s => s.id));
-    setSelectedCleanerIds(allActiveIds);
-    setCleanerPickerBooking(booking);
-    setCleanerPickerOpen(true);
+    setSelectedTechnicianIds(allActiveIds);
+    setTechnicianPickerBooking(booking);
+    setTechnicianPickerOpen(true);
   };
 
-  // Notify selected cleaners about an open/unassigned job
-  const handleNotifySelectedCleaners = async () => {
-    const booking = cleanerPickerBooking;
-    if (!booking || !organization?.id || selectedCleanerIds.size === 0) return;
+  // Notify selected technicians about an open/unassigned job
+  const handleNotifySelectedTechnicians = async () => {
+    const booking = technicianPickerBooking;
+    if (!booking || !organization?.id || selectedTechnicianIds.size === 0) return;
 
-    setCleanerPickerOpen(false);
+    setTechnicianPickerOpen(false);
     setNotifyingOpenJob(booking.id);
 
     try {
@@ -1062,12 +1062,12 @@ export default function BookingsPage() {
         .filter(Boolean)
         .join(', ');
 
-      const { error } = await supabase.functions.invoke('notify-cleaners-open-job', {
+      const { error } = await supabase.functions.invoke('notify-technicians-open-job', {
         body: {
           jobDetails: {
             booking_id: booking.id,
             booking_number: booking.booking_number,
-            service_name: booking.service?.name || 'Cleaning Service',
+            service_name: booking.service?.name || 'Detailing Service',
             scheduled_date: format(scheduledDate, 'MMMM d, yyyy'),
             scheduled_time: format(scheduledDate, 'h:mm a'),
             address: fullAddress || 'Address not provided',
@@ -1076,22 +1076,22 @@ export default function BookingsPage() {
             total_amount: booking.total_amount,
           },
           organizationId: organization.id,
-          staffIds: Array.from(selectedCleanerIds),
+          staffIds: Array.from(selectedTechnicianIds),
         }
       });
 
       if (error) throw error;
 
       toast({ 
-        title: "Cleaners Notified", 
-        description: `Sent notification to ${selectedCleanerIds.size} cleaner(s) about open job #${booking.booking_number}` 
+        title: "Technicians Notified", 
+        description: `Sent notification to ${selectedTechnicianIds.size} technician(s) about open job #${booking.booking_number}` 
       });
     } catch (error: any) {
-      console.error('Failed to notify cleaners:', error);
-      toast({ title: "Error", description: error.message || "Failed to notify cleaners", variant: "destructive" });
+      console.error('Failed to notify technicians:', error);
+      toast({ title: "Error", description: error.message || "Failed to notify technicians", variant: "destructive" });
     } finally {
       setNotifyingOpenJob(null);
-      setCleanerPickerBooking(null);
+      setTechnicianPickerBooking(null);
     }
   };
 
@@ -1166,11 +1166,11 @@ export default function BookingsPage() {
     }
   };
 
-  const handleBulkNotifyWeekCleaners = async () => {
+  const handleBulkNotifyWeekTechnicians = async () => {
     const now = new Date();
     const weekEnd = addDays(now, 7);
     
-    // Get all upcoming bookings for the next 7 days with assigned cleaners
+    // Get all upcoming bookings for the next 7 days with assigned technicians
     const upcomingWeekBookings = sortedBookings.filter(b => {
       const scheduledDate = new Date(b.scheduled_at);
       return scheduledDate >= now && 
@@ -1180,7 +1180,7 @@ export default function BookingsPage() {
     });
 
     if (upcomingWeekBookings.length === 0) {
-      toast({ title: "No Bookings", description: "No upcoming bookings with assigned cleaners found for this week.", variant: "destructive" });
+      toast({ title: "No Bookings", description: "No upcoming bookings with assigned technicians found for this week.", variant: "destructive" });
       return;
     }
 
@@ -1196,13 +1196,13 @@ export default function BookingsPage() {
             .filter(Boolean)
             .join(', ');
 
-          const { data, error } = await supabase.functions.invoke('send-cleaner-notification', {
+          const { data, error } = await supabase.functions.invoke('send-technician-notification', {
             body: {
-              cleanerName: booking.staff!.name,
-              cleanerPhone: booking.staff!.phone,
+              technicianName: booking.staff!.name,
+              technicianPhone: booking.staff!.phone,
               customerName: booking.customer ? `${booking.customer.first_name} ${booking.customer.last_name}` : 'Customer',
               customerPhone: booking.customer?.phone || 'N/A',
-              serviceName: booking.service?.name || 'Cleaning Service',
+              serviceName: booking.service?.name || 'Detailing Service',
               appointmentDate: format(scheduledDate, 'EEEE, MMMM d, yyyy'),
               appointmentTime: format(scheduledDate, 'h:mm a'),
               address: fullAddress || 'Address not provided',
@@ -1215,7 +1215,7 @@ export default function BookingsPage() {
           if (!data?.success) throw new Error(data?.error || 'SMS delivery failed');
           successCount++;
         } catch (error) {
-          console.error(`Failed to notify cleaner for booking #${booking.booking_number}:`, error);
+          console.error(`Failed to notify technician for booking #${booking.booking_number}:`, error);
           failCount++;
         }
       }
@@ -1223,7 +1223,7 @@ export default function BookingsPage() {
       if (successCount > 0) {
         toast({ 
           title: "Week's Notifications Sent", 
-          description: `Successfully notified cleaners for ${successCount} upcoming booking(s)${failCount > 0 ? `. ${failCount} failed.` : '.'}`
+          description: `Successfully notified technicians for ${successCount} upcoming booking(s)${failCount > 0 ? `. ${failCount} failed.` : '.'}`
         });
       } else {
         toast({ title: "Error", description: "Failed to send notifications", variant: "destructive" });
@@ -1328,7 +1328,7 @@ export default function BookingsPage() {
         const rows = filteredBookings.map(b => [
           b.booking_number,
           b.customer ? `${b.customer.first_name} ${b.customer.last_name}` : 'Unknown',
-          b.service?.name || (b.total_amount === 0 ? 'Re-clean' : 'Service'),
+          b.service?.name || (b.total_amount === 0 ? 'Re-detail' : 'Service'),
           format(new Date(b.scheduled_at), 'yyyy-MM-dd'),
           format(new Date(b.scheduled_at), 'h:mm a'),
           b.staff?.name || 'Unassigned',
@@ -1387,7 +1387,7 @@ export default function BookingsPage() {
           customerId: (booking as any).customer_id || booking.customer?.id,
           customerPhone: booking.customer.phone,
           customerName: `${booking.customer.first_name} ${booking.customer.last_name}`,
-          serviceName: booking.service?.name || 'Cleaning Service',
+          serviceName: booking.service?.name || 'Detailing Service',
           organizationId: organization.id,
         }
       });
@@ -1454,9 +1454,9 @@ export default function BookingsPage() {
             <Star className="w-4 h-4" />
             Quotes
           </TabsTrigger>
-          <TabsTrigger value="cleaner-wages" className="gap-2">
+          <TabsTrigger value="technician-wages" className="gap-2">
             <Settings2 className="w-4 h-4" />
-            Cleaner Wages
+            Technician Wages
           </TabsTrigger>
         </TabsList>
 
@@ -1496,7 +1496,7 @@ export default function BookingsPage() {
                   <div className="p-2 bg-blue-100 rounded-xl">
                     <User className="w-5 h-5 text-blue-600" />
                   </div>
-                  <span className="text-sm font-medium text-muted-foreground">Uncleaned</span>
+                  <span className="text-sm font-medium text-muted-foreground">Unserviceded</span>
                 </div>
                 <p className="text-3xl font-bold text-foreground">{stats.confirmed}</p>
               </div>
@@ -1584,11 +1584,11 @@ export default function BookingsPage() {
           <Button 
             variant="outline" 
             className="h-11 gap-2 rounded-xl text-blue-600 border-blue-200 hover:bg-blue-50"
-            onClick={handleBulkNotifyWeekCleaners}
+            onClick={handleBulkNotifyWeekTechnicians}
             disabled={bulkNotifyingWeek}
           >
             {bulkNotifyingWeek ? <Loader2 className="w-4 h-4 animate-spin" /> : <Bell className="w-4 h-4" />}
-            Notify Week's Cleaners
+            Notify Week's Technicians
           </Button>
           <Button 
             variant="outline" 
@@ -1638,16 +1638,16 @@ export default function BookingsPage() {
                 onClick={() => setBulkAssignDialogOpen(true)}
               >
                 <User className="w-4 h-4" />
-                Assign Cleaner ({selectedBookings.size})
+                Assign Technician ({selectedBookings.size})
               </Button>
               <Button 
                 variant="outline" 
                 className="h-11 gap-2 rounded-xl text-purple-600 border-purple-200 hover:bg-purple-50"
-                onClick={handleBulkNotifyCleaners}
-                disabled={bulkNotifyingCleaners}
+                onClick={handleBulkNotifyTechnicians}
+                disabled={bulkNotifyingTechnicians}
               >
-                {bulkNotifyingCleaners ? <Loader2 className="w-4 h-4 animate-spin" /> : <Phone className="w-4 h-4" />}
-                Notify Cleaners ({selectedBookings.size})
+                {bulkNotifyingTechnicians ? <Loader2 className="w-4 h-4 animate-spin" /> : <Phone className="w-4 h-4" />}
+                Notify Technicians ({selectedBookings.size})
               </Button>
               <Button 
                 variant="destructive" 
@@ -1728,7 +1728,7 @@ export default function BookingsPage() {
                   
                   {/* Service + date */}
                   <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-                    <span>{booking.service?.name || (booking.total_amount === 0 ? 'Re-clean' : 'Service')}</span>
+                    <span>{booking.service?.name || (booking.total_amount === 0 ? 'Re-detail' : 'Service')}</span>
                     <span>•</span>
                     <span>{format(scheduledDate, 'MMM d, h:mm a')}</span>
                   </div>
@@ -1765,7 +1765,7 @@ export default function BookingsPage() {
                       ) : (
                         <>
                           <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
-                          uncleaned
+                          unserviced
                         </>
                       )}
                     </div>
@@ -1874,7 +1874,7 @@ export default function BookingsPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <span className="font-medium">{booking.service?.name || (booking.total_amount === 0 ? 'Re-clean' : 'Service')}</span>
+                        <span className="font-medium">{booking.service?.name || (booking.total_amount === 0 ? 'Re-detail' : 'Service')}</span>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
@@ -2009,11 +2009,11 @@ export default function BookingsPage() {
                                   className="gap-2 cursor-pointer text-amber-600" 
                                   onClick={async () => {
                                     await handleStatusChange(booking.id, 'confirmed');
-                                    toast({ title: "Marked Uncleaned", description: `Booking #${booking.booking_number} marked as uncleaned.` });
+                                    toast({ title: "Marked Unserviceded", description: `Booking #${booking.booking_number} marked as unserviced.` });
                                   }}
                                   disabled={booking.status === 'confirmed'}
                                 >
-                                  <XCircle className="w-4 h-4" /> Mark Uncleaned
+                                  <XCircle className="w-4 h-4" /> Mark Unserviceded
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
                                   className="gap-2 cursor-pointer" 
@@ -2022,7 +2022,7 @@ export default function BookingsPage() {
                                     setAdjustPaymentOpen(true);
                                   }}
                                 >
-                                  <DollarSign className="w-4 h-4" /> Adjust Cleaner Pay
+                                  <DollarSign className="w-4 h-4" /> Adjust Technician Pay
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem
@@ -2143,20 +2143,20 @@ export default function BookingsPage() {
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
                                   className="gap-2 cursor-pointer text-purple-600" 
-                                  onClick={() => handleSendCleanerNotification(booking)}
-                                  disabled={sendingCleanerNotification === booking.id || !booking.staff?.phone}
+                                  onClick={() => handleSendTechnicianNotification(booking)}
+                                  disabled={sendingTechnicianNotification === booking.id || !booking.staff?.phone}
                                 >
-                                  {sendingCleanerNotification === booking.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Phone className="w-4 h-4" />}
-                                  Notify Cleaner
+                                  {sendingTechnicianNotification === booking.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Phone className="w-4 h-4" />}
+                                  Notify Technician
                                 </DropdownMenuItem>
                                 {!booking.staff && (
                                   <DropdownMenuItem 
                                     className="gap-2 cursor-pointer text-green-600" 
-                                    onClick={() => handleOpenCleanerPicker(booking)}
+                                    onClick={() => handleOpenTechnicianPicker(booking)}
                                     disabled={notifyingOpenJob === booking.id}
                                   >
                                     {notifyingOpenJob === booking.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Bell className="w-4 h-4" />}
-                                    Notify Cleaners
+                                    Notify Technicians
                                   </DropdownMenuItem>
                                 )}
                                 <DropdownMenuItem 
@@ -2190,10 +2190,10 @@ export default function BookingsPage() {
                                 <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">Staff</DropdownMenuLabel>
                                 <DropdownMenuItem 
                                   className="gap-2 cursor-pointer text-indigo-600" 
-                                  onClick={() => setAssignCleanerBooking(booking)}
+                                  onClick={() => setAssignTechnicianBooking(booking)}
                                 >
                                   <UserPlus className="w-4 h-4" />
-                                  Assign Cleaner
+                                  Assign Technician
                                 </DropdownMenuItem>
                               </div>
                             </div>
@@ -2226,8 +2226,8 @@ export default function BookingsPage() {
         onEdit={(b) => { setActionSheetBooking(null); setEditingBooking(b); setAddDialogOpen(true); }}
         onDuplicate={(b) => { setActionSheetBooking(null); handleDuplicate(b); }}
         onMarkCompleteAdjustPay={(b) => { handleStatusChange(b.id, 'completed'); setActiveBooking(b); setAdjustPaymentOpen(true); setActionSheetBooking(null); }}
-        onMarkUncleaned={async (b) => { await handleStatusChange(b.id, 'confirmed'); toast({ title: "Marked Uncleaned" }); setActionSheetBooking(null); }}
-        onAdjustCleanerPay={(b) => { setActiveBooking(b); setAdjustPaymentOpen(true); setActionSheetBooking(null); }}
+        onMarkUnserviceded={async (b) => { await handleStatusChange(b.id, 'confirmed'); toast({ title: "Marked Unserviceded" }); setActionSheetBooking(null); }}
+        onAdjustTechnicianPay={(b) => { setActiveBooking(b); setAdjustPaymentOpen(true); setActionSheetBooking(null); }}
         onDelete={(b) => { setActionSheetBooking(null); handleDelete(b); }}
         onMarkUnpaid={async (b) => { await updateBooking.mutateAsync({ id: b.id, payment_status: 'pending' as any }); toast({ title: "Marked Unpaid" }); setActionSheetBooking(null); }}
         onAdditionalCharge={(b) => { setAdditionalChargesBooking(b); setAdditionalChargesOpen(true); setActionSheetBooking(null); }}
@@ -2238,18 +2238,18 @@ export default function BookingsPage() {
         onRefund={(b) => { setRefundDialogBooking(b); setRefundType('full'); setRefundAmount(''); setActionSheetBooking(null); }}
         onPaymentHistory={(b) => { setPaymentHistoryBooking(b); setPaymentHistoryOpen(true); setActionSheetBooking(null); }}
         onSendReminder={(b) => { handleSendReminder(b); setActionSheetBooking(null); }}
-        onNotifyCleaner={(b) => { handleSendCleanerNotification(b); setActionSheetBooking(null); }}
-        onNotifyOpenJob={(b) => { handleOpenCleanerPicker(b); setActionSheetBooking(null); }}
+        onNotifyTechnician={(b) => { handleSendTechnicianNotification(b); setActionSheetBooking(null); }}
+        onNotifyOpenJob={(b) => { handleOpenTechnicianPicker(b); setActionSheetBooking(null); }}
         onSendReview={(b) => { handleSendReviewRequest(b); setActionSheetBooking(null); }}
         onSendTipLink={(b) => { handleSendTipRequest(b); setActionSheetBooking(null); }}
         onSendDepositLink={(b) => { setDepositDialogBooking(b); setDepositAmount(''); setActionSheetBooking(null); }}
-        onAssignCleaner={(b) => { setAssignCleanerBooking(b); setActionSheetBooking(null); }}
+        onAssignTechnician={(b) => { setAssignTechnicianBooking(b); setActionSheetBooking(null); }}
         chargingCard={chargingCard}
         placingHold={placingHold}
         capturingPayment={capturingPayment}
         cancelingHold={cancelingHold}
         sendingReminder={sendingReminder}
-        sendingCleanerNotification={sendingCleanerNotification}
+        sendingTechnicianNotification={sendingTechnicianNotification}
         notifyingOpenJob={notifyingOpenJob}
         sendingReviewRequest={sendingReviewRequest}
         sendingTipRequest={sendingTipRequest}
@@ -2323,8 +2323,8 @@ export default function BookingsPage() {
           <QuotesTabContent />
         </TabsContent>
 
-        <TabsContent value="cleaner-wages">
-          <BulkEditCleanerWages />
+        <TabsContent value="technician-wages">
+          <BulkEditTechnicianWages />
         </TabsContent>
       </Tabs>
 
@@ -2516,19 +2516,19 @@ export default function BookingsPage() {
         booking={paymentHistoryBooking}
       />
 
-      {/* Bulk Assign Cleaner Dialog */}
+      {/* Bulk Assign Technician Dialog */}
       <AlertDialog open={bulkAssignDialogOpen} onOpenChange={setBulkAssignDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Assign Cleaner to {selectedBookings.size} Booking{selectedBookings.size > 1 ? 's' : ''}</AlertDialogTitle>
+            <AlertDialogTitle>Assign Technician to {selectedBookings.size} Booking{selectedBookings.size > 1 ? 's' : ''}</AlertDialogTitle>
             <AlertDialogDescription>
-              Select a cleaner to assign to the selected bookings.
+              Select a technician to assign to the selected bookings.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="py-4">
             <Select value={selectedStaffId} onValueChange={setSelectedStaffId}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select a cleaner..." />
+                <SelectValue placeholder="Select a technician..." />
               </SelectTrigger>
               <SelectContent>
                 {staffList.map((staff) => (
@@ -2551,7 +2551,7 @@ export default function BookingsPage() {
                   Assigning...
                 </>
               ) : (
-                'Assign Cleaner'
+                'Assign Technician'
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -2621,19 +2621,19 @@ export default function BookingsPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Assign Cleaner Dialog */}
-      <AlertDialog open={!!assignCleanerBooking} onOpenChange={(open) => !open && setAssignCleanerBooking(null)}>
+      {/* Assign Technician Dialog */}
+      <AlertDialog open={!!assignTechnicianBooking} onOpenChange={(open) => !open && setAssignTechnicianBooking(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Assign Cleaner</AlertDialogTitle>
+            <AlertDialogTitle>Assign Technician</AlertDialogTitle>
             <AlertDialogDescription>
-              Select a cleaner to assign to Booking #{assignCleanerBooking?.booking_number} — {assignCleanerBooking?.customer?.first_name} {assignCleanerBooking?.customer?.last_name}
+              Select a technician to assign to Booking #{assignTechnicianBooking?.booking_number} — {assignTechnicianBooking?.customer?.first_name} {assignTechnicianBooking?.customer?.last_name}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="py-4">
             <Select value={selectedStaffId} onValueChange={setSelectedStaffId}>
               <SelectTrigger>
-                <SelectValue placeholder="Select a cleaner..." />
+                <SelectValue placeholder="Select a technician..." />
               </SelectTrigger>
               <SelectContent>
                 {staffList.map((staff) => (
@@ -2645,58 +2645,58 @@ export default function BookingsPage() {
             </Select>
           </div>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => { setAssignCleanerBooking(null); setSelectedStaffId(''); }}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel onClick={() => { setAssignTechnicianBooking(null); setSelectedStaffId(''); }}>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              disabled={assigningCleaner || !selectedStaffId}
+              disabled={assigningTechnician || !selectedStaffId}
               onClick={async () => {
-                if (!assignCleanerBooking || !selectedStaffId) return;
-                setAssigningCleaner(true);
+                if (!assignTechnicianBooking || !selectedStaffId) return;
+                setAssigningTechnician(true);
                 try {
                   await updateBooking.mutateAsync({
-                    id: assignCleanerBooking.id,
+                    id: assignTechnicianBooking.id,
                     staff_id: selectedStaffId,
                   });
-                  toast({ title: "Cleaner Assigned", description: `Cleaner assigned to booking #${assignCleanerBooking.booking_number}` });
-                  setAssignCleanerBooking(null);
+                  toast({ title: "Technician Assigned", description: `Technician assigned to booking #${assignTechnicianBooking.booking_number}` });
+                  setAssignTechnicianBooking(null);
                   setSelectedStaffId('');
                 } catch (error) {
-                  toast({ title: "Error", description: "Failed to assign cleaner", variant: "destructive" });
+                  toast({ title: "Error", description: "Failed to assign technician", variant: "destructive" });
                 } finally {
-                  setAssigningCleaner(false);
+                  setAssigningTechnician(false);
                 }
               }}
               className="bg-primary hover:bg-primary/90"
             >
-              {assigningCleaner ? (
+              {assigningTechnician ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />
                   Assigning...
                 </>
               ) : (
-                'Assign Cleaner'
+                'Assign Technician'
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      {/* Cleaner Picker Dialog */}
-      <AlertDialog open={cleanerPickerOpen} onOpenChange={setCleanerPickerOpen}>
+      {/* Technician Picker Dialog */}
+      <AlertDialog open={technicianPickerOpen} onOpenChange={setTechnicianPickerOpen}>
         <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>Select Cleaners to Notify</AlertDialogTitle>
+            <AlertDialogTitle>Select Technicians to Notify</AlertDialogTitle>
             <AlertDialogDescription>
-              Choose which cleaners should receive the notification for job #{cleanerPickerBooking?.booking_number}.
+              Choose which technicians should receive the notification for job #{technicianPickerBooking?.booking_number}.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="max-h-64 overflow-y-auto space-y-2 py-2">
             <div className="flex items-center gap-2 pb-2 border-b">
               <Checkbox
-                checked={selectedCleanerIds.size === staffList.filter(s => s.is_active).length && selectedCleanerIds.size > 0}
+                checked={selectedTechnicianIds.size === staffList.filter(s => s.is_active).length && selectedTechnicianIds.size > 0}
                 onCheckedChange={(checked) => {
                   if (checked) {
-                    setSelectedCleanerIds(new Set(staffList.filter(s => s.is_active).map(s => s.id)));
+                    setSelectedTechnicianIds(new Set(staffList.filter(s => s.is_active).map(s => s.id)));
                   } else {
-                    setSelectedCleanerIds(new Set());
+                    setSelectedTechnicianIds(new Set());
                   }
                 }}
               />
@@ -2705,9 +2705,9 @@ export default function BookingsPage() {
             {staffList.filter(s => s.is_active).map((staff) => (
               <div key={staff.id} className="flex items-center gap-2">
                 <Checkbox
-                  checked={selectedCleanerIds.has(staff.id)}
+                  checked={selectedTechnicianIds.has(staff.id)}
                   onCheckedChange={(checked) => {
-                    setSelectedCleanerIds(prev => {
+                    setSelectedTechnicianIds(prev => {
                       const next = new Set(prev);
                       if (checked) next.add(staff.id);
                       else next.delete(staff.id);
@@ -2720,17 +2720,17 @@ export default function BookingsPage() {
               </div>
             ))}
             {staffList.filter(s => s.is_active).length === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-4">No active cleaners found.</p>
+              <p className="text-sm text-muted-foreground text-center py-4">No active technicians found.</p>
             )}
           </div>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleNotifySelectedCleaners}
-              disabled={selectedCleanerIds.size === 0}
+              onClick={handleNotifySelectedTechnicians}
+              disabled={selectedTechnicianIds.size === 0}
             >
               <Bell className="w-4 h-4 mr-2" />
-              Notify {selectedCleanerIds.size} Cleaner{selectedCleanerIds.size !== 1 ? 's' : ''}
+              Notify {selectedTechnicianIds.size} Technician{selectedTechnicianIds.size !== 1 ? 's' : ''}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

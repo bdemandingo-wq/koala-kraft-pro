@@ -85,12 +85,12 @@ export function SidebarVisibilitySettings() {
         setHiddenItems(hidden);
         setInitialHiddenItems(hidden);
         // Sync to localStorage for sidebar component
-        localStorage.setItem('tidywise_nav_hidden', JSON.stringify(hidden));
+        localStorage.setItem('wedetailnc_nav_hidden', JSON.stringify(hidden));
         window.dispatchEvent(new Event('navHiddenChanged'));
       } else {
         setHiddenItems([]);
         setInitialHiddenItems([]);
-        localStorage.removeItem('tidywise_nav_hidden');
+        localStorage.removeItem('wedetailnc_nav_hidden');
         window.dispatchEvent(new Event('navHiddenChanged'));
       }
     };
@@ -137,7 +137,7 @@ export function SidebarVisibilitySettings() {
         : [...prev, href];
       
       // Update localStorage for instant preview
-      localStorage.setItem('tidywise_nav_hidden', JSON.stringify(newHidden));
+      localStorage.setItem('wedetailnc_nav_hidden', JSON.stringify(newHidden));
       window.dispatchEvent(new Event('navHiddenChanged'));
       
       return newHidden;
@@ -174,8 +174,8 @@ export function SidebarVisibilitySettings() {
   const resetToDefault = async () => {
     setHiddenItems([]);
     setInitialHiddenItems([]);
-    localStorage.removeItem('tidywise_nav_hidden');
-    localStorage.removeItem('tidywise_nav_order');
+    localStorage.removeItem('wedetailnc_nav_hidden');
+    localStorage.removeItem('wedetailnc_nav_order');
     window.dispatchEvent(new Event('navHiddenChanged'));
     
     // Delete from database

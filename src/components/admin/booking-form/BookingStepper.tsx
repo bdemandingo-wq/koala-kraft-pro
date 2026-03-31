@@ -47,7 +47,7 @@ import { PropertyStep } from './steps/PropertyStep';
 import { ServiceStep } from './steps/ServiceStep';
 import { ScheduleStep } from './steps/ScheduleStep';
 import { PaymentStep } from './steps/PaymentStep';
-import { useCleanerConflicts } from '@/hooks/useCleanerConflicts';
+import { useTechnicianConflicts } from '@/hooks/useTechnicianConflicts';
 import {
   DndContext,
   closestCenter,
@@ -194,7 +194,7 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
 
   // Load step order from localStorage
   useEffect(() => {
-    const savedOrder = localStorage.getItem('tidywise_booking_steps_order');
+    const savedOrder = localStorage.getItem('wedetailnc_booking_steps_order');
     if (savedOrder) {
       try {
         const stepIds: string[] = JSON.parse(savedOrder);
@@ -226,7 +226,7 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
         const newOrder = arrayMove(items, oldIndex, newIndex);
         
         // Save to localStorage
-        localStorage.setItem('tidywise_booking_steps_order', JSON.stringify(newOrder.map(s => s.id)));
+        localStorage.setItem('wedetailnc_booking_steps_order', JSON.stringify(newOrder.map(s => s.id)));
         
         return newOrder;
       });
@@ -264,9 +264,9 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
     teamMemberPay,
     notes,
     totalAmount,
-    cleanerWage,
-    cleanerWageType,
-    cleanerOverrideHours,
+    technicianWage,
+    technicianWageType,
+    technicianOverrideHours,
     sendConfirmationEmail,
     setSendConfirmationEmail,
     sendConfirmationSms,
@@ -294,7 +294,7 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
     : newCustomer.phone;
 
   // Conflict detection for validation
-  const { checkConflictsForStaff } = useCleanerConflicts(
+  const { checkConflictsForStaff } = useTechnicianConflicts(
     selectedDate,
     selectedTime,
     selectedService?.duration || 120,
@@ -366,7 +366,7 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
       if (quoteError) throw quoteError;
 
       // Send SMS
-      const message = `Hi ${customerName}! Here's your quote for ${selectedService?.name || 'cleaning services'}:\n\n` +
+      const message = `Hi ${customerName}! Here's your quote for ${selectedService?.name || 'detailing services'}:\n\n` +
         `📍 Address: ${address}${city ? `, ${city}` : ''}\n` +
         `💰 Total: $${quoteAmount.toFixed(2)}\n\n` +
         `This quote is valid for 7 days. Reply YES to confirm or call us with any questions!`;
@@ -417,7 +417,7 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
           customerName,
           customerEmail: email,
           customerPhone: customerPhone || '',
-          serviceName: selectedService?.name || 'Cleaning Service',
+          serviceName: selectedService?.name || 'Detailing Service',
           homeSize: `${bedrooms || '?'} bed / ${bathrooms || '?'} bath`,
           appointmentDate: format(scheduledDate, 'MMMM d, yyyy'),
           appointmentTime: format(scheduledDate, 'h:mm a'),
@@ -486,7 +486,7 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
         <p>Hi ${customerName},</p>
         <p>Thank you for your interest! Here's your personalized quote:</p>
         <table style="width:100%;border-collapse:collapse;margin:20px 0;">
-          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666;">Service</td><td style="padding:8px;border-bottom:1px solid #eee;font-weight:600;">${selectedService?.name || 'Cleaning Service'}</td></tr>
+          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666;">Service</td><td style="padding:8px;border-bottom:1px solid #eee;font-weight:600;">${selectedService?.name || 'Detailing Service'}</td></tr>
           ${fullAddr ? `<tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666;">Address</td><td style="padding:8px;border-bottom:1px solid #eee;font-weight:600;">${fullAddr}</td></tr>` : ''}
           <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666;">Home Size</td><td style="padding:8px;border-bottom:1px solid #eee;font-weight:600;">${bedrooms || '?'} bed / ${bathrooms || '?'} bath</td></tr>
           <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666;">Extras</td><td style="padding:8px;border-bottom:1px solid #eee;font-weight:600;">${extrasTextList}</td></tr>
@@ -632,20 +632,20 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
       square_footage: squareFootage || null,
       extras: selectedExtras,
       is_draft: isDraft,
-      cleaner_wage: cleanerWage ? parseFloat(cleanerWage) : null,
-      cleaner_wage_type: cleanerWageType,
-      cleaner_override_hours: cleanerOverrideHours ? parseFloat(cleanerOverrideHours) : null,
-      // Compute and persist cleaner_pay_expected — SINGLE SOURCE OF TRUTH for payroll
-      cleaner_pay_expected: (() => {
-        const wage = cleanerWage ? parseFloat(cleanerWage) : null;
+      technician_wage: technicianWage ? parseFloat(technicianWage) : null,
+      technician_wage_type: technicianWageType,
+      technician_override_hours: technicianOverrideHours ? parseFloat(technicianOverrideHours) : null,
+      // Compute and persist technician_pay_expected — SINGLE SOURCE OF TRUTH for payroll
+      technician_pay_expected: (() => {
+        const wage = technicianWage ? parseFloat(technicianWage) : null;
         if (wage == null || wage === 0) return null;
-        if (cleanerWageType === 'flat') return wage;
-        if (cleanerWageType === 'percentage') {
+        if (technicianWageType === 'flat') return wage;
+        if (technicianWageType === 'percentage') {
           const base = finalPrice > 0 ? finalPrice : (totalAmount > 0 ? totalAmount : calculatedPrice);
           return Math.round((wage / 100) * base * 100) / 100;
         }
         // hourly
-        const hours = cleanerOverrideHours ? parseFloat(cleanerOverrideHours) : ((selectedService?.duration || 60) / 60);
+        const hours = technicianOverrideHours ? parseFloat(technicianOverrideHours) : ((selectedService?.duration || 60) / 60);
         return Math.round(wage * hours * 100) / 100;
       })(),
     };
@@ -859,11 +859,11 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
           }
         } else if (bookingData.staff_id) {
           // Single staff → one primary assignment
-          // Use null (not 0) when no wage is set, so cleaner_actual_payment remains the source of truth
+          // Use null (not 0) when no wage is set, so technician_actual_payment remains the source of truth
           await supabase.from('booking_team_assignments').insert({
             booking_id: booking.id,
             staff_id: bookingData.staff_id,
-            pay_share: cleanerWage ? parseFloat(cleanerWage) : null,
+            pay_share: technicianWage ? parseFloat(technicianWage) : null,
             is_primary: true,
             organization_id: organizationId,
           });
@@ -992,12 +992,12 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
                 const staffMember = staff?.find(s => s.id === staffId);
                 const jobTotal = totalAmount > 0 ? totalAmount : calculatedPrice;
                 const teamSize = selectedTeamMembers.length;
-                const wageToUse = cleanerWage ? parseFloat(cleanerWage) : null;
+                const wageToUse = technicianWage ? parseFloat(technicianWage) : null;
                 
                 if (wageToUse) {
-                  if (cleanerWageType === 'flat') {
+                  if (technicianWageType === 'flat') {
                     payShare = wageToUse / teamSize;
-                  } else if (cleanerWageType === 'percentage') {
+                  } else if (technicianWageType === 'percentage') {
                     payShare = (jobTotal * wageToUse / 100) / teamSize;
                   } else {
                     payShare = wageToUse * 2;
@@ -1021,11 +1021,11 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
             }
           } else if (bookingData.staff_id) {
             // Single staff → one primary assignment only
-            // Use null (not 0) when no wage is set, so cleaner_actual_payment remains the source of truth
+            // Use null (not 0) when no wage is set, so technician_actual_payment remains the source of truth
             await supabase.from('booking_team_assignments').insert({
               booking_id: newBooking.id,
               staff_id: bookingData.staff_id,
-              pay_share: cleanerWage ? parseFloat(cleanerWage) : null,
+              pay_share: technicianWage ? parseFloat(technicianWage) : null,
               is_primary: true,
               organization_id: organizationId,
             });

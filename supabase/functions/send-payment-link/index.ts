@@ -129,7 +129,7 @@ const handler = async (req: Request): Promise<Response> => {
       .eq("organization_id", organizationId)
       .maybeSingle();
 
-    const companyName = businessSettings?.company_name || "Your Cleaning Service";
+    const companyName = businessSettings?.company_name || "Your Detailing Service";
 
     // Format phone number
     let formattedPhone = phone.replace(/\D/g, "");
@@ -173,8 +173,8 @@ const handler = async (req: Request): Promise<Response> => {
       customer: customerId,
       mode: "setup",  // SETUP mode = save card only, NO charge
       payment_method_types: ["card"],
-      success_url: "https://jointidywise.lovable.app/card-saved?success=true",
-      cancel_url: "https://jointidywise.lovable.app/card-saved?cancelled=true",
+      success_url: "https://joinwedetailnc.lovable.app/card-saved?success=true",
+      cancel_url: "https://joinwedetailnc.lovable.app/card-saved?cancelled=true",
       metadata: {
         bookingId: bookingId || "",
         customerName: customerName,

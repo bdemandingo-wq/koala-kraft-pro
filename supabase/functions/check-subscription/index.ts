@@ -7,7 +7,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// TIDYWISE Pro product ID
+// WE DETAIL NC Pro product ID
 const PRO_PRODUCT_ID = "prod_Tg3zSKe9hRHLZy";
 
 // Trial duration in days (from organization creation date)
@@ -83,7 +83,7 @@ serve(async (req) => {
     const normalizedEmail = user.email.toLowerCase();
 
     // Bypass subscription check for owner account and Apple review
-    const FREE_ACCOUNTS = ["support@tidywisecleaning.com", "applereview@tidywise.com"];
+    const FREE_ACCOUNTS = ["support@wedetailnccleaning.com", "applereview@wedetailnc.com"];
     if (FREE_ACCOUNTS.includes(normalizedEmail)) {
       logStep("Free account detected - bypassing subscription check", { email: user.email });
       return new Response(JSON.stringify({

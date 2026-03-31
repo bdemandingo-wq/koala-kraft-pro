@@ -237,7 +237,7 @@ export default function CampaignsPage() {
       setAiTemplates([]);
       const { data, error } = await supabase.functions.invoke("generate-campaign-templates", {
         body: {
-          companyName: businessSettings?.company_name || "Your Cleaning Service",
+          companyName: businessSettings?.company_name || "Your Detailing Service",
           serviceType: "cleaning",
           audience: campaignForm.audience,
           tone: aiTone,
@@ -840,7 +840,7 @@ export default function CampaignsPage() {
                         .replace(/\{last_name\}/g, "Johnson")
                         .replace(/\{company_name\}/g, businessSettings?.company_name || "Your Company")
                         .replace(/\{booking_date\}/g, "Jan 15")
-                        .replace(/\{service_type\}/g, "Deep Clean")}
+                        .replace(/\{service_type\}/g, "Full Detail")}
                     </div>
                   </div>
                 </div>

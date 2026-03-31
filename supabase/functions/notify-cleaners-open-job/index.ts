@@ -9,7 +9,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface NotifyCleanersRequest {
+interface NotifyTechniciansRequest {
   jobDetails: {
     booking_id: string;
     booking_number: number;
@@ -34,7 +34,7 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
 
-    const { jobDetails, companyName: providedCompanyName, organizationId, staffIds }: NotifyCleanersRequest = await req.json();
+    const { jobDetails, companyName: providedCompanyName, organizationId, staffIds }: NotifyTechniciansRequest = await req.json();
 
     // organizationId is required — block if missing to prevent cross-org leakage
     if (!organizationId) {
@@ -45,7 +45,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log(`Notifying cleaners for org ${organizationId} about job #${jobDetails.booking_number}`);
+    console.log(`Notifying technicians for org ${organizationId} about job #${jobDetails.booking_number}`);
 
     // Fetch org-specific OpenPhone settings from the correct table
     const { data: phoneSettings } = await supabase
@@ -62,7 +62,7 @@ const handler = async (req: Request): Promise<Response> => {
     const orgPhoneNumberId = phoneSettings?.openphone_phone_number_id;
 
     // Get company name from business settings
-    let companyName = providedCompanyName || "Your Cleaning Company";
+    let companyName = providedCompanyName || "Your Detailing Company";
     const { data: settings } = await supabase
       .from("business_settings")
       .select("company_name")
@@ -124,7 +124,7 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     const { error: notifError } = await supabase
-      .from("cleaner_notifications")
+      .from("technician_notifications")
       .insert(notifications);
 
     if (notifError) {
@@ -210,7 +210,7 @@ const handler = async (req: Request): Promise<Response> => {
         notifications: notifications.length,
         smsSent,
         smsFailed,
-        message: `Notified ${staffMembers.length} cleaner(s) for org ${organizationId}`,
+        message: `Notified ${staffMembers.length} technician(s) for org ${organizationId}`,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

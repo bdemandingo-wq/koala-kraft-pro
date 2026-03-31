@@ -147,7 +147,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Create a Stripe Checkout session for this invoice payment
-    const origin = req.headers.get("origin") || "https://tidywisecleaning.com";
+    const origin = req.headers.get("origin") || "https://wedetailnccleaning.com";
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       line_items: [
@@ -155,7 +155,7 @@ const handler = async (req: Request): Promise<Response> => {
           price_data: {
             currency: "usd",
             product_data: {
-              name: `Invoice #${data.invoiceNumber} - ${data.serviceName || 'Cleaning Service'}`,
+              name: `Invoice #${data.invoiceNumber} - ${data.serviceName || 'Detailing Service'}`,
               description: data.address ? `Service at ${data.address}` : undefined,
             },
             unit_amount: Math.round(data.amount * 100), // Convert to cents
@@ -195,7 +195,7 @@ const handler = async (req: Request): Promise<Response> => {
               <div style="font-size:32px;font-weight:bold;color:#ffffff;">
                 ${companyName}
               </div>
-              <p style="color:#ffffff;font-size:14px;margin:5px 0 0 0;">Professional Cleaning Services</p>
+              <p style="color:#ffffff;font-size:14px;margin:5px 0 0 0;">Professional Detailing Services</p>
             </td>
           </tr>
           
@@ -225,7 +225,7 @@ const handler = async (req: Request): Promise<Response> => {
                       </tr>
                       <tr>
                         <td style="padding:8px 0;border-bottom:1px solid #e0e0e0;color:#666;">Service</td>
-                        <td style="padding:8px 0;border-bottom:1px solid #e0e0e0;text-align:right;font-weight:600;">${data.serviceName || 'Cleaning Service'}</td>
+                        <td style="padding:8px 0;border-bottom:1px solid #e0e0e0;text-align:right;font-weight:600;">${data.serviceName || 'Detailing Service'}</td>
                       </tr>
                       ${data.address ? `
                       <tr>

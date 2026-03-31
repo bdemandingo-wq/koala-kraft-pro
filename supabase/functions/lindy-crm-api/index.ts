@@ -1512,12 +1512,12 @@ serve(async (req) => {
         break;
       }
 
-      case "get_cleaner_notifications": {
+      case "get_technician_notifications": {
         const { staff_id, unread_only } = params;
         if (!staff_id) throw new Error("Missing staff_id");
 
         let query = supabase
-          .from("cleaner_notifications")
+          .from("technician_notifications")
           .select("id, title, message, type, is_read, booking_id, created_at")
           .eq("organization_id", organization_id)
           .eq("staff_id", staff_id)
@@ -1555,7 +1555,7 @@ serve(async (req) => {
       case "get_reminder_settings": {
         const { data, error } = await supabase
           .from("appointment_reminder_intervals")
-          .select("id, label, hours_before, is_active, send_to_client, send_to_cleaner, created_at")
+          .select("id, label, hours_before, is_active, send_to_client, send_to_technician, created_at")
           .eq("organization_id", organization_id)
           .order("hours_before", { ascending: false });
 
@@ -1565,13 +1565,13 @@ serve(async (req) => {
       }
 
       case "update_reminder_setting": {
-        const { reminder_id, is_active, send_to_client, send_to_cleaner } = params;
+        const { reminder_id, is_active, send_to_client, send_to_technician } = params;
         if (!reminder_id) throw new Error("Missing reminder_id");
 
         const updates: Record<string, any> = {};
         if (is_active !== undefined) updates.is_active = is_active;
         if (send_to_client !== undefined) updates.send_to_client = send_to_client;
-        if (send_to_cleaner !== undefined) updates.send_to_cleaner = send_to_cleaner;
+        if (send_to_technician !== undefined) updates.send_to_technician = send_to_technician;
 
         const { data, error } = await supabase.from("appointment_reminder_intervals").update(updates).eq("id", reminder_id).eq("organization_id", organization_id).select().single();
         if (error) throw error;
@@ -1683,7 +1683,7 @@ serve(async (req) => {
             "get_staff_member - Details (params: staff_id)",
             "get_staff_schedule - Schedule (params: staff_id, from_date, to_date)",
             "get_staff_documents - Documents (params: staff_id)",
-            "get_cleaner_notifications - Notifications (params: staff_id, unread_only)",
+            "get_technician_notifications - Notifications (params: staff_id, unread_only)",
           ],
           services: ["get_services - List (params: include_inactive)"],
           invoices: [
@@ -1748,13 +1748,13 @@ serve(async (req) => {
           ],
           notifications: [
             "get_admin_notifications - Admin alerts (params: unread_only)",
-            "get_cleaner_notifications - Staff alerts (params: staff_id, unread_only)",
+            "get_technician_notifications - Staff alerts (params: staff_id, unread_only)",
           ],
           automations: [
             "get_automations - List automation toggles",
             "toggle_automation - Enable/disable (params: automation_type, is_enabled)",
             "get_reminder_settings - Reminder config",
-            "update_reminder_setting - Update (params: reminder_id, is_active, send_to_client, send_to_cleaner)",
+            "update_reminder_setting - Update (params: reminder_id, is_active, send_to_client, send_to_technician)",
           ],
           analytics: [
             "get_dashboard_stats - Today's stats, monthly revenue, totals",

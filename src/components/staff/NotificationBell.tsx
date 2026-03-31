@@ -33,7 +33,7 @@ export function NotificationBell({ staffId, onViewJob }: Props) {
 
   const fetchNotifications = async () => {
     const { data, error } = await supabase
-      .from('cleaner_notifications')
+      .from('technician_notifications')
       .select('*')
       .eq('staff_id', staffId)
       .order('created_at', { ascending: false })
@@ -51,13 +51,13 @@ export function NotificationBell({ staffId, onViewJob }: Props) {
 
       // Subscribe to realtime notifications
       const channel = supabase
-        .channel('cleaner-notifications')
+        .channel('technician-notifications')
         .on(
           'postgres_changes',
           {
             event: 'INSERT',
             schema: 'public',
-            table: 'cleaner_notifications',
+            table: 'technician_notifications',
             filter: `staff_id=eq.${staffId}`,
           },
           (payload) => {
@@ -75,7 +75,7 @@ export function NotificationBell({ staffId, onViewJob }: Props) {
 
   const markAsRead = async (notificationId: string) => {
     await supabase
-      .from('cleaner_notifications')
+      .from('technician_notifications')
       .update({ is_read: true })
       .eq('id', notificationId);
 
@@ -87,7 +87,7 @@ export function NotificationBell({ staffId, onViewJob }: Props) {
 
   const markAllAsRead = async () => {
     await supabase
-      .from('cleaner_notifications')
+      .from('technician_notifications')
       .update({ is_read: true })
       .eq('staff_id', staffId)
       .eq('is_read', false);

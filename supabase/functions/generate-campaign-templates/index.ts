@@ -49,7 +49,7 @@ Generate 3 UNIQUE SMS templates that are:
 
 Always return valid JSON with exactly 3 templates.`;
 
-    const userPrompt = `Generate 3 FRESH Hormozi-style SMS templates for "${companyName || 'a cleaning business'}" targeting ${audience === 'inactive_clients' ? 'INACTIVE CLIENTS (win them back)' : audience === 'active_clients' ? 'ACTIVE CLIENTS (VIP treatment)' : 'all eligible customers'} (ID: ${uniqueId}):
+    const userPrompt = `Generate 3 FRESH Hormozi-style SMS templates for "${companyName || 'a car detailing business'}" targeting ${audience === 'inactive_clients' ? 'INACTIVE CLIENTS (win them back)' : audience === 'active_clients' ? 'ACTIVE CLIENTS (VIP treatment)' : 'all eligible customers'} (ID: ${uniqueId}):
 
 1. "The No-Brainer" - ${audience === 'inactive_clients' ? 'Stack so much value they feel dumb not booking. Make coming back irresistible.' : audience === 'active_clients' ? 'Exclusive VIP deal that makes them feel special for being loyal' : 'An offer so good it sells itself'}
 2. "The Pattern Interrupt" - ${audience === 'inactive_clients' ? 'Unexpected angle - maybe self-deprecating, maybe bold question' : audience === 'active_clients' ? 'Surprising way to show appreciation or offer upgrade' : 'Something unexpected that stops the scroll'}

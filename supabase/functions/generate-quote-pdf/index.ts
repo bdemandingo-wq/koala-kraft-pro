@@ -63,7 +63,7 @@ serve(async (req) => {
       .limit(1)
       .maybeSingle();
 
-    const companyName = settings?.company_name || "TidyWise";
+    const companyName = settings?.company_name || "We Detail NC";
     const companyAddress = settings?.company_address || "";
     const companyCity = settings?.company_city || "";
     const companyState = settings?.company_state || "";
@@ -200,7 +200,7 @@ serve(async (req) => {
             <tbody>
               <tr>
                 <td>
-                  <strong>${quote.service?.name || 'Cleaning Service'}</strong>
+                  <strong>${quote.service?.name || 'Detailing Service'}</strong>
                   ${quote.service?.description ? `<br><span style="color: #6b7280; font-size: 12px;">${quote.service.description}</span>` : ''}
                 </td>
                 <td>${quote.service?.duration ? `${quote.service.duration} min` : '-'}</td>

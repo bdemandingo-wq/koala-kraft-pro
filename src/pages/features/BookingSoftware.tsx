@@ -21,22 +21,22 @@ export default function BookingSoftware() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleStartFreeTrial = () => {
-    sessionStorage.setItem("selectedIndustry", "Home Cleaning");
+    sessionStorage.setItem("selectedIndustry", "Car Detailing");
     navigate("/auth", { state: { mode: "signup" } });
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Seo 
-        title="Online Booking Software for Cleaning Businesses | TidyWise"
-        description="Let clients book cleaning services online 24/7. TidyWise automates your booking process so you never miss a job. Try free today."
+        title="Online Booking Software for Car Detailing Businesses | We Detail NC"
+        description="Let clients book detailing services online 24/7. We Detail NC automates your booking process so you never miss a job. Try free today."
         canonicalPath="/features/booking"
-        ogImage="/images/tidywise-og.png"
+        ogImage="/images/wedetailnc-og.png"
         jsonLd={{
           "@type": "SoftwareApplication",
-          "name": "TidyWise Booking Software",
+          "name": "We Detail NC Booking Software",
           "applicationCategory": "BusinessApplication",
-          "description": "Online booking software designed for cleaning businesses with smart scheduling and automated confirmations.",
+          "description": "Online booking software designed for car detailing businesses with smart scheduling and automated confirmations.",
           "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "description": "60-day free trial" }
         }}
       />
@@ -45,7 +45,7 @@ export default function BookingSoftware() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <a href="/" className="flex items-center gap-2">
-              <span className="font-bold text-xl text-foreground">TIDYWISE</span>
+              <span className="font-bold text-xl text-foreground">WE DETAIL NC</span>
             </a>
             <div className="hidden md:flex items-center gap-8">
               <a href="/#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
@@ -81,10 +81,10 @@ export default function BookingSoftware() {
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
             Online Booking Software<br/>
-            <span className="text-primary">Built for Cleaning Businesses</span>
+            <span className="text-primary">Built for Car Detailing Businesses</span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Stop playing phone tag with clients. TidyWise gives your cleaning business a professional online booking system that works around the clock — even while you're on the job.
+            Stop playing phone tag with clients. We Detail NC gives your car detailing business a professional online booking system that works around the clock — even while you're on the job.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="text-lg px-8 h-14" onClick={handleStartFreeTrial}>
@@ -142,7 +142,7 @@ export default function BookingSoftware() {
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-primary/5">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl font-bold text-foreground mb-4">Start Accepting Bookings Today</h2>
-          <p className="text-lg text-muted-foreground mb-8">Join hundreds of cleaning businesses using TidyWise to fill their calendar. Start free, no credit card required.</p>
+          <p className="text-lg text-muted-foreground mb-8">Join hundreds of car detailing businesses using We Detail NC to fill their calendar. Start free, no credit card required.</p>
           <Button size="lg" className="text-lg px-8 h-14" onClick={handleStartFreeTrial}>
             Get Started Free <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
@@ -157,7 +157,7 @@ export default function BookingSoftware() {
       </section>
 
       <footer className="border-t border-border py-8 px-4 text-center text-sm text-muted-foreground">
-        <p>© {new Date().getFullYear()} TidyWise. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} We Detail NC. All rights reserved.</p>
       </footer>
     </div>
   );

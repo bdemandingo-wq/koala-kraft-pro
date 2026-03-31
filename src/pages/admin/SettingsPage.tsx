@@ -811,7 +811,7 @@ export default function SettingsPage() {
                     <button
                       type="button"
                       onClick={() => updateField('review_sms_template', 
-                        `Hi {customer_name}, love to hear you had a 5-Star experience! We're having an office competition - {cleaner_name} is almost in 1st place! It would make their day if you left a 5-Star review: {review_link} - Please mention {cleaner_name} in your review and send us a screenshot! - {company_name}`
+                        `Hi {customer_name}, love to hear you had a 5-Star experience! We're having an office competition - {technician_name} is almost in 1st place! It would make their day if you left a 5-Star review: {review_link} - Please mention {technician_name} in your review and send us a screenshot! - {company_name}`
                       )}
                       className="p-3 text-left border rounded-lg hover:bg-muted/50 transition-colors group"
                     >
@@ -820,7 +820,7 @@ export default function SettingsPage() {
                         <span className="font-medium text-sm">Office Competition Method</span>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Frame as team competition to encourage mentioning cleaner by name
+                        Frame as team competition to encourage mentioning technician by name
                       </p>
                     </button>
                   </div>
@@ -839,7 +839,7 @@ export default function SettingsPage() {
                 <div className="flex flex-wrap gap-2 mt-1">
                   <code className="text-xs bg-muted px-2 py-1 rounded">{'{customer_name}'}</code>
                   <code className="text-xs bg-muted px-2 py-1 rounded">{'{company_name}'}</code>
-                  <code className="text-xs bg-muted px-2 py-1 rounded">{'{cleaner_name}'}</code>
+                  <code className="text-xs bg-muted px-2 py-1 rounded">{'{technician_name}'}</code>
                   <code className="text-xs bg-muted px-2 py-1 rounded">{'{service_name}'}</code>
                   <code className="text-xs bg-muted px-2 py-1 rounded">{'{review_link}'}</code>
                 </div>

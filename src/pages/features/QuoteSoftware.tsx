@@ -66,15 +66,15 @@ export default function QuoteSoftware() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleStartFreeTrial = () => {
-    sessionStorage.setItem("selectedIndustry", "Home Cleaning");
+    sessionStorage.setItem("selectedIndustry", "Car Detailing");
     navigate("/auth", { state: { mode: "signup" } });
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Seo 
-        title="Cleaning Quote Software | Instant Estimates | TIDYWISE"
-        description="Professional quote software for cleaning businesses. Auto-calculate prices, send branded estimates, and convert leads to bookings. Start free trial."
+        title="Cleaning Quote Software | Instant Estimates | WE DETAIL NC"
+        description="Professional quote software for car detailing businesses. Auto-calculate prices, send branded estimates, and convert leads to bookings. Start free trial."
         canonicalPath="/features/quote-software"
       />
 
@@ -83,7 +83,7 @@ export default function QuoteSoftware() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <a href="/" className="flex items-center gap-2">
-              <span className="font-bold text-xl text-foreground">TIDYWISE</span>
+              <span className="font-bold text-xl text-foreground">WE DETAIL NC</span>
             </a>
             <div className="hidden md:flex items-center gap-8">
               <a href="/#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
@@ -164,7 +164,7 @@ export default function QuoteSoftware() {
       <section id="benefits" className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl font-bold text-foreground text-center mb-4">
-            Quote Software Built for Cleaning Businesses
+            Quote Software Built for Car Detailing Businesses
           </h2>
           <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
             From lead to booked job in minutes. Everything you need to win more cleaning contracts.
@@ -227,7 +227,7 @@ export default function QuoteSoftware() {
       {/* Footer */}
       <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-border">
         <div className="max-w-5xl mx-auto text-center">
-          <p className="text-muted-foreground">© 2026 TIDYWISE. Quote software for cleaning businesses.</p>
+          <p className="text-muted-foreground">© 2026 WE DETAIL NC. Quote software for car detailing businesses.</p>
           <div className="flex justify-center gap-6 mt-4">
             <Link to="/" className="text-muted-foreground hover:text-foreground">Home</Link>
             <Link to="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</Link>
@@ -241,11 +241,11 @@ export default function QuoteSoftware() {
         __html: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "SoftwareApplication",
-          "name": "TIDYWISE Quote Software",
+          "name": "WE DETAIL NC Quote Software",
           "applicationCategory": "BusinessApplication",
           "operatingSystem": "Web, iOS, Android",
           "offers": { "@type": "Offer", "price": "50", "priceCurrency": "USD" },
-          "description": "Professional quote software for cleaning businesses with instant pricing and automated follow-ups."
+          "description": "Professional quote software for car detailing businesses with instant pricing and automated follow-ups."
         })
       }} />
     </div>

@@ -33,7 +33,7 @@ interface BookingProfit {
   serviceName: string;
   scheduledAt: Date;
   revenue: number;
-  cleanerPay: number;
+  technicianPay: number;
   profit: number;
   marginPercent: number;
   status: string;
@@ -103,26 +103,26 @@ export function ProfitMarginReport({ bookings }: ProfitMarginReportProps) {
         // Team cleanings: if pay_share totals exist, use them as labor cost
         const teamPay = teamPaysByBooking.get(booking.id);
 
-        let cleanerPay = 0;
+        let technicianPay = 0;
         if (teamPay != null && teamPay > 0) {
-          cleanerPay = teamPay;
-        } else if (bookingAny.cleaner_actual_payment != null) {
-          cleanerPay = Number(bookingAny.cleaner_actual_payment);
-        } else if (bookingAny.cleaner_wage) {
-          const wage = Number(bookingAny.cleaner_wage);
-          const wageType = bookingAny.cleaner_wage_type || 'hourly';
+          technicianPay = teamPay;
+        } else if (bookingAny.technician_actual_payment != null) {
+          technicianPay = Number(bookingAny.technician_actual_payment);
+        } else if (bookingAny.technician_wage) {
+          const wage = Number(bookingAny.technician_wage);
+          const wageType = bookingAny.technician_wage_type || 'hourly';
 
           if (wageType === 'flat') {
-            cleanerPay = wage;
+            technicianPay = wage;
           } else if (wageType === 'percentage') {
-            cleanerPay = (revenue * wage) / 100;
+            technicianPay = (revenue * wage) / 100;
           } else {
-            const hours = bookingAny.cleaner_override_hours || (booking.duration / 60);
-            cleanerPay = wage * hours;
+            const hours = bookingAny.technician_override_hours || (booking.duration / 60);
+            technicianPay = wage * hours;
           }
         }
 
-        const profit = revenue - cleanerPay;
+        const profit = revenue - technicianPay;
         const marginPercent = revenue > 0 ? (profit / revenue) * 100 : 0;
 
         return {
@@ -134,7 +134,7 @@ export function ProfitMarginReport({ bookings }: ProfitMarginReportProps) {
           serviceName: booking.service?.name || 'Refund',
           scheduledAt: new Date(booking.scheduled_at),
           revenue,
-          cleanerPay,
+          technicianPay,
           profit,
           marginPercent,
           status: booking.status,
@@ -152,8 +152,8 @@ export function ProfitMarginReport({ bookings }: ProfitMarginReportProps) {
 
   const summaryStats = useMemo(() => {
     const totalRevenue = profitData.reduce((sum, b) => sum + b.revenue, 0);
-    const totalCleanerPay = profitData.reduce((sum, b) => sum + b.cleanerPay, 0);
-    const totalProfit = totalRevenue - totalCleanerPay;
+    const totalTechnicianPay = profitData.reduce((sum, b) => sum + b.technicianPay, 0);
+    const totalProfit = totalRevenue - totalTechnicianPay;
     const avgMargin = profitData.length > 0 
       ? profitData.reduce((sum, b) => sum + b.marginPercent, 0) / profitData.length 
       : 0;
@@ -162,7 +162,7 @@ export function ProfitMarginReport({ bookings }: ProfitMarginReportProps) {
 
     return {
       totalRevenue,
-      totalCleanerPay,
+      totalTechnicianPay,
       totalProfit,
       avgMargin,
       mostProfitable,
@@ -186,14 +186,14 @@ export function ProfitMarginReport({ bookings }: ProfitMarginReportProps) {
   };
 
   const exportToCSV = () => {
-    const headers = ['Booking #', 'Date', 'Customer', 'Service', 'Revenue', 'Cleaner Pay', 'Profit', 'Margin %'];
+    const headers = ['Booking #', 'Date', 'Customer', 'Service', 'Revenue', 'Technician Pay', 'Profit', 'Margin %'];
     const rows = profitData.map(item => [
       item.bookingNumber,
       format(item.scheduledAt, 'yyyy-MM-dd'),
       item.customerName,
       item.serviceName,
       item.revenue.toFixed(2),
-      item.cleanerPay.toFixed(2),
+      item.technicianPay.toFixed(2),
       item.profit.toFixed(2),
       item.marginPercent.toFixed(1),
     ]);
@@ -268,8 +268,8 @@ export function ProfitMarginReport({ bookings }: ProfitMarginReportProps) {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Total Cleaner Pay</p>
-                <p className="text-2xl font-bold text-foreground">{isTestMode ? '$XXX' : `$${summaryStats.totalCleanerPay.toLocaleString()}`}</p>
+                <p className="text-sm text-muted-foreground">Total Technician Pay</p>
+                <p className="text-2xl font-bold text-foreground">{isTestMode ? '$XXX' : `$${summaryStats.totalTechnicianPay.toLocaleString()}`}</p>
               </div>
               <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
                 <DollarSign className="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -371,7 +371,7 @@ export function ProfitMarginReport({ bookings }: ProfitMarginReportProps) {
                   <TableHead>Customer</TableHead>
                   <TableHead>Service</TableHead>
                   <TableHead className="text-right">Revenue</TableHead>
-                  <TableHead className="text-right">Cleaner Pay</TableHead>
+                  <TableHead className="text-right">Technician Pay</TableHead>
                   <TableHead className="text-right">Profit</TableHead>
                   <TableHead className="text-right">Margin</TableHead>
                 </TableRow>
@@ -386,7 +386,7 @@ export function ProfitMarginReport({ bookings }: ProfitMarginReportProps) {
                       <TableCell>{maskName(item.customerName)}</TableCell>
                       <TableCell>{item.serviceName}</TableCell>
                       <TableCell className="text-right">{maskAmount(item.revenue)}</TableCell>
-                      <TableCell className="text-right text-muted-foreground">{maskAmount(item.cleanerPay)}</TableCell>
+                      <TableCell className="text-right text-muted-foreground">{maskAmount(item.technicianPay)}</TableCell>
                       <TableCell className={cn("text-right font-semibold", getMarginColor(item.marginPercent))}>
                         {maskAmount(item.profit)}
                       </TableCell>

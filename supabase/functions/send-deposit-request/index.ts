@@ -99,8 +99,8 @@ const handler = async (req: Request): Promise<Response> => {
       .eq('organization_id', organizationId)
       .maybeSingle();
 
-    const companyName = businessSettings?.company_name || 'Your cleaning service';
-    const appUrl = (businessSettings?.app_url || Deno.env.get("PROJECT_URL") || req.headers.get("origin") || "https://jointidywise.lovable.app").replace(/\/+$/, '');
+    const companyName = businessSettings?.company_name || 'Your detailing service';
+    const appUrl = (businessSettings?.app_url || Deno.env.get("PROJECT_URL") || req.headers.get("origin") || "https://joinwedetailnc.lovable.app").replace(/\/+$/, '');
 
     // Shorten the deposit link
     const shortCode = Math.random().toString(36).substring(2, 8).toUpperCase();

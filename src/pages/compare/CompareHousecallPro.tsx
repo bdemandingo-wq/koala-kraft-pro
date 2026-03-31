@@ -17,28 +17,28 @@ import {
 import { useState } from "react";
 
 const comparisonData = [
-  { feature: "Free Trial", tidywise: "2 months free", housecallpro: "14 days", winner: "tidywise" },
-  { feature: "Monthly Pricing", tidywise: "$50/month flat", housecallpro: "$59-$199/month", winner: "tidywise" },
-  { feature: "Online Booking", tidywise: true, housecallpro: true, winner: "tie" },
-  { feature: "Smart Scheduling", tidywise: true, housecallpro: true, winner: "tie" },
-  { feature: "GPS Check-ins", tidywise: true, housecallpro: true, winner: "tie" },
-  { feature: "Automated Payroll", tidywise: true, housecallpro: false, winner: "tidywise" },
-  { feature: "P&L Reports", tidywise: true, housecallpro: false, winner: "tidywise" },
-  { feature: "Demo/Test Mode", tidywise: true, housecallpro: false, winner: "tidywise" },
-  { feature: "Cleaning-Specific Pricing", tidywise: true, housecallpro: false, winner: "tidywise" },
-  { feature: "AI Revenue Tools", tidywise: true, housecallpro: false, winner: "tidywise" },
-  { feature: "Unlimited Users", tidywise: true, housecallpro: "Add-on", winner: "tidywise" },
-  { feature: "Review Requests", tidywise: true, housecallpro: true, winner: "tie" },
-  { feature: "Loyalty Programs", tidywise: true, housecallpro: false, winner: "tidywise" },
-  { feature: "Inventory Tracking", tidywise: true, housecallpro: false, winner: "tidywise" },
-  { feature: "Square Footage Pricing", tidywise: true, housecallpro: false, winner: "tidywise" },
+  { feature: "Free Trial", wedetailnc: "2 months free", housecallpro: "14 days", winner: "wedetailnc" },
+  { feature: "Monthly Pricing", wedetailnc: "$50/month flat", housecallpro: "$59-$199/month", winner: "wedetailnc" },
+  { feature: "Online Booking", wedetailnc: true, housecallpro: true, winner: "tie" },
+  { feature: "Smart Scheduling", wedetailnc: true, housecallpro: true, winner: "tie" },
+  { feature: "GPS Check-ins", wedetailnc: true, housecallpro: true, winner: "tie" },
+  { feature: "Automated Payroll", wedetailnc: true, housecallpro: false, winner: "wedetailnc" },
+  { feature: "P&L Reports", wedetailnc: true, housecallpro: false, winner: "wedetailnc" },
+  { feature: "Demo/Test Mode", wedetailnc: true, housecallpro: false, winner: "wedetailnc" },
+  { feature: "Cleaning-Specific Pricing", wedetailnc: true, housecallpro: false, winner: "wedetailnc" },
+  { feature: "AI Revenue Tools", wedetailnc: true, housecallpro: false, winner: "wedetailnc" },
+  { feature: "Unlimited Users", wedetailnc: true, housecallpro: "Add-on", winner: "wedetailnc" },
+  { feature: "Review Requests", wedetailnc: true, housecallpro: true, winner: "tie" },
+  { feature: "Loyalty Programs", wedetailnc: true, housecallpro: false, winner: "wedetailnc" },
+  { feature: "Inventory Tracking", wedetailnc: true, housecallpro: false, winner: "wedetailnc" },
+  { feature: "Square Footage Pricing", wedetailnc: true, housecallpro: false, winner: "wedetailnc" },
 ];
 
 const testimonials = [
   {
-    quote: "Housecall Pro was built for plumbers and HVAC. TidyWise actually understands cleaning businesses.",
+    quote: "Housecall Pro was built for plumbers and HVAC. We Detail NC actually understands car detailing businesses.",
     author: "Jennifer M.",
-    role: "Pristine Home Cleaners",
+    role: "Pristine Home Technicians",
     rating: 5
   },
   {
@@ -60,7 +60,7 @@ export default function CompareHousecallPro() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleStartFreeTrial = () => {
-    sessionStorage.setItem("selectedIndustry", "Home Cleaning");
+    sessionStorage.setItem("selectedIndustry", "Car Detailing");
     navigate("/auth", { state: { mode: "signup" } });
   };
 
@@ -73,10 +73,10 @@ export default function CompareHousecallPro() {
   return (
     <div className="min-h-screen bg-background">
       <Seo 
-        title="TIDYWISE vs Housecall Pro (2026)"
-        description="Compare TIDYWISE vs Housecall Pro for cleaning businesses. Cleaning-specific features, payroll, and $50/mo flat pricing vs Housecall Pro's $59–$199/mo."
+        title="WE DETAIL NC vs Housecall Pro (2026)"
+        description="Compare WE DETAIL NC vs Housecall Pro for car detailing businesses. Cleaning-specific features, payroll, and $50/mo flat pricing vs Housecall Pro's $59–$199/mo."
         canonicalPath="/compare/housecall-pro"
-        ogImage="/images/tidywise-og.png"
+        ogImage="/images/wedetailnc-og.png"
       />
 
       {/* Navigation */}
@@ -84,7 +84,7 @@ export default function CompareHousecallPro() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <a href="/" className="flex items-center gap-2">
-              <span className="font-bold text-xl text-foreground">TIDYWISE</span>
+              <span className="font-bold text-xl text-foreground">WE DETAIL NC</span>
             </a>
             <div className="hidden md:flex items-center gap-8">
               <a href="/#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
@@ -120,11 +120,11 @@ export default function CompareHousecallPro() {
             2026 Comparison
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
-            TidyWise vs Housecall Pro:<br/>
+            We Detail NC vs Housecall Pro:<br/>
             <span className="text-primary">Built for Cleaning, Not Plumbing</span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Housecall Pro was built for plumbers and HVAC techs. TidyWise is built specifically for cleaning businesses with <strong>square footage pricing, automated payroll, and P&L reports</strong>—all for a flat $50/month.
+            Housecall Pro was built for plumbers and HVAC techs. We Detail NC is built specifically for car detailing businesses with <strong>square footage pricing, automated payroll, and P&L reports</strong>—all for a flat $50/month.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="h-12 px-8" onClick={handleStartFreeTrial}>
@@ -169,7 +169,7 @@ export default function CompareHousecallPro() {
             Feature-by-Feature Comparison
           </h2>
           <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
-            See what you get with TidyWise vs Housecall Pro. Green checkmarks mean included.
+            See what you get with We Detail NC vs Housecall Pro. Green checkmarks mean included.
           </p>
 
           <div className="bg-card rounded-xl border border-border overflow-hidden">
@@ -178,7 +178,7 @@ export default function CompareHousecallPro() {
                 <thead>
                   <tr className="bg-secondary/50">
                     <th className="text-left p-4 font-semibold text-foreground">Feature</th>
-                    <th className="text-center p-4 font-semibold text-primary">TidyWise</th>
+                    <th className="text-center p-4 font-semibold text-primary">We Detail NC</th>
                     <th className="text-center p-4 font-semibold text-muted-foreground">Housecall Pro</th>
                   </tr>
                 </thead>
@@ -187,7 +187,7 @@ export default function CompareHousecallPro() {
                     <tr key={row.feature} className={i % 2 === 0 ? "bg-background" : "bg-secondary/20"}>
                       <td className="p-4 text-foreground font-medium">{row.feature}</td>
                       <td className="p-4 text-center">
-                        {renderValue(row.tidywise)}
+                        {renderValue(row.wedetailnc)}
                       </td>
                       <td className="p-4 text-center">
                         {renderValue(row.housecallpro)}
@@ -201,7 +201,7 @@ export default function CompareHousecallPro() {
 
           <div className="mt-8 text-center">
             <Button size="lg" onClick={handleStartFreeTrial}>
-              Switch to TidyWise Today <ArrowRight className="ml-2 h-4 w-4" />
+              Switch to We Detail NC Today <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -211,7 +211,7 @@ export default function CompareHousecallPro() {
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-secondary/30">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl font-bold text-foreground text-center mb-12">
-            Why Cleaning Businesses Choose TidyWise
+            Why Car Detailing Businesses Choose We Detail NC
           </h2>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -221,7 +221,7 @@ export default function CompareHousecallPro() {
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-2">Save $100+/Month</h3>
               <p className="text-muted-foreground">
-                Housecall Pro's Pro plan costs $199/month. TidyWise gives you more cleaning features for just $50/month flat.
+                Housecall Pro's Pro plan costs $199/month. We Detail NC gives you more cleaning features for just $50/month flat.
               </p>
             </div>
 
@@ -231,7 +231,7 @@ export default function CompareHousecallPro() {
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-2">Square Footage Pricing</h3>
               <p className="text-muted-foreground">
-                Price by square feet like real cleaning businesses do. Housecall Pro doesn't support this natively.
+                Price by square feet like real car detailing businesses do. Housecall Pro doesn't support this natively.
               </p>
             </div>
 
@@ -241,7 +241,7 @@ export default function CompareHousecallPro() {
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-2">Built for Cleaning</h3>
               <p className="text-muted-foreground">
-                Housecall Pro serves 20+ industries. TidyWise is 100% focused on making cleaning businesses successful.
+                Housecall Pro serves 20+ industries. We Detail NC is 100% focused on making car detailing businesses successful.
               </p>
             </div>
           </div>
@@ -303,7 +303,7 @@ export default function CompareHousecallPro() {
       <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-border">
         <div className="max-w-5xl mx-auto text-center">
           <p className="text-muted-foreground">
-            © 2026 TidyWise. A Housecall Pro alternative for cleaning businesses.
+            © 2026 We Detail NC. A Housecall Pro alternative for car detailing businesses.
           </p>
           <div className="flex flex-wrap justify-center gap-6 mt-4">
             <Link to="/" className="text-muted-foreground hover:text-foreground">Home</Link>
@@ -321,7 +321,7 @@ export default function CompareHousecallPro() {
         __html: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "SoftwareApplication",
-          "name": "TidyWise",
+          "name": "We Detail NC",
           "applicationCategory": "BusinessApplication",
           "operatingSystem": "Web, iOS, Android",
           "offers": {
@@ -330,7 +330,7 @@ export default function CompareHousecallPro() {
             "priceCurrency": "USD",
             "priceValidUntil": "2027-12-31"
           },
-          "description": "The best Housecall Pro alternative for cleaning businesses. Cleaning-specific features, automated payroll, and flat $50/month pricing."
+          "description": "The best Housecall Pro alternative for car detailing businesses. Cleaning-specific features, automated payroll, and flat $50/month pricing."
         })
       }} />
     </div>

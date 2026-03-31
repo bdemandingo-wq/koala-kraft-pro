@@ -16,7 +16,7 @@ import { supabase } from "@/lib/supabase";
 
 const STATUS_OPTIONS: Array<{ value: BookingWithDetails["status"]; label: string }> = [
   { value: "pending", label: "Pending Payment" },
-  { value: "confirmed", label: "Uncleaned" },
+  { value: "confirmed", label: "Unserviceded" },
   { value: "in_progress", label: "In Progress" },
   { value: "completed", label: "Clean Completed" },
   { value: "cancelled", label: "Cancelled" },
@@ -142,12 +142,12 @@ export function BookingDetailsDialog({
   const scheduled = new Date(booking.scheduled_at);
   const bookingAny = booking as any;
 
-  // Calculate cleaner pay display
-  const getCleanerPayDisplay = () => {
-    if (!bookingAny.cleaner_wage) return "Not set";
+  // Calculate technician pay display
+  const getTechnicianPayDisplay = () => {
+    if (!bookingAny.technician_wage) return "Not set";
     
-    const wage = bookingAny.cleaner_wage;
-    const wageType = bookingAny.cleaner_wage_type || 'hourly';
+    const wage = bookingAny.technician_wage;
+    const wageType = bookingAny.technician_wage_type || 'hourly';
     
     if (wageType === 'flat') {
       return `$${wage} flat fee`;
@@ -155,7 +155,7 @@ export function BookingDetailsDialog({
       const amount = (booking.total_amount * wage) / 100;
       return `${wage}% ($${amount.toFixed(2)})`;
     } else {
-      const hours = bookingAny.cleaner_override_hours || (booking.duration / 60);
+      const hours = bookingAny.technician_override_hours || (booking.duration / 60);
       const amount = wage * hours;
       return `$${wage}/hr × ${hours}hrs = $${amount.toFixed(2)}`;
     }
@@ -182,7 +182,7 @@ export function BookingDetailsDialog({
               </div>
               <div>
                 <dt className="text-xs text-muted-foreground">Service</dt>
-                <dd className="text-sm font-medium">{booking.service?.name || (booking.total_amount === 0 ? 'Re-clean' : 'Service')}</dd>
+                <dd className="text-sm font-medium">{booking.service?.name || (booking.total_amount === 0 ? 'Re-detail' : 'Service')}</dd>
               </div>
               <div>
                 <dt className="text-xs text-muted-foreground">Scheduled</dt>
@@ -206,13 +206,13 @@ export function BookingDetailsDialog({
                 <dd className="text-sm font-medium">${booking.total_amount}</dd>
               </div>
               <div>
-                <dt className="text-xs text-muted-foreground">Cleaner Pay</dt>
-                <dd className="text-sm font-medium">{getCleanerPayDisplay()}</dd>
+                <dt className="text-xs text-muted-foreground">Technician Pay</dt>
+                <dd className="text-sm font-medium">{getTechnicianPayDisplay()}</dd>
               </div>
-              {bookingAny.cleaner_actual_payment && (
+              {bookingAny.technician_actual_payment && (
                 <div className="sm:col-span-2">
-                  <dt className="text-xs text-muted-foreground">Actual Paid to Cleaner</dt>
-                  <dd className="text-sm font-bold text-green-600">${bookingAny.cleaner_actual_payment}</dd>
+                  <dt className="text-xs text-muted-foreground">Actual Paid to Technician</dt>
+                  <dd className="text-sm font-bold text-green-600">${bookingAny.technician_actual_payment}</dd>
                 </div>
               )}
             </dl>
@@ -291,10 +291,10 @@ export function EditBookingDialog({
       staffId: booking.staff?.id || "__unassigned__",
       notes: booking.notes || "",
       amount: String(booking.total_amount ?? ""),
-      cleanerWage: bookingAny.cleaner_wage ? String(bookingAny.cleaner_wage) : "",
-      cleanerWageType: bookingAny.cleaner_wage_type || "hourly",
-      cleanerOverrideHours: bookingAny.cleaner_override_hours ? String(bookingAny.cleaner_override_hours) : "",
-      cleanerActualPayment: bookingAny.cleaner_actual_payment ? String(bookingAny.cleaner_actual_payment) : "",
+      technicianWage: bookingAny.technician_wage ? String(bookingAny.technician_wage) : "",
+      technicianWageType: bookingAny.technician_wage_type || "hourly",
+      technicianOverrideHours: bookingAny.technician_override_hours ? String(bookingAny.technician_override_hours) : "",
+      technicianActualPayment: bookingAny.technician_actual_payment ? String(bookingAny.technician_actual_payment) : "",
     };
   }, [booking]);
 
@@ -304,10 +304,10 @@ export function EditBookingDialog({
   const [staffId, setStaffId] = useState<string>("");
   const [notes, setNotes] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
-  const [cleanerWage, setCleanerWage] = useState<string>("");
-  const [cleanerWageType, setCleanerWageType] = useState<string>("hourly");
-  const [cleanerOverrideHours, setCleanerOverrideHours] = useState<string>("");
-  const [cleanerActualPayment, setCleanerActualPayment] = useState<string>("");
+  const [technicianWage, setTechnicianWage] = useState<string>("");
+  const [technicianWageType, setTechnicianWageType] = useState<string>("hourly");
+  const [technicianOverrideHours, setTechnicianOverrideHours] = useState<string>("");
+  const [technicianActualPayment, setTechnicianActualPayment] = useState<string>("");
   const [showActualPayment, setShowActualPayment] = useState(false);
 
   useEffect(() => {
@@ -318,11 +318,11 @@ export function EditBookingDialog({
     setStaffId(initial.staffId);
     setNotes(initial.notes);
     setAmount(initial.amount);
-    setCleanerWage(initial.cleanerWage);
-    setCleanerWageType(initial.cleanerWageType);
-    setCleanerOverrideHours(initial.cleanerOverrideHours);
-    setCleanerActualPayment(initial.cleanerActualPayment);
-    setShowActualPayment(initial.status === 'completed' || !!initial.cleanerActualPayment);
+    setTechnicianWage(initial.technicianWage);
+    setTechnicianWageType(initial.technicianWageType);
+    setTechnicianOverrideHours(initial.technicianOverrideHours);
+    setTechnicianActualPayment(initial.technicianActualPayment);
+    setShowActualPayment(initial.status === 'completed' || !!initial.technicianActualPayment);
   }, [open, initial]);
 
   // Show actual payment field when status changes to completed
@@ -336,19 +336,19 @@ export function EditBookingDialog({
 
   const saving = updateBooking.isPending;
 
-  // Calculate estimated cleaner pay
+  // Calculate estimated technician pay
   const calculateEstimatedPay = () => {
-    const wage = parseFloat(cleanerWage);
+    const wage = parseFloat(technicianWage);
     if (!wage || isNaN(wage)) return null;
     
     const totalAmt = parseFloat(amount) || booking.total_amount;
     
-    if (cleanerWageType === 'flat') {
+    if (technicianWageType === 'flat') {
       return wage;
-    } else if (cleanerWageType === 'percentage') {
+    } else if (technicianWageType === 'percentage') {
       return (totalAmt * wage) / 100;
     } else {
-      const hours = parseFloat(cleanerOverrideHours) || (booking.duration / 60);
+      const hours = parseFloat(technicianOverrideHours) || (booking.duration / 60);
       return wage * hours;
     }
   };
@@ -360,18 +360,18 @@ export function EditBookingDialog({
       const scheduledAtIso = date && time ? new Date(`${date}T${time}:00`).toISOString() : booking.scheduled_at;
       const parsedAmount = Number(amount);
 
-      // Compute cleaner_pay_expected snapshot so payroll always reads the correct value
+      // Compute technician_pay_expected snapshot so payroll always reads the correct value
       const computedExpectedPay = (() => {
         // If admin entered an explicit actual payment, that IS the expected pay
-        if (cleanerActualPayment) return parseFloat(cleanerActualPayment);
+        if (technicianActualPayment) return parseFloat(technicianActualPayment);
         // Otherwise compute from wage fields
-        const wage = cleanerWage ? parseFloat(cleanerWage) : null;
+        const wage = technicianWage ? parseFloat(technicianWage) : null;
         if (wage == null || isNaN(wage) || wage === 0) return null;
         const totalAmt = Number.isFinite(parsedAmount) ? parsedAmount : booking.total_amount;
-        if (cleanerWageType === 'flat') return wage;
-        if (cleanerWageType === 'percentage') return Math.round((wage / 100) * totalAmt * 100) / 100;
+        if (technicianWageType === 'flat') return wage;
+        if (technicianWageType === 'percentage') return Math.round((wage / 100) * totalAmt * 100) / 100;
         // hourly
-        const hours = cleanerOverrideHours ? parseFloat(cleanerOverrideHours) : (booking.duration / 60);
+        const hours = technicianOverrideHours ? parseFloat(technicianOverrideHours) : (booking.duration / 60);
         return Math.round(wage * hours * 100) / 100;
       })();
 
@@ -382,12 +382,12 @@ export function EditBookingDialog({
         staff_id: staffId && staffId !== '__unassigned__' ? staffId : null,
         notes: notes || null,
         total_amount: Number.isFinite(parsedAmount) ? parsedAmount : booking.total_amount,
-        cleaner_wage: cleanerWage ? parseFloat(cleanerWage) : null,
-        cleaner_wage_type: cleanerWageType || null,
-        cleaner_override_hours: cleanerOverrideHours ? parseFloat(cleanerOverrideHours) : null,
-        cleaner_actual_payment: cleanerActualPayment ? parseFloat(cleanerActualPayment) : null,
+        technician_wage: technicianWage ? parseFloat(technicianWage) : null,
+        technician_wage_type: technicianWageType || null,
+        technician_override_hours: technicianOverrideHours ? parseFloat(technicianOverrideHours) : null,
+        technician_actual_payment: technicianActualPayment ? parseFloat(technicianActualPayment) : null,
         // CRITICAL: Always persist the pay snapshot so payroll reads the correct value
-        cleaner_pay_expected: computedExpectedPay,
+        technician_pay_expected: computedExpectedPay,
       });
 
       toast({ title: "Saved", description: "Booking updated" });
@@ -466,11 +466,11 @@ export function EditBookingDialog({
 
           <Separator />
 
-          {/* Cleaner Payment Section */}
+          {/* Technician Payment Section */}
           <div className="space-y-4">
             <h4 className="font-semibold text-sm flex items-center gap-2">
               <DollarSign className="w-4 h-4" />
-              Cleaner Payment
+              Technician Payment
             </h4>
             
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -478,8 +478,8 @@ export function EditBookingDialog({
                 <Label>Wage</Label>
                 <Input 
                   type="number" 
-                  value={cleanerWage} 
-                  onChange={(e) => setCleanerWage(e.target.value)} 
+                  value={technicianWage} 
+                  onChange={(e) => setTechnicianWage(e.target.value)} 
                   placeholder="25"
                   inputMode="decimal"
                 />
@@ -487,7 +487,7 @@ export function EditBookingDialog({
 
               <div className="space-y-2">
                 <Label>Wage Type</Label>
-                <Select value={cleanerWageType} onValueChange={setCleanerWageType}>
+                <Select value={technicianWageType} onValueChange={setTechnicianWageType}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -504,13 +504,13 @@ export function EditBookingDialog({
                 </Select>
               </div>
 
-              {cleanerWageType === 'hourly' && (
+              {technicianWageType === 'hourly' && (
                 <div className="space-y-2 sm:col-span-2">
                   <Label>Override Time (hours)</Label>
                   <Input 
                     type="number" 
-                    value={cleanerOverrideHours} 
-                    onChange={(e) => setCleanerOverrideHours(e.target.value)} 
+                    value={technicianOverrideHours} 
+                    onChange={(e) => setTechnicianOverrideHours(e.target.value)} 
                     placeholder={`Default: ${(booking.duration / 60).toFixed(1)} hrs`}
                     inputMode="decimal"
                   />
@@ -519,7 +519,7 @@ export function EditBookingDialog({
 
               {estimatedPay !== null && (
                 <div className="sm:col-span-2 p-3 bg-secondary/50 rounded-lg">
-                  <p className="text-sm text-muted-foreground">Estimated Cleaner Pay</p>
+                  <p className="text-sm text-muted-foreground">Estimated Technician Pay</p>
                   <p className="text-lg font-bold text-primary">${estimatedPay.toFixed(2)}</p>
                 </div>
               )}
@@ -527,16 +527,16 @@ export function EditBookingDialog({
 
             {showActualPayment && (
               <div className="space-y-2 p-4 border-2 border-primary/20 rounded-lg bg-primary/5">
-                <Label className="text-primary font-semibold">Actual Amount Paid to Cleaner</Label>
+                <Label className="text-primary font-semibold">Actual Amount Paid to Technician</Label>
                 <p className="text-xs text-muted-foreground mb-2">
-                  Adjust the final amount you actually paid the cleaner after the job was completed.
+                  Adjust the final amount you actually paid the technician after the job was completed.
                 </p>
                 <div className="relative">
                   <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input 
                     type="number" 
-                    value={cleanerActualPayment} 
-                    onChange={(e) => setCleanerActualPayment(e.target.value)} 
+                    value={technicianActualPayment} 
+                    onChange={(e) => setTechnicianActualPayment(e.target.value)} 
                     placeholder={estimatedPay ? estimatedPay.toFixed(2) : "0.00"}
                     className="pl-9"
                     inputMode="decimal"
@@ -573,9 +573,9 @@ export function AdjustPaymentDialog({
   const updateBooking = useUpdateBooking();
   const { organizationId } = useOrgId();
 
-  // Single cleaner payment (used when no team assignments)
+  // Single technician payment (used when no team assignments)
   const [singlePayment, setSinglePayment] = useState<string>("");
-  // Per-cleaner payments keyed by staff_id (used for team bookings)
+  // Per-technician payments keyed by staff_id (used for team bookings)
   const [teamPayments, setTeamPayments] = useState<Record<string, string>>({});
   // All team members from booking_team_assignments
   const [teamMembers, setTeamMembers] = useState<{ id: string; name: string; pay_share: number | null; is_primary: boolean }[]>([]);
@@ -587,8 +587,8 @@ export function AdjustPaymentDialog({
   useEffect(() => {
     if (!open || !booking) return;
 
-    // Reset single payment - prefer cleaner_pay_expected (single source of truth), fall back to cleaner_actual_payment
-    const initialPay = bookingAny?.cleaner_pay_expected != null ? bookingAny.cleaner_pay_expected : bookingAny?.cleaner_actual_payment;
+    // Reset single payment - prefer technician_pay_expected (single source of truth), fall back to technician_actual_payment
+    const initialPay = bookingAny?.technician_pay_expected != null ? bookingAny.technician_pay_expected : bookingAny?.technician_actual_payment;
     setSinglePayment(initialPay != null ? String(initialPay) : "");
     setTeamMembers([]);
     setTeamPayments({});
@@ -618,16 +618,16 @@ export function AdjustPaymentDialog({
 
         const payments: Record<string, string> = {};
         members.forEach(m => {
-          // For the primary, prefer cleaner_actual_payment from booking if pay_share is null
-          if (m.is_primary && m.pay_share == null && bookingAny?.cleaner_actual_payment != null) {
-            payments[m.id] = String(bookingAny.cleaner_actual_payment);
+          // For the primary, prefer technician_actual_payment from booking if pay_share is null
+          if (m.is_primary && m.pay_share == null && bookingAny?.technician_actual_payment != null) {
+            payments[m.id] = String(bookingAny.technician_actual_payment);
           } else {
             payments[m.id] = m.pay_share != null ? String(m.pay_share) : "";
           }
         });
         setTeamPayments(payments);
       } else if (data && data.length === 1) {
-        // Only 1 assignment — treat as single cleaner, keep singlePayment
+        // Only 1 assignment — treat as single technician, keep singlePayment
         setTeamMembers([]);
       }
       setLoadingTeam(false);
@@ -642,12 +642,12 @@ export function AdjustPaymentDialog({
   const isTeamBooking = teamMembers.length >= 2;
 
   const calculateEstimatedPay = () => {
-    const wage = bookingAny?.cleaner_wage;
+    const wage = bookingAny?.technician_wage;
     if (!wage) return null;
-    const wageType = bookingAny?.cleaner_wage_type || 'hourly';
+    const wageType = bookingAny?.technician_wage_type || 'hourly';
     if (wageType === 'flat') return wage;
     if (wageType === 'percentage') return (booking.total_amount * wage) / 100;
-    const hours = bookingAny?.cleaner_override_hours || (booking.duration / 60);
+    const hours = bookingAny?.technician_override_hours || (booking.duration / 60);
     return wage * hours;
   };
 
@@ -658,7 +658,7 @@ export function AdjustPaymentDialog({
       setSaving(true);
 
       if (isTeamBooking && organizationId) {
-        // Save each cleaner's individual pay to booking_team_assignments.pay_share
+        // Save each technician's individual pay to booking_team_assignments.pay_share
         for (const member of teamMembers) {
           const amount = teamPayments[member.id];
           await supabase
@@ -669,26 +669,26 @@ export function AdjustPaymentDialog({
             .eq('organization_id', organizationId);
         }
 
-        // Also save primary cleaner's pay to booking for payroll parity
+        // Also save primary technician's pay to booking for payroll parity
         const primaryMember = teamMembers.find(m => m.is_primary);
         if (primaryMember) {
           const primaryAmount = teamPayments[primaryMember.id];
           const parsedAmount = primaryAmount ? parseFloat(primaryAmount) : null;
           await updateBooking.mutateAsync({
             id: booking.id,
-            cleaner_actual_payment: parsedAmount,
-            // CRITICAL: Also update cleaner_pay_expected so payroll uses the adjusted value
-            cleaner_pay_expected: parsedAmount,
+            technician_actual_payment: parsedAmount,
+            // CRITICAL: Also update technician_pay_expected so payroll uses the adjusted value
+            technician_pay_expected: parsedAmount,
           });
         }
       } else {
-        // Single cleaner — save directly on booking
+        // Single technician — save directly on booking
         const parsedAmount = singlePayment ? parseFloat(singlePayment) : null;
         await updateBooking.mutateAsync({
           id: booking.id,
-          cleaner_actual_payment: parsedAmount,
-          // CRITICAL: Also update cleaner_pay_expected so payroll uses the adjusted value
-          cleaner_pay_expected: parsedAmount,
+          technician_actual_payment: parsedAmount,
+          // CRITICAL: Also update technician_pay_expected so payroll uses the adjusted value
+          technician_pay_expected: parsedAmount,
         });
 
         // CRITICAL: Also update booking_team_assignments.pay_share if a single assignment exists
@@ -702,7 +702,7 @@ export function AdjustPaymentDialog({
         }
       }
 
-      toast({ title: "Saved", description: "Cleaner payments adjusted successfully" });
+      toast({ title: "Saved", description: "Technician payments adjusted successfully" });
       onOpenChange(false);
     } catch (e: any) {
       toast({
@@ -719,10 +719,10 @@ export function AdjustPaymentDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Adjust Cleaner Payment</DialogTitle>
+          <DialogTitle>Adjust Technician Payment</DialogTitle>
           <DialogDescription>
             Booking #{booking.booking_number}
-            {isTeamBooking ? ` · ${teamMembers.length} cleaners` : booking.staff?.name ? ` · ${booking.staff.name}` : ''}
+            {isTeamBooking ? ` · ${teamMembers.length} technicians` : booking.staff?.name ? ` · ${booking.staff.name}` : ''}
           </DialogDescription>
         </DialogHeader>
 
@@ -745,9 +745,9 @@ export function AdjustPaymentDialog({
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
             </div>
           ) : isTeamBooking ? (
-            // TEAM: one field per cleaner, all from booking_team_assignments
+            // TEAM: one field per technician, all from booking_team_assignments
             <div className="space-y-3">
-              <p className="text-sm font-semibold">Individual Cleaner Pay</p>
+              <p className="text-sm font-semibold">Individual Technician Pay</p>
               {teamMembers.map(member => (
                 <div key={member.id} className="space-y-1">
                   <Label className="text-sm font-medium">
@@ -770,7 +770,7 @@ export function AdjustPaymentDialog({
                 </div>
               ))}
               <p className="text-xs text-muted-foreground">
-                Enter the amount paid to each cleaner individually.
+                Enter the amount paid to each technician individually.
               </p>
             </div>
           ) : (
@@ -792,7 +792,7 @@ export function AdjustPaymentDialog({
                 />
               </div>
               <p className="text-xs text-muted-foreground">
-                Enter the final amount you paid to the cleaner for this job.
+                Enter the final amount you paid to the technician for this job.
               </p>
             </div>
           )}

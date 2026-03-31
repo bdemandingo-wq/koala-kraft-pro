@@ -16,11 +16,11 @@ const blogTopics = [
     "Kitchen cleaning hacks every pro should know"
   ]},
   { category: "Business Growth", topics: [
-    "How to price your cleaning services competitively",
+    "How to price your detailing services competitively",
     "Marketing strategies that attract high-paying clients",
     "Building a referral program that works",
-    "Scaling your cleaning business from solo to team",
-    "Customer retention strategies for cleaning companies"
+    "Scaling your car detailing business from solo to team",
+    "Customer retention strategies for detailing companies"
   ]},
   { category: "Operations", topics: [
     "Optimizing your cleaning route for maximum efficiency",
@@ -31,10 +31,10 @@ const blogTopics = [
   ]},
   { category: "Industry Insights", topics: [
     "Trends shaping the cleaning industry",
-    "How technology is changing cleaning businesses",
+    "How technology is changing car detailing businesses",
     "Green cleaning: Meeting client demands",
     "Commercial vs residential cleaning pros and cons",
-    "Insurance and liability for cleaning businesses"
+    "Insurance and liability for car detailing businesses"
   ]}
 ];
 
@@ -79,16 +79,16 @@ const handler = async (req: Request): Promise<Response> => {
       const { category, topic } = getRandomTopic();
       const uniqueId = Date.now() + i;
 
-      const systemPrompt = `You are an expert content writer for cleaning business blogs. Write in a casual, helpful Alex Hormozi-inspired style - direct, value-packed, no fluff. Your content should be:
+      const systemPrompt = `You are an expert content writer for car detailing business blogs. Write in a casual, helpful Alex Hormozi-inspired style - direct, value-packed, no fluff. Your content should be:
 - Practical and actionable
 - Easy to read with short paragraphs
 - Include specific tips and examples
-- Written for cleaning business owners
+- Written for car detailing business owners
 - SEO-optimized with natural keyword usage
 
 IMPORTANT: Return valid JSON only, no markdown code blocks.`;
 
-      const userPrompt = `Write a blog post about "${topic}" for a cleaning business audience.
+      const userPrompt = `Write a blog post about "${topic}" for a car detailing business audience.
 
 Return JSON format:
 {

@@ -43,18 +43,18 @@ function resolveEarnings(
   if (payShare != null && Number(payShare) > 0) {
     return { calculatedPay: Number(payShare), hoursWorked: base.hoursWorked };
   }
-  // calculateBookingWage already prioritizes cleaner_pay_expected → cleaner_actual_payment → fallback
+  // calculateBookingWage already prioritizes technician_pay_expected → technician_actual_payment → fallback
   return { calculatedPay: base.calculatedPay, hoursWorked: base.hoursWorked };
 }
 
-export function CleanerEarnings({ staffId, staffName }: Props) {
+export function TechnicianEarnings({ staffId, staffName }: Props) {
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: startOfMonth(new Date()),
     to: endOfMonth(new Date()),
   });
 
   const { data: staffInfo } = useQuery({
-    queryKey: ['cleaner-wage-info', staffId],
+    queryKey: ['technician-wage-info', staffId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('staff')
@@ -76,9 +76,9 @@ export function CleanerEarnings({ staffId, staffName }: Props) {
   const upcomingWeekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
   const upcomingWeekEnd = endOfWeek(new Date(), { weekStartsOn: 1 });
 
-  // Fetch upcoming week bookings for this cleaner (all non-cancelled statuses)
+  // Fetch upcoming week bookings for this technician (all non-cancelled statuses)
   const { data: upcomingBookings = [] } = useQuery({
-    queryKey: ['cleaner-upcoming-week', staffId],
+    queryKey: ['technician-upcoming-week', staffId],
     queryFn: async () => {
       const wEnd = new Date(upcomingWeekEnd);
       wEnd.setHours(23, 59, 59, 999);
@@ -86,8 +86,8 @@ export function CleanerEarnings({ staffId, staffName }: Props) {
         .from('bookings')
         .select(`
           id, booking_number, scheduled_at, duration, status, total_amount, subtotal, discount_amount,
-          cleaner_actual_payment, cleaner_pay_expected, cleaner_wage, cleaner_wage_type,
-          cleaner_checkin_at, cleaner_checkout_at, cleaner_override_hours,
+          technician_actual_payment, technician_pay_expected, technician_wage, technician_wage_type,
+          technician_checkin_at, technician_checkout_at, technician_override_hours,
           staff_id,
           service:services(name),
           customer:customers(first_name, last_name)
@@ -105,11 +105,11 @@ export function CleanerEarnings({ staffId, staffName }: Props) {
 
   // Team assignments for upcoming week
   const { data: upcomingTeamAssignments = [] } = useQuery({
-    queryKey: ['cleaner-upcoming-team', staffId],
+    queryKey: ['technician-upcoming-team', staffId],
     queryFn: async () => {
       const wEnd = new Date(upcomingWeekEnd);
       wEnd.setHours(23, 59, 59, 999);
-      // Find team assignments for this cleaner
+      // Find team assignments for this technician
       const { data: assignments, error: aErr } = await supabase
         .from('booking_team_assignments')
         .select('booking_id, staff_id, pay_share, is_primary')
@@ -121,8 +121,8 @@ export function CleanerEarnings({ staffId, staffName }: Props) {
         .from('bookings')
         .select(`
           id, booking_number, scheduled_at, duration, status, total_amount, subtotal, discount_amount,
-          cleaner_actual_payment, cleaner_pay_expected, cleaner_wage, cleaner_wage_type,
-          cleaner_checkin_at, cleaner_checkout_at, cleaner_override_hours,
+          technician_actual_payment, technician_pay_expected, technician_wage, technician_wage_type,
+          technician_checkin_at, technician_checkout_at, technician_override_hours,
           staff_id,
           service:services(name),
           customer:customers(first_name, last_name)
@@ -172,14 +172,14 @@ export function CleanerEarnings({ staffId, staffName }: Props) {
 
   // Completed bookings (historical)
   const { data: primaryBookings = [], isLoading: loadingPrimary } = useQuery({
-    queryKey: ['cleaner-earnings-primary', staffId, dateRange],
+    queryKey: ['technician-earnings-primary', staffId, dateRange],
     queryFn: async () => {
       let query = supabase
         .from('bookings')
         .select(`
           id, booking_number, scheduled_at, duration, status, total_amount, subtotal, discount_amount,
-          cleaner_actual_payment, cleaner_pay_expected, cleaner_wage, cleaner_wage_type,
-          cleaner_checkin_at, cleaner_checkout_at, cleaner_override_hours,
+          technician_actual_payment, technician_pay_expected, technician_wage, technician_wage_type,
+          technician_checkin_at, technician_checkout_at, technician_override_hours,
           service:services(name),
           customer:customers(first_name, last_name)
         `)
@@ -195,7 +195,7 @@ export function CleanerEarnings({ staffId, staffName }: Props) {
   });
 
   const { data: teamAssignments = [], isLoading: loadingTeam } = useQuery({
-    queryKey: ['cleaner-earnings-team', staffId, dateRange],
+    queryKey: ['technician-earnings-team', staffId, dateRange],
     queryFn: async () => {
       const { data: assignments, error: aErr } = await supabase
         .from('booking_team_assignments')
@@ -208,8 +208,8 @@ export function CleanerEarnings({ staffId, staffName }: Props) {
         .from('bookings')
         .select(`
           id, booking_number, scheduled_at, duration, status, total_amount,
-          cleaner_actual_payment, cleaner_wage, cleaner_wage_type,
-          cleaner_checkin_at, cleaner_checkout_at, cleaner_override_hours,
+          technician_actual_payment, technician_wage, technician_wage_type,
+          technician_checkin_at, technician_checkout_at, technician_override_hours,
           staff_id,
           service:services(name),
           customer:customers(first_name, last_name)
@@ -270,7 +270,7 @@ export function CleanerEarnings({ staffId, staffName }: Props) {
       return [
         format(new Date(booking.scheduled_at), 'yyyy-MM-dd'),
         booking.booking_number,
-        booking.service?.name || (booking.total_amount === 0 ? 'Re-clean' : 'Service'),
+        booking.service?.name || (booking.total_amount === 0 ? 'Re-detail' : 'Service'),
         booking.customer ? `${booking.customer.first_name} ${booking.customer.last_name}` : 'N/A',
         hoursWorked.toFixed(2),
         calculatedPay.toFixed(2),
@@ -476,7 +476,7 @@ export function CleanerEarnings({ staffId, staffName }: Props) {
                         <TableCell>
                           <Badge variant="outline">#{booking.booking_number}</Badge>
                         </TableCell>
-                        <TableCell>{booking.service?.name || (booking.total_amount === 0 ? 'Re-clean' : 'Service')}</TableCell>
+                        <TableCell>{booking.service?.name || (booking.total_amount === 0 ? 'Re-detail' : 'Service')}</TableCell>
                         <TableCell>
                           {booking.customer
                             ? `${booking.customer.first_name} ${booking.customer.last_name}`

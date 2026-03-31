@@ -64,7 +64,7 @@ const handler = async (req: Request): Promise<Response> => {
 
       const companyName = settings?.company_name || 'Our Company';
       const customerName = quote.customer.first_name;
-      const serviceName = quote.service?.name || 'cleaning service';
+      const serviceName = quote.service?.name || 'detailing service';
       const quoteAmount = quote.total_amount?.toFixed(2) || '0.00';
 
       const message = `Hi ${customerName}! Your quote for ${serviceName} ($${quoteAmount}) from ${companyName} expires tomorrow. Ready to book? Reply YES to confirm or call us to discuss. We'd love to help!`;

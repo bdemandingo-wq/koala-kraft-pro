@@ -39,7 +39,7 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useTestMode } from '@/contexts/TestModeContext';
-import { CleanerCalendar } from '@/components/staff/CleanerCalendar';
+import { TechnicianCalendar } from '@/components/staff/TechnicianCalendar';
 import { useOrgId } from '@/hooks/useOrgId';
 import { cn } from '@/lib/utils';
 import { StaffEventNotifications } from '@/components/admin/StaffEventNotifications';
@@ -576,7 +576,7 @@ export default function StaffPage() {
             </DialogTitle>
           </DialogHeader>
           {selectedStaff && (
-            <CleanerCalendar staffId={selectedStaff.id} />
+            <TechnicianCalendar staffId={selectedStaff.id} />
           )}
           <DialogFooter>
             <Button onClick={() => setScheduleDialogOpen(false)}>Close</Button>

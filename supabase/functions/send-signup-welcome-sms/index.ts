@@ -17,7 +17,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    // Use platform-level OpenPhone credentials (TidyWise's account)
+    // Use platform-level OpenPhone credentials (We Detail NC's account)
     const apiKey = Deno.env.get("OPENPHONE_API_KEY");
     const phoneNumberId = Deno.env.get("OPENPHONE_PHONE_NUMBER_ID");
 
@@ -58,7 +58,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Construct welcome message with features
     const greeting = fullName ? `Hi ${fullName}! ` : "Hi! ";
-    const message = `${greeting}Welcome to TidyWise! 🎉
+    const message = `${greeting}Welcome to We Detail NC! 🎉
 
 Your account is ready! Here's what you can do:
 
@@ -68,7 +68,7 @@ Your account is ready! Here's what you can do:
 📊 Track customers & revenue
 📱 Send automated reminders
 
-Complete your setup to start managing your cleaning business like a pro. Questions? Reply to this text!`;
+Complete your setup to start managing your car detailing business like a pro. Questions? Reply to this text!`;
 
     console.log(`[send-signup-welcome-sms] Sending welcome SMS to ${formattedPhone}`);
 

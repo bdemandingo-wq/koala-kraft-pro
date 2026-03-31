@@ -55,7 +55,7 @@ export function BulkEditBookingsDialog({
   const [editStaffIds, setEditStaffIds] = useState<string[]>([]);
   const [editTime, setEditTime] = useState<string>('');
   const [editPrice, setEditPrice] = useState<string>('');
-  const [editCleanerPay, setEditCleanerPay] = useState<string>('');
+  const [editTechnicianPay, setEditTechnicianPay] = useState<string>('');
   const [editStatus, setEditStatus] = useState<string>('');
   const [editIndividualPay, setEditIndividualPay] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
@@ -115,7 +115,7 @@ export function BulkEditBookingsDialog({
   };
 
   const hasIndividualPay = Object.values(editIndividualPay).some(v => v !== '');
-  const hasChanges = editServiceId || editStaffIds.length > 0 || editTime || editPrice || editCleanerPay || editStatus || hasIndividualPay;
+  const hasChanges = editServiceId || editStaffIds.length > 0 || editTime || editPrice || editTechnicianPay || editStatus || hasIndividualPay;
 
   const handleApply = async () => {
     if (!hasChanges) {
@@ -149,13 +149,13 @@ export function BulkEditBookingsDialog({
           }
         }
         if (editStaffIds.length > 0) {
-          updates.staff_id = editStaffIds[0]; // Primary cleaner
+          updates.staff_id = editStaffIds[0]; // Primary technician
         }
         if (editPrice) {
           updates.total_amount = parseFloat(editPrice);
         }
-        if (editCleanerPay) {
-          updates.cleaner_pay_expected = parseFloat(editCleanerPay);
+        if (editTechnicianPay) {
+          updates.technician_pay_expected = parseFloat(editTechnicianPay);
         }
         if (editStatus) {
           updates.status = editStatus;
@@ -187,8 +187,8 @@ export function BulkEditBookingsDialog({
               let payShare: number;
               if (individualPay) {
                 payShare = parseFloat(individualPay);
-              } else if (editCleanerPay) {
-                payShare = parseFloat(editCleanerPay) / editStaffIds.length;
+              } else if (editTechnicianPay) {
+                payShare = parseFloat(editTechnicianPay) / editStaffIds.length;
               } else {
                 payShare = 1 / editStaffIds.length;
               }
@@ -219,7 +219,7 @@ export function BulkEditBookingsDialog({
       setEditStaffIds([]);
       setEditTime('');
       setEditPrice('');
-      setEditCleanerPay('');
+      setEditTechnicianPay('');
       setEditStatus('');
       setEditIndividualPay({});
       onOpenChange(false);
@@ -351,7 +351,7 @@ export function BulkEditBookingsDialog({
                 <SelectContent>
                   <SelectItem value="__none__">Keep current</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="confirmed">Uncleaned</SelectItem>
+                  <SelectItem value="confirmed">Unserviceded</SelectItem>
                   <SelectItem value="in_progress">In Progress</SelectItem>
                   <SelectItem value="completed">Clean Completed</SelectItem>
                   <SelectItem value="cancelled">Cancelled</SelectItem>
@@ -363,7 +363,7 @@ export function BulkEditBookingsDialog({
             <div className="space-y-1.5">
               <Label className="text-xs flex items-center gap-1.5">
                 <Users className="w-3.5 h-3.5" />
-                Assign Cleaner(s)
+                Assign Technician(s)
               </Label>
               {editStaffIds.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mb-2">
@@ -392,11 +392,11 @@ export function BulkEditBookingsDialog({
                 }}
               >
                 <SelectTrigger className="h-10 rounded-xl">
-                  <SelectValue placeholder={editStaffIds.length > 0 ? 'Add another cleaner...' : 'Keep current'} />
+                  <SelectValue placeholder={editStaffIds.length > 0 ? 'Add another technician...' : 'Keep current'} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__none__">
-                    {editStaffIds.length > 0 ? 'Add another cleaner...' : 'Keep current'}
+                    {editStaffIds.length > 0 ? 'Add another technician...' : 'Keep current'}
                   </SelectItem>
                   {staffList
                     .filter((s) => !editStaffIds.includes(s.id))
@@ -444,29 +444,29 @@ export function BulkEditBookingsDialog({
               />
             </div>
 
-            {/* Cleaner Pay */}
+            {/* Technician Pay */}
             <div className="space-y-1.5">
               <Label className="text-xs flex items-center gap-1.5">
                 <Banknote className="w-3.5 h-3.5" />
-                {editStaffIds.length > 1 ? 'Change Cleaner Pay (Total)' : 'Change Cleaner Pay'}
+                {editStaffIds.length > 1 ? 'Change Technician Pay (Total)' : 'Change Technician Pay'}
               </Label>
               <Input
                 type="number"
                 step="0.01"
                 min="0"
-                value={editCleanerPay}
-                onChange={(e) => setEditCleanerPay(e.target.value)}
+                value={editTechnicianPay}
+                onChange={(e) => setEditTechnicianPay(e.target.value)}
                 className="h-10 rounded-xl"
                 placeholder="Keep current"
               />
-              {editCleanerPay && editStaffIds.length > 1 && !hasIndividualPay && (
+              {editTechnicianPay && editStaffIds.length > 1 && !hasIndividualPay && (
                 <p className="text-xs text-muted-foreground">
-                  Split equally: ${(parseFloat(editCleanerPay) / editStaffIds.length).toFixed(2)} each
+                  Split equally: ${(parseFloat(editTechnicianPay) / editStaffIds.length).toFixed(2)} each
                 </p>
               )}
             </div>
 
-            {/* Individual pay per cleaner (team mode) */}
+            {/* Individual pay per technician (team mode) */}
             {editStaffIds.length > 1 && (
               <div className="space-y-2 bg-secondary/30 rounded-xl p-3">
                 <Label className="text-xs flex items-center gap-1.5 text-muted-foreground">
@@ -474,7 +474,7 @@ export function BulkEditBookingsDialog({
                   Individual Pay Override (optional)
                 </Label>
                 <p className="text-xs text-muted-foreground">
-                  Set custom pay per cleaner. Overrides the equal split above.
+                  Set custom pay per technician. Overrides the equal split above.
                 </p>
                 {editStaffIds.map((id) => {
                   const staff = staffList.find((s) => s.id === id);

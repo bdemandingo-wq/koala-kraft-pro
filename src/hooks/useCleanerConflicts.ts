@@ -31,7 +31,7 @@ interface WorkingHour {
 
 const TRAVEL_BUFFER_MINUTES = 60;
 
-export function useCleanerConflicts(
+export function useTechnicianConflicts(
   selectedDate: Date | undefined,
   selectedTime: string,
   duration: number = 120, // default 2 hours

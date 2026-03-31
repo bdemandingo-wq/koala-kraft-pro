@@ -66,7 +66,7 @@ const handler = async (req: Request): Promise<Response> => {
     const companyName = settings?.company_name || 'Our Company';
 
     // Wait 2 hours after the review before sending referral request (handled by caller or delay)
-    const message = `${customer.first_name}, thank you SO much for the amazing 5-star review! 🌟 You made our day! If you know anyone who needs cleaning services, we'd love to help them too. Share our number and they'll get $20 off their first clean. You'll get $20 off your next clean too! 💙 - ${companyName}`;
+    const message = `${customer.first_name}, thank you SO much for the amazing 5-star review! 🌟 You made our day! If you know anyone who needs detailing services, we'd love to help them too. Share our number and they'll get $20 off their first clean. You'll get $20 off your next clean too! 💙 - ${companyName}`;
 
     // Send SMS
     const response = await fetch(`${SUPABASE_URL}/functions/v1/send-openphone-sms`, {

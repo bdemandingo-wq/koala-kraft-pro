@@ -160,7 +160,7 @@ const handler = async (req: Request): Promise<Response> => {
       .eq('organization_id', booking.organization_id)
       .maybeSingle();
 
-    const companyName = businessSettings?.company_name || 'Your cleaning service';
+    const companyName = businessSettings?.company_name || 'Your detailing service';
     const adminPhone = businessSettings?.company_phone;
 
     // Build customer SMS message
@@ -268,7 +268,7 @@ const handler = async (req: Request): Promise<Response> => {
       console.log(`[send-on-the-way-sms] No admin phone configured, skipping admin notification`);
     }
 
-    // Log to prevent duplicates (e.g. second cleaner pressing "on the way")
+    // Log to prevent duplicates (e.g. second technician pressing "on the way")
     await supabase.from('booking_reminder_log').insert({
       booking_id: bookingId,
       organization_id: booking.organization_id,

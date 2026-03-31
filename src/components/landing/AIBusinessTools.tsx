@@ -25,7 +25,7 @@ export function AIBusinessTools() {
   // Calculator state
   const [cleansPerWeek, setCleansPerWeek] = useState(10);
   const [avgCleanPrice, setAvgCleanPrice] = useState(150);
-  const [numCleaners, setNumCleaners] = useState(3);
+  const [numTechnicians, setNumTechnicians] = useState(3);
   const [showResults, setShowResults] = useState(false);
   
   // Health score state
@@ -42,7 +42,7 @@ export function AIBusinessTools() {
   const projectedIncrease = Math.round(currentMonthlyRevenue * 0.35);
   const projectedMonthlyRevenue = currentMonthlyRevenue + projectedIncrease;
   const projectedYearlyGrowth = projectedIncrease * 12;
-  const timesSaved = numCleaners * 5; // 5 hours per cleaner per week on admin
+  const timesSaved = numTechnicians * 5; // 5 hours per technician per week on admin
   
   // Health score calculation
   const healthFactors = [
@@ -130,7 +130,7 @@ export function AIBusinessTools() {
                     
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <Label className="text-sm font-medium">Avg. price per clean</Label>
+                        <Label className="text-sm font-medium">Avg. price per job</Label>
                         <span className="text-2xl font-bold text-primary">${avgCleanPrice}</span>
                       </div>
                       <Slider
@@ -145,12 +145,12 @@ export function AIBusinessTools() {
                     
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <Label className="text-sm font-medium">Number of cleaners</Label>
-                        <span className="text-2xl font-bold text-primary">{numCleaners}</span>
+                        <Label className="text-sm font-medium">Number of technicians</Label>
+                        <span className="text-2xl font-bold text-primary">{numTechnicians}</span>
                       </div>
                       <Slider
-                        value={[numCleaners]}
-                        onValueChange={([v]) => setNumCleaners(v)}
+                        value={[numTechnicians]}
+                        onValueChange={([v]) => setNumTechnicians(v)}
                         min={1}
                         max={50}
                         step={1}
@@ -169,7 +169,7 @@ export function AIBusinessTools() {
               ) : (
                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                   <div className="text-center">
-                    <p className="text-muted-foreground mb-2">Your projected monthly revenue with TIDYWISE</p>
+                    <p className="text-muted-foreground mb-2">Your projected monthly revenue with WE DETAIL NC</p>
                     <p className="text-5xl sm:text-6xl font-bold text-primary">
                       ${projectedMonthlyRevenue.toLocaleString()}
                     </p>
@@ -300,7 +300,7 @@ export function AIBusinessTools() {
                       <CheckCircle2 className="h-6 w-6 text-primary flex-shrink-0 mt-0.5" />
                       <div>
                         <p className="font-semibold text-foreground mb-1">
-                          TIDYWISE includes all these features
+                          WE DETAIL NC includes all these features
                         </p>
                         <p className="text-sm text-muted-foreground">
                           Get scheduling, payments, recurring bookings, expense tracking, automated reminders, and review collection all in one platform.

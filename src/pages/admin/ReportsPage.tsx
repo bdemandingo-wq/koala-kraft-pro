@@ -19,9 +19,9 @@ import { useMemo, useState, useEffect } from 'react';
 import { format, subMonths, isAfter, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProfitMarginReport } from '@/components/admin/ProfitMarginReport';
-import { CleanerPerformanceDashboard } from '@/components/admin/CleanerPerformanceDashboard';
+import { TechnicianPerformanceDashboard } from '@/components/admin/TechnicianPerformanceDashboard';
 import { ProfitByServiceChart } from '@/components/admin/ProfitByServiceChart';
-import { CleanerAvailabilityDashboard } from '@/components/admin/CleanerAvailabilityDashboard';
+import { TechnicianAvailabilityDashboard } from '@/components/admin/TechnicianAvailabilityDashboard';
 import { CustomerLifetimeValue } from '@/components/admin/CustomerLifetimeValue';
 import { StaffProductivityMetrics } from '@/components/admin/StaffProductivityMetrics';
 import { RevenueForecasting } from '@/components/admin/RevenueForecasting';
@@ -170,10 +170,10 @@ export default function ReportsPage() {
       // Get all bookings for this staff member within date range
       const staffBookings = filteredBookings.filter(b => b.staff?.id === s.id);
       
-      // Calculate total payment using cleaner_pay_expected (single source of truth)
+      // Calculate total payment using technician_pay_expected (single source of truth)
       const totalPayment = staffBookings.reduce((sum, b) => {
         const bAny = b as any;
-        return sum + Number(bAny.cleaner_pay_expected || bAny.cleaner_actual_payment || 0);
+        return sum + Number(bAny.technician_pay_expected || bAny.technician_actual_payment || 0);
       }, 0);
       
       // Count upcoming cleans (scheduled_at > now and not cancelled/completed)
@@ -352,8 +352,8 @@ export default function ReportsPage() {
           <TabsTrigger value="staff-productivity">Staff Productivity</TabsTrigger>
           <TabsTrigger value="forecasting">Revenue Forecast</TabsTrigger>
           <TabsTrigger value="profit-margin">Profit Margin</TabsTrigger>
-          <TabsTrigger value="cleaner-performance">Cleaner Performance</TabsTrigger>
-          <TabsTrigger value="cleaner-availability">Availability</TabsTrigger>
+          <TabsTrigger value="technician-performance">Technician Performance</TabsTrigger>
+          <TabsTrigger value="technician-availability">Availability</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -495,12 +495,12 @@ export default function ReportsPage() {
           <ProfitMarginReport bookings={bookings} />
         </TabsContent>
 
-        <TabsContent value="cleaner-performance">
-          <CleanerPerformanceDashboard bookings={bookings} staff={staff} />
+        <TabsContent value="technician-performance">
+          <TechnicianPerformanceDashboard bookings={bookings} staff={staff} />
         </TabsContent>
 
-        <TabsContent value="cleaner-availability">
-          <CleanerAvailabilityDashboard 
+        <TabsContent value="technician-availability">
+          <TechnicianAvailabilityDashboard 
             bookings={bookings} 
             staff={staff} 
             workingHours={workingHours}

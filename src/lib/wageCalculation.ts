@@ -1,21 +1,21 @@
 /**
  * Shared wage calculation logic used by both:
  * - Admin Payroll page
- * - Cleaner Portal Earnings
+ * - Technician Portal Earnings
  *
- * RULE: booking.cleaner_pay_expected is the SINGLE SOURCE OF TRUTH.
- * Never recompute pay from hours/rate if cleaner_pay_expected exists.
- * Only fall back to computation when cleaner_pay_expected is null.
+ * RULE: booking.technician_pay_expected is the SINGLE SOURCE OF TRUTH.
+ * Never recompute pay from hours/rate if technician_pay_expected exists.
+ * Only fall back to computation when technician_pay_expected is null.
  */
 
 export interface WageBooking {
-  cleaner_actual_payment: number | null;
-  cleaner_pay_expected: number | null;
-  cleaner_wage: number | null;
-  cleaner_wage_type: string | null;
-  cleaner_checkin_at: string | null;
-  cleaner_checkout_at: string | null;
-  cleaner_override_hours: number | null;
+  technician_actual_payment: number | null;
+  technician_pay_expected: number | null;
+  technician_wage: number | null;
+  technician_wage_type: string | null;
+  technician_checkin_at: string | null;
+  technician_checkout_at: string | null;
+  technician_override_hours: number | null;
   duration: number;
   total_amount: number;
   subtotal?: number | null;
@@ -42,20 +42,20 @@ export interface WageResult {
  * falling back to override → default hours → booking duration.
  */
 export function getActualHours(booking: WageBooking, staff?: WageStaff | null): number {
-  if (booking.cleaner_checkin_at && booking.cleaner_checkout_at) {
-    const checkin = new Date(booking.cleaner_checkin_at).getTime();
-    const checkout = new Date(booking.cleaner_checkout_at).getTime();
+  if (booking.technician_checkin_at && booking.technician_checkout_at) {
+    const checkin = new Date(booking.technician_checkin_at).getTime();
+    const checkout = new Date(booking.technician_checkout_at).getTime();
     return (checkout - checkin) / (1000 * 60 * 60);
   }
-  return booking.cleaner_override_hours || staff?.default_hours || (booking.duration / 60);
+  return booking.technician_override_hours || staff?.default_hours || (booking.duration / 60);
 }
 
 /**
- * Compute pay from rate/type (used ONLY as fallback when cleaner_pay_expected is null).
+ * Compute pay from rate/type (used ONLY as fallback when technician_pay_expected is null).
  */
 function computePayFromDefaults(booking: WageBooking, staff?: WageStaff | null): { pay: number; wageType: string; wageRate: number } {
-  const wageType = booking.cleaner_wage_type || 'hourly';
-  const wageRate = booking.cleaner_wage || staff?.base_wage || staff?.hourly_rate || 0;
+  const wageType = booking.technician_wage_type || 'hourly';
+  const wageRate = booking.technician_wage || staff?.base_wage || staff?.hourly_rate || 0;
   const hoursWorked = getActualHours(booking, staff);
 
   let pay = 0;
@@ -76,19 +76,19 @@ function computePayFromDefaults(booking: WageBooking, staff?: WageStaff | null):
  * Calculate the wage for a single booking.
  * 
  * Priority:
- * 1. cleaner_pay_expected (SINGLE SOURCE OF TRUTH — if set, use it)
- * 2. cleaner_actual_payment (legacy override — treat as expected pay)
+ * 1. technician_pay_expected (SINGLE SOURCE OF TRUTH — if set, use it)
+ * 2. technician_actual_payment (legacy override — treat as expected pay)
  * 3. Fallback: compute from wage type/rate/hours (only when no snapshot exists)
  */
 export function calculateBookingWage(booking: WageBooking, staff?: WageStaff | null): WageResult {
   const hoursWorked = getActualHours(booking, staff);
-  const wageType = booking.cleaner_wage_type || 'hourly';
-  const wageRate = Number(booking.cleaner_wage || staff?.base_wage || staff?.hourly_rate || 0);
+  const wageType = booking.technician_wage_type || 'hourly';
+  const wageRate = Number(booking.technician_wage || staff?.base_wage || staff?.hourly_rate || 0);
 
-  // 1. cleaner_pay_expected is the single source of truth
-  if (booking.cleaner_pay_expected != null) {
+  // 1. technician_pay_expected is the single source of truth
+  if (booking.technician_pay_expected != null) {
     return {
-      calculatedPay: Number(booking.cleaner_pay_expected),
+      calculatedPay: Number(booking.technician_pay_expected),
       hoursWorked,
       wageType,
       wageRate,
@@ -96,13 +96,13 @@ export function calculateBookingWage(booking: WageBooking, staff?: WageStaff | n
     };
   }
 
-  // 2. Legacy: cleaner_actual_payment (explicit admin override, including $0)
-  if (booking.cleaner_actual_payment != null) {
+  // 2. Legacy: technician_actual_payment (explicit admin override, including $0)
+  if (booking.technician_actual_payment != null) {
     return {
-      calculatedPay: Number(booking.cleaner_actual_payment),
+      calculatedPay: Number(booking.technician_actual_payment),
       hoursWorked,
       wageType: 'actual',
-      wageRate: Number(booking.cleaner_actual_payment),
+      wageRate: Number(booking.technician_actual_payment),
       isMissingPay: false,
     };
   }

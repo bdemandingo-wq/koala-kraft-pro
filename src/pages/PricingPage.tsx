@@ -73,16 +73,16 @@ export default function PricingPage() {
   return (
     <>
       <Seo
-        title="TidyWise Pricing | Cleaning Business Software Plans"
-        description="Simple, transparent pricing for cleaning business owners. Start free and scale as you grow. No hidden fees."
+        title="We Detail NC Pricing | Car Detailing Business Software Plans"
+        description="Simple, transparent pricing for car detailing business owners. Start free and scale as you grow. No hidden fees."
         canonicalPath="/pricing"
-        ogImage="/images/tidywise-og.png"
+        ogImage="/images/wedetailnc-og.png"
         jsonLd={[
           {
             "@type": "Product",
-            "name": "TidyWise Pro",
-            "description": "Complete cleaning business management software",
-            "brand": { "@type": "Brand", "name": "TidyWise" },
+            "name": "We Detail NC Pro",
+            "description": "Complete car detailing business management software",
+            "brand": { "@type": "Brand", "name": "We Detail NC" },
             "offers": {
               "@type": "Offer",
               "price": "50.00",
@@ -106,7 +106,7 @@ export default function PricingPage() {
         {/* Header */}
         <header className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-30">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
-            <Link to="/" className="font-bold text-lg text-foreground">TIDYWISE</Link>
+            <Link to="/" className="font-bold text-lg text-foreground">WE DETAIL NC</Link>
             <div className="flex items-center gap-3">
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/login">Log in</Link>
@@ -126,7 +126,7 @@ export default function PricingPage() {
               60-day free trial · No credit card required
             </Badge>
             <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4 tracking-tight">
-              Simple Pricing for Cleaning Business Owners
+              Simple Pricing for Car Detailing Business Owners
             </h1>
             <p className="text-lg text-muted-foreground max-w-xl mx-auto">
               No confusing tiers. No surprise fees. Just straightforward pricing that grows with your business.
@@ -140,8 +140,8 @@ export default function PricingPage() {
             <Card className="border-2 border-primary/30 shadow-lg shadow-primary/5 overflow-hidden">
               <div className="bg-primary/5 px-6 py-5 flex items-end justify-between">
                 <div>
-                  <h2 className="text-xl font-bold text-foreground">TidyWise Pro</h2>
-                  <p className="text-sm text-muted-foreground">Complete cleaning business management</p>
+                  <h2 className="text-xl font-bold text-foreground">We Detail NC Pro</h2>
+                  <p className="text-sm text-muted-foreground">Complete car detailing business management</p>
                 </div>
                 <div className="text-right">
                   <span className="text-4xl font-bold text-foreground">$50</span>
@@ -195,12 +195,12 @@ export default function PricingPage() {
           </div>
         </section>
 
-        {/* Why TidyWise */}
+        {/* Why We Detail NC */}
         <section className="py-16 px-4 sm:px-6 lg:px-8 border-t border-border bg-muted/30">
           <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-2xl font-bold text-foreground mb-4">Why Cleaning Businesses Choose TidyWise</h2>
+            <h2 className="text-2xl font-bold text-foreground mb-4">Why Car Detailing Businesses Choose We Detail NC</h2>
             <p className="text-muted-foreground">
-              Most cleaning software was built for general field service companies. TidyWise was built from the ground up for cleaning businesses — by someone who runs one. Every feature was designed with your daily workflow in mind.
+              Most cleaning software was built for general field service companies. We Detail NC was built from the ground up for car detailing businesses — by someone who runs one. Every feature was designed with your daily workflow in mind.
             </p>
           </div>
         </section>
@@ -225,7 +225,7 @@ export default function PricingPage() {
         {/* Bottom CTA */}
         <section className="py-16 px-4 sm:px-6 lg:px-8 text-center border-t border-border">
           <h2 className="text-2xl font-bold text-foreground mb-3">Start Your Free Trial Today</h2>
-          <p className="text-muted-foreground mb-6">Join cleaning companies already using TidyWise.</p>
+          <p className="text-muted-foreground mb-6">Join detailing companies already using We Detail NC.</p>
           <Button size="lg" className="gap-2" asChild>
             <Link to="/signup">
               Get Started <ArrowRight className="h-4 w-4" />
@@ -235,7 +235,7 @@ export default function PricingPage() {
 
         <footer className="border-t border-border py-8 px-4 text-center">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} TidyWise. All rights reserved.
+            © {new Date().getFullYear()} We Detail NC. All rights reserved.
           </p>
         </footer>
       </div>

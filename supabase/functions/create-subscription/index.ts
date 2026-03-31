@@ -7,7 +7,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// TIDYWISE Pro subscription price ID - $50/month
+// WE DETAIL NC Pro subscription price ID - $50/month
 const PRICE_ID = "price_1SihrVJv857o86noT8NIIfrq";
 
 // Helper logging function

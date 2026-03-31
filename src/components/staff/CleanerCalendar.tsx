@@ -40,13 +40,13 @@ interface Props {
   staffId: string;
 }
 
-export function CleanerCalendar({ staffId }: Props) {
+export function TechnicianCalendar({ staffId }: Props) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   // Fetch all bookings for the month
   const { data: bookings = [], isLoading } = useQuery({
-    queryKey: ['cleaner-calendar', staffId, format(currentMonth, 'yyyy-MM')],
+    queryKey: ['technician-calendar', staffId, format(currentMonth, 'yyyy-MM')],
     queryFn: async () => {
       const monthStart = startOfMonth(currentMonth);
       const monthEnd = endOfMonth(currentMonth);

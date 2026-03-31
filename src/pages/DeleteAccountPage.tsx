@@ -51,7 +51,7 @@ export default function DeleteAccountPage() {
       toast.success("Your deletion request has been submitted.");
     } catch (err) {
       console.error("Deletion request error:", err);
-      toast.error("Something went wrong. Please email Support@tidywisecleaning.com directly.");
+      toast.error("Something went wrong. Please email Support@wedetailnccleaning.com directly.");
     } finally {
       setSubmitting(false);
     }
@@ -60,8 +60,8 @@ export default function DeleteAccountPage() {
   return (
     <>
       <Seo
-        title="Delete Your TidyWise Account | Data Deletion Request"
-        description="Request deletion of your TidyWise account and all associated data. Required for Google Play Store data safety compliance."
+        title="Delete Your We Detail NC Account | Data Deletion Request"
+        description="Request deletion of your We Detail NC account and all associated data. Required for Google Play Store data safety compliance."
         canonicalPath="/delete-account"
         noIndex={false}
       />
@@ -71,8 +71,8 @@ export default function DeleteAccountPage() {
         <header className="border-b bg-card">
           <div className="container max-w-3xl mx-auto px-4 py-6">
             <div className="flex items-center gap-3">
-              <img src="/images/tidywise-logo.webp" alt="TidyWise" className="h-8 w-auto" loading="lazy" />
-              <span className="text-xl font-bold text-foreground">TidyWise</span>
+              <img src="/images/wedetailnc-logo.webp" alt="We Detail NC" className="h-8 w-auto" loading="lazy" />
+              <span className="text-xl font-bold text-foreground">We Detail NC</span>
             </div>
           </div>
         </header>
@@ -82,10 +82,10 @@ export default function DeleteAccountPage() {
           <div className="space-y-3">
             <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
               <Trash2 className="h-8 w-8 text-destructive" />
-              Delete Your TidyWise Account
+              Delete Your We Detail NC Account
             </h1>
             <p className="text-muted-foreground text-lg">
-              You can request deletion of your TidyWise account and all associated data.
+              You can request deletion of your We Detail NC account and all associated data.
               This page is provided for Google Play Store data safety compliance.
             </p>
           </div>
@@ -103,10 +103,10 @@ export default function DeleteAccountPage() {
                 To request deletion of your account and all associated data, you can either fill out the form below or email us directly at:
               </p>
               <a
-                href="mailto:Support@tidywisecleaning.com"
+                href="mailto:Support@wedetailnccleaning.com"
                 className="inline-block text-primary font-semibold hover:underline text-lg"
               >
-                Support@tidywisecleaning.com
+                Support@wedetailnccleaning.com
               </a>
               <p className="text-muted-foreground text-sm">
                 Please include the following information:
@@ -222,7 +222,7 @@ export default function DeleteAccountPage() {
 
           {/* Footer */}
           <p className="text-xs text-muted-foreground text-center pb-8">
-            © {new Date().getFullYear()} TidyWise. All rights reserved. •{" "}
+            © {new Date().getFullYear()} We Detail NC. All rights reserved. •{" "}
             <a href="/privacy-policy" className="hover:underline text-primary">Privacy Policy</a>
           </p>
         </main>

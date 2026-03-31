@@ -3,8 +3,8 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
-const CACHE_PREFIX = 'tidywise_offline_';
-const SYNC_QUEUE_KEY = 'tidywise_sync_queue';
+const CACHE_PREFIX = 'wedetailnc_offline_';
+const SYNC_QUEUE_KEY = 'wedetailnc_sync_queue';
 
 interface SyncQueueItem {
   id: string;

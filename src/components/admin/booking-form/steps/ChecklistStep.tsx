@@ -109,7 +109,7 @@ export function ChecklistStep() {
         </div>
         <div>
           <h3 className="text-lg font-semibold">Cleaning Checklist</h3>
-          <p className="text-sm text-muted-foreground">Optional quality assurance checklist for cleaners</p>
+          <p className="text-sm text-muted-foreground">Optional quality assurance checklist for technicians</p>
         </div>
       </div>
 

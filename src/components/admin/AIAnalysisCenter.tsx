@@ -541,7 +541,7 @@ export function AIAnalysisCenter() {
 
         {/* ─── Tab 5: Ask AI ─── */}
         <TabsContent value="ask-ai">
-          <h3 style={{ fontFamily: labelFont, fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Ask TidyWise AI</h3>
+          <h3 style={{ fontFamily: labelFont, fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Ask We Detail NC AI</h3>
           <div className="flex flex-wrap gap-2 mb-4">
             {quickQuestions.map((q, i) => (
               <button

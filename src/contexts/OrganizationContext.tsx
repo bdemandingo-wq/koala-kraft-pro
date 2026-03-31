@@ -33,7 +33,7 @@ interface OrganizationContextType {
   refetch: () => Promise<void>;
 }
 
-const ACTIVE_ORG_KEY = 'tidywise_active_org';
+const ACTIVE_ORG_KEY = 'wedetailnc_active_org';
 
 const OrganizationContext = createContext<OrganizationContextType | undefined>(undefined);
 

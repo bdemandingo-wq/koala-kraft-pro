@@ -72,8 +72,8 @@ function useScrollReveal() {
 
 const cleaningConfig = {
   jobLabel: "Cleans",
-  staffLabel: "Cleaners",
-  serviceExamples: ["Deep Clean", "Standard Clean", "Move In/Out"],
+  staffLabel: "Technicians",
+  serviceExamples: ["Full Detail", "Express Detail", "Pre-Sale Detail"],
   dashboardStats: {
     bookings: 12,
     revenue: "$2,450",
@@ -81,23 +81,23 @@ const cleaningConfig = {
   },
   testimonials: [
     {
-      quote: "This platform transformed how we run our cleaning business. Bookings increased 40% in the first month!",
+      quote: "This platform transformed how we run our car detailing business. Bookings increased 40% in the first month!",
       author: "Sarah M.",
-      role: "Owner, Sparkle Clean Co.",
+      role: "Owner, Elite Auto Detail",
       rating: 5,
       avatar: "SM"
     },
     {
       quote: "The staff portal is amazing. My team can manage their own schedules and I can track everything in real-time.",
       author: "Michael R.",
-      role: "Founder, Fresh Start Services",
+      role: "Founder, Pristine Auto Care",
       rating: 5,
       avatar: "MR"
     },
     {
-      quote: "Finally, a platform that understands cleaning businesses. The automated invoicing alone saves me hours every week.",
+      quote: "Finally, a platform that understands car detailing businesses. The automated invoicing alone saves me hours every week.",
       author: "Jennifer L.",
-      role: "CEO, Elite Home Care",
+      role: "CEO, Premium Detail Works",
       rating: 5,
       avatar: "JL"
     },
@@ -129,7 +129,7 @@ const baseFeatures = [
   {
     icon: Calendar,
     title: "Smart Scheduling & Online Booking",
-    description: "Cleaning business scheduling software that auto-assigns cleaners by location, skills, and availability. Let customers book online 24/7."
+    description: "Cleaning business scheduling software that auto-assigns technicians by location, skills, and availability. Let customers book online 24/7."
   },
   {
     icon: Users,
@@ -189,33 +189,33 @@ export default function LandingPage() {
   }, [mobileMenuOpen]);
 
   const handleGetStarted = () => {
-    sessionStorage.setItem("selectedIndustry", "Home Cleaning");
+    sessionStorage.setItem("selectedIndustry", "Car Detailing");
     navigate("/signup");
   };
 
   const handleStartFreeTrial = () => {
-    sessionStorage.setItem("selectedIndustry", "Home Cleaning");
+    sessionStorage.setItem("selectedIndustry", "Car Detailing");
     navigate("/signup");
   };
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
       <Seo 
-        title="Cleaning Business Software | TIDYWISE"
-        description="Smart scheduling, automated payroll, CRM, GPS tracking & online booking for cleaning businesses. Start your 60-day free trial today."
+        title="Car Detailing Business Software | WE DETAIL NC"
+        description="Smart scheduling, automated payroll, CRM, GPS tracking & online booking for car detailing businesses. Start your 60-day free trial today."
         canonicalPath="/"
-        ogImage="/images/tidywise-og.png"
+        ogImage="/images/wedetailnc-og.png"
         jsonLd={[
           {
             "@type": "Organization",
-            "name": "TIDYWISE",
-            "url": "https://www.jointidywise.com",
-            "logo": "https://www.jointidywise.com/images/tidywise-logo.png",
+            "name": "WE DETAIL NC",
+            "url": "https://www.joinwedetailnc.com",
+            "logo": "https://www.joinwedetailnc.com/images/wedetailnc-logo.png",
             "sameAs": []
           },
           {
             "@type": "SoftwareApplication",
-            "name": "TIDYWISE",
+            "name": "WE DETAIL NC",
             "applicationCategory": "BusinessApplication",
             "operatingSystem": "Web, iOS, Android",
             "offers": {
@@ -224,7 +224,7 @@ export default function LandingPage() {
               "priceCurrency": "USD",
               "priceValidUntil": "2027-12-31"
             },
-            "description": "All-in-one cleaning business management software with scheduling, CRM, payments, and staff management."
+            "description": "All-in-one car detailing business management software with scheduling, CRM, payments, and staff management."
           }
         ]}
       />
@@ -238,7 +238,7 @@ export default function LandingPage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-14 md:h-18">
             <div className="flex items-center gap-2">
-              <span className="font-bold text-xl md:text-2xl text-foreground tracking-tight">TIDYWISE</span>
+              <span className="font-bold text-xl md:text-2xl text-foreground tracking-tight">WE DETAIL NC</span>
             </div>
 
             {/* Desktop Navigation */}
@@ -383,18 +383,18 @@ export default function LandingPage() {
               {/* Trust badge */}
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 backdrop-blur-sm rounded-full text-primary text-sm font-medium mb-5 border border-primary/20 animate-pulse-glow">
                 <Sparkles className="h-4 w-4" />
-                <span>All-in-One Cleaning Business Software</span>
+                <span>All-in-One Car Detailing Business Software</span>
                 <ChevronRight className="h-4 w-4" />
               </div>
               
               <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-foreground leading-[1.1] mb-6 tracking-tight">
                 The best{" "}
-                <span className="text-gradient-hero">maid service software</span>{" "}
+                <span className="text-gradient-hero">car detailing software</span>{" "}
                 to grow your business
               </h1>
               
               <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                Looking for Booking Koala or Jobber alternatives? TIDYWISE gives you online booking, smart scheduling, automated payroll, and CRM—all in one platform.
+                Looking for Booking Koala or Jobber alternatives? WE DETAIL NC gives you online booking, smart scheduling, automated payroll, and CRM—all in one platform.
               </p>
 
               {/* CTA - Clean and focused */}
@@ -455,7 +455,7 @@ export default function LandingPage() {
                       <Star key={i} className="h-4 w-4 fill-warning text-warning" />
                     ))}
                   </div>
-                  <p className="text-sm text-muted-foreground">Trusted by cleaning businesses</p>
+                  <p className="text-sm text-muted-foreground">Trusted by car detailing businesses</p>
                 </div>
               </div>
             </div>
@@ -475,7 +475,7 @@ export default function LandingPage() {
                   </div>
                   <div className="flex-1 mx-4">
                     <div className="bg-sidebar-accent/50 rounded-lg px-4 py-1.5 text-sidebar-foreground/50 text-sm">
-                      app.tidywise.com/dashboard
+                      app.wedetailnc.com/dashboard
                     </div>
                   </div>
                 </div>
@@ -559,7 +559,7 @@ export default function LandingPage() {
               <span className="text-gradient-hero">run your business</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              More than just software. TIDYWISE is the all-in-one platform—from automated booking to GPS route optimization.
+              More than just software. WE DETAIL NC is the all-in-one platform—from automated booking to GPS route optimization.
             </p>
           </div>
 
@@ -583,7 +583,7 @@ export default function LandingPage() {
           {/* Features checklist */}
           <Card variant="glass" className="mt-12 p-8">
             <h3 className="text-xl font-semibold text-foreground mb-6 text-center">
-              Built specifically for cleaning businesses...
+              Built specifically for car detailing businesses...
             </h3>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {cleaningConfig.features.map((item, i) => (
@@ -635,7 +635,7 @@ export default function LandingPage() {
                 <span className="text-gradient-hero">$1M+ revenue</span>
               </h2>
               <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-                Whether you're just starting or ready to scale, TIDYWISE gives you the same tools multi-million dollar cleaning services use.
+                Whether you're just starting or ready to scale, WE DETAIL NC gives you the same tools multi-million dollar detailing services use.
               </p>
               <div className="space-y-4">
                 {[
@@ -698,11 +698,11 @@ export default function LandingPage() {
               Customer Stories
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 tracking-tight">
-              Loved by cleaning businesses{" "}
+              Loved by car detailing businesses{" "}
               <span className="text-gradient-hero">everywhere</span>
             </h2>
             <p className="text-lg text-muted-foreground">
-              Join cleaning companies that trust TIDYWISE to manage their operations.
+              Join detailing companies that trust WE DETAIL NC to manage their operations.
             </p>
           </div>
 
@@ -749,10 +749,10 @@ export default function LandingPage() {
         
         <div className="max-w-4xl mx-auto text-center relative">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-primary-foreground mb-6 tracking-tight">
-            Ready to grow your cleaning business?
+            Ready to grow your car detailing business?
           </h2>
           <p className="text-lg sm:text-xl text-primary-foreground/80 mb-10 max-w-2xl mx-auto">
-            Join cleaning companies that trust TIDYWISE to manage their operations.
+            Join detailing companies that trust WE DETAIL NC to manage their operations.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
@@ -777,9 +777,9 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-4 gap-8 mb-12">
             <div className="md:col-span-1">
-              <span className="font-bold text-xl text-foreground mb-4 block">TIDYWISE</span>
+              <span className="font-bold text-xl text-foreground mb-4 block">WE DETAIL NC</span>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                The complete platform to grow your cleaning business.
+                The complete platform to grow your car detailing business.
               </p>
             </div>
             <div>
@@ -794,7 +794,7 @@ export default function LandingPage() {
               <h4 className="font-semibold text-foreground mb-4">Company</h4>
               <ul className="space-y-3">
                 <li>
-                  <a href="mailto:support@tidywisecleaning.com" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  <a href="mailto:support@wedetailnccleaning.com" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                     Contact
                   </a>
                 </li>
@@ -824,7 +824,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="border-t border-border pt-8 text-center text-sm text-muted-foreground">
-            © {new Date().getFullYear()} TIDYWISE. All rights reserved.
+            © {new Date().getFullYear()} WE DETAIL NC. All rights reserved.
           </div>
         </div>
       </footer>

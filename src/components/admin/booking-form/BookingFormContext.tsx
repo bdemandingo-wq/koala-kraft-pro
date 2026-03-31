@@ -75,9 +75,9 @@ interface BookingFormState {
   
   notes: string;
   totalAmount: number;
-  cleanerWage: string;
-  cleanerWageType: string;
-  cleanerOverrideHours: string;
+  technicianWage: string;
+  technicianWageType: string;
+  technicianOverrideHours: string;
   sendConfirmationEmail: boolean;
   sendConfirmationSms: boolean;
   sendQuoteSms: boolean;
@@ -146,9 +146,9 @@ interface BookingFormContextType extends BookingFormState {
   setConflictOverride: (override: boolean) => void;
   setNotes: (notes: string) => void;
   setTotalAmount: (amount: number) => void;
-  setCleanerWage: (wage: string) => void;
-  setCleanerWageType: (type: string) => void;
-  setCleanerOverrideHours: (hours: string) => void;
+  setTechnicianWage: (wage: string) => void;
+  setTechnicianWageType: (type: string) => void;
+  setTechnicianOverrideHours: (hours: string) => void;
   setSendConfirmationEmail: (send: boolean) => void;
   setSendConfirmationSms: (send: boolean) => void;
   setSendQuoteSms: (send: boolean) => void;
@@ -234,9 +234,9 @@ export function BookingFormProvider({
   // Payment/Notes state
   const [notes, setNotes] = useState('');
   const [totalAmount, setTotalAmount] = useState(0);
-  const [cleanerWage, setCleanerWage] = useState('');
-  const [cleanerWageType, setCleanerWageType] = useState('hourly');
-  const [cleanerOverrideHours, setCleanerOverrideHours] = useState('');
+  const [technicianWage, setTechnicianWage] = useState('');
+  const [technicianWageType, setTechnicianWageType] = useState('hourly');
+  const [technicianOverrideHours, setTechnicianOverrideHours] = useState('');
   const [sendConfirmationEmail, setSendConfirmationEmail] = useState(false);
   const [sendConfirmationSms, setSendConfirmationSms] = useState(false);
   const [sendQuoteSms, setSendQuoteSms] = useState(false);
@@ -416,9 +416,9 @@ export function BookingFormProvider({
     setCardInfo(null);
     setIsTeamMode(false);
     setSelectedTeamMembers([]);
-    setCleanerWage('');
-    setCleanerWageType('hourly');
-    setCleanerOverrideHours('');
+    setTechnicianWage('');
+    setTechnicianWageType('hourly');
+    setTechnicianOverrideHours('');
     setPricingMode('sqft');
     setHomeCondition(1);
     setPetOption('no_pets');
@@ -464,9 +464,9 @@ export function BookingFormProvider({
     }
     setSelectedExtras(extrasStringArray);
     const bookingAny = booking as any;
-    setCleanerWage(bookingAny.cleaner_wage ? String(bookingAny.cleaner_wage) : '');
-    setCleanerWageType(bookingAny.cleaner_wage_type || 'hourly');
-    setCleanerOverrideHours(bookingAny.cleaner_override_hours ? String(bookingAny.cleaner_override_hours) : '');
+    setTechnicianWage(bookingAny.technician_wage ? String(bookingAny.technician_wage) : '');
+    setTechnicianWageType(bookingAny.technician_wage_type || 'hourly');
+    setTechnicianOverrideHours(bookingAny.technician_override_hours ? String(bookingAny.technician_override_hours) : '');
 
     // Load existing checklist template for this booking
     if (booking.id && organizationId) {
@@ -586,9 +586,9 @@ export function BookingFormProvider({
       conflictOverride,
       notes,
       totalAmount,
-      cleanerWage,
-      cleanerWageType,
-      cleanerOverrideHours,
+      technicianWage,
+      technicianWageType,
+      technicianOverrideHours,
       sendConfirmationEmail,
       sendConfirmationSms,
       sendQuoteSms,
@@ -644,9 +644,9 @@ export function BookingFormProvider({
       setConflictOverride,
       setNotes,
       setTotalAmount,
-      setCleanerWage,
-      setCleanerWageType,
-      setCleanerOverrideHours,
+      setTechnicianWage,
+      setTechnicianWageType,
+      setTechnicianOverrideHours,
       setSendConfirmationEmail,
       setSendConfirmationSms,
       setSendQuoteSms,

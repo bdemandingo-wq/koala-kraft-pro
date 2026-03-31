@@ -27,7 +27,7 @@ serve(async (req) => {
           messages: [
             {
               role: "system",
-              content: `You are TidyWise AI, a business intelligence assistant for cleaning companies. Given this business snapshot: Revenue: $${snap.revenue || 0}, Hot Leads: ${snap.hotLeads || 0}, Churn Risk Clients: ${snap.churnCount || 0}, Conversion Rate: ${snap.conversionRate || 0}%, Best Day: ${snap.bestDay || "N/A"}, return exactly 4 JSON objects in an array. Each object: { "priority": "Urgent|Watch|Opportunity|Pricing", "insight": "2-sentence specific business insight with dollar amounts", "confidence": "High confidence|Medium confidence", "action": "short CTA label", "promptText": "full prompt the user can send for help" }. Return only valid JSON array, no markdown, no code fences.`,
+              content: `You are We Detail NC AI, a business intelligence assistant for detailing companies. Given this business snapshot: Revenue: $${snap.revenue || 0}, Hot Leads: ${snap.hotLeads || 0}, Churn Risk Clients: ${snap.churnCount || 0}, Conversion Rate: ${snap.conversionRate || 0}%, Best Day: ${snap.bestDay || "N/A"}, return exactly 4 JSON objects in an array. Each object: { "priority": "Urgent|Watch|Opportunity|Pricing", "insight": "2-sentence specific business insight with dollar amounts", "confidence": "High confidence|Medium confidence", "action": "short CTA label", "promptText": "full prompt the user can send for help" }. Return only valid JSON array, no markdown, no code fences.`,
             },
             { role: "user", content: "Generate 4 business insights based on the current data." },
           ],
@@ -89,7 +89,7 @@ serve(async (req) => {
 
     if (type === "chat") {
       const snap = businessSnapshot || {};
-      const systemPrompt = `You are TidyWise AI, a business intelligence assistant for a cleaning company. Here is their current business snapshot: Monthly Revenue: $${snap.revenue || 0}, Hot Leads: ${snap.hotLeads || 0}, Churn Risk Clients: ${snap.churnCount || 0}, Conversion Rate: ${snap.conversionRate || 0}%, Best Day: ${snap.bestDay || "N/A"}. Provide specific, actionable advice referencing their actual numbers. Keep answers concise (under 200 words).`;
+      const systemPrompt = `You are We Detail NC AI, a business intelligence assistant for a detailing company. Here is their current business snapshot: Monthly Revenue: $${snap.revenue || 0}, Hot Leads: ${snap.hotLeads || 0}, Churn Risk Clients: ${snap.churnCount || 0}, Conversion Rate: ${snap.conversionRate || 0}%, Best Day: ${snap.bestDay || "N/A"}. Provide specific, actionable advice referencing their actual numbers. Keep answers concise (under 200 words).`;
 
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
@@ -127,7 +127,7 @@ serve(async (req) => {
         body: JSON.stringify({
           model: "google/gemini-3-flash-preview",
           messages: [
-            { role: "system", content: "You are TidyWise AI. Give one short scheduling recommendation (2-3 sentences) based on the data." },
+            { role: "system", content: "You are We Detail NC AI. Give one short scheduling recommendation (2-3 sentences) based on the data." },
             { role: "user", content: `Weekly booking distribution: ${JSON.stringify(snap.weeklyData || {})}. Best day: ${snap.bestDay || "N/A"}. Total staff: ${snap.staffCount || "unknown"}.` },
           ],
         }),

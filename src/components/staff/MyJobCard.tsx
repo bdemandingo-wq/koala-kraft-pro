@@ -30,11 +30,11 @@ interface Booking {
   state: string | null;
   zip_code: string | null;
   total_amount: number;
-  cleaner_wage: number | null;
-  cleaner_wage_type: string | null;
-  cleaner_actual_payment: number | null;
-  cleaner_checkin_at?: string | null;
-  cleaner_checkout_at?: string | null;
+  technician_wage: number | null;
+  technician_wage_type: string | null;
+  technician_actual_payment: number | null;
+  technician_checkin_at?: string | null;
+  technician_checkout_at?: string | null;
   notes?: string | null;
   customer: {
     first_name: string;
@@ -93,14 +93,14 @@ export function MyJobCard({ booking, staffInfo, onUpdateStatus, isUpdating }: Pr
   
   // Get actual hours from check-in/out if available
   const getActualHours = (): number => {
-    if (booking.cleaner_checkin_at && booking.cleaner_checkout_at) {
-      const checkin = new Date(booking.cleaner_checkin_at).getTime();
-      const checkout = new Date(booking.cleaner_checkout_at).getTime();
+    if (booking.technician_checkin_at && booking.technician_checkout_at) {
+      const checkin = new Date(booking.technician_checkin_at).getTime();
+      const checkout = new Date(booking.technician_checkout_at).getTime();
       return (checkout - checkin) / (1000 * 60 * 60);
     }
-    if (booking.cleaner_checkin_at && booking.status === 'in_progress') {
+    if (booking.technician_checkin_at && booking.status === 'in_progress') {
       // Job in progress - show elapsed time so far
-      const checkin = new Date(booking.cleaner_checkin_at).getTime();
+      const checkin = new Date(booking.technician_checkin_at).getTime();
       return (Date.now() - checkin) / (1000 * 60 * 60);
     }
     return staffInfo.default_hours || booking.duration / 60 || 2;
@@ -109,15 +109,15 @@ export function MyJobCard({ booking, staffInfo, onUpdateStatus, isUpdating }: Pr
   // Calculate exact pay based on wage type
   const calculatePay = (): { amount: number; type: string; isExact: boolean } => {
     // If actual payment is already set by admin, use it
-    if (booking.cleaner_actual_payment && booking.cleaner_actual_payment > 0) {
+    if (booking.technician_actual_payment && booking.technician_actual_payment > 0) {
       return {
-        amount: booking.cleaner_actual_payment,
+        amount: booking.technician_actual_payment,
         type: 'Confirmed',
         isExact: true,
       };
     }
 
-    // pay_share stores the actual dollar amount for this cleaner's pay on this booking
+    // pay_share stores the actual dollar amount for this technician's pay on this booking
     // If set and > 0, use it directly as the pay amount
     const payShareAmount = booking.team_pay_share;
     if (payShareAmount && payShareAmount > 0) {
@@ -129,26 +129,26 @@ export function MyJobCard({ booking, staffInfo, onUpdateStatus, isUpdating }: Pr
     }
 
     const hours = getActualHours();
-    const hasActualTime = !!(booking.cleaner_checkin_at && booking.cleaner_checkout_at);
+    const hasActualTime = !!(booking.technician_checkin_at && booking.technician_checkout_at);
 
-    // If booking has specific cleaner wage set
-    if (booking.cleaner_wage && booking.cleaner_wage_type) {
-      if (booking.cleaner_wage_type === 'percentage') {
+    // If booking has specific technician wage set
+    if (booking.technician_wage && booking.technician_wage_type) {
+      if (booking.technician_wage_type === 'percentage') {
         return {
-          amount: (booking.total_amount * booking.cleaner_wage) / 100,
-          type: `${booking.cleaner_wage}% of job`,
+          amount: (booking.total_amount * booking.technician_wage) / 100,
+          type: `${booking.technician_wage}% of job`,
           isExact: true,
         };
-      } else if (booking.cleaner_wage_type === 'flat') {
+      } else if (booking.technician_wage_type === 'flat') {
         return {
-          amount: booking.cleaner_wage,
+          amount: booking.technician_wage,
           type: 'Flat rate',
           isExact: true,
         };
       } else {
         return {
-          amount: booking.cleaner_wage * hours,
-          type: `$${booking.cleaner_wage}/hr × ${hours.toFixed(1)}hrs`,
+          amount: booking.technician_wage * hours,
+          type: `$${booking.technician_wage}/hr × ${hours.toFixed(1)}hrs`,
           isExact: hasActualTime,
         };
       }
@@ -213,7 +213,7 @@ export function MyJobCard({ booking, staffInfo, onUpdateStatus, isUpdating }: Pr
         <div className="flex items-start justify-between">
           <div>
             <CardTitle className="text-lg">#{booking.booking_number}</CardTitle>
-            <p className="text-sm text-muted-foreground">{booking.service?.name || (booking.total_amount === 0 ? 'Re-clean' : 'Service')}</p>
+            <p className="text-sm text-muted-foreground">{booking.service?.name || (booking.total_amount === 0 ? 'Re-detail' : 'Service')}</p>
           </div>
           {getStatusBadge(booking.status)}
         </div>

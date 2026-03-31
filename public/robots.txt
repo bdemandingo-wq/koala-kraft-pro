@@ -1,5 +1,5 @@
-# TidyWise Robots.txt - Cleaning Business Software
-# https://www.jointidywise.com
+# We Detail NC Robots.txt - Car Detailing Business Software
+# https://www.joinwedetailnc.com
 
 User-agent: Googlebot
 Allow: /
@@ -43,4 +43,4 @@ Allow: /privacy-policy
 Allow: /portal
 
 # Sitemap
-Sitemap: https://www.jointidywise.com/sitemap.xml
+Sitemap: https://www.joinwedetailnc.com/sitemap.xml

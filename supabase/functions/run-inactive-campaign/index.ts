@@ -111,7 +111,7 @@ const handler = async (req: Request): Promise<Response> => {
       .eq('organization_id', organizationId)
       .single();
 
-    const companyName = businessSettings?.company_name || 'Your Cleaning Service';
+    const companyName = businessSettings?.company_name || 'Your Detailing Service';
 
     // Calculate the cutoff date
     const cutoffDate = new Date();
@@ -223,7 +223,7 @@ const handler = async (req: Request): Promise<Response> => {
       .maybeSingle();
     
     const orgSlug = orgData?.slug || organizationId;
-    const projectUrl = Deno.env.get("PROJECT_URL") || "https://jointidywise.lovable.app";
+    const projectUrl = Deno.env.get("PROJECT_URL") || "https://joinwedetailnc.lovable.app";
 
     // Send SMS to each inactive customer
     let sentCount = 0;

@@ -30,7 +30,7 @@ import { toast } from 'sonner';
 import { useOrgId } from '@/hooks/useOrgId';
 import { useAuth } from '@/hooks/useAuth';
 
-const PLATFORM_ADMIN_EMAIL = 'support@tidywisecleaning.com';
+const PLATFORM_ADMIN_EMAIL = 'support@wedetailnccleaning.com';
 
 interface HelpVideo {
   id: string;

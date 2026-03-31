@@ -117,7 +117,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Seo title="Log In | TidyWise - Cleaning Business Software" description="Log in to your TidyWise account to manage bookings, staff, and grow your cleaning business." canonicalPath="/login" noIndex />
+      <Seo title="Log In | We Detail NC - Car Detailing Business Software" description="Log in to your We Detail NC account to manage bookings, staff, and grow your car detailing business." canonicalPath="/login" noIndex />
       <div className="w-full max-w-md">
         {/* Back to home link */}
         <Link 

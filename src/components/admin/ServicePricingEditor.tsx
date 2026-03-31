@@ -479,7 +479,7 @@ export function ServicePricingEditor() {
                         <Input
                           value={newExtra.name}
                           onChange={(e) => setNewExtra({ ...newExtra, name: e.target.value })}
-                          placeholder="e.g., Window Cleaning"
+                          placeholder="e.g., Interior Detail"
                         />
                       </div>
                       <div>
