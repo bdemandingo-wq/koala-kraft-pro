@@ -121,7 +121,7 @@ export default function CompareHousecallPro() {
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
             We Detail NC vs Housecall Pro:<br/>
-            <span className="text-primary">Built for Cleaning, Not Plumbing</span>
+            <span className="text-primary">Built for Detailing, Not Plumbing</span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
             Housecall Pro was built for plumbers and HVAC techs. We Detail NC is built specifically for car detailing businesses with <strong>square footage pricing, automated payroll, and P&L reports</strong>—all for a flat $50/month.
