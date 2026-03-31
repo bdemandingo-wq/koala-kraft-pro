@@ -25,7 +25,7 @@ const comparisonData = [
   { feature: "Automated Payroll", wedetailnc: true, housecallpro: false, winner: "wedetailnc" },
   { feature: "P&L Reports", wedetailnc: true, housecallpro: false, winner: "wedetailnc" },
   { feature: "Demo/Test Mode", wedetailnc: true, housecallpro: false, winner: "wedetailnc" },
-  { feature: "Cleaning-Specific Pricing", wedetailnc: true, housecallpro: false, winner: "wedetailnc" },
+  { feature: "Detailing-Specific Pricing", wedetailnc: true, housecallpro: false, winner: "wedetailnc" },
   { feature: "AI Revenue Tools", wedetailnc: true, housecallpro: false, winner: "wedetailnc" },
   { feature: "Unlimited Users", wedetailnc: true, housecallpro: "Add-on", winner: "wedetailnc" },
   { feature: "Review Requests", wedetailnc: true, housecallpro: true, winner: "tie" },
