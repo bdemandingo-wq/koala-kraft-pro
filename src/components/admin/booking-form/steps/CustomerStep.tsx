@@ -52,6 +52,8 @@ export function CustomerStep() {
     setSelectedServiceId,
     setTotalAmount,
     setSquareFootage,
+    selectedVehicleId,
+    setSelectedVehicleId,
   } = useBookingForm();
 
   const { organizationId } = useOrgId();
