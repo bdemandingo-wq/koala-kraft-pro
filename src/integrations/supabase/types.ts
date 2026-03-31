@@ -3006,6 +3006,80 @@ export type Database = {
           },
         ]
       }
+      job_media: {
+        Row: {
+          booking_id: string
+          customer_acknowledged: boolean | null
+          damage_notes: string | null
+          file_name: string
+          file_type: string
+          file_url: string
+          id: string
+          media_type: string
+          notes: string | null
+          organization_id: string
+          uploaded_at: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          booking_id: string
+          customer_acknowledged?: boolean | null
+          damage_notes?: string | null
+          file_name: string
+          file_type: string
+          file_url: string
+          id?: string
+          media_type: string
+          notes?: string | null
+          organization_id: string
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          booking_id?: string
+          customer_acknowledged?: boolean | null
+          damage_notes?: string | null
+          file_name?: string
+          file_type?: string
+          file_url?: string
+          id?: string
+          media_type?: string
+          notes?: string | null
+          organization_id?: string
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_media_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_media_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_media_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_media_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "staff_safe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lead_intelligence: {
         Row: {
           ai_insights: Json | null
