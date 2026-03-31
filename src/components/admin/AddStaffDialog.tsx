@@ -331,7 +331,7 @@ export function AddStaffDialog({ open, onOpenChange }: AddStaffDialogProps) {
               Cancel
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Creating...' : 'Create Staff Member'}
+              {isLoading ? 'Creating...' : 'Create Technician'}
             </Button>
           </DialogFooter>
         </form>
