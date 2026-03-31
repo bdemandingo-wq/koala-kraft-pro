@@ -238,12 +238,12 @@ export default function StaffPage() {
 
   return (
     <AdminLayout
-      title="Staff"
+      title="Technicians"
       subtitle={`${staff.length} team members`}
       actions={
         <Button className="gap-2" onClick={() => setAddDialogOpen(true)}>
           <Plus className="w-4 h-4" />
-          Add Staff
+          Add Technician
         </Button>
       }
     >
@@ -279,7 +279,7 @@ export default function StaffPage() {
             <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
               <TabsList>
                 <TabsTrigger value="all" className="gap-1.5">
-                  All Staff
+                  All Technicians
                   <Badge variant="secondary" className="ml-1 text-xs h-5 px-1.5">{staff.length}</Badge>
                 </TabsTrigger>
                 <TabsTrigger value="active" className="gap-1.5">
@@ -301,7 +301,7 @@ export default function StaffPage() {
             <div className="text-center py-8 text-muted-foreground">Loading staff...</div>
           ) : filteredStaff.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              {searchTerm ? 'No staff found matching your search' : statusFilter === 'inactive' ? 'No inactive staff members' : 'No staff members yet. Add your first team member!'}
+              {searchTerm ? 'No technicians found matching your search' : statusFilter === 'inactive' ? 'No inactive technicians' : 'No technicians yet. Add your first team member!'}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -333,9 +333,9 @@ export default function StaffPage() {
                           <div>
                             <h3 className="font-semibold">{maskName(member.name)}</h3>
                             <div className="flex items-center gap-2">
-                              {(member.base_wage || member.hourly_rate) && (
+                                {(member.base_wage || member.hourly_rate) && (
                                 <span className="text-sm text-muted-foreground">
-                                  {isTestMode ? '$XX/hr' : `$${member.base_wage || member.hourly_rate}/hr`}
+                                  {isTestMode ? '$XX' : `$${member.base_wage || member.hourly_rate}`}
                                 </span>
                               )}
                               <Badge variant={member.tax_classification === '1099' ? 'secondary' : 'default'} className="text-xs">
@@ -471,7 +471,7 @@ export default function StaffPage() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Deactivate Staff Member</AlertDialogTitle>
+            <AlertDialogTitle>Deactivate Technician</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to deactivate <strong>{staffToDelete?.name}</strong>?
               <br /><br />
@@ -500,7 +500,7 @@ export default function StaffPage() {
       <AlertDialog open={permanentDeleteDialogOpen} onOpenChange={setPermanentDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-destructive">Permanently Delete Staff Member</AlertDialogTitle>
+            <AlertDialogTitle className="text-destructive">Permanently Delete Technician</AlertDialogTitle>
             <AlertDialogDescription>
               <strong className="text-destructive">Warning:</strong> This will permanently delete {staffToDelete?.name} from the database. 
               This action cannot be undone. All associated data will be removed.

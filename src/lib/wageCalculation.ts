@@ -27,6 +27,13 @@ export interface WageStaff {
   base_wage: number | null;
   hourly_rate: number | null;
   default_hours: number | null;
+  pay_type?: string | null;
+  package_pay_rates?: Record<string, number> | null;
+  commission_rate?: number | null;
+}
+
+export interface WageBooking_ServiceInfo {
+  name?: string | null;
 }
 
 export interface WageResult {
@@ -53,7 +60,28 @@ export function getActualHours(booking: WageBooking, staff?: WageStaff | null): 
 /**
  * Compute pay from rate/type (used ONLY as fallback when cleaner_pay_expected is null).
  */
-function computePayFromDefaults(booking: WageBooking, staff?: WageStaff | null): { pay: number; wageType: string; wageRate: number } {
+function computePayFromDefaults(booking: WageBooking, staff?: WageStaff | null, serviceName?: string | null): { pay: number; wageType: string; wageRate: number } {
+  const payType = staff?.pay_type || null;
+  
+  // Per Job (flat rate per package)
+  if (payType === 'per_job' && staff?.package_pay_rates && serviceName) {
+    const rates = typeof staff.package_pay_rates === 'object' ? staff.package_pay_rates : {};
+    // Match package name
+    for (const [key, rate] of Object.entries(rates)) {
+      if (serviceName.toLowerCase().includes(key.toLowerCase().split(' ')[0]) && Number(rate) > 0) {
+        return { pay: Math.round(Number(rate) * 100) / 100, wageType: 'per_job', wageRate: Number(rate) };
+      }
+    }
+  }
+  
+  // Commission (% of job total)
+  if (payType === 'commission' && staff?.commission_rate) {
+    const base = Number(booking.subtotal || booking.total_amount) - Number(booking.discount_amount || 0);
+    const pay = (Number(staff.commission_rate) / 100) * base;
+    return { pay: Math.round(pay * 100) / 100, wageType: 'commission', wageRate: Number(staff.commission_rate) };
+  }
+
+  // Existing logic for hourly/percentage/flat
   const wageType = booking.cleaner_wage_type || 'hourly';
   const wageRate = booking.cleaner_wage || staff?.base_wage || staff?.hourly_rate || 0;
   const hoursWorked = getActualHours(booking, staff);
@@ -80,7 +108,7 @@ function computePayFromDefaults(booking: WageBooking, staff?: WageStaff | null):
  * 2. cleaner_actual_payment (legacy override — treat as expected pay)
  * 3. Fallback: compute from wage type/rate/hours (only when no snapshot exists)
  */
-export function calculateBookingWage(booking: WageBooking, staff?: WageStaff | null): WageResult {
+export function calculateBookingWage(booking: WageBooking, staff?: WageStaff | null, serviceName?: string | null): WageResult {
   const hoursWorked = getActualHours(booking, staff);
   const wageType = booking.cleaner_wage_type || 'hourly';
   const wageRate = Number(booking.cleaner_wage || staff?.base_wage || staff?.hourly_rate || 0);
@@ -108,7 +136,7 @@ export function calculateBookingWage(booking: WageBooking, staff?: WageStaff | n
   }
 
   // 3. Fallback: compute from defaults (no pay snapshot exists)
-  const fallback = computePayFromDefaults(booking, staff);
+  const fallback = computePayFromDefaults(booking, staff, serviceName);
   return {
     calculatedPay: fallback.pay,
     hoursWorked,

@@ -1225,6 +1225,7 @@ export type Database = {
           resend_api_key: string | null
           review_sms_template: string | null
           timezone: string | null
+          tip_split_technician_percent: number | null
           updated_at: string
         }
         Insert: {
@@ -1266,6 +1267,7 @@ export type Database = {
           resend_api_key?: string | null
           review_sms_template?: string | null
           timezone?: string | null
+          tip_split_technician_percent?: number | null
           updated_at?: string
         }
         Update: {
@@ -1307,6 +1309,7 @@ export type Database = {
           resend_api_key?: string | null
           review_sms_template?: string | null
           timezone?: string | null
+          tip_split_technician_percent?: number | null
           updated_at?: string
         }
         Relationships: [
@@ -5345,7 +5348,13 @@ export type Database = {
           avatar_url: string | null
           base_wage: number | null
           bio: string | null
+          bonus_amount: number | null
+          bonus_threshold: number | null
+          bonus_trigger: string | null
+          bonus_type: string | null
           calendar_color: string | null
+          certifications: string[] | null
+          commission_rate: number | null
           created_at: string
           default_hours: number | null
           ein: string | null
@@ -5356,21 +5365,32 @@ export type Database = {
           hourly_rate: number | null
           id: string
           is_active: boolean
+          license_plate: string | null
           name: string
           organization_id: string | null
+          package_pay_rates: Json | null
+          pay_type: string | null
           percentage_rate: number | null
           phone: string | null
+          specialties: string[] | null
           ssn_last4: string | null
           tax_classification: string | null
           tax_document_url: string | null
           updated_at: string
           user_id: string | null
+          vehicle_info: string | null
         }
         Insert: {
           avatar_url?: string | null
           base_wage?: number | null
           bio?: string | null
+          bonus_amount?: number | null
+          bonus_threshold?: number | null
+          bonus_trigger?: string | null
+          bonus_type?: string | null
           calendar_color?: string | null
+          certifications?: string[] | null
+          commission_rate?: number | null
           created_at?: string
           default_hours?: number | null
           ein?: string | null
@@ -5381,21 +5401,32 @@ export type Database = {
           hourly_rate?: number | null
           id?: string
           is_active?: boolean
+          license_plate?: string | null
           name: string
           organization_id?: string | null
+          package_pay_rates?: Json | null
+          pay_type?: string | null
           percentage_rate?: number | null
           phone?: string | null
+          specialties?: string[] | null
           ssn_last4?: string | null
           tax_classification?: string | null
           tax_document_url?: string | null
           updated_at?: string
           user_id?: string | null
+          vehicle_info?: string | null
         }
         Update: {
           avatar_url?: string | null
           base_wage?: number | null
           bio?: string | null
+          bonus_amount?: number | null
+          bonus_threshold?: number | null
+          bonus_trigger?: string | null
+          bonus_type?: string | null
           calendar_color?: string | null
+          certifications?: string[] | null
+          commission_rate?: number | null
           created_at?: string
           default_hours?: number | null
           ein?: string | null
@@ -5406,15 +5437,20 @@ export type Database = {
           hourly_rate?: number | null
           id?: string
           is_active?: boolean
+          license_plate?: string | null
           name?: string
           organization_id?: string | null
+          package_pay_rates?: Json | null
+          pay_type?: string | null
           percentage_rate?: number | null
           phone?: string | null
+          specialties?: string[] | null
           ssn_last4?: string | null
           tax_classification?: string | null
           tax_document_url?: string | null
           updated_at?: string
           user_id?: string | null
+          vehicle_info?: string | null
         }
         Relationships: [
           {

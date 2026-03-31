@@ -45,6 +45,7 @@ export function AddStaffDialog({ open, onOpenChange }: AddStaffDialogProps) {
     percentage_rate: '',
     default_hours: '5',
     tax_classification: 'w2' as 'w2' | '1099',
+    pay_type: 'per_job',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -131,7 +132,7 @@ export function AddStaffDialog({ open, onOpenChange }: AddStaffDialogProps) {
 
   const handleClose = () => {
     if (!showCredentials) {
-      setFormData({ name: '', email: '', phone: '', password: '', hourly_rate: '', percentage_rate: '', default_hours: '5', tax_classification: 'w2' });
+      setFormData({ name: '', email: '', phone: '', password: '', hourly_rate: '', percentage_rate: '', default_hours: '5', tax_classification: 'w2', pay_type: 'per_job' });
     }
     onOpenChange(false);
   };
@@ -140,7 +141,7 @@ export function AddStaffDialog({ open, onOpenChange }: AddStaffDialogProps) {
     setShowCredentials(false);
     setCredentials(null);
     setCopied(false);
-    setFormData({ name: '', email: '', phone: '', password: '', hourly_rate: '', percentage_rate: '', default_hours: '5', tax_classification: 'w2' });
+    setFormData({ name: '', email: '', phone: '', password: '', hourly_rate: '', percentage_rate: '', default_hours: '5', tax_classification: 'w2', pay_type: 'per_job' });
     onOpenChange(false);
   };
 
@@ -200,7 +201,7 @@ export function AddStaffDialog({ open, onOpenChange }: AddStaffDialogProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Add Staff Member</DialogTitle>
+          <DialogTitle>Add Technician</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -280,48 +281,49 @@ export function AddStaffDialog({ open, onOpenChange }: AddStaffDialogProps) {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="hourly_rate">Hourly Rate ($)</Label>
-              <Input
-                id="hourly_rate"
-                type="number"
-                step="0.01"
-                min="0"
-                value={formData.hourly_rate}
-                onChange={(e) => setFormData({ ...formData, hourly_rate: e.target.value, percentage_rate: '' })}
-                placeholder="25.00"
-                disabled={!!formData.percentage_rate}
-              />
+              <Label>Pay Type</Label>
+              <Select
+                value={formData.pay_type}
+                onValueChange={(value) => setFormData({ ...formData, pay_type: value })}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="per_job">Per Job (Flat Rate)</SelectItem>
+                  <SelectItem value="commission">Commission (%)</SelectItem>
+                  <SelectItem value="hourly">Hourly</SelectItem>
+                  <SelectItem value="salary">Salary</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="percentage_rate">Percentage (%)</Label>
-              <Input
-                id="percentage_rate"
-                type="number"
-                step="0.1"
-                min="0"
-                max="100"
-                value={formData.percentage_rate}
-                onChange={(e) => setFormData({ ...formData, percentage_rate: e.target.value, hourly_rate: '' })}
-                placeholder="50"
-                disabled={!!formData.hourly_rate}
-              />
-              <p className="text-xs text-muted-foreground">% of job total</p>
+              {formData.pay_type === 'hourly' && (
+                <>
+                  <Label htmlFor="hourly_rate">Hourly Rate ($)</Label>
+                  <Input id="hourly_rate" type="number" step="0.01" min="0" value={formData.hourly_rate}
+                    onChange={(e) => setFormData({ ...formData, hourly_rate: e.target.value })} placeholder="25.00" />
+                </>
+              )}
+              {formData.pay_type === 'commission' && (
+                <>
+                  <Label htmlFor="percentage_rate">Commission Rate (%)</Label>
+                  <Input id="percentage_rate" type="number" step="0.1" min="0" max="100" value={formData.percentage_rate}
+                    onChange={(e) => setFormData({ ...formData, percentage_rate: e.target.value })} placeholder="40" />
+                </>
+              )}
+              {formData.pay_type === 'per_job' && (
+                <>
+                  <Label className="text-xs text-muted-foreground">Per-package rates</Label>
+                  <p className="text-xs text-muted-foreground">Set in technician profile after creation</p>
+                </>
+              )}
+              {formData.pay_type === 'salary' && (
+                <>
+                  <Label htmlFor="hourly_rate">Base Wage ($)</Label>
+                  <Input id="hourly_rate" type="number" step="0.01" min="0" value={formData.hourly_rate}
+                    onChange={(e) => setFormData({ ...formData, hourly_rate: e.target.value })} placeholder="50000" />
+                </>
+              )}
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="default_hours">Default Hours Per Job</Label>
-            <Input
-              id="default_hours"
-              type="number"
-              step="0.5"
-              min="0.5"
-              max="24"
-              value={formData.default_hours}
-              onChange={(e) => setFormData({ ...formData, default_hours: e.target.value })}
-              placeholder="5"
-            />
-            <p className="text-xs text-muted-foreground">Used for pay calculations when not using check-in/out times</p>
           </div>
 
           <DialogFooter>
@@ -329,7 +331,7 @@ export function AddStaffDialog({ open, onOpenChange }: AddStaffDialogProps) {
               Cancel
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Creating...' : 'Create Staff Member'}
+              {isLoading ? 'Creating...' : 'Create Technician'}
             </Button>
           </DialogFooter>
         </form>

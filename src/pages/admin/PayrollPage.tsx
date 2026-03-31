@@ -221,7 +221,7 @@ export default function PayrollPage() {
       if (!organizationId) return [];
       const { data, error } = await supabase
         .from('staff')
-        .select('*')
+        .select('*, package_pay_rates, commission_rate, pay_type')
         .eq('organization_id', organizationId)
         .eq('is_active', true);
       if (error) throw error;
@@ -239,7 +239,7 @@ export default function PayrollPage() {
       toEndOfDay.setHours(23, 59, 59, 999);
       const { data, error } = await supabase
         .from('bookings')
-        .select(`*, customer:customers(*), staff:staff(*)`)
+        .select(`*, customer:customers(*), staff:staff(*), service:services(name)`)
         .eq('organization_id', organizationId)
         .gte('scheduled_at', dateRange.from.toISOString())
         .lte('scheduled_at', toEndOfDay.toISOString())
@@ -295,7 +295,7 @@ export default function PayrollPage() {
       nwEnd.setHours(23, 59, 59, 999);
       const { data, error } = await supabase
         .from('bookings')
-        .select(`*, customer:customers(*), staff:staff(*)`)
+        .select(`*, customer:customers(*), staff:staff(*), service:services(name)`)
         .eq('organization_id', organizationId)
         .neq('status', 'cancelled')
         .gte('scheduled_at', currentWeekStart.toISOString())
@@ -362,7 +362,8 @@ export default function PayrollPage() {
 
   // Wage calculation — pay_share (per-technician) takes priority over cleaner_pay_expected (booking total)
   const calcWage = (booking: any, staffMember: any, payShareOverride?: number | null) => {
-    const baseResult = calculateBookingWage(booking, staffMember);
+    const serviceName = booking.service?.name || null;
+    const baseResult = calculateBookingWage(booking, staffMember, serviceName);
     // PRIORITY 1: Individual technician pay from team assignments (pay_share)
     if (payShareOverride != null && Number(payShareOverride) > 0) {
       return { calculatedPay: Number(payShareOverride), actualPay: Number(payShareOverride), wageType: 'actual', wageRate: Number(payShareOverride), hoursWorked: baseResult.hoursWorked, isMissingPay: false };
@@ -691,7 +692,7 @@ export default function PayrollPage() {
   return (
     <AdminLayout
       title="Payroll Report"
-      subtitle="Staff wages, profitability, and forecasting"
+      subtitle="Technician pay, profitability, and forecasting"
       actions={
         <Button onClick={exportCSV} className="gap-2">
           <Download className="w-4 h-4" />
@@ -886,15 +887,15 @@ export default function PayrollPage() {
       {/* Tabs */}
       <Tabs defaultValue="summary" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="summary">Staff Summary</TabsTrigger>
-          <TabsTrigger value="details">Booking Details</TabsTrigger>
+          <TabsTrigger value="summary">Technician Summary</TabsTrigger>
+          <TabsTrigger value="details">Job Details</TabsTrigger>
           <TabsTrigger value="settings">Payroll Settings</TabsTrigger>
         </TabsList>
 
         <TabsContent value="summary">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Staff Payroll Summary</CardTitle>
+              <CardTitle>Technician Payroll Summary</CardTitle>
               <Button variant="outline" size="sm" onClick={exportCSV} className="gap-2">
                 <Download className="w-4 h-4" />
                 Export Summary
@@ -907,7 +908,7 @@ export default function PayrollPage() {
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Tax Status</TableHead>
-                    <TableHead className="text-right">Cleans</TableHead>
+                    <TableHead className="text-right">Jobs</TableHead>
                     <TableHead className="text-right">Hours</TableHead>
                     <TableHead className="text-right">Period Pay</TableHead>
                     <TableHead className="text-right">Revenue</TableHead>
@@ -976,7 +977,7 @@ export default function PayrollPage() {
         <TabsContent value="details">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Booking Payroll Details</CardTitle>
+              <CardTitle>Job Payroll Details</CardTitle>
               <Button variant="outline" size="sm" onClick={exportDetailedCSV} className="gap-2">
                 <Download className="w-4 h-4" />
                 Export Details
