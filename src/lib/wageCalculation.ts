@@ -27,6 +27,13 @@ export interface WageStaff {
   base_wage: number | null;
   hourly_rate: number | null;
   default_hours: number | null;
+  pay_type?: string | null;
+  package_pay_rates?: Record<string, number> | null;
+  commission_rate?: number | null;
+}
+
+export interface WageBooking_ServiceInfo {
+  name?: string | null;
 }
 
 export interface WageResult {
