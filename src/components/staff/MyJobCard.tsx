@@ -51,8 +51,9 @@ interface Booking {
 interface Props {
   booking: Booking;
   staffInfo: StaffInfo & { id?: string };
-  onUpdateStatus?: (bookingId: string, status: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'no_show') => void;
+  onUpdateStatus?: (bookingId: string, status: 'pending' | 'confirmed' | 'en_route' | 'in_progress' | 'completed' | 'cancelled' | 'no_show') => void;
   isUpdating?: boolean;
+  onEnRoute?: (bookingId: string) => void;
 }
 
 export function MyJobCard({ booking, staffInfo, onUpdateStatus, isUpdating }: Props) {
