@@ -286,7 +286,7 @@ const handler = async (req: Request): Promise<Response> => {
         : "your scheduled time");
 
       const customerName = payload?.customerName || "there";
-      const serviceName = payload?.serviceName || "cleaning";
+      const serviceName = payload?.serviceName || "detailing";
       const address = payload?.address || "";
 
       const isConfirmation = payload?.messageType === "confirmation";
