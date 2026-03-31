@@ -72,8 +72,8 @@ export default function PortalLoginPage() {
       </Button>
       
       <Seo
-        title="Client Portal | Sign In"
-        description="Sign in to your client portal to view bookings, request appointments, and more."
+        title="We Detail NC — Client Portal"
+        description="Sign in to view your vehicles, service history, and book your next detail."
         canonicalPath="/portal"
       />
 
