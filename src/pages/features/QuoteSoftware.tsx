@@ -73,7 +73,7 @@ export default function QuoteSoftware() {
   return (
     <div className="min-h-screen bg-background">
       <Seo 
-        title="Cleaning Quote Software | Instant Estimates | WE DETAIL NC"
+        title="Detailing Quote Software | Instant Estimates | WE DETAIL NC"
         description="Professional quote software for car detailing businesses. Auto-calculate prices, send branded estimates, and convert leads to bookings. Start free trial."
         canonicalPath="/features/quote-software"
       />
