@@ -178,7 +178,7 @@ export default function PortalRequestPage() {
         },
       }).catch((err) => console.error("SMS notification error:", err));
 
-      toast.success("Booking request submitted! We'll get back to you soon.");
+      toast.success("Service request submitted! We'll get back to you soon.");
       navigate("/portal/dashboard");
     } catch (err: unknown) {
       console.error("Submit error:", err);
