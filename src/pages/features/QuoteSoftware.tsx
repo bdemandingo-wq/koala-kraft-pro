@@ -206,7 +206,7 @@ export default function QuoteSoftware() {
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-primary">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl sm:text-4xl font-bold text-primary-foreground mb-4">
-            Start Winning More Cleaning Contracts
+            Start Winning More Detailing Contracts
           </h2>
           <p className="text-lg text-primary-foreground/80 mb-8">
             Professional quotes in 60 seconds. Start your free trial today.
