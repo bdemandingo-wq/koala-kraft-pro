@@ -419,7 +419,7 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
           customerEmail: email,
           customerPhone: customerPhone || '',
           serviceName: selectedService?.name || 'Detailing Service',
-          homeSize: `${bedrooms || '?'} bed / ${bathrooms || '?'} bath`,
+          homeSize: `Vehicle detail`,
           appointmentDate: format(scheduledDate, 'MMMM d, yyyy'),
           appointmentTime: format(scheduledDate, 'h:mm a'),
           address: address || '',
