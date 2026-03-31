@@ -35,9 +35,9 @@ const statusColors: Record<string, string> = {
 
 const statusLabels: Record<string, string> = {
   pending: 'pending payment',
-  confirmed: 'unserviced',
+  confirmed: 'scheduled',
   in_progress: 'in progress',
-  completed: 'clean completed',
+  completed: 'detail completed',
   cancelled: 'cancelled',
   no_show: 'no show',
 };
