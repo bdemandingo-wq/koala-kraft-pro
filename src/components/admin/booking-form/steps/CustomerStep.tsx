@@ -60,7 +60,6 @@ export function CustomerStep() {
   const [lastBooking, setLastBooking] = useState<LastBookingInfo | null>(null);
   const [loadingLast, setLoadingLast] = useState(false);
   const [editCustomerId, setEditCustomerId] = useState<string | null>(null);
-  const [selectedVehicleId, setSelectedVehicleId] = useState('');
   const [addVehicleOpen, setAddVehicleOpen] = useState(false);
   const [vehicleForm, setVehicleForm] = useState({ year: '', make: '', model: '', color: '', vehicle_type: '', condition: '', notes: '' });
   const [savingVehicle, setSavingVehicle] = useState(false);
