@@ -471,7 +471,7 @@ export default function StaffPage() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Deactivate Staff Member</AlertDialogTitle>
+            <AlertDialogTitle>Deactivate Technician</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to deactivate <strong>{staffToDelete?.name}</strong>?
               <br /><br />
