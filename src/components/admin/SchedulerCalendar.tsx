@@ -69,20 +69,22 @@ const MONTHS = [
 
 const statusColors: Record<string, string> = {
   pending: 'bg-warning/20 text-warning border-warning/30',
-  confirmed: 'bg-primary/20 text-primary border-primary/30',
-  in_progress: 'bg-info/20 text-info border-info/30',
+  confirmed: 'bg-blue-500/20 text-blue-600 border-blue-500/30',
+  en_route: 'bg-cyan-500/20 text-cyan-600 border-cyan-500/30',
+  in_progress: 'bg-amber-400/20 text-amber-500 border-amber-400/30',
   completed: 'bg-success/20 text-success border-success/30',
   cancelled: 'bg-destructive/20 text-destructive border-destructive/30',
   no_show: 'bg-muted text-muted-foreground border-muted',
 };
 
 const statusLabels: Record<string, string> = {
-  pending: 'pending payment',
-  confirmed: 'unserviced',
-  in_progress: 'in progress',
-  completed: 'clean completed',
-  cancelled: 'cancelled',
-  no_show: 'no show',
+  pending: 'Pending',
+  confirmed: 'Scheduled',
+  en_route: 'En Route',
+  in_progress: 'In Progress',
+  completed: 'Completed',
+  cancelled: 'Cancelled',
+  no_show: 'No Show',
 };
 
 // Bolder, more distinct staff colors with higher saturation and contrast
