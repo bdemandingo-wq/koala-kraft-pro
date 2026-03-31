@@ -124,7 +124,7 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     const { error: notifError } = await supabase
-      .from("technician_notifications")
+      .from("cleaner_notifications")
       .insert(notifications);
 
     if (notifError) {

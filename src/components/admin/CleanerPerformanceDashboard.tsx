@@ -80,7 +80,7 @@ export function TechnicianPerformanceDashboard({ bookings, staff }: TechnicianPe
         
         const totalRevenue = completedBookings.reduce((sum, b) => sum + Number(b.total_amount || 0), 0);
         const totalEarnings = completedBookings.reduce((sum, b) => {
-          return sum + Number((b as any).technician_actual_payment || 0);
+          return sum + Number((b as any).cleaner_actual_payment || 0);
         }, 0);
         
         const completionRate = periodBookings.length > 0 

@@ -30,8 +30,8 @@ interface BookingWithWage {
   booking_number: number;
   scheduled_at: string;
   total_amount: number;
-  technician_wage: number | null;
-  technician_wage_type: string | null;
+  cleaner_wage: number | null;
+  cleaner_wage_type: string | null;
   customer: {
     first_name: string;
     last_name: string;
@@ -69,7 +69,7 @@ export function BulkEditTechnicianWages() {
         .from('bookings')
         .select(`
           id, booking_number, scheduled_at, total_amount, 
-          technician_wage, technician_wage_type,
+          cleaner_wage, cleaner_wage_type,
           customer:customers(first_name, last_name),
           service:services(name),
           staff:staff(name, hourly_rate, percentage_rate)
@@ -188,8 +188,8 @@ export function BulkEditTechnicianWages() {
         const jobTotalValue = edit.jobTotal ? parseFloat(edit.jobTotal) : undefined;
 
         const updateData: Record<string, unknown> = {
-          technician_wage_type: edit.type || null,
-          technician_wage: wageValue,
+          cleaner_wage_type: edit.type || null,
+          cleaner_wage: wageValue,
         };
         
         if (jobTotalValue !== undefined) {
@@ -250,8 +250,8 @@ export function BulkEditTechnicianWages() {
       };
     }
     return {
-      type: booking.technician_wage_type || '',
-      value: booking.technician_wage?.toString() || '',
+      type: booking.cleaner_wage_type || '',
+      value: booking.cleaner_wage?.toString() || '',
       isEdited: false,
     };
   };

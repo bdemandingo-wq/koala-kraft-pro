@@ -19,9 +19,9 @@ import { useMemo, useState, useEffect } from 'react';
 import { format, subMonths, isAfter, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProfitMarginReport } from '@/components/admin/ProfitMarginReport';
-import { TechnicianPerformanceDashboard } from '@/components/admin/TechnicianPerformanceDashboard';
+import { TechnicianPerformanceDashboard } from '@/components/admin/CleanerPerformanceDashboard';
 import { ProfitByServiceChart } from '@/components/admin/ProfitByServiceChart';
-import { TechnicianAvailabilityDashboard } from '@/components/admin/TechnicianAvailabilityDashboard';
+import { TechnicianAvailabilityDashboard } from '@/components/admin/CleanerAvailabilityDashboard';
 import { CustomerLifetimeValue } from '@/components/admin/CustomerLifetimeValue';
 import { StaffProductivityMetrics } from '@/components/admin/StaffProductivityMetrics';
 import { RevenueForecasting } from '@/components/admin/RevenueForecasting';
@@ -170,10 +170,10 @@ export default function ReportsPage() {
       // Get all bookings for this staff member within date range
       const staffBookings = filteredBookings.filter(b => b.staff?.id === s.id);
       
-      // Calculate total payment using technician_pay_expected (single source of truth)
+      // Calculate total payment using cleaner_pay_expected (single source of truth)
       const totalPayment = staffBookings.reduce((sum, b) => {
         const bAny = b as any;
-        return sum + Number(bAny.technician_pay_expected || bAny.technician_actual_payment || 0);
+        return sum + Number(bAny.cleaner_pay_expected || bAny.cleaner_actual_payment || 0);
       }, 0);
       
       // Count upcoming cleans (scheduled_at > now and not cancelled/completed)

@@ -144,10 +144,10 @@ export function BookingDetailsDialog({
 
   // Calculate technician pay display
   const getTechnicianPayDisplay = () => {
-    if (!bookingAny.technician_wage) return "Not set";
+    if (!bookingAny.cleaner_wage) return "Not set";
     
-    const wage = bookingAny.technician_wage;
-    const wageType = bookingAny.technician_wage_type || 'hourly';
+    const wage = bookingAny.cleaner_wage;
+    const wageType = bookingAny.cleaner_wage_type || 'hourly';
     
     if (wageType === 'flat') {
       return `$${wage} flat fee`;
@@ -155,7 +155,7 @@ export function BookingDetailsDialog({
       const amount = (booking.total_amount * wage) / 100;
       return `${wage}% ($${amount.toFixed(2)})`;
     } else {
-      const hours = bookingAny.technician_override_hours || (booking.duration / 60);
+      const hours = bookingAny.cleaner_override_hours || (booking.duration / 60);
       const amount = wage * hours;
       return `$${wage}/hr × ${hours}hrs = $${amount.toFixed(2)}`;
     }
@@ -209,10 +209,10 @@ export function BookingDetailsDialog({
                 <dt className="text-xs text-muted-foreground">Technician Pay</dt>
                 <dd className="text-sm font-medium">{getTechnicianPayDisplay()}</dd>
               </div>
-              {bookingAny.technician_actual_payment && (
+              {bookingAny.cleaner_actual_payment && (
                 <div className="sm:col-span-2">
                   <dt className="text-xs text-muted-foreground">Actual Paid to Technician</dt>
-                  <dd className="text-sm font-bold text-green-600">${bookingAny.technician_actual_payment}</dd>
+                  <dd className="text-sm font-bold text-green-600">${bookingAny.cleaner_actual_payment}</dd>
                 </div>
               )}
             </dl>
@@ -291,10 +291,10 @@ export function EditBookingDialog({
       staffId: booking.staff?.id || "__unassigned__",
       notes: booking.notes || "",
       amount: String(booking.total_amount ?? ""),
-      technicianWage: bookingAny.technician_wage ? String(bookingAny.technician_wage) : "",
-      technicianWageType: bookingAny.technician_wage_type || "hourly",
-      technicianOverrideHours: bookingAny.technician_override_hours ? String(bookingAny.technician_override_hours) : "",
-      technicianActualPayment: bookingAny.technician_actual_payment ? String(bookingAny.technician_actual_payment) : "",
+      technicianWage: bookingAny.cleaner_wage ? String(bookingAny.cleaner_wage) : "",
+      technicianWageType: bookingAny.cleaner_wage_type || "hourly",
+      technicianOverrideHours: bookingAny.cleaner_override_hours ? String(bookingAny.cleaner_override_hours) : "",
+      technicianActualPayment: bookingAny.cleaner_actual_payment ? String(bookingAny.cleaner_actual_payment) : "",
     };
   }, [booking]);
 
@@ -360,7 +360,7 @@ export function EditBookingDialog({
       const scheduledAtIso = date && time ? new Date(`${date}T${time}:00`).toISOString() : booking.scheduled_at;
       const parsedAmount = Number(amount);
 
-      // Compute technician_pay_expected snapshot so payroll always reads the correct value
+      // Compute cleaner_pay_expected snapshot so payroll always reads the correct value
       const computedExpectedPay = (() => {
         // If admin entered an explicit actual payment, that IS the expected pay
         if (technicianActualPayment) return parseFloat(technicianActualPayment);
@@ -382,12 +382,12 @@ export function EditBookingDialog({
         staff_id: staffId && staffId !== '__unassigned__' ? staffId : null,
         notes: notes || null,
         total_amount: Number.isFinite(parsedAmount) ? parsedAmount : booking.total_amount,
-        technician_wage: technicianWage ? parseFloat(technicianWage) : null,
-        technician_wage_type: technicianWageType || null,
-        technician_override_hours: technicianOverrideHours ? parseFloat(technicianOverrideHours) : null,
-        technician_actual_payment: technicianActualPayment ? parseFloat(technicianActualPayment) : null,
+        cleaner_wage: technicianWage ? parseFloat(technicianWage) : null,
+        cleaner_wage_type: technicianWageType || null,
+        cleaner_override_hours: technicianOverrideHours ? parseFloat(technicianOverrideHours) : null,
+        cleaner_actual_payment: technicianActualPayment ? parseFloat(technicianActualPayment) : null,
         // CRITICAL: Always persist the pay snapshot so payroll reads the correct value
-        technician_pay_expected: computedExpectedPay,
+        cleaner_pay_expected: computedExpectedPay,
       });
 
       toast({ title: "Saved", description: "Booking updated" });
@@ -587,8 +587,8 @@ export function AdjustPaymentDialog({
   useEffect(() => {
     if (!open || !booking) return;
 
-    // Reset single payment - prefer technician_pay_expected (single source of truth), fall back to technician_actual_payment
-    const initialPay = bookingAny?.technician_pay_expected != null ? bookingAny.technician_pay_expected : bookingAny?.technician_actual_payment;
+    // Reset single payment - prefer cleaner_pay_expected (single source of truth), fall back to cleaner_actual_payment
+    const initialPay = bookingAny?.cleaner_pay_expected != null ? bookingAny.cleaner_pay_expected : bookingAny?.cleaner_actual_payment;
     setSinglePayment(initialPay != null ? String(initialPay) : "");
     setTeamMembers([]);
     setTeamPayments({});
@@ -618,9 +618,9 @@ export function AdjustPaymentDialog({
 
         const payments: Record<string, string> = {};
         members.forEach(m => {
-          // For the primary, prefer technician_actual_payment from booking if pay_share is null
-          if (m.is_primary && m.pay_share == null && bookingAny?.technician_actual_payment != null) {
-            payments[m.id] = String(bookingAny.technician_actual_payment);
+          // For the primary, prefer cleaner_actual_payment from booking if pay_share is null
+          if (m.is_primary && m.pay_share == null && bookingAny?.cleaner_actual_payment != null) {
+            payments[m.id] = String(bookingAny.cleaner_actual_payment);
           } else {
             payments[m.id] = m.pay_share != null ? String(m.pay_share) : "";
           }
@@ -642,12 +642,12 @@ export function AdjustPaymentDialog({
   const isTeamBooking = teamMembers.length >= 2;
 
   const calculateEstimatedPay = () => {
-    const wage = bookingAny?.technician_wage;
+    const wage = bookingAny?.cleaner_wage;
     if (!wage) return null;
-    const wageType = bookingAny?.technician_wage_type || 'hourly';
+    const wageType = bookingAny?.cleaner_wage_type || 'hourly';
     if (wageType === 'flat') return wage;
     if (wageType === 'percentage') return (booking.total_amount * wage) / 100;
-    const hours = bookingAny?.technician_override_hours || (booking.duration / 60);
+    const hours = bookingAny?.cleaner_override_hours || (booking.duration / 60);
     return wage * hours;
   };
 
@@ -676,9 +676,9 @@ export function AdjustPaymentDialog({
           const parsedAmount = primaryAmount ? parseFloat(primaryAmount) : null;
           await updateBooking.mutateAsync({
             id: booking.id,
-            technician_actual_payment: parsedAmount,
-            // CRITICAL: Also update technician_pay_expected so payroll uses the adjusted value
-            technician_pay_expected: parsedAmount,
+            cleaner_actual_payment: parsedAmount,
+            // CRITICAL: Also update cleaner_pay_expected so payroll uses the adjusted value
+            cleaner_pay_expected: parsedAmount,
           });
         }
       } else {
@@ -686,9 +686,9 @@ export function AdjustPaymentDialog({
         const parsedAmount = singlePayment ? parseFloat(singlePayment) : null;
         await updateBooking.mutateAsync({
           id: booking.id,
-          technician_actual_payment: parsedAmount,
-          // CRITICAL: Also update technician_pay_expected so payroll uses the adjusted value
-          technician_pay_expected: parsedAmount,
+          cleaner_actual_payment: parsedAmount,
+          // CRITICAL: Also update cleaner_pay_expected so payroll uses the adjusted value
+          cleaner_pay_expected: parsedAmount,
         });
 
         // CRITICAL: Also update booking_team_assignments.pay_share if a single assignment exists

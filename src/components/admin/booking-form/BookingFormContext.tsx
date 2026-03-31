@@ -464,9 +464,9 @@ export function BookingFormProvider({
     }
     setSelectedExtras(extrasStringArray);
     const bookingAny = booking as any;
-    setTechnicianWage(bookingAny.technician_wage ? String(bookingAny.technician_wage) : '');
-    setTechnicianWageType(bookingAny.technician_wage_type || 'hourly');
-    setTechnicianOverrideHours(bookingAny.technician_override_hours ? String(bookingAny.technician_override_hours) : '');
+    setTechnicianWage(bookingAny.cleaner_wage ? String(bookingAny.cleaner_wage) : '');
+    setTechnicianWageType(bookingAny.cleaner_wage_type || 'hourly');
+    setTechnicianOverrideHours(bookingAny.cleaner_override_hours ? String(bookingAny.cleaner_override_hours) : '');
 
     // Load existing checklist template for this booking
     if (booking.id && organizationId) {

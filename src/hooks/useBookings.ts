@@ -83,11 +83,11 @@ export interface CreateBookingData {
   square_footage?: string;
   extras?: Json;
   is_draft?: boolean;
-  technician_wage?: number | null;
-  technician_wage_type?: string | null;
-  technician_override_hours?: number | null;
-  technician_actual_payment?: number | null;
-  technician_pay_expected?: number | null;
+  cleaner_wage?: number | null;
+  cleaner_wage_type?: string | null;
+  cleaner_override_hours?: number | null;
+  cleaner_actual_payment?: number | null;
+  cleaner_pay_expected?: number | null;
 }
 
 export interface UpdateBookingData {
@@ -114,11 +114,11 @@ export interface UpdateBookingData {
   square_footage?: string | null;
   extras?: Json | null;
   is_draft?: boolean;
-  technician_wage?: number | null;
-  technician_wage_type?: string | null;
-  technician_override_hours?: number | null;
-  technician_actual_payment?: number | null;
-  technician_pay_expected?: number | null;
+  cleaner_wage?: number | null;
+  cleaner_wage_type?: string | null;
+  cleaner_override_hours?: number | null;
+  cleaner_actual_payment?: number | null;
+  cleaner_pay_expected?: number | null;
 }
 
 export interface NewCustomerData {

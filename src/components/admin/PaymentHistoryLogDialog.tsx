@@ -118,7 +118,7 @@ export function PaymentHistoryLogDialog({ open, onOpenChange, booking }: Payment
       }
 
       // Check technician payment
-      const technicianPayment = (booking as any).technician_actual_payment;
+      const technicianPayment = (booking as any).cleaner_actual_payment;
       if (technicianPayment && technicianPayment > 0) {
         paymentEvents.push({
           id: `technician-${booking.id}`,

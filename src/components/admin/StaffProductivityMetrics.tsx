@@ -87,14 +87,14 @@ export function StaffProductivityMetrics({ bookings, staff }: StaffProductivityM
       
       metrics.completedJobs = completedJobs.length;
       metrics.totalRevenue = completedJobs.reduce((sum, b) => sum + Number(b.total_amount || 0), 0);
-      metrics.totalEarnings = completedJobs.reduce((sum, b) => sum + Number((b as any).technician_actual_payment || 0), 0);
+      metrics.totalEarnings = completedJobs.reduce((sum, b) => sum + Number((b as any).cleaner_actual_payment || 0), 0);
       
       // Calculate average job duration (from check-in to check-out if available)
-      const jobsWithTime = completedJobs.filter(b => (b as any).technician_checkin_at && (b as any).technician_checkout_at);
+      const jobsWithTime = completedJobs.filter(b => (b as any).cleaner_checkin_at && (b as any).cleaner_checkout_at);
       if (jobsWithTime.length > 0) {
         const totalMinutes = jobsWithTime.reduce((sum, b) => {
-          const checkin = new Date((b as any).technician_checkin_at);
-          const checkout = new Date((b as any).technician_checkout_at);
+          const checkin = new Date((b as any).cleaner_checkin_at);
+          const checkout = new Date((b as any).cleaner_checkout_at);
           return sum + differenceInMinutes(checkout, checkin);
         }, 0);
         metrics.avgJobDuration = totalMinutes / jobsWithTime.length;
@@ -116,11 +116,11 @@ export function StaffProductivityMetrics({ bookings, staff }: StaffProductivityM
       metrics.cancellationRate = totalJobs > 0 ? (cancelledJobs.length / totalJobs) * 100 : 0;
 
       // On-time rate (jobs started within 15 min of scheduled time)
-      const jobsWithCheckin = completedJobs.filter(b => (b as any).technician_checkin_at);
+      const jobsWithCheckin = completedJobs.filter(b => (b as any).cleaner_checkin_at);
       if (jobsWithCheckin.length > 0) {
         const onTimeJobs = jobsWithCheckin.filter(b => {
           const scheduled = new Date(b.scheduled_at);
-          const checkin = new Date((b as any).technician_checkin_at);
+          const checkin = new Date((b as any).cleaner_checkin_at);
           return Math.abs(differenceInMinutes(checkin, scheduled)) <= 15;
         });
         metrics.onTimeRate = (onTimeJobs.length / jobsWithCheckin.length) * 100;

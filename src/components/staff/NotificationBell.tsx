@@ -33,7 +33,7 @@ export function NotificationBell({ staffId, onViewJob }: Props) {
 
   const fetchNotifications = async () => {
     const { data, error } = await supabase
-      .from('technician_notifications')
+      .from('cleaner_notifications')
       .select('*')
       .eq('staff_id', staffId)
       .order('created_at', { ascending: false })
@@ -57,7 +57,7 @@ export function NotificationBell({ staffId, onViewJob }: Props) {
           {
             event: 'INSERT',
             schema: 'public',
-            table: 'technician_notifications',
+            table: 'cleaner_notifications',
             filter: `staff_id=eq.${staffId}`,
           },
           (payload) => {
@@ -75,7 +75,7 @@ export function NotificationBell({ staffId, onViewJob }: Props) {
 
   const markAsRead = async (notificationId: string) => {
     await supabase
-      .from('technician_notifications')
+      .from('cleaner_notifications')
       .update({ is_read: true })
       .eq('id', notificationId);
 
@@ -87,7 +87,7 @@ export function NotificationBell({ staffId, onViewJob }: Props) {
 
   const markAllAsRead = async () => {
     await supabase
-      .from('technician_notifications')
+      .from('cleaner_notifications')
       .update({ is_read: true })
       .eq('staff_id', staffId)
       .eq('is_read', false);

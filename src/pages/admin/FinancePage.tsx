@@ -146,24 +146,24 @@ export default function FinancePage() {
       const processingFee = (grossAmount * 0.029) + 0.30;
       const netAmount = grossAmount - processingFee;
       
-      // Calculate technician pay - use single source of truth: technician_pay_expected
+      // Calculate technician pay - use single source of truth: cleaner_pay_expected
       const teamPay = teamPaysByBooking.get(b.id);
       let technicianPay = 0;
       if (teamPay != null && teamPay > 0) {
         technicianPay = teamPay;
-      } else if (b.technician_pay_expected != null && Number(b.technician_pay_expected) > 0) {
-        technicianPay = Number(b.technician_pay_expected);
-      } else if (b.technician_actual_payment != null && Number(b.technician_actual_payment) > 0) {
-        technicianPay = Number(b.technician_actual_payment);
-      } else if (b.technician_wage) {
-        const wage = Number(b.technician_wage);
-        const wageType = b.technician_wage_type || 'hourly';
+      } else if (b.cleaner_pay_expected != null && Number(b.cleaner_pay_expected) > 0) {
+        technicianPay = Number(b.cleaner_pay_expected);
+      } else if (b.cleaner_actual_payment != null && Number(b.cleaner_actual_payment) > 0) {
+        technicianPay = Number(b.cleaner_actual_payment);
+      } else if (b.cleaner_wage) {
+        const wage = Number(b.cleaner_wage);
+        const wageType = b.cleaner_wage_type || 'hourly';
         if (wageType === 'flat') {
           technicianPay = wage;
         } else if (wageType === 'percentage') {
           technicianPay = (grossAmount * wage) / 100;
         } else {
-          const hours = b.technician_override_hours || (b.duration / 60);
+          const hours = b.cleaner_override_hours || (b.duration / 60);
           technicianPay = wage * hours;
         }
       }

@@ -43,7 +43,7 @@ function resolveEarnings(
   if (payShare != null && Number(payShare) > 0) {
     return { calculatedPay: Number(payShare), hoursWorked: base.hoursWorked };
   }
-  // calculateBookingWage already prioritizes technician_pay_expected → technician_actual_payment → fallback
+  // calculateBookingWage already prioritizes cleaner_pay_expected → cleaner_actual_payment → fallback
   return { calculatedPay: base.calculatedPay, hoursWorked: base.hoursWorked };
 }
 
@@ -86,8 +86,8 @@ export function TechnicianEarnings({ staffId, staffName }: Props) {
         .from('bookings')
         .select(`
           id, booking_number, scheduled_at, duration, status, total_amount, subtotal, discount_amount,
-          technician_actual_payment, technician_pay_expected, technician_wage, technician_wage_type,
-          technician_checkin_at, technician_checkout_at, technician_override_hours,
+          cleaner_actual_payment, cleaner_pay_expected, cleaner_wage, cleaner_wage_type,
+          cleaner_checkin_at, cleaner_checkout_at, cleaner_override_hours,
           staff_id,
           service:services(name),
           customer:customers(first_name, last_name)
@@ -121,8 +121,8 @@ export function TechnicianEarnings({ staffId, staffName }: Props) {
         .from('bookings')
         .select(`
           id, booking_number, scheduled_at, duration, status, total_amount, subtotal, discount_amount,
-          technician_actual_payment, technician_pay_expected, technician_wage, technician_wage_type,
-          technician_checkin_at, technician_checkout_at, technician_override_hours,
+          cleaner_actual_payment, cleaner_pay_expected, cleaner_wage, cleaner_wage_type,
+          cleaner_checkin_at, cleaner_checkout_at, cleaner_override_hours,
           staff_id,
           service:services(name),
           customer:customers(first_name, last_name)
@@ -178,8 +178,8 @@ export function TechnicianEarnings({ staffId, staffName }: Props) {
         .from('bookings')
         .select(`
           id, booking_number, scheduled_at, duration, status, total_amount, subtotal, discount_amount,
-          technician_actual_payment, technician_pay_expected, technician_wage, technician_wage_type,
-          technician_checkin_at, technician_checkout_at, technician_override_hours,
+          cleaner_actual_payment, cleaner_pay_expected, cleaner_wage, cleaner_wage_type,
+          cleaner_checkin_at, cleaner_checkout_at, cleaner_override_hours,
           service:services(name),
           customer:customers(first_name, last_name)
         `)
@@ -208,8 +208,8 @@ export function TechnicianEarnings({ staffId, staffName }: Props) {
         .from('bookings')
         .select(`
           id, booking_number, scheduled_at, duration, status, total_amount,
-          technician_actual_payment, technician_wage, technician_wage_type,
-          technician_checkin_at, technician_checkout_at, technician_override_hours,
+          cleaner_actual_payment, cleaner_wage, cleaner_wage_type,
+          cleaner_checkin_at, cleaner_checkout_at, cleaner_override_hours,
           staff_id,
           service:services(name),
           customer:customers(first_name, last_name)

@@ -155,7 +155,7 @@ export function BulkEditBookingsDialog({
           updates.total_amount = parseFloat(editPrice);
         }
         if (editTechnicianPay) {
-          updates.technician_pay_expected = parseFloat(editTechnicianPay);
+          updates.cleaner_pay_expected = parseFloat(editTechnicianPay);
         }
         if (editStatus) {
           updates.status = editStatus;
