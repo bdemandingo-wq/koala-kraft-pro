@@ -126,15 +126,18 @@ const defaultSettings: PnLSettings = {
   credit_card_percent: 2.9,
   refunds_percent: 2,
   fixed_overhead_items: [
-    { name: 'Booking Software', monthly: Array(12).fill(0) },
-    { name: 'Insurance', monthly: Array(12).fill(0) },
-    { name: 'Website Hosting', monthly: Array(12).fill(0) },
+    { name: 'CRM Software', monthly: Array(12).fill(0) },
+    { name: 'Insurance (Liability + Vehicle)', monthly: Array(12).fill(0) },
+    { name: 'Website & Domain', monthly: Array(12).fill(0) },
     { name: 'Phone/VoIP', monthly: Array(12).fill(0) },
     { name: 'Accounting Software', monthly: Array(12).fill(0) },
   ],
   variable_overhead_items: [
-    { name: 'Supplies', monthly: Array(12).fill(0) },
-    { name: 'Gas/Mileage', monthly: Array(12).fill(0) },
+    { name: 'Detailing Supplies & Chemicals', monthly: Array(12).fill(0) },
+    { name: 'Ceramic Coating Products', monthly: Array(12).fill(0) },
+    { name: 'Fuel & Vehicle Maintenance', monthly: Array(12).fill(0) },
+    { name: 'Water Supply', monthly: Array(12).fill(0) },
+    { name: 'Equipment Maintenance', monthly: Array(12).fill(0) },
   ],
   recruiting_costs: Array(12).fill(0),
 };
