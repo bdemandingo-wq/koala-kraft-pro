@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, DollarSign, Percent, Clock, Send, CreditCard, FileText } from "lucide-react";
+import { Loader2, DollarSign, Percent, Clock, Send, CreditCard, FileText, MapPin, Navigation, CheckCircle2, Circle } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/lib/supabase";
 
