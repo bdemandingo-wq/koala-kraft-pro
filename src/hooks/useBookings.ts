@@ -68,7 +68,7 @@ export interface CreateBookingData {
   duration: number;
   total_amount: number;
   deposit_paid?: number;
-  status?: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
+  status?: 'pending' | 'confirmed' | 'en_route' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
   payment_status?: 'pending' | 'partial' | 'paid' | 'refunded';
   payment_intent_id?: string;
   notes?: string | null;
