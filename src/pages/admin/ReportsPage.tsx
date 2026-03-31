@@ -313,15 +313,15 @@ export default function ReportsPage() {
           icon={<Calendar className="w-6 h-6" />}
         />
         <StatCard
-          title={`Recurring Cleans (${new Date().getFullYear()})`}
-          value={isTestMode ? 'XX' : recurringCleansCount}
+          title={`Recurring Services (${new Date().getFullYear()})`}
+          value={isTestMode ? 'XX' : recurringServicesCount}
           change={0}
-          changeLabel={isTestMode ? '$X,XXX revenue' : `$${recurringCleansRevenue.toLocaleString()} revenue`}
+          changeLabel={isTestMode ? '$X,XXX revenue' : `$${recurringServicesRevenue.toLocaleString()} revenue`}
           trend="up"
           icon={<Repeat className="w-6 h-6" />}
         />
         <StatCard
-          title="Recurring Plans"
+          title="Maintenance Plans"
           value={isTestMode ? 'XX' : recurringStats.recurringClients}
           icon={<UserCheck className="w-6 h-6" />}
         />
