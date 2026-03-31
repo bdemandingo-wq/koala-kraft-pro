@@ -124,7 +124,10 @@ export default function SchedulerPage() {
                 Pending
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setStatusFilter('confirmed')}>
-                Confirmed
+                Scheduled
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setStatusFilter('en_route')}>
+                En Route
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setStatusFilter('in_progress')}>
                 In Progress
