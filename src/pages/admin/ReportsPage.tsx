@@ -507,6 +507,94 @@ export default function ReportsPage() {
             workingHours={workingHours}
           />
         </TabsContent>
+
+        <TabsContent value="package-performance" className="space-y-6">
+          {(() => {
+            const packageData = serviceStats.map(s => {
+              const returnCustomers = new Set<string>();
+              const allCustomers = new Set<string>();
+              filteredBookings
+                .filter(b => b.service?.name === s.name && b.status === 'completed')
+                .forEach(b => {
+                  const cid = b.customer?.id;
+                  if (!cid) return;
+                  if (allCustomers.has(cid)) returnCustomers.add(cid);
+                  allCustomers.add(cid);
+                });
+              const returnRate = allCustomers.size > 0 ? (returnCustomers.size / allCustomers.size) * 100 : 0;
+              return {
+                ...s,
+                avgTicket: s.count > 0 ? s.revenue / s.count : 0,
+                revenuePercent: totalStats.totalRevenue > 0 ? (s.revenue / totalStats.totalRevenue) * 100 : 0,
+                returnRate,
+              };
+            }).sort((a, b) => b.revenue - a.revenue);
+
+            return (
+              <>
+                <div className="bg-card rounded-xl border border-border p-4">
+                  <h3 className="font-semibold mb-4">Package Performance</h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="text-left border-b border-border">
+                          <th className="pb-3 font-medium text-muted-foreground">Package</th>
+                          <th className="pb-3 font-medium text-muted-foreground text-right">Jobs</th>
+                          <th className="pb-3 font-medium text-muted-foreground text-right">Revenue</th>
+                          <th className="pb-3 font-medium text-muted-foreground text-right">Avg Ticket</th>
+                          <th className="pb-3 font-medium text-muted-foreground text-right">% of Revenue</th>
+                          <th className="pb-3 font-medium text-muted-foreground text-right">Return Rate</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {packageData.map((pkg, idx) => (
+                          <tr key={pkg.name} className="border-b border-border/50 last:border-0">
+                            <td className="py-3 font-medium">{pkg.name}</td>
+                            <td className="py-3 text-right">{isTestMode ? 'X' : pkg.count}</td>
+                            <td className="py-3 text-right font-semibold text-emerald-600">
+                              {isTestMode ? '$XXX' : `$${pkg.revenue.toLocaleString()}`}
+                            </td>
+                            <td className="py-3 text-right">
+                              {isTestMode ? '$XXX' : `$${pkg.avgTicket.toFixed(0)}`}
+                            </td>
+                            <td className="py-3 text-right">{pkg.revenuePercent.toFixed(1)}%</td>
+                            <td className="py-3 text-right">
+                              <Badge variant={pkg.returnRate >= 30 ? 'default' : 'secondary'}>
+                                {pkg.returnRate.toFixed(0)}%
+                              </Badge>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div className="bg-card rounded-xl border border-border p-4">
+                  <h3 className="font-semibold mb-4">Revenue by Package</h3>
+                  <div className="h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={packageData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} />
+                        <YAxis axisLine={false} tickLine={false} tickFormatter={(v) => `$${v}`} />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: 'hsl(var(--popover))',
+                            border: '1px solid hsl(var(--border))',
+                            borderRadius: '8px',
+                          }}
+                          formatter={(value: number) => [`$${value.toLocaleString()}`, 'Revenue']}
+                        />
+                        <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </>
+            );
+          })()}
+        </TabsContent>
       </Tabs>
       </SubscriptionGate>
     </AdminLayout>
