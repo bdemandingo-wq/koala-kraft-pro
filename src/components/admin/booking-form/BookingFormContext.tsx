@@ -662,7 +662,6 @@ export function BookingFormProvider({
       setCardInfo,
       setAppliedDiscount,
       setSelectedChecklistId,
-      selectedVehicleId,
       setSelectedVehicleId,
       
       loadCardInfo,
