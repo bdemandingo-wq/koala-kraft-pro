@@ -133,7 +133,7 @@ const faqs = [
   },
   {
     question: "Is there a CRM specifically designed for detailing companies?",
-    answer: "Yes, WE DETAIL NC is built specifically for car detailing businesses including detailing services, detailing companies, and residential car detailing businesses. It includes industry-specific features like recurring booking management, square footage pricing, and cleaning checklists."
+    answer: "Yes, WE DETAIL NC is built specifically for car detailing businesses including detailing services, detailing companies, and residential car detailing businesses. It includes industry-specific features like recurring booking management, square footage pricing, and service checklists."
   },
   {
     question: "How do I switch from spreadsheets to car detailing business software?",
@@ -463,7 +463,7 @@ export default function CleaningBusinessCRM() {
                     <span className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold">2</span>
                     Consider Your Service Types
                   </h3>
-                  <p className="text-muted-foreground">Recurring residential cleaning needs different features than one-time commercial jobs. Look for software with flexible pricing (per hour, per room, per sqft) and recurring booking management.</p>
+                  <p className="text-muted-foreground">Recurring residential detailing needs different features than one-time commercial jobs. Look for software with flexible pricing (per hour, per room, per sqft) and recurring booking management.</p>
                 </div>
                 <div className="bg-card border border-border rounded-lg p-5">
                   <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">

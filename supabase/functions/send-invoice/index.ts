@@ -147,7 +147,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Create a Stripe Checkout session for this invoice payment
-    const origin = req.headers.get("origin") || "https://wedetailnccleaning.com";
+    const origin = req.headers.get("origin") || "https://wedetailnc.com";
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       line_items: [

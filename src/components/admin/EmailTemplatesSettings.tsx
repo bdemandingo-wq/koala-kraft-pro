@@ -222,7 +222,7 @@ export function EmailTemplatesSettings({
                 id="reminderSubject"
                 value={reminderEmailSubject}
                 onChange={(e) => onUpdate('reminder_email_subject', e.target.value)}
-                placeholder="Reminder: Your Cleaning is Tomorrow - {{booking_number}}"
+                placeholder="Reminder: Your Appointment is Tomorrow - {{booking_number}}"
               />
             </div>
             <div className="space-y-2">

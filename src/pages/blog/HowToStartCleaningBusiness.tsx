@@ -81,7 +81,7 @@ export default function HowToStartCleaningBusiness() {
               The Ultimate Guide on How to Start a Car Detailing Business in 2026
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Starting a car detailing business has never been more accessible. With the right tools—like <strong>automated payroll software for detailing services</strong>, a <strong>car detailing business inventory management tool</strong>, and <strong>real-time messenger for cleaning teams</strong>—you can compete with established companies from day one.
+              Starting a car detailing business has never been more accessible. With the right tools—like <strong>automated payroll software for detailing services</strong>, a <strong>car detailing business inventory management tool</strong>, and <strong>real-time messenger for detailing teams</strong>—you can compete with established companies from day one.
             </p>
           </header>
 
@@ -138,7 +138,7 @@ export default function HowToStartCleaningBusiness() {
                 Getting Started: Business Fundamentals
               </h2>
               <p className="text-muted-foreground mb-6 leading-relaxed">
-                The cleaning industry is booming, with the residential cleaning market expected to reach $40 billion by 2027. Whether you're starting a solo operation or building a team, success comes down to three things: <strong>efficient operations</strong>, <strong>happy customers</strong>, and <strong>motivated staff</strong>.
+                The cleaning industry is booming, with the residential detailing market expected to reach $40 billion by 2027. Whether you're starting a solo operation or building a team, success comes down to three things: <strong>efficient operations</strong>, <strong>happy customers</strong>, and <strong>motivated staff</strong>.
               </p>
               <div className="bg-card border border-border rounded-xl p-6 mb-6">
                 <h3 className="text-lg font-semibold text-foreground mb-4">Essential Steps to Launch</h3>
@@ -213,7 +213,7 @@ export default function HowToStartCleaningBusiness() {
                 How to Handle Staff Payroll
               </h2>
               <p className="text-muted-foreground mb-6 leading-relaxed">
-                Managing payroll for cleaning staff can be complex. Between hourly rates, per-job payments, tips, and contractor vs. employee classifications, there's a lot to track. That's where <strong>automated payroll software for detailing services</strong> becomes essential.
+                Managing payroll for detailing staff can be complex. Between hourly rates, per-job payments, tips, and contractor vs. employee classifications, there's a lot to track. That's where <strong>automated payroll software for detailing services</strong> becomes essential.
               </p>
 
               <h3 className="text-xl font-semibold text-foreground mb-4">Payment Structure Options</h3>
@@ -303,7 +303,7 @@ export default function HowToStartCleaningBusiness() {
                 <h3 className="text-lg font-semibold text-foreground mb-4">What to Track</h3>
                 <div className="grid sm:grid-cols-2 gap-4">
                   {[
-                    { category: "Cleaning Supplies", items: "Multi-surface technicians, glass technician, disinfectants" },
+                    { category: "Detailing Supplies", items: "Multi-surface technicians, glass technician, disinfectants" },
                     { category: "Equipment", items: "Vacuums, mops, buckets, caddies" },
                     { category: "Disposables", items: "Gloves, trash bags, paper towels, rags" },
                     { category: "Specialty Items", items: "Floor polish, stain removers, upholstery technician" }
@@ -328,7 +328,7 @@ export default function HowToStartCleaningBusiness() {
                 Real-Time Team Communication
               </h2>
               <p className="text-muted-foreground mb-6 leading-relaxed">
-                Miscommunication leads to missed appointments, wrong addresses, and frustrated customers. A <strong>real-time messenger for cleaning teams</strong> keeps everyone on the same page.
+                Miscommunication leads to missed appointments, wrong addresses, and frustrated customers. A <strong>real-time messenger for detailing teams</strong> keeps everyone on the same page.
               </p>
 
               <div className="grid md:grid-cols-2 gap-6 mb-8">
@@ -373,7 +373,7 @@ export default function HowToStartCleaningBusiness() {
                 Ready to Start Your Car Detailing Business?
               </h2>
               <p className="text-muted-foreground mb-6 leading-relaxed">
-                Starting a car detailing business in 2026 is easier than ever—if you have the right tools. With WE DETAIL NC, you get everything you need in one platform: smart scheduling, <strong>automated payroll software for detailing services</strong>, a <strong>car detailing business inventory management tool</strong>, lead tracking, and <strong>real-time messenger for cleaning teams</strong>.
+                Starting a car detailing business in 2026 is easier than ever—if you have the right tools. With WE DETAIL NC, you get everything you need in one platform: smart scheduling, <strong>automated payroll software for detailing services</strong>, a <strong>car detailing business inventory management tool</strong>, lead tracking, and <strong>real-time messenger for detailing teams</strong>.
               </p>
               <p className="text-muted-foreground mb-8 leading-relaxed">
                 Stop piecing together multiple tools. Start with a platform built specifically for car detailing businesses.

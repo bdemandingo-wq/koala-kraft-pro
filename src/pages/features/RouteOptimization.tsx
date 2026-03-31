@@ -27,7 +27,7 @@ const benefits = [
   {
     icon: Fuel,
     title: "Reduce Fuel Costs by 25%",
-    description: "Optimized routes mean less driving. Save hundreds on gas every month across your cleaning team."
+    description: "Optimized routes mean less driving. Save hundreds on gas every month across your appointment team."
   },
   {
     icon: Clock,
@@ -124,7 +124,7 @@ export default function RouteOptimization() {
             <span className="text-primary">for Car Detailing Businesses</span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Stop wasting time and money on inefficient routes. We Detail NC automatically plans the fastest routes for your cleaning team. <strong>Save 25% on fuel costs</strong> and fit more jobs into every day.
+            Stop wasting time and money on inefficient routes. We Detail NC automatically plans the fastest routes for your appointment team. <strong>Save 25% on fuel costs</strong> and fit more jobs into every day.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="h-12 px-8" onClick={handleStartFreeTrial}>
@@ -168,7 +168,7 @@ export default function RouteOptimization() {
             How Route Optimization Works
           </h2>
           <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
-            We Detail NC uses AI to plan the most efficient routes for your cleaning team automatically.
+            We Detail NC uses AI to plan the most efficient routes for your appointment team automatically.
           </p>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">

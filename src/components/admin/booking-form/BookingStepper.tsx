@@ -482,7 +482,7 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
       const extrasTextList = selectedExtras && selectedExtras.length > 0 ? selectedExtras.join(', ') : 'None';
 
       const quoteHtml = `
-        <h2>Your Cleaning Quote</h2>
+        <h2>Your Appointment Quote</h2>
         <p>Hi ${customerName},</p>
         <p>Thank you for your interest! Here's your personalized quote:</p>
         <table style="width:100%;border-collapse:collapse;margin:20px 0;">
@@ -499,7 +499,7 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
         body: {
           organizationId,
           to: email,
-          subject: `Your Cleaning Quote - $${quoteAmount.toFixed(2)}`,
+          subject: `Your Appointment Quote - $${quoteAmount.toFixed(2)}`,
           body: quoteHtml,
         },
       });

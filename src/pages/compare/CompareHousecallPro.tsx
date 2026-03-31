@@ -281,7 +281,7 @@ export default function CompareHousecallPro() {
             Ready to Switch from Housecall Pro?
           </h2>
           <p className="text-lg text-primary-foreground/80 mb-8">
-            Start your 2-month free trial today. No credit card required. Get software actually built for cleaning.
+            Start your 2-month free trial today. No credit card required. Get software actually built for detailing.
           </p>
           <Button size="lg" variant="secondary" className="h-12 px-8" onClick={handleStartFreeTrial}>
             Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />

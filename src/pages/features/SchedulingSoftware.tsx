@@ -36,7 +36,7 @@ export default function SchedulingSoftware() {
     <div className="min-h-screen bg-background">
       <Seo 
         title="Car Detailing Business Scheduling Software | We Detail NC"
-        description="Schedule your cleaning team in minutes with We Detail NC. Drag-and-drop scheduling, automatic reminders, and real-time updates for your whole team."
+        description="Schedule your appointment team in minutes with We Detail NC. Drag-and-drop scheduling, automatic reminders, and real-time updates for your whole team."
         canonicalPath="/features/scheduling-software"
         ogImage="/images/wedetailnc-og.png"
         jsonLd={{
@@ -89,7 +89,7 @@ export default function SchedulingSoftware() {
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
             Scheduling Software That Runs<br/>
-            <span className="text-primary">Your Cleaning Operation</span>
+            <span className="text-primary">Your Appointment Operation</span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
             Juggling technicians, clients, and jobs manually is costing you time and money. We Detail NC makes scheduling effortless — assign jobs, manage your team, and handle last-minute changes without the headache.

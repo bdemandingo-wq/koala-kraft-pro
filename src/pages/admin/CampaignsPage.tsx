@@ -386,10 +386,10 @@ export default function CampaignsPage() {
     const map: Record<string, { label: string; description: string; icon: typeof Zap }> = {
       winback_60day: { label: "Win Back Inactive", description: "Fires after 60+ days of no booking", icon: RefreshCw },
       review_request: { label: "Post-Clean Review Request", description: "Fires 30 min after booking marked complete", icon: Star },
-      appointment_reminder: { label: "Appointment Reminder", description: "Fires 24 hours before scheduled cleaning", icon: CalendarDays },
+      appointment_reminder: { label: "Appointment Reminder", description: "Fires 24 hours before scheduled appointment", icon: CalendarDays },
       
-      rebooking_reminder: { label: "Recurring Reminder", description: "Fires 28 days after completed cleaning", icon: Clock },
-      recurring_upsell: { label: "Recurring Service Upsell", description: "Fires 2 hours after completed cleaning", icon: TrendingUp },
+      rebooking_reminder: { label: "Recurring Reminder", description: "Fires 28 days after completed service", icon: Clock },
+      recurring_upsell: { label: "Recurring Service Upsell", description: "Fires 2 hours after completed service", icon: TrendingUp },
     };
     return map[type] || { label: type.replace(/_/g, " "), description: "", icon: Zap };
   };
@@ -651,7 +651,7 @@ export default function CampaignsPage() {
                 <Input
                   value={campaignForm.name}
                   onChange={e => setCampaignForm(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="e.g., Spring Cleaning Promo"
+                  placeholder="e.g., Spring Detail Promo"
                 />
               </div>
 

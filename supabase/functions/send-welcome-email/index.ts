@@ -114,7 +114,7 @@ const handler = async (req: Request): Promise<Response> => {
                       <tr>
                         <td style="padding:12px 0;border-bottom:1px solid #e5e7eb;">
                           <span style="color:${accentColor};font-size:18px;margin-right:10px;">👷</span>
-                          <span style="color:#1f2937;font-size:15px;">Manage your cleaning staff</span>
+                          <span style="color:#1f2937;font-size:15px;">Manage your detailing staff</span>
                         </td>
                       </tr>
                       <tr>

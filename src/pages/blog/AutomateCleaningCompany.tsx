@@ -57,7 +57,7 @@ export default function AutomateCleaningCompany() {
           <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-6">How to Automate Your Detailing Company</h1>
 
           <div className="prose prose-lg max-w-none text-foreground space-y-6">
-            <p className="text-muted-foreground text-lg">If you're spending more time on admin than actual cleaning, it's time to automate. Modern car detailing business software can handle booking, scheduling, invoicing, reminders, and follow-ups — freeing you up to grow your business.</p>
+            <p className="text-muted-foreground text-lg">If you're spending more time on admin than actual detailing, it's time to automate. Modern car detailing business software can handle booking, scheduling, invoicing, reminders, and follow-ups — freeing you up to grow your business.</p>
 
             <h2 className="text-2xl font-bold mt-8">1. Automate Booking & Scheduling</h2>
             <p className="text-muted-foreground">Replace phone tag with online booking. Clients pick their service, date, and time. The system checks availability, assigns a technician, and sends confirmation — all without you touching anything. This alone saves 5-10 hours per week for most car detailing business owners.</p>

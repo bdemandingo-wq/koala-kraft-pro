@@ -71,7 +71,7 @@ function useScrollReveal() {
 }
 
 const cleaningConfig = {
-  jobLabel: "Cleans",
+  jobLabel: "Details",
   staffLabel: "Technicians",
   serviceExamples: ["Full Detail", "Express Detail", "Pre-Sale Detail"],
   dashboardStats: {
@@ -129,7 +129,7 @@ const baseFeatures = [
   {
     icon: Calendar,
     title: "Smart Scheduling & Online Booking",
-    description: "Cleaning business scheduling software that auto-assigns technicians by location, skills, and availability. Let customers book online 24/7."
+    description: "Car detailing scheduling software that auto-assigns technicians by location, skills, and availability. Let customers book online 24/7."
   },
   {
     icon: Users,
@@ -794,7 +794,7 @@ export default function LandingPage() {
               <h4 className="font-semibold text-foreground mb-4">Company</h4>
               <ul className="space-y-3">
                 <li>
-                  <a href="mailto:support@wedetailnccleaning.com" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  <a href="mailto:support@wedetailnc.com" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                     Contact
                   </a>
                 </li>

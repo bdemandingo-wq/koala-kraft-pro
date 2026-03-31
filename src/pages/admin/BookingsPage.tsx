@@ -1276,7 +1276,7 @@ export default function BookingsPage() {
           const formattedTime = format(scheduledDate, 'h:mm a');
           
           // AI-style friendly reminder message
-          const message = `Hey ${customerName}! 👋 Quick reminder: Your ${booking.service?.name || 'cleaning'} is scheduled for ${formattedDate} at ${formattedTime}.\n\n` +
+          const message = `Hey ${customerName}! 👋 Quick reminder: Your ${booking.service?.name || 'detailing'} is scheduled for ${formattedDate} at ${formattedTime}.\n\n` +
             `Any special entry instructions? (Key under mat, gate code, etc.) Just reply to let us know!\n\n` +
             `Looking forward to making your space shine! ✨`;
 

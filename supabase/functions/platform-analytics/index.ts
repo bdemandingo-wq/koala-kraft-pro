@@ -7,7 +7,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const PLATFORM_ADMIN_EMAIL = "support@wedetailnccleaning.com";
+const PLATFORM_ADMIN_EMAIL = "support@wedetailnc.com";
 
 // Safe date formatter
 function safeFormatDate(timestamp: number | undefined | null): string {

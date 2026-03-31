@@ -285,11 +285,11 @@ const handler = async (req: Request): Promise<Response> => {
               <!-- Important Reminders -->
               <h3 style="margin:30px 0 15px 0;color:${primaryColor};font-size:14px;text-transform:uppercase;letter-spacing:1px;font-weight:600;border-bottom:2px solid ${primaryColor};padding-bottom:10px;">Important Reminders</h3>
               <ul style="margin:0 0 25px 0;padding-left:20px;color:#4b5563;font-size:14px;">
-                <li style="margin-bottom:10px;">If you would like to add extras not included in your cleaning, please notify us as quickly as possible.</li>
+                <li style="margin-bottom:10px;">If you would like to add extras not included in your appointment, please notify us as quickly as possible.</li>
                 <li style="margin-bottom:10px;">Communicate your expectations with your technician when they arrive. Please do a review with the technician(s) prior to letting them go.</li>
                 <li style="margin-bottom:10px;">Make sure the technician(s) has space to clean. Children, pets, and other adults in the way can be hazardous.</li>
                 <li style="margin-bottom:10px;">We recommend minimizing clutter as much as possible. The technicians will need access to surfaces to clean.</li>
-                <li style="margin-bottom:10px;"><strong>Please be home when the technicians finish cleaning.</strong> If the client is not home for the final walkthrough, they surrender the right to a reclean.</li>
+                <li style="margin-bottom:10px;"><strong>Please be home when the technicians finish detailing.</strong> If the client is not home for the final walkthrough, they surrender the right to a reclean.</li>
               </ul>
               
               <!-- Pricing & Adjustments -->

@@ -128,7 +128,7 @@ export default function PlatformAnalyticsPage() {
         clientPortalStats: allTimeData?.clientPortalStats,
       };
     },
-    enabled: user?.email === 'support@wedetailnccleaning.com',
+    enabled: user?.email === 'support@wedetailnc.com',
   });
 
 
@@ -186,7 +186,7 @@ export default function PlatformAnalyticsPage() {
   }, []);
 
   // Check if user is platform admin
-  if (user?.email !== 'support@wedetailnccleaning.com') {
+  if (user?.email !== 'support@wedetailnc.com') {
     return (
       <AdminLayout title="Unauthorized" subtitle="You don't have access to this page">
         <Card className="border-destructive/20 bg-destructive/5">

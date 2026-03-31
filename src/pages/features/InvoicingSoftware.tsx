@@ -124,7 +124,7 @@ export default function InvoicingSoftware() {
             <span className="text-primary">for Car Detailing Businesses</span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Stop using spreadsheets and paper invoices. We Detail NC creates professional invoices automatically after every cleaning. <strong>Get paid 2x faster</strong> with online payments and automated reminders.
+            Stop using spreadsheets and paper invoices. We Detail NC creates professional invoices automatically after every detailing. <strong>Get paid 2x faster</strong> with online payments and automated reminders.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="h-12 px-8" onClick={handleStartFreeTrial}>

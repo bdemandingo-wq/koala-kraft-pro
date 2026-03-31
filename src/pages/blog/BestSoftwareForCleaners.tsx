@@ -57,7 +57,7 @@ export default function BestSoftwareForTechnicians() {
           <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-6">Best Software for Car Detailing Business Owners</h1>
 
           <div className="prose prose-lg max-w-none text-foreground space-y-6">
-            <p className="text-muted-foreground text-lg">Choosing the right software can make or break your car detailing business. The best tools handle scheduling, client management, invoicing, and team coordination — so you can focus on cleaning, not paperwork. Here's our 2025 breakdown.</p>
+            <p className="text-muted-foreground text-lg">Choosing the right software can make or break your car detailing business. The best tools handle scheduling, client management, invoicing, and team coordination — so you can focus on detailing, not paperwork. Here's our 2025 breakdown.</p>
 
             <h2 className="text-2xl font-bold mt-8">What to Look For in Car Detailing Business Software</h2>
             <p className="text-muted-foreground">The ideal car detailing business software should offer: online booking, client CRM, team scheduling, automated notifications, invoicing, and reporting. Bonus points for mobile apps, payment processing, and a client portal.</p>
@@ -73,7 +73,7 @@ export default function BestSoftwareForTechnicians() {
             <p className="text-muted-foreground">Good for solo technicians just starting out. Offers basic booking and client management. However, it lacks team management, automation, and advanced reporting.</p>
 
             <h2 className="text-2xl font-bold mt-8">4. Housecall Pro — Best for Larger Teams</h2>
-            <p className="text-muted-foreground">Strong dispatching and GPS tracking for larger operations. Higher price point ($65+/month) and less tailored to residential cleaning workflows.</p>
+            <p className="text-muted-foreground">Strong dispatching and GPS tracking for larger operations. Higher price point ($65+/month) and less tailored to residential detailing workflows.</p>
 
             <h2 className="text-2xl font-bold mt-8">How to Choose the Right Tool</h2>
             <p className="text-muted-foreground">Consider your team size, budget, and growth plans. Solo operators may start with simpler tools, but if you plan to scale, choose software that grows with you. Features like automated reminders, recurring booking, and a client portal will save you hours every week.</p>

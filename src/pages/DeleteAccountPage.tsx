@@ -51,7 +51,7 @@ export default function DeleteAccountPage() {
       toast.success("Your deletion request has been submitted.");
     } catch (err) {
       console.error("Deletion request error:", err);
-      toast.error("Something went wrong. Please email Support@wedetailnccleaning.com directly.");
+      toast.error("Something went wrong. Please email Support@wedetailnc.com directly.");
     } finally {
       setSubmitting(false);
     }
@@ -103,10 +103,10 @@ export default function DeleteAccountPage() {
                 To request deletion of your account and all associated data, you can either fill out the form below or email us directly at:
               </p>
               <a
-                href="mailto:Support@wedetailnccleaning.com"
+                href="mailto:Support@wedetailnc.com"
                 className="inline-block text-primary font-semibold hover:underline text-lg"
               >
-                Support@wedetailnccleaning.com
+                Support@wedetailnc.com
               </a>
               <p className="text-muted-foreground text-sm">
                 Please include the following information:

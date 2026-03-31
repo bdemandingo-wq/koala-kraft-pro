@@ -184,7 +184,7 @@ export default function ServicesPage() {
             <CardHeader>
               <CardTitle>Add-On Extras</CardTitle>
               <p className="text-sm text-muted-foreground">
-                Additional services that can be added to a cleaning. Select a service to edit its add-ons.
+                Additional services that can be added to a detailing. Select a service to edit its add-ons.
               </p>
             </CardHeader>
             <CardContent>

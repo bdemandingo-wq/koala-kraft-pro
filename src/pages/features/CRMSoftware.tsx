@@ -30,7 +30,7 @@ export default function CRMSoftware() {
     <div className="min-h-screen bg-background">
       <Seo 
         title="CRM for Cleaning Companies | Manage Clients & Jobs | We Detail NC"
-        description="We Detail NC CRM keeps all your cleaning clients, job history, and notes in one place. Stay organized and grow your car detailing business faster."
+        description="We Detail NC CRM keeps all your appointment clients, job history, and notes in one place. Stay organized and grow your car detailing business faster."
         canonicalPath="/features/crm"
         ogImage="/images/wedetailnc-og.png"
         jsonLd={{

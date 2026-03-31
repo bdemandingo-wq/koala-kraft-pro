@@ -467,8 +467,8 @@ export default function PaymentIntegrationPage() {
                 <h3 className="font-semibold text-foreground">Need Help?</h3>
                 <p className="text-sm text-muted-foreground mt-1">
                   Having trouble setting up Stripe? Contact us at{" "}
-                  <a href="mailto:support@wedetailnccleaning.com" className="text-primary hover:underline">
-                    support@wedetailnccleaning.com
+                  <a href="mailto:support@wedetailnc.com" className="text-primary hover:underline">
+                    support@wedetailnc.com
                   </a>
                 </p>
               </div>

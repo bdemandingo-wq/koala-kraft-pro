@@ -23,9 +23,9 @@ const blogTopics = [
     "Customer retention strategies for detailing companies"
   ]},
   { category: "Operations", topics: [
-    "Optimizing your cleaning route for maximum efficiency",
-    "Managing a remote cleaning team effectively",
-    "Inventory management for cleaning supplies",
+    "Optimizing your appointment route for maximum efficiency",
+    "Managing a remote detailing team effectively",
+    "Inventory management for detailing supplies",
     "Creating SOPs that ensure consistent quality",
     "Time tracking and productivity tips"
   ]},
@@ -33,7 +33,7 @@ const blogTopics = [
     "Trends shaping the cleaning industry",
     "How technology is changing car detailing businesses",
     "Green cleaning: Meeting client demands",
-    "Commercial vs residential cleaning pros and cons",
+    "Commercial vs residential detailing pros and cons",
     "Insurance and liability for car detailing businesses"
   ]}
 ];

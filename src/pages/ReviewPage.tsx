@@ -194,7 +194,7 @@ export default function ReviewPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4">
             <span className="text-3xl">✨</span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-800">How was your cleaning?</h1>
+          <h1 className="text-2xl font-bold text-gray-800">How was your appointment?</h1>
           <p className="text-gray-600 mt-2">Your feedback helps us serve you better</p>
         </div>
 

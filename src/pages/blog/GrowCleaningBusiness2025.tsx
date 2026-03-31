@@ -72,7 +72,7 @@ export default function GrowCleaningBusiness2025() {
             <p className="text-muted-foreground">Claim and optimize your Google Business Profile. Collect reviews after every job (automate this with your scheduling software). Target keywords like "detailing service near me" and "car detailing [your city]."</p>
 
             <h2 className="text-2xl font-bold mt-8">5. Systemize Your Operations</h2>
-            <p className="text-muted-foreground">Growth stalls when you can't delegate. Document your cleaning checklists, pricing, and communication templates. Use car detailing business scheduling software to assign jobs, track team performance, and manage payroll without micromanaging.</p>
+            <p className="text-muted-foreground">Growth stalls when you can't delegate. Document your service checklists, pricing, and communication templates. Use car detailing business scheduling software to assign jobs, track team performance, and manage payroll without micromanaging.</p>
 
             <h2 className="text-2xl font-bold mt-8">6. Offer Recurring Service Plans</h2>
             <p className="text-muted-foreground">One-time cleanings are feast or famine. Push clients toward weekly, biweekly, or monthly plans with a small discount. Recurring revenue creates predictability and makes your business more valuable.</p>

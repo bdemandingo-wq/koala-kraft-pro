@@ -45,7 +45,7 @@ const prebuiltTemplates: EmailTemplate[] = [
     name: 'Rebooking Reminder',
     category: 'Retention',
     icon: CalendarCheck,
-    subject: 'Time for your next cleaning, {{customer_name}}!',
+    subject: 'Time for your next detailing, {{customer_name}}!',
     body: 'Hi {{customer_name}},\n\nIt\'s been a while since your last {{service_name}}. We\'d love to get you back on the schedule!\n\nRegular cleanings keep your home healthy and save you time. Book now and we\'ll make sure everything sparkles.\n\nSimply reply to this email with your preferred date and time, and we\'ll take care of the rest.\n\nBest,\n{{company_name}} Team',
   },
   {

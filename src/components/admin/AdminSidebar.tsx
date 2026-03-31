@@ -454,8 +454,8 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
           </DndContext>
         )}
 
-        {/* Platform Admin Link - Only visible for support@wedetailnccleaning.com */}
-        {user?.email === 'support@wedetailnccleaning.com' && (
+        {/* Platform Admin Link - Only visible for support@wedetailnc.com */}
+        {user?.email === 'support@wedetailnc.com' && (
           <div className="mt-4 pt-4 border-t border-sidebar-border">
             <Link
               to="/dashboard/platform-analytics"
