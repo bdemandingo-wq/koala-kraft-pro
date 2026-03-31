@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { JobMediaSection } from "@/components/admin/JobMediaSection";
+import { formatDuration, formatTimeRange, getPackageChecklist } from "@/data/detailingPackages";
 
 import { BookingWithDetails, useStaff, useUpdateBooking } from "@/hooks/useBookings";
 import { useOrgId } from "@/hooks/useOrgId";
