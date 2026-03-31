@@ -9,10 +9,11 @@ import { Input } from '@/components/ui/input';
 import {
   Brain, TrendingUp, AlertTriangle, Flame, Target,
   Send, Sparkles, Calendar, Users, ArrowUpRight,
-  RefreshCw, MessageSquare, BarChart3, ShieldAlert
+  RefreshCw, MessageSquare, BarChart3, ShieldAlert,
+  FileText, Car, Wrench, Package
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { format, differenceInDays, startOfMonth, endOfMonth, subMonths, startOfWeek, endOfWeek, addDays } from 'date-fns';
+import { format, differenceInDays, startOfMonth, endOfMonth, subMonths, startOfWeek, endOfWeek } from 'date-fns';
 
 // ─── Count-up hook ───
 function useCountUp(target: number, duration = 1200) {
@@ -39,6 +40,7 @@ const TEAL = '#00E5C3';
 const AMBER = '#FFB547';
 const RED = '#FF4B6E';
 const BLUE = '#4A9EFF';
+const GOLD = '#D4AF37';
 
 const cardStyle: React.CSSProperties = { background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 12 };
 const monoFont = "'DM Mono', monospace";
@@ -51,14 +53,17 @@ export function AIAnalysisCenter() {
   const orgId = organization?.id;
   const [activeTab, setActiveTab] = useState('overview');
 
-  // ─── Data queries ───
+  // ─── Date ranges ───
   const now = new Date();
   const monthStart = startOfMonth(now).toISOString();
   const monthEnd = endOfMonth(now).toISOString();
   const prevMonthStart = startOfMonth(subMonths(now, 1)).toISOString();
   const prevMonthEnd = endOfMonth(subMonths(now, 1)).toISOString();
+  const weekStart = startOfWeek(now, { weekStartsOn: 1 }).toISOString();
+  const weekEnd = endOfWeek(now, { weekStartsOn: 1 }).toISOString();
+  const threeDaysAgo = new Date(Date.now() - 3 * 86400000).toISOString();
 
-  // Revenue this month
+  // ─── Revenue ───
   const { data: revenueData } = useQuery({
     queryKey: ['ai-revenue', orgId],
     queryFn: async () => {
@@ -74,8 +79,113 @@ export function AIAnalysisCenter() {
     enabled: !!orgId,
   });
 
-  // Hot leads
-  const threeDaysAgo = new Date(Date.now() - 3 * 86400000).toISOString();
+  // ─── Revenue by package (service) ───
+  const { data: packageRevenue = [] } = useQuery({
+    queryKey: ['ai-package-revenue', orgId],
+    queryFn: async () => {
+      if (!orgId) return [];
+      const { data: bookings } = await supabase.from('bookings').select('total_amount, service_id').eq('organization_id', orgId).eq('status', 'completed').gte('scheduled_at', monthStart).lte('scheduled_at', monthEnd);
+      const { data: services } = await supabase.from('services').select('id, name').eq('organization_id', orgId);
+      if (!bookings?.length || !services?.length) return [];
+      const svcMap = Object.fromEntries(services.map(s => [s.id, s.name]));
+      const agg: Record<string, { name: string; jobs: number; revenue: number }> = {};
+      bookings.forEach(b => {
+        const name = svcMap[b.service_id || ''] || 'Other';
+        if (!agg[name]) agg[name] = { name, jobs: 0, revenue: 0 };
+        agg[name].jobs++;
+        agg[name].revenue += b.total_amount || 0;
+      });
+      return Object.values(agg).sort((a, b) => b.revenue - a.revenue);
+    },
+    enabled: !!orgId,
+  });
+
+  // ─── Revenue by vehicle type ───
+  const { data: vehicleRevenue = [] } = useQuery({
+    queryKey: ['ai-vehicle-revenue', orgId],
+    queryFn: async () => {
+      if (!orgId) return [];
+      const { data: bookings } = await supabase.from('bookings').select('total_amount, vehicle_id').eq('organization_id', orgId).eq('status', 'completed').gte('scheduled_at', monthStart).not('vehicle_id', 'is', null);
+      if (!bookings?.length) return [];
+      const vehicleIds = [...new Set(bookings.map(b => b.vehicle_id).filter(Boolean))];
+      const { data: vehicles } = await supabase.from('customer_vehicles').select('id, vehicle_type').in('id', vehicleIds as string[]);
+      if (!vehicles?.length) return [];
+      const vMap = Object.fromEntries(vehicles.map(v => [v.id, v.vehicle_type || 'Unknown']));
+      const agg: Record<string, { type: string; jobs: number; revenue: number }> = {};
+      bookings.forEach(b => {
+        const type = vMap[b.vehicle_id || ''] || 'Unknown';
+        if (!agg[type]) agg[type] = { type, jobs: 0, revenue: 0 };
+        agg[type].jobs++;
+        agg[type].revenue += b.total_amount || 0;
+      });
+      return Object.values(agg).sort((a, b) => b.revenue - a.revenue);
+    },
+    enabled: !!orgId,
+  });
+
+  // ─── Staff / technician performance ───
+  const { data: techPerformance = [] } = useQuery({
+    queryKey: ['ai-tech-performance', orgId],
+    queryFn: async () => {
+      if (!orgId) return [];
+      const { data: bookings } = await supabase.from('bookings').select('staff_id, total_amount').eq('organization_id', orgId).eq('status', 'completed').gte('scheduled_at', monthStart);
+      const { data: staff } = await supabase.from('staff').select('id, name').eq('organization_id', orgId);
+      if (!bookings?.length || !staff?.length) return [];
+      const sMap = Object.fromEntries(staff.map(s => [s.id, s.name]));
+      const agg: Record<string, { name: string; jobs: number; revenue: number }> = {};
+      bookings.forEach(b => {
+        const name = sMap[b.staff_id || ''] || 'Unassigned';
+        if (name === 'Unassigned') return;
+        if (!agg[name]) agg[name] = { name, jobs: 0, revenue: 0 };
+        agg[name].jobs++;
+        agg[name].revenue += b.total_amount || 0;
+      });
+      return Object.values(agg).sort((a, b) => b.revenue - a.revenue);
+    },
+    enabled: !!orgId,
+  });
+
+  // ─── Low stock inventory ───
+  const { data: lowStockItems = [] } = useQuery({
+    queryKey: ['ai-low-stock', orgId],
+    queryFn: async () => {
+      if (!orgId) return [];
+      const { data } = await supabase.from('inventory_items').select('product_name, quantity_on_hand, reorder_threshold, unit').eq('organization_id', orgId);
+      return (data || []).filter(i => (i.quantity_on_hand || 0) <= (i.reorder_threshold || 0));
+    },
+    enabled: !!orgId,
+  });
+
+  // ─── Customer stats ───
+  const { data: customerStats } = useQuery({
+    queryKey: ['ai-customer-stats', orgId],
+    queryFn: async () => {
+      if (!orgId) return { total: 0, newThisMonth: 0, newLastMonth: 0 };
+      const { data: all } = await supabase.from('customers').select('id, created_at').eq('organization_id', orgId);
+      const total = all?.length || 0;
+      const newThisMonth = (all || []).filter(c => c.created_at >= monthStart && c.created_at <= monthEnd).length;
+      const newLastMonth = (all || []).filter(c => c.created_at >= prevMonthStart && c.created_at <= prevMonthEnd).length;
+      return { total, newThisMonth, newLastMonth };
+    },
+    enabled: !!orgId,
+  });
+
+  // ─── Jobs completed this month vs last ───
+  const { data: jobStats } = useQuery({
+    queryKey: ['ai-job-stats', orgId],
+    queryFn: async () => {
+      if (!orgId) return { current: 0, previous: 0, cancelled: 0 };
+      const [cur, prev, cancelled] = await Promise.all([
+        supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('organization_id', orgId).eq('status', 'completed').gte('scheduled_at', monthStart).lte('scheduled_at', monthEnd),
+        supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('organization_id', orgId).eq('status', 'completed').gte('scheduled_at', prevMonthStart).lte('scheduled_at', prevMonthEnd),
+        supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('organization_id', orgId).eq('status', 'cancelled').gte('scheduled_at', monthStart).lte('scheduled_at', monthEnd),
+      ]);
+      return { current: cur.count || 0, previous: prev.count || 0, cancelled: cancelled.count || 0 };
+    },
+    enabled: !!orgId,
+  });
+
+  // ─── Hot leads ───
   const { data: hotLeads = [] } = useQuery({
     queryKey: ['ai-hot-leads', orgId],
     queryFn: async () => {
@@ -86,7 +196,22 @@ export function AIAnalysisCenter() {
     enabled: !!orgId,
   });
 
-  // Churn risk customers (last booking > 30 days ago)
+  // ─── Lead stats ───
+  const { data: leadStats } = useQuery({
+    queryKey: ['ai-lead-stats', orgId],
+    queryFn: async () => {
+      if (!orgId) return { total: 0, converted: 0, bySource: {} as Record<string, number> };
+      const { data } = await supabase.from('leads').select('status, source, created_at').eq('organization_id', orgId).gte('created_at', monthStart);
+      const total = data?.length || 0;
+      const converted = (data || []).filter(l => l.status === 'converted' || l.status === 'won').length;
+      const bySource: Record<string, number> = {};
+      (data || []).forEach(l => { bySource[l.source || 'Unknown'] = (bySource[l.source || 'Unknown'] || 0) + 1; });
+      return { total, converted, bySource };
+    },
+    enabled: !!orgId,
+  });
+
+  // ─── Churn risk (60+ days) ───
   const { data: churnCustomers = [] } = useQuery({
     queryKey: ['ai-churn', orgId],
     queryFn: async () => {
@@ -100,7 +225,7 @@ export function AIAnalysisCenter() {
           const days = differenceInDays(now, new Date(lastBooking[0].scheduled_at));
           if (days > 30) {
             const { data: svc } = lastBooking[0].service_id ? await supabase.from('services').select('name').eq('id', lastBooking[0].service_id).single() : { data: null };
-            results.push({ ...c, daysSince: days, serviceName: svc?.name || 'General Cleaning' });
+            results.push({ ...c, daysSince: days, serviceName: svc?.name || 'Detail Service' });
           }
         }
       }
@@ -109,23 +234,7 @@ export function AIAnalysisCenter() {
     enabled: !!orgId,
   });
 
-  // Conversion rate
-  const { data: conversionData } = useQuery({
-    queryKey: ['ai-conversion', orgId],
-    queryFn: async () => {
-      if (!orgId) return { rate: 0, total: 0, converted: 0 };
-      const { data: allLeads } = await supabase.from('leads').select('status, created_at').eq('organization_id', orgId).gte('created_at', monthStart);
-      const total = allLeads?.length || 0;
-      const converted = allLeads?.filter(l => l.status === 'converted' || l.status === 'won').length || 0;
-      return { rate: total > 0 ? Math.round((converted / total) * 100) : 0, total, converted };
-    },
-    enabled: !!orgId,
-  });
-
-  // Weekly booking distribution — current week (Mon–Sun)
-  const weekStart = startOfWeek(now, { weekStartsOn: 1 }).toISOString();
-  const weekEnd = endOfWeek(now, { weekStartsOn: 1 }).toISOString();
-
+  // ─── Weekly booking distribution ───
   const { data: weeklyData = {} as Record<string, number> } = useQuery({
     queryKey: ['ai-weekly', orgId, weekStart],
     queryFn: async () => {
@@ -133,7 +242,7 @@ export function AIAnalysisCenter() {
       const { data } = await supabase.from('bookings').select('scheduled_at').eq('organization_id', orgId).in('status', ['confirmed', 'completed']).gte('scheduled_at', weekStart).lte('scheduled_at', weekEnd);
       const counts: Record<string, number> = { Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0, Sun: 0 };
       (data || []).forEach(b => {
-        const day = format(new Date(b.scheduled_at), 'EEE') as string;
+        const day = format(new Date(b.scheduled_at), 'EEE');
         if (day in counts) counts[day]++;
       });
       return counts;
@@ -141,6 +250,7 @@ export function AIAnalysisCenter() {
     enabled: !!orgId,
   });
 
+  // ─── Derived values ───
   const bestDay = useMemo(() => {
     const entries = Object.entries(weeklyData);
     if (!entries.length) return 'N/A';
@@ -152,7 +262,8 @@ export function AIAnalysisCenter() {
   const revenueChange = prevRevenue > 0 ? Math.round(((revenue - prevRevenue) / prevRevenue) * 100) : 0;
   const hotLeadsCount = hotLeads.length;
   const churnCount = churnCustomers.length;
-  const conversionRate = conversionData?.rate || 0;
+  const conversionRate = leadStats ? (leadStats.total > 0 ? Math.round((leadStats.converted / leadStats.total) * 100) : 0) : 0;
+  const avgTicket = jobStats && jobStats.current > 0 ? Math.round(revenue / jobStats.current) : 0;
 
   // Animated values
   const animRevenue = useCountUp(Math.round(revenue));
@@ -160,15 +271,25 @@ export function AIAnalysisCenter() {
   const animChurn = useCountUp(churnCount);
   const animConversion = useCountUp(conversionRate);
 
-  // Business snapshot for AI calls
+  // ─── Comprehensive business snapshot for AI ───
   const businessSnapshot = useMemo(() => ({
     revenue: Math.round(revenue),
+    prevRevenue: Math.round(prevRevenue),
+    revenueChange,
+    avgTicket,
     hotLeads: hotLeadsCount,
     churnCount,
     conversionRate,
     bestDay,
     weeklyData,
-  }), [revenue, hotLeadsCount, churnCount, conversionRate, bestDay, weeklyData]);
+    packageRevenue: packageRevenue.slice(0, 8),
+    vehicleRevenue: vehicleRevenue.slice(0, 6),
+    techPerformance: techPerformance.slice(0, 6),
+    lowStockItems: lowStockItems.slice(0, 10),
+    customerStats: customerStats || { total: 0, newThisMonth: 0, newLastMonth: 0 },
+    jobStats: jobStats || { current: 0, previous: 0, cancelled: 0 },
+    leadStats: leadStats || { total: 0, converted: 0, bySource: {} },
+  }), [revenue, prevRevenue, revenueChange, avgTicket, hotLeadsCount, churnCount, conversionRate, bestDay, weeklyData, packageRevenue, vehicleRevenue, techPerformance, lowStockItems, customerStats, jobStats, leadStats]);
 
   // ─── AI Insights ───
   const [insights, setInsights] = useState<any[]>([]);
@@ -202,7 +323,7 @@ export function AIAnalysisCenter() {
     setSchedLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('ai-analysis-center', {
-        body: { type: 'scheduling', businessSnapshot: { ...businessSnapshot, staffCount: 'unknown' } },
+        body: { type: 'scheduling', businessSnapshot },
       });
       if (error) throw error;
       setSchedRec(data?.recommendation || '');
@@ -213,6 +334,18 @@ export function AIAnalysisCenter() {
   useEffect(() => {
     if (activeTab === 'scheduling' && !schedRec) fetchScheduleRec();
   }, [activeTab]);
+
+  // ─── Weekly / monthly summary ───
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const generateSummary = useCallback(async (period: 'weekly' | 'monthly') => {
+    setSummaryLoading(true);
+    setActiveTab('ask-ai');
+    const prompt = period === 'weekly'
+      ? `Generate a comprehensive weekly business summary for We Detail NC. Include revenue, jobs completed, top packages, technician performance, lead activity, and inventory status. Use the live data provided.`
+      : `Generate a comprehensive monthly business report for We Detail NC. Include total revenue vs last month, jobs completed, average ticket, top packages by revenue, vehicle type breakdown, technician rankings, customer acquisition, lead conversion, churn risks, and inventory alerts. Provide 3–5 actionable recommendations.`;
+    await sendChat(prompt);
+    setSummaryLoading(false);
+  }, []);
 
   // ─── Ask AI chat ───
   const [chatMessages, setChatMessages] = useState<{ role: string; content: string }[]>([]);
@@ -301,18 +434,78 @@ export function AIAnalysisCenter() {
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [chatMessages]);
 
-  const quickQuestions = [
-    'How can I reduce customer churn this month?',
-    'What pricing changes would increase revenue?',
-    'Which leads should I follow up with first?',
-    'How should I optimize my weekly schedule?',
+  // ─── Quick questions — detailing-specific ───
+  const quickQuestionCategories = [
+    {
+      label: '💰 Revenue',
+      questions: [
+        'What is my most profitable service package this month?',
+        'Which vehicle types generate the most revenue?',
+        'What is my average ticket size vs last month?',
+        'What is my monthly recurring revenue from Maintenance Plan subscribers?',
+      ],
+    },
+    {
+      label: '👥 Customers',
+      questions: [
+        'Who are my top 10 highest value customers?',
+        'Which customers haven\'t booked in 60+ days?',
+        'What is my average customer lifetime value?',
+        'How many new customers this month vs last month?',
+      ],
+    },
+    {
+      label: '🔧 Technicians',
+      questions: [
+        'Which technician completed the most jobs this period?',
+        'Which technician generated the most revenue?',
+        'Compare technician performance side by side.',
+      ],
+    },
+    {
+      label: '📊 Leads',
+      questions: [
+        'How many leads came in this month and from which sources?',
+        'What is my lead-to-booking conversion rate?',
+        'Which lead source generates the highest quality bookings?',
+      ],
+    },
+    {
+      label: '🚗 Operations',
+      questions: [
+        'How many jobs did I complete this month vs last month?',
+        'What days of the week are my busiest?',
+        'How many jobs were cancelled this month?',
+        'What is my average job duration per package?',
+      ],
+    },
+    {
+      label: '📦 Inventory',
+      questions: [
+        'Which products need to be reordered this week?',
+        'What is my average product cost per job?',
+        'Which products am I using the fastest?',
+      ],
+    },
+    {
+      label: '📈 Growth',
+      questions: [
+        'Give me 5 actionable recommendations to grow revenue.',
+        'Which customers should I target for upselling to Ceramic Coating?',
+        'Suggest a midweek promotion to fill empty Tuesday/Wednesday slots.',
+      ],
+    },
   ];
+
+  const [activeQuestionCategory, setActiveQuestionCategory] = useState(0);
 
   const priorityStyles: Record<string, { bg: string; text: string; border: string }> = {
     Urgent: { bg: `${RED}18`, text: RED, border: `${RED}40` },
     Watch: { bg: `${AMBER}18`, text: AMBER, border: `${AMBER}40` },
     Opportunity: { bg: `${TEAL}18`, text: TEAL, border: `${TEAL}40` },
     Pricing: { bg: `${BLUE}18`, text: BLUE, border: `${BLUE}40` },
+    Growth: { bg: `${GOLD}18`, text: GOLD, border: `${GOLD}40` },
+    Inventory: { bg: `${AMBER}18`, text: AMBER, border: `${AMBER}40` },
   };
 
   const maxBookings = Math.max(...Object.values(weeklyData), 1);
@@ -325,9 +518,9 @@ export function AIAnalysisCenter() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {[
           { label: 'Monthly Revenue', value: `$${animRevenue.toLocaleString()}`, sub: revenueChange >= 0 ? `+${revenueChange}% vs last month` : `${revenueChange}% vs last month`, color: TEAL, icon: TrendingUp },
-          { label: 'Hot Leads', value: animHotLeads.toString(), sub: `${hotLeads.filter(l => differenceInDays(now, new Date(l.updated_at)) > 5).length} need follow-up today`, color: AMBER, icon: Flame },
-          { label: 'Churn Risk', value: animChurn.toString(), sub: churnCount > 0 ? `${churnCustomers.filter(c => c.daysSince > 45).length} critical (45+ days)` : 'All customers active', color: RED, icon: ShieldAlert },
-          { label: 'Conversion Rate', value: `${animConversion}%`, sub: `${conversionData?.converted || 0} of ${conversionData?.total || 0} leads this month`, color: BLUE, icon: Target },
+          { label: 'Jobs Completed', value: (jobStats?.current || 0).toString(), sub: `${jobStats?.previous || 0} last month · Avg $${avgTicket}`, color: BLUE, icon: Car },
+          { label: 'Churn Risk (60d+)', value: animChurn.toString(), sub: churnCount > 0 ? `${churnCustomers.filter(c => c.daysSince > 60).length} critical (60+ days)` : 'All customers active', color: RED, icon: ShieldAlert },
+          { label: 'Lead Conversion', value: `${animConversion}%`, sub: `${leadStats?.converted || 0} of ${leadStats?.total || 0} leads · ${Object.keys(leadStats?.bySource || {}).length} sources`, color: AMBER, icon: Target },
         ].map((kpi, i) => (
           <div key={i} style={cardStyle} className="p-5">
             <div className="flex items-center gap-2 mb-3">
@@ -342,9 +535,43 @@ export function AIAnalysisCenter() {
         ))}
       </div>
 
+      {/* ─── Quick action bar ─── */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        <Button
+          size="sm"
+          onClick={fetchInsights}
+          disabled={insightsLoading}
+          style={{ background: `${TEAL}15`, color: TEAL, border: `1px solid ${TEAL}30`, fontFamily: labelFont }}
+          className="hover:opacity-80"
+        >
+          <RefreshCw size={14} className={`mr-1.5 ${insightsLoading ? 'animate-spin' : ''}`} />
+          Refresh Data
+        </Button>
+        <Button
+          size="sm"
+          onClick={() => generateSummary('weekly')}
+          disabled={summaryLoading || chatLoading}
+          style={{ background: `${BLUE}15`, color: BLUE, border: `1px solid ${BLUE}30`, fontFamily: labelFont }}
+          className="hover:opacity-80"
+        >
+          <FileText size={14} className="mr-1.5" />
+          Weekly Summary
+        </Button>
+        <Button
+          size="sm"
+          onClick={() => generateSummary('monthly')}
+          disabled={summaryLoading || chatLoading}
+          style={{ background: `${GOLD}15`, color: GOLD, border: `1px solid ${GOLD}30`, fontFamily: labelFont }}
+          className="hover:opacity-80"
+        >
+          <BarChart3 size={14} className="mr-1.5" />
+          Monthly Report
+        </Button>
+      </div>
+
       {/* ─── Tabs ─── */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-transparent border-b border-white/5 rounded-none w-full justify-start gap-1 px-0 mb-6">
+        <TabsList className="bg-transparent border-b border-white/5 rounded-none w-full justify-start gap-1 px-0 mb-6 flex-wrap">
           {[
             { value: 'overview', label: 'Overview', icon: Brain },
             { value: 'leads', label: 'Leads', icon: Flame },
@@ -373,6 +600,48 @@ export function AIAnalysisCenter() {
               {insightsLoading ? 'Analyzing...' : 'Refresh'}
             </Button>
           </div>
+
+          {/* Low stock alert */}
+          {lowStockItems.length > 0 && (
+            <div style={{ ...cardStyle, borderColor: `${AMBER}40`, marginBottom: 16 }} className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Package size={16} style={{ color: AMBER }} />
+                <span style={{ fontFamily: labelFont, fontSize: 13, fontWeight: 600, color: AMBER }}>Low Stock Alert</span>
+                <Badge variant="outline" className="text-xs" style={{ borderColor: `${AMBER}40`, color: AMBER }}>{lowStockItems.length} items</Badge>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {lowStockItems.slice(0, 5).map((item, i) => (
+                  <span key={i} style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', background: 'rgba(255,255,255,0.04)', padding: '2px 8px', borderRadius: 6 }}>
+                    {item.product_name}: {item.quantity_on_hand} {item.unit}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Package revenue mini table */}
+          {packageRevenue.length > 0 && (
+            <div style={cardStyle} className="p-4 mb-4">
+              <h4 style={{ fontFamily: labelFont, fontSize: 13, fontWeight: 600, marginBottom: 12, color: 'rgba(255,255,255,0.7)' }}>📦 Revenue by Package — This Month</h4>
+              <div className="space-y-2">
+                {packageRevenue.slice(0, 6).map((pkg, i) => {
+                  const totalPkgRev = packageRevenue.reduce((s, p) => s + p.revenue, 0);
+                  const pct = totalPkgRev > 0 ? Math.round((pkg.revenue / totalPkgRev) * 100) : 0;
+                  return (
+                    <div key={i} className="flex items-center justify-between">
+                      <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)' }}>{pkg.name}</span>
+                      <div className="flex items-center gap-4">
+                        <span style={{ fontFamily: monoFont, fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>{pkg.jobs} jobs</span>
+                        <span style={{ fontFamily: monoFont, fontSize: 13, color: TEAL }}>${pkg.revenue.toLocaleString()}</span>
+                        <span style={{ fontFamily: monoFont, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{pct}%</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {insights.length === 0 && !insightsLoading && (
             <div style={cardStyle} className="p-8 text-center">
               <Sparkles size={32} style={{ color: TEAL, margin: '0 auto 12px' }} />
@@ -408,6 +677,22 @@ export function AIAnalysisCenter() {
         {/* ─── Tab 2: Leads ─── */}
         <TabsContent value="leads">
           <h3 style={{ fontFamily: labelFont, fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Hot & Stale Leads</h3>
+
+          {/* Lead source summary */}
+          {leadStats && Object.keys(leadStats.bySource).length > 0 && (
+            <div style={cardStyle} className="p-4 mb-4">
+              <h4 style={{ fontFamily: labelFont, fontSize: 13, fontWeight: 600, marginBottom: 8, color: 'rgba(255,255,255,0.7)' }}>Lead Sources This Month</h4>
+              <div className="flex flex-wrap gap-3">
+                {Object.entries(leadStats.bySource).sort((a, b) => b[1] - a[1]).map(([source, count]) => (
+                  <div key={source} className="flex items-center gap-2">
+                    <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>{source}:</span>
+                    <span style={{ fontFamily: monoFont, fontSize: 13, color: BLUE }}>{count}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {hotLeads.length === 0 ? (
             <div style={cardStyle} className="p-8 text-center">
               <Flame size={32} style={{ color: AMBER, margin: '0 auto 12px' }} />
@@ -417,7 +702,7 @@ export function AIAnalysisCenter() {
             <div className="space-y-2">
               {hotLeads.slice(0, 15).map(lead => {
                 const daysSince = differenceInDays(now, new Date(lead.updated_at));
-                const typeLabel = lead.service_interest || 'Residential';
+                const typeLabel = lead.service_interest || 'Mobile Detail';
                 return (
                   <div key={lead.id} style={cardStyle} className="p-4 flex items-center justify-between">
                     <div>
@@ -431,7 +716,7 @@ export function AIAnalysisCenter() {
                       size="sm"
                       onClick={() => {
                         setActiveTab('ask-ai');
-                        setChatInput(`Draft a follow-up message for ${lead.name}, a ${typeLabel} lead who hasn't been contacted in ${daysSince} days. Make it personal and include a scheduling CTA.`);
+                        setChatInput(`Draft a follow-up message for ${lead.name}, a lead interested in ${typeLabel} who hasn't been contacted in ${daysSince} days. Mention We Detail NC's mobile service in Charlotte NC and include a booking CTA.`);
                       }}
                       style={{ background: `${TEAL}18`, color: TEAL, border: `1px solid ${TEAL}30`, fontSize: 12, fontFamily: labelFont }}
                       className="hover:opacity-80"
@@ -447,7 +732,15 @@ export function AIAnalysisCenter() {
 
         {/* ─── Tab 3: Retention ─── */}
         <TabsContent value="retention">
-          <h3 style={{ fontFamily: labelFont, fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Churn Risk Customers</h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 style={{ fontFamily: labelFont, fontSize: 16, fontWeight: 600 }}>Churn Risk Customers</h3>
+            {customerStats && (
+              <div className="flex gap-4">
+                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>Total: <span style={{ color: TEAL, fontFamily: monoFont }}>{customerStats.total}</span></span>
+                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>New this month: <span style={{ color: BLUE, fontFamily: monoFont }}>{customerStats.newThisMonth}</span></span>
+              </div>
+            )}
+          </div>
           {churnCustomers.length === 0 ? (
             <div style={cardStyle} className="p-8 text-center">
               <Users size={32} style={{ color: TEAL, margin: '0 auto 12px' }} />
@@ -455,8 +748,8 @@ export function AIAnalysisCenter() {
             </div>
           ) : (
             <div className="space-y-2">
-              {churnCustomers.slice(0, 5).map(c => {
-                const barColor = c.daysSince >= 45 ? RED : c.daysSince >= 30 ? AMBER : TEAL;
+              {churnCustomers.map(c => {
+                const barColor = c.daysSince >= 60 ? RED : c.daysSince >= 45 ? AMBER : TEAL;
                 const barWidth = Math.min((c.daysSince / 90) * 100, 100);
                 return (
                   <div key={c.id} style={cardStyle} className="p-4">
@@ -471,7 +764,7 @@ export function AIAnalysisCenter() {
                           size="sm"
                           onClick={() => {
                             setActiveTab('ask-ai');
-                            setChatInput(`Draft a re-engagement message for ${c.first_name} ${c.last_name}, who last booked ${c.daysSince} days ago for ${c.serviceName}. Make it warm and offer a small incentive to rebook.`);
+                            setChatInput(`Draft a re-engagement message for ${c.first_name} ${c.last_name}, who last booked a ${c.serviceName} detail ${c.daysSince} days ago. Mention We Detail NC's mobile service and offer a small incentive to rebook.`);
                           }}
                           style={{ background: `${TEAL}18`, color: TEAL, border: `1px solid ${TEAL}30`, fontSize: 12, fontFamily: labelFont }}
                           className="hover:opacity-80"
@@ -493,11 +786,31 @@ export function AIAnalysisCenter() {
         {/* ─── Tab 4: Scheduling ─── */}
         <TabsContent value="scheduling">
           <h3 style={{ fontFamily: labelFont, fontSize: 16, fontWeight: 600, marginBottom: 16 }}>
-            This Week's Bookings
+            This Week's Jobs
             <span style={{ fontSize: 12, fontWeight: 400, color: 'rgba(255,255,255,0.4)', marginLeft: 8 }}>
               {format(startOfWeek(now, { weekStartsOn: 1 }), 'MMM d')} – {format(endOfWeek(now, { weekStartsOn: 1 }), 'MMM d')}
             </span>
           </h3>
+
+          {/* Technician performance mini-table */}
+          {techPerformance.length > 0 && (
+            <div style={cardStyle} className="p-4 mb-4">
+              <h4 style={{ fontFamily: labelFont, fontSize: 13, fontWeight: 600, marginBottom: 8, color: 'rgba(255,255,255,0.7)' }}>🔧 Technician Performance — This Month</h4>
+              <div className="space-y-2">
+                {techPerformance.map((t, i) => (
+                  <div key={i} className="flex items-center justify-between">
+                    <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)' }}>{t.name}</span>
+                    <div className="flex items-center gap-4">
+                      <span style={{ fontFamily: monoFont, fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>{t.jobs} jobs</span>
+                      <span style={{ fontFamily: monoFont, fontSize: 13, color: TEAL }}>${t.revenue.toLocaleString()}</span>
+                      <span style={{ fontFamily: monoFont, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>Avg ${t.jobs > 0 ? Math.round(t.revenue / t.jobs) : 0}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div style={cardStyle} className="p-5 mb-4">
             <div className="grid grid-cols-7 gap-3" style={{ height: 200 }}>
               {DAYS.map(day => {
@@ -527,9 +840,14 @@ export function AIAnalysisCenter() {
             </div>
           </div>
           <div style={cardStyle} className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Sparkles size={14} style={{ color: TEAL }} />
-              <span style={{ fontFamily: labelFont, fontSize: 13, fontWeight: 600 }}>AI Recommendation</span>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <Sparkles size={14} style={{ color: TEAL }} />
+                <span style={{ fontFamily: labelFont, fontSize: 13, fontWeight: 600 }}>AI Recommendation</span>
+              </div>
+              <Button size="sm" variant="ghost" onClick={fetchScheduleRec} disabled={schedLoading} className="text-white/40 hover:text-white">
+                <RefreshCw size={12} className={schedLoading ? 'animate-spin' : ''} />
+              </Button>
             </div>
             {schedLoading ? (
               <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>Generating recommendation...</p>
@@ -542,8 +860,33 @@ export function AIAnalysisCenter() {
         {/* ─── Tab 5: Ask AI ─── */}
         <TabsContent value="ask-ai">
           <h3 style={{ fontFamily: labelFont, fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Ask We Detail NC AI</h3>
+
+          {/* Category pills */}
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {quickQuestionCategories.map((cat, i) => (
+              <button
+                key={i}
+                onClick={() => setActiveQuestionCategory(i)}
+                style={{
+                  background: activeQuestionCategory === i ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.03)',
+                  border: `1px solid ${activeQuestionCategory === i ? 'rgba(255,255,255,0.2)' : BORDER}`,
+                  borderRadius: 20,
+                  padding: '4px 12px',
+                  fontSize: 12,
+                  color: activeQuestionCategory === i ? '#fff' : 'rgba(255,255,255,0.5)',
+                  fontFamily: labelFont,
+                  cursor: 'pointer',
+                }}
+                className="hover:bg-white/10 transition-colors"
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Quick question chips */}
           <div className="flex flex-wrap gap-2 mb-4">
-            {quickQuestions.map((q, i) => (
+            {quickQuestionCategories[activeQuestionCategory].questions.map((q, i) => (
               <button
                 key={i}
                 onClick={() => sendChat(q)}
@@ -554,11 +897,12 @@ export function AIAnalysisCenter() {
               </button>
             ))}
           </div>
+
           <div style={{ ...cardStyle, maxHeight: 400, overflowY: 'auto', marginBottom: 16 }} className="p-4">
             {chatMessages.length === 0 ? (
               <div className="text-center py-8">
                 <Brain size={32} style={{ color: TEAL, margin: '0 auto 12px' }} />
-                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13 }}>Ask a question or tap a chip above to start</p>
+                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13 }}>Ask a question or tap a category above to start</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -590,7 +934,7 @@ export function AIAnalysisCenter() {
               value={chatInput}
               onChange={e => setChatInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && !e.shiftKey && sendChat(chatInput)}
-              placeholder="Ask about your business..."
+              placeholder="Ask about revenue, customers, technicians, leads, inventory..."
               style={{ background: CARD_BG, border: `1px solid ${BORDER}`, color: '#fff', fontFamily: labelFont }}
               className="flex-1"
             />

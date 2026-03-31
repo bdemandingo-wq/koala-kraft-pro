@@ -14,8 +14,51 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
+    const snap = businessSnapshot || {};
+
+    // Build a rich context string from the snapshot
+    const buildDetailedContext = () => {
+      const parts: string[] = [];
+
+      parts.push(`Monthly Revenue: $${snap.revenue || 0} (${snap.revenueChange >= 0 ? '+' : ''}${snap.revenueChange || 0}% vs last month, prev: $${snap.prevRevenue || 0})`);
+      parts.push(`Average Ticket: $${snap.avgTicket || 0}`);
+      parts.push(`Jobs Completed: ${snap.jobStats?.current || 0} this month, ${snap.jobStats?.previous || 0} last month, ${snap.jobStats?.cancelled || 0} cancelled`);
+      parts.push(`Hot Leads: ${snap.hotLeads || 0}, Churn Risk: ${snap.churnCount || 0}`);
+      parts.push(`Lead Conversion Rate: ${snap.conversionRate || 0}% (${snap.leadStats?.converted || 0} of ${snap.leadStats?.total || 0})`);
+
+      if (snap.leadStats?.bySource && Object.keys(snap.leadStats.bySource).length > 0) {
+        parts.push(`Lead Sources: ${Object.entries(snap.leadStats.bySource).map(([s, c]) => `${s}: ${c}`).join(', ')}`);
+      }
+
+      parts.push(`Best Day: ${snap.bestDay || "N/A"}`);
+      parts.push(`Customers: ${snap.customerStats?.total || 0} total, ${snap.customerStats?.newThisMonth || 0} new this month, ${snap.customerStats?.newLastMonth || 0} new last month`);
+
+      if (snap.packageRevenue?.length) {
+        parts.push(`Revenue by Package: ${snap.packageRevenue.map((p: any) => `${p.name}: ${p.jobs} jobs, $${p.revenue}`).join(' | ')}`);
+      }
+
+      if (snap.vehicleRevenue?.length) {
+        parts.push(`Revenue by Vehicle Type: ${snap.vehicleRevenue.map((v: any) => `${v.type}: ${v.jobs} jobs, $${v.revenue}`).join(' | ')}`);
+      }
+
+      if (snap.techPerformance?.length) {
+        parts.push(`Technician Performance: ${snap.techPerformance.map((t: any) => `${t.name}: ${t.jobs} jobs, $${t.revenue}`).join(' | ')}`);
+      }
+
+      if (snap.lowStockItems?.length) {
+        parts.push(`Low Stock Items: ${snap.lowStockItems.map((i: any) => `${i.product_name}: ${i.quantity_on_hand} ${i.unit}`).join(', ')}`);
+      }
+
+      if (snap.weeklyData && Object.keys(snap.weeklyData).length > 0) {
+        parts.push(`Weekly Distribution: ${Object.entries(snap.weeklyData).map(([d, c]) => `${d}: ${c}`).join(', ')}`);
+      }
+
+      return parts.join('\n');
+    };
+
+    const detailedContext = buildDetailedContext();
+
     if (type === "insights") {
-      const snap = businessSnapshot || {};
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -27,16 +70,16 @@ serve(async (req) => {
           messages: [
             {
               role: "system",
-              content: `You are We Detail NC AI, a business intelligence assistant for detailing companies. Given this business snapshot: Revenue: $${snap.revenue || 0}, Hot Leads: ${snap.hotLeads || 0}, Churn Risk Clients: ${snap.churnCount || 0}, Conversion Rate: ${snap.conversionRate || 0}%, Best Day: ${snap.bestDay || "N/A"}, return exactly 4 JSON objects in an array. Each object: { "priority": "Urgent|Watch|Opportunity|Pricing", "insight": "2-sentence specific business insight with dollar amounts", "confidence": "High confidence|Medium confidence", "action": "short CTA label", "promptText": "full prompt the user can send for help" }. Return only valid JSON array, no markdown, no code fences.`,
+              content: `You are We Detail NC AI, a business intelligence assistant for a mobile car detailing company in Charlotte, NC. Services include Express ($175+), Reset ($225+), Deluxe ($350+), Elite ($480+), Ultimate Protect ($580+), and Maintenance Plans. Here is the live business data:\n\n${detailedContext}\n\nReturn exactly 5 JSON objects in an array. Each: { "priority": "Urgent|Watch|Opportunity|Pricing|Growth|Inventory", "insight": "2-sentence specific business insight referencing actual numbers from the data", "confidence": "High confidence|Medium confidence", "action": "short CTA label", "promptText": "full prompt for follow-up" }. Focus on: revenue by package, vehicle type trends, technician performance gaps, inventory alerts, customer churn/upsell opportunities. Return only valid JSON array, no markdown, no code fences.`,
             },
-            { role: "user", content: "Generate 4 business insights based on the current data." },
+            { role: "user", content: "Generate 5 detailing-specific business insights based on the current data." },
           ],
           tools: [
             {
               type: "function",
               function: {
                 name: "generate_insights",
-                description: "Return 4 business insights as structured data.",
+                description: "Return 5 business insights as structured data for a mobile car detailing business.",
                 parameters: {
                   type: "object",
                   properties: {
@@ -45,7 +88,7 @@ serve(async (req) => {
                       items: {
                         type: "object",
                         properties: {
-                          priority: { type: "string", enum: ["Urgent", "Watch", "Opportunity", "Pricing"] },
+                          priority: { type: "string", enum: ["Urgent", "Watch", "Opportunity", "Pricing", "Growth", "Inventory"] },
                           insight: { type: "string" },
                           confidence: { type: "string", enum: ["High confidence", "Medium confidence"] },
                           action: { type: "string" },
@@ -88,8 +131,22 @@ serve(async (req) => {
     }
 
     if (type === "chat") {
-      const snap = businessSnapshot || {};
-      const systemPrompt = `You are We Detail NC AI, a business intelligence assistant for a detailing company. Here is their current business snapshot: Monthly Revenue: $${snap.revenue || 0}, Hot Leads: ${snap.hotLeads || 0}, Churn Risk Clients: ${snap.churnCount || 0}, Conversion Rate: ${snap.conversionRate || 0}%, Best Day: ${snap.bestDay || "N/A"}. Provide specific, actionable advice referencing their actual numbers. Keep answers concise (under 200 words).`;
+      const systemPrompt = `You are We Detail NC AI, a business intelligence assistant for a mobile car detailing company based in Charlotte, NC. The business offers these packages: Express ($175+), Reset ($225+), Deluxe ($350+), Elite ($480+), Ultimate Protect with Ceramic Coating ($580+), and Maintenance Plans (weekly/biweekly/monthly).
+
+Here is the live business data:
+
+${detailedContext}
+
+You have deep knowledge of:
+- Revenue by package and vehicle type
+- Technician performance and productivity
+- Customer retention and churn patterns
+- Lead conversion by source (Facebook, Website, Referral, etc.)
+- Inventory and supply levels for detailing products
+- Scheduling optimization for mobile operations
+- Upselling strategies (e.g., Express → Ceramic Coating)
+
+Provide specific, actionable advice referencing actual numbers. When suggesting promotions, reference specific packages and pricing. When discussing customers, reference vehicle types and service history. Keep answers concise (under 250 words) but data-driven.`;
 
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
@@ -117,7 +174,6 @@ serve(async (req) => {
     }
 
     if (type === "scheduling") {
-      const snap = businessSnapshot || {};
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -127,8 +183,8 @@ serve(async (req) => {
         body: JSON.stringify({
           model: "google/gemini-3-flash-preview",
           messages: [
-            { role: "system", content: "You are We Detail NC AI. Give one short scheduling recommendation (2-3 sentences) based on the data." },
-            { role: "user", content: `Weekly booking distribution: ${JSON.stringify(snap.weeklyData || {})}. Best day: ${snap.bestDay || "N/A"}. Total staff: ${snap.staffCount || "unknown"}.` },
+            { role: "system", content: "You are We Detail NC AI for a mobile car detailing business in Charlotte NC. Give one specific scheduling recommendation (2-3 sentences) based on the data. Consider drive time between jobs, package durations (Express: 2hr, Reset: 2.5hr, Deluxe: 3.5hr, Elite: 5hr, Ultimate: 6hr), and day-of-week patterns." },
+            { role: "user", content: `Weekly booking distribution: ${JSON.stringify(snap.weeklyData || {})}. Best day: ${snap.bestDay || "N/A"}. Jobs this month: ${snap.jobStats?.current || 0}. Technicians: ${snap.techPerformance?.length || "unknown"}. Top package: ${snap.packageRevenue?.[0]?.name || "unknown"}.` },
           ],
         }),
       });
