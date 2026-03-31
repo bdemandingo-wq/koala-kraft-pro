@@ -500,7 +500,7 @@ export default function StaffPage() {
       <AlertDialog open={permanentDeleteDialogOpen} onOpenChange={setPermanentDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-destructive">Permanently Delete Staff Member</AlertDialogTitle>
+            <AlertDialogTitle className="text-destructive">Permanently Delete Technician</AlertDialogTitle>
             <AlertDialogDescription>
               <strong className="text-destructive">Warning:</strong> This will permanently delete {staffToDelete?.name} from the database. 
               This action cannot be undone. All associated data will be removed.
