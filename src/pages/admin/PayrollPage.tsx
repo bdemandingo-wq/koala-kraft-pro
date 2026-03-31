@@ -362,7 +362,8 @@ export default function PayrollPage() {
 
   // Wage calculation — pay_share (per-technician) takes priority over cleaner_pay_expected (booking total)
   const calcWage = (booking: any, staffMember: any, payShareOverride?: number | null) => {
-    const baseResult = calculateBookingWage(booking, staffMember);
+    const serviceName = booking.service?.name || null;
+    const baseResult = calculateBookingWage(booking, staffMember, serviceName);
     // PRIORITY 1: Individual technician pay from team assignments (pay_share)
     if (payShareOverride != null && Number(payShareOverride) > 0) {
       return { calculatedPay: Number(payShareOverride), actualPay: Number(payShareOverride), wageType: 'actual', wageRate: Number(payShareOverride), hoursWorked: baseResult.hoursWorked, isMissingPay: false };
