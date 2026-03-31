@@ -107,7 +107,7 @@ export default function ReportsPage() {
     });
   }, [bookings, dateRange]);
 
-  const { serviceStats, serviceStatsAllTime, staffStats, monthlyData, totalStats, recurringCleansCount, recurringCleansRevenue } = useMemo(() => {
+  const { serviceStats, serviceStatsAllTime, staffStats, monthlyData, totalStats, recurringServicesCount, recurringServicesRevenue } = useMemo(() => {
     // Build a set of recurring customer IDs for quick lookup
     const recurringCustomerIds = new Set<string>();
     customers.forEach((c: any) => {
