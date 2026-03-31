@@ -378,7 +378,7 @@ const handler = async (req: Request): Promise<Response> => {
         const formattedDate = formatLocalDate(scheduledDate);
         const formattedTime = formatLocalTime(scheduledDate);
         const address = [booking.address, booking.city].filter(Boolean).join(", ");
-        const serviceName = booking.service?.name || "cleaning";
+        const serviceName = booking.service?.name || "detailing";
 
         // --- CLIENT REMINDER ---
         if (interval.send_to_client && booking.customer?.phone) {
