@@ -96,9 +96,9 @@ export default function InventoryPage() {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: Partial<InventoryItem>) => {
+    mutationFn: async (data: Record<string, any>) => {
       if (!organization?.id) throw new Error('No organization found');
-      const { error } = await supabase.from('inventory_items').insert([{ ...data, organization_id: organization.id }]);
+      const { error } = await supabase.from('inventory_items').insert([{ name: data.name, description: data.description, category: data.category, quantity: data.quantity, min_quantity: data.min_quantity, unit: data.unit, cost_per_unit: data.cost_per_unit, supplier: data.supplier, supplier_link: data.supplier_link, organization_id: organization.id }]);
       if (error) throw error;
     },
     onSuccess: () => {
