@@ -32,15 +32,15 @@ export interface IndustryTemplate {
 export const industryTemplates: Record<IndustryType, IndustryTemplate> = {
   "Car Detailing": {
     name: "Car Detailing",
-    description: "Residential detailing services",
-    categories: ["Residential", "Full Detailing", "Specialty"],
+    description: "Professional car detailing services",
+    categories: ["Packages", "Protection", "Maintenance"],
     services: [
-      { name: "Express Detail", description: "Regular maintenance cleaning for your home", price: 120, duration: 120, depositAmount: 25 },
-      { name: "Full Detail", description: "Thorough top-to-bottom cleaning", price: 200, duration: 180, depositAmount: 50 },
-      { name: "Pre-Sale Detail Clean", description: "Complete cleaning for property transitions", price: 280, duration: 240, depositAmount: 75 },
-      { name: "Post Construction Clean", description: "Detailed cleaning after renovations or construction", price: 350, duration: 300, depositAmount: 100 },
-      { name: "Airbnb Turnover", description: "Quick turnaround cleaning for short-term rentals", price: 100, duration: 90, depositAmount: 25 },
-      { name: "Spring Clean", description: "Seasonal deep detailing service", price: 250, duration: 210, depositAmount: 60 },
+      { name: "Express Package", description: "Prewash, wheel/tire/fender cleaning, bug removal, foam bath, door jambs, tires dressed, streak-free windows, interior air blowout, vacuum, streak-free glass", price: 175, duration: 120, depositAmount: 50 },
+      { name: "Reset Package", description: "Everything in Express + trim restored, spray sealant (3-month protection), dash/cup holders/trim cleaned, leather & vinyl cleaned", price: 225, duration: 180, depositAmount: 75 },
+      { name: "Deluxe Package", description: "Everything in Reset + paint decontamination, clay bar treatment, buff-on ceramic wax, leather & vinyl conditioned, steam cleaning", price: 350, duration: 240, depositAmount: 100 },
+      { name: "Elite Package", description: "1-step paint correction (removes 50–70% of swirls) + everything in Express Package", price: 480, duration: 300, depositAmount: 150 },
+      { name: "Ultimate Protect Package", description: "5-year ceramic coating, prewash, emblems & gas cap cleaning, wheel/tire/fender cleaning, bug removal, foam bath, door jambs, tires dressed, streak-free windows & glass", price: 580, duration: 360, depositAmount: 200 },
+      { name: "Maintenance Plan", description: "Weekly, bi-weekly, or monthly options — exterior + interior upkeep, flexible scheduling, priority access", price: 90, duration: 90, depositAmount: 0 },
     ]
   },
   "Office Cleaning": {
