@@ -51,7 +51,7 @@ export function TodayStats({ grossVolume, payments, customers }: TodayStatsProps
             </p>
           </div>
           <div className="text-center px-4">
-            <p className="text-sm text-muted-foreground mb-1">Payments</p>
+            <p className="text-sm text-muted-foreground mb-1">Jobs Paid</p>
             <p className={cn(
               "text-lg md:text-2xl font-bold transition-colors duration-300",
               isPulsing && "text-primary"
