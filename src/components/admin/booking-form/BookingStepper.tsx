@@ -489,7 +489,7 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
         <table style="width:100%;border-collapse:collapse;margin:20px 0;">
           <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666;">Service</td><td style="padding:8px;border-bottom:1px solid #eee;font-weight:600;">${selectedService?.name || 'Detailing Service'}</td></tr>
           ${fullAddr ? `<tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666;">Address</td><td style="padding:8px;border-bottom:1px solid #eee;font-weight:600;">${fullAddr}</td></tr>` : ''}
-          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666;">Home Size</td><td style="padding:8px;border-bottom:1px solid #eee;font-weight:600;">${bedrooms || '?'} bed / ${bathrooms || '?'} bath</td></tr>
+          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666;">Vehicle</td><td style="padding:8px;border-bottom:1px solid #eee;font-weight:600;">Details on file</td></tr>
           <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666;">Extras</td><td style="padding:8px;border-bottom:1px solid #eee;font-weight:600;">${extrasTextList}</td></tr>
           <tr><td style="padding:8px;color:#666;">Estimated Total</td><td style="padding:8px;font-weight:bold;font-size:18px;color:#22c55e;">$${quoteAmount.toFixed(2)}</td></tr>
         </table>

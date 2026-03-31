@@ -147,21 +147,11 @@ export function AvailableJobCard({ booking, staffInfo, onAssign, isAssigning, cl
             <p className="text-xs text-green-600 dark:text-green-400 mt-1">{earnings.type}</p>
           </div>
 
-          {/* Property Details */}
+          {/* Vehicle Details */}
           <div className="flex flex-wrap gap-2 text-xs">
-            {booking.square_footage && (
+            {booking.vehicle && (
               <Badge variant="outline" className="bg-background">
-                {booking.square_footage} sq ft
-              </Badge>
-            )}
-            {booking.bedrooms && (
-              <Badge variant="outline" className="bg-background">
-                {booking.bedrooms} bed
-              </Badge>
-            )}
-            {booking.bathrooms && (
-              <Badge variant="outline" className="bg-background">
-                {booking.bathrooms} bath
+                {[booking.vehicle.year, booking.vehicle.make, booking.vehicle.model].filter(Boolean).join(' ')}
               </Badge>
             )}
           </div>
