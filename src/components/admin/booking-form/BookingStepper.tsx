@@ -286,6 +286,7 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
     staff,
     conflictOverride,
     selectedChecklistId,
+    selectedVehicleId,
   } = useBookingForm();
 
   // Get customer phone for quote SMS
@@ -632,6 +633,7 @@ export function BookingStepper({ booking, onClose, onDuplicate }: BookingStepper
       square_footage: squareFootage || null,
       extras: selectedExtras,
       is_draft: isDraft,
+      vehicle_id: selectedVehicleId || null,
       cleaner_wage: technicianWage ? parseFloat(technicianWage) : null,
       cleaner_wage_type: technicianWageType,
       cleaner_override_hours: technicianOverrideHours ? parseFloat(technicianOverrideHours) : null,

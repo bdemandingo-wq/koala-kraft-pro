@@ -92,6 +92,9 @@ interface BookingFormState {
   
   // Discount
   appliedDiscount: AppliedDiscount | null;
+  
+  // Vehicle
+  selectedVehicleId: string;
 }
 
 interface BookingFormContextType extends BookingFormState {
@@ -156,6 +159,8 @@ interface BookingFormContextType extends BookingFormState {
   setCardInfo: (info: CardInfo | null) => void;
   setAppliedDiscount: (discount: AppliedDiscount | null) => void;
   setSelectedChecklistId: (id: string | null) => void;
+  selectedVehicleId: string;
+  setSelectedVehicleId: (id: string) => void;
   loadCardInfo: (email: string) => Promise<void>;
   resetForm: () => void;
   prefillFromBooking: (booking: BookingWithDetails) => void;
@@ -251,6 +256,10 @@ export function BookingFormProvider({
   
   // Checklist state
   const [selectedChecklistId, setSelectedChecklistId] = useState<string | null>(null);
+  
+  // Vehicle state
+  const [selectedVehicleId, setSelectedVehicleId] = useState('');
+
   
   const selectedService = services.find(s => s.id === selectedServiceId);
   const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
@@ -424,6 +433,7 @@ export function BookingFormProvider({
     setPetOption('no_pets');
     setConflictOverride(false);
     setSelectedChecklistId(null);
+    setSelectedVehicleId('');
   };
 
   const prefillFromBooking = (booking: BookingWithDetails) => {
@@ -596,6 +606,7 @@ export function BookingFormProvider({
       cardInfo,
       loadingCard,
       selectedChecklistId,
+      selectedVehicleId,
       
       customers,
       services,
@@ -654,6 +665,7 @@ export function BookingFormProvider({
       setCardInfo,
       setAppliedDiscount,
       setSelectedChecklistId,
+      setSelectedVehicleId,
       
       loadCardInfo,
       resetForm,

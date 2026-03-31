@@ -88,6 +88,7 @@ export interface CreateBookingData {
   cleaner_override_hours?: number | null;
   cleaner_actual_payment?: number | null;
   cleaner_pay_expected?: number | null;
+  vehicle_id?: string | null;
 }
 
 export interface UpdateBookingData {
@@ -119,6 +120,7 @@ export interface UpdateBookingData {
   cleaner_override_hours?: number | null;
   cleaner_actual_payment?: number | null;
   cleaner_pay_expected?: number | null;
+  vehicle_id?: string | null;
 }
 
 export interface NewCustomerData {

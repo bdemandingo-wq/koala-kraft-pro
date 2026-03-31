@@ -7,11 +7,18 @@ import { Badge } from '@/components/ui/badge';
 import { User, RotateCcw, Loader2 } from 'lucide-react';
 import { CustomerSearchInput } from '@/components/admin/CustomerSearchInput';
 import { EditCustomerDialog } from '@/components/admin/EditCustomerDialog';
+import { VehicleSelectDropdown } from '@/components/admin/VehicleManager';
 import { useBookingForm } from '../BookingFormContext';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useOrgId } from '@/hooks/useOrgId';
 import { toast } from 'sonner';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Car } from 'lucide-react';
 
 interface LastBookingInfo {
   address: string | null;
@@ -45,12 +52,48 @@ export function CustomerStep() {
     setSelectedServiceId,
     setTotalAmount,
     setSquareFootage,
+    selectedVehicleId,
+    setSelectedVehicleId,
   } = useBookingForm();
 
   const { organizationId } = useOrgId();
   const [lastBooking, setLastBooking] = useState<LastBookingInfo | null>(null);
   const [loadingLast, setLoadingLast] = useState(false);
   const [editCustomerId, setEditCustomerId] = useState<string | null>(null);
+  const [addVehicleOpen, setAddVehicleOpen] = useState(false);
+  const [vehicleForm, setVehicleForm] = useState({ year: '', make: '', model: '', color: '', vehicle_type: '', condition: '', notes: '' });
+  const [savingVehicle, setSavingVehicle] = useState(false);
+
+  const VEHICLE_TYPES = ['Sedan', 'Coupe', 'SUV / Crossover', 'Truck', 'Minivan', 'Sports Car', 'Luxury / Exotic', 'RV / Motorhome'];
+  const VEHICLE_CONDITIONS = ['Well Maintained', 'Light Dirt/Wear', 'Moderate — Needs Attention', 'Heavy — Neglected'];
+
+  const handleAddVehicle = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!vehicleForm.make || !selectedCustomerId || !organizationId) return;
+    setSavingVehicle(true);
+    try {
+      const { data, error } = await supabase.from('vehicles').insert({
+        customer_id: selectedCustomerId,
+        organization_id: organizationId,
+        year: vehicleForm.year || null,
+        make: vehicleForm.make || null,
+        model: vehicleForm.model || null,
+        color: vehicleForm.color || null,
+        vehicle_type: vehicleForm.vehicle_type || null,
+        condition: vehicleForm.condition || null,
+        notes: vehicleForm.notes || null,
+      }).select('id').single();
+      if (error) throw error;
+      toast.success('Vehicle added');
+      setSelectedVehicleId(data.id);
+      setAddVehicleOpen(false);
+      setVehicleForm({ year: '', make: '', model: '', color: '', vehicle_type: '', condition: '', notes: '' });
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to add vehicle');
+    } finally {
+      setSavingVehicle(false);
+    }
+  };
 
   // Fetch last booking when customer changes
   useEffect(() => {
@@ -185,6 +228,19 @@ export function CustomerStep() {
                   Loading last booking...
                 </div>
               )}
+
+              {/* Vehicle Selection */}
+              {selectedCustomerId && organizationId && (
+                <div className="mt-4 pt-4 border-t border-border/50">
+                  <VehicleSelectDropdown
+                    customerId={selectedCustomerId}
+                    organizationId={organizationId}
+                    value={selectedVehicleId}
+                    onChange={setSelectedVehicleId}
+                    onAddNew={() => setAddVehicleOpen(true)}
+                  />
+                </div>
+              )}
             </TabsContent>
             
             <TabsContent value="new" className="mt-6 space-y-4">
@@ -240,6 +296,54 @@ export function CustomerStep() {
         onOpenChange={(open) => { if (!open) setEditCustomerId(null); }}
         customer={(customers || []).find(c => c.id === editCustomerId) || null}
       />
+
+      {/* Inline Add Vehicle Dialog */}
+      <Dialog open={addVehicleOpen} onOpenChange={setAddVehicleOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Car className="w-5 h-5" /> Add Vehicle
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleAddVehicle} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2"><Label>Year</Label><Input value={vehicleForm.year} onChange={e => setVehicleForm(f => ({ ...f, year: e.target.value }))} placeholder="2024" /></div>
+              <div className="space-y-2"><Label>Make *</Label><Input value={vehicleForm.make} onChange={e => setVehicleForm(f => ({ ...f, make: e.target.value }))} placeholder="Toyota" /></div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2"><Label>Model</Label><Input value={vehicleForm.model} onChange={e => setVehicleForm(f => ({ ...f, model: e.target.value }))} placeholder="Camry" /></div>
+              <div className="space-y-2"><Label>Color</Label><Input value={vehicleForm.color} onChange={e => setVehicleForm(f => ({ ...f, color: e.target.value }))} placeholder="Black" /></div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Vehicle Type</Label>
+                <Select value={vehicleForm.vehicle_type} onValueChange={v => setVehicleForm(f => ({ ...f, vehicle_type: v }))}>
+                  <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
+                  <SelectContent>{VEHICLE_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Condition</Label>
+                <Select value={vehicleForm.condition} onValueChange={v => setVehicleForm(f => ({ ...f, condition: v }))}>
+                  <SelectTrigger><SelectValue placeholder="Select condition" /></SelectTrigger>
+                  <SelectContent>{VEHICLE_CONDITIONS.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Notes</Label>
+              <Textarea value={vehicleForm.notes} onChange={e => setVehicleForm(f => ({ ...f, notes: e.target.value }))} placeholder="Any special notes..." rows={2} />
+            </div>
+            <div className="flex justify-end gap-3 pt-2">
+              <Button type="button" variant="outline" onClick={() => setAddVehicleOpen(false)}>Cancel</Button>
+              <Button type="submit" disabled={savingVehicle}>
+                {savingVehicle && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Add Vehicle
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

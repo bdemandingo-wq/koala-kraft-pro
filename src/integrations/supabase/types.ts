@@ -939,6 +939,7 @@ export type Database = {
           tax_amount: number | null
           total_amount: number
           updated_at: string
+          vehicle_id: string | null
           zip_code: string | null
         }
         Insert: {
@@ -990,6 +991,7 @@ export type Database = {
           tax_amount?: number | null
           total_amount?: number
           updated_at?: string
+          vehicle_id?: string | null
           zip_code?: string | null
         }
         Update: {
@@ -1041,6 +1043,7 @@ export type Database = {
           tax_amount?: number | null
           total_amount?: number
           updated_at?: string
+          vehicle_id?: string | null
           zip_code?: string | null
         }
         Relationships: [
@@ -1091,6 +1094,13 @@ export type Database = {
             columns: ["staff_id"]
             isOneToOne: false
             referencedRelation: "staff_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
             referencedColumns: ["id"]
           },
         ]
@@ -5991,6 +6001,63 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      vehicles: {
+        Row: {
+          color: string | null
+          condition: string | null
+          created_at: string
+          customer_id: string
+          id: string
+          make: string | null
+          model: string | null
+          notes: string | null
+          organization_id: string
+          vehicle_type: string | null
+          year: string | null
+        }
+        Insert: {
+          color?: string | null
+          condition?: string | null
+          created_at?: string
+          customer_id: string
+          id?: string
+          make?: string | null
+          model?: string | null
+          notes?: string | null
+          organization_id: string
+          vehicle_type?: string | null
+          year?: string | null
+        }
+        Update: {
+          color?: string | null
+          condition?: string | null
+          created_at?: string
+          customer_id?: string
+          id?: string
+          make?: string | null
+          model?: string | null
+          notes?: string | null
+          organization_id?: string
+          vehicle_type?: string | null
+          year?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicles_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       working_hours: {
         Row: {

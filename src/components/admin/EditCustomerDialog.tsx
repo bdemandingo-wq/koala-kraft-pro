@@ -13,7 +13,8 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
-import { Loader2, User, Mail, Phone, ShieldAlert, UserCheck, CreditCard, Link2, Check, Clock, Send } from 'lucide-react';
+import { Loader2, User, Mail, Phone, ShieldAlert, UserCheck, CreditCard, Link2, Check, Clock, Send, Car } from 'lucide-react';
+import { VehicleManager } from '@/components/admin/VehicleManager';
 import { supabase } from '@/lib/supabase';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useOrganization } from '@/contexts/OrganizationContext';
@@ -308,6 +309,10 @@ export function EditCustomerDialog({ open, onOpenChange, customer }: EditCustome
               </p>
             )}
           </div>
+
+          {/* Vehicles */}
+          <Separator />
+          {customer && <VehicleManager customerId={customer.id} />}
 
           {/* Add Card on File */}
           <Separator />
