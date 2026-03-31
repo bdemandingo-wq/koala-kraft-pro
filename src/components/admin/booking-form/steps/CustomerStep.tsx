@@ -58,6 +58,41 @@ export function CustomerStep() {
   const [lastBooking, setLastBooking] = useState<LastBookingInfo | null>(null);
   const [loadingLast, setLoadingLast] = useState(false);
   const [editCustomerId, setEditCustomerId] = useState<string | null>(null);
+  const [selectedVehicleId, setSelectedVehicleId] = useState('');
+  const [addVehicleOpen, setAddVehicleOpen] = useState(false);
+  const [vehicleForm, setVehicleForm] = useState({ year: '', make: '', model: '', color: '', vehicle_type: '', condition: '', notes: '' });
+  const [savingVehicle, setSavingVehicle] = useState(false);
+
+  const VEHICLE_TYPES = ['Sedan', 'Coupe', 'SUV / Crossover', 'Truck', 'Minivan', 'Sports Car', 'Luxury / Exotic', 'RV / Motorhome'];
+  const VEHICLE_CONDITIONS = ['Well Maintained', 'Light Dirt/Wear', 'Moderate — Needs Attention', 'Heavy — Neglected'];
+
+  const handleAddVehicle = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!vehicleForm.make || !selectedCustomerId || !organizationId) return;
+    setSavingVehicle(true);
+    try {
+      const { data, error } = await supabase.from('vehicles').insert({
+        customer_id: selectedCustomerId,
+        organization_id: organizationId,
+        year: vehicleForm.year || null,
+        make: vehicleForm.make || null,
+        model: vehicleForm.model || null,
+        color: vehicleForm.color || null,
+        vehicle_type: vehicleForm.vehicle_type || null,
+        condition: vehicleForm.condition || null,
+        notes: vehicleForm.notes || null,
+      }).select('id').single();
+      if (error) throw error;
+      toast.success('Vehicle added');
+      setSelectedVehicleId(data.id);
+      setAddVehicleOpen(false);
+      setVehicleForm({ year: '', make: '', model: '', color: '', vehicle_type: '', condition: '', notes: '' });
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to add vehicle');
+    } finally {
+      setSavingVehicle(false);
+    }
+  };
 
   // Fetch last booking when customer changes
   useEffect(() => {
