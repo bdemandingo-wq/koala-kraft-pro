@@ -141,7 +141,7 @@ export function AddStaffDialog({ open, onOpenChange }: AddStaffDialogProps) {
     setShowCredentials(false);
     setCredentials(null);
     setCopied(false);
-    setFormData({ name: '', email: '', phone: '', password: '', hourly_rate: '', percentage_rate: '', default_hours: '5', tax_classification: 'w2' });
+    setFormData({ name: '', email: '', phone: '', password: '', hourly_rate: '', percentage_rate: '', default_hours: '5', tax_classification: 'w2', pay_type: 'per_job' });
     onOpenChange(false);
   };
 
