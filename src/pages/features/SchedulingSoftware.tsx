@@ -14,7 +14,7 @@ const benefits = [
   { icon: Bell, title: "Automatic Reminders", description: "Your team and clients get SMS/email reminders before appointments. Reduce no-shows dramatically." },
   { icon: CalendarCheck, title: "Handle Changes in Seconds", description: "Reschedules and cancellations handled instantly. No more frantic phone calls." },
   { icon: Calendar, title: "Full Week or Month View", description: "View your full week or month at a glance. Know exactly what's happening across your business." },
-  { icon: Repeat, title: "Recurring Job Automation", description: "Set up weekly, bi-weekly, or monthly recurring cleans. They're scheduled automatically forever." },
+  { icon: Repeat, title: "Recurring Job Automation", description: "Set up weekly, bi-weekly, or monthly maintenance plans. They're scheduled automatically forever." },
 ];
 
 const results = [
