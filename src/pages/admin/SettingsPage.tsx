@@ -1029,6 +1029,11 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
 
+        {/* Facebook Integration */}
+        <TabsContent value="facebook" className="space-y-6">
+          <FacebookIntegrationCard organizationId={organization?.id || ''} />
+        </TabsContent>
+
         {/* Security */}
         <TabsContent value="security" className="space-y-6">
           <Card>
