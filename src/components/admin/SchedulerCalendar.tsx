@@ -1128,7 +1128,8 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
                   )}
                 </div>
               </div>
-            )}
+              );
+            })()}
           </DialogContent>
         </Dialog>
 
