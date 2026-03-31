@@ -124,7 +124,7 @@ const getStaffColor = (staffId: string | null | undefined, staffList: { id: stri
 interface SchedulerCalendarProps {
   searchTerm?: string;
   onSearchChange?: (term: string) => void;
-  statusFilter?: 'all' | 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled';
+  statusFilter?: string;
   staffFilter?: string | null;
 }
 
