@@ -238,7 +238,7 @@ export default function CampaignsPage() {
       const { data, error } = await supabase.functions.invoke("generate-campaign-templates", {
         body: {
           companyName: businessSettings?.company_name || "Your Detailing Service",
-          serviceType: "detailing",
+          serviceType: "car detailing",
           audience: campaignForm.audience,
           tone: aiTone,
           timestamp: Date.now(),
