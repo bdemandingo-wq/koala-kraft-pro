@@ -499,94 +499,13 @@ export default function PublicBookingPage() {
           {/* Step 1: Select Service & Square Footage */}
           {step === 1 && (
             <div className="animate-fade-in space-y-6">
-              {/* Square Footage Selection */}
-              {displaySettings.show_sqft_on_booking && (
-                <div>
-                  <h2 className="text-2xl font-bold mb-2">Home Size</h2>
-                  <p className="text-muted-foreground mb-4">Select your home's square footage</p>
-                  <Card>
-                    <CardContent className="p-5">
-                      <div className="flex items-center gap-3 mb-4">
-                        <Ruler className="w-5 h-5 text-primary" />
-                        <Label className="text-base">Square Footage</Label>
-                      </div>
-                      <Select 
-                        value={selectedSqFtIndex?.toString() ?? ''} 
-                        onValueChange={(val) => setSelectedSqFtIndex(parseInt(val))}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select your home size" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {squareFootageRanges.map((range, index) => (
-                            <SelectItem key={index} value={index.toString()}>
-                              {range.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </CardContent>
-                  </Card>
-                </div>
-              )}
-
-              {/* Bed & Bath Selection */}
-              {displaySettings.show_bed_bath_on_booking && bedroomPricing.length > 0 && (
-                <div>
-                  <h2 className="text-2xl font-bold mb-2">Bedrooms & Bathrooms</h2>
-                  <p className="text-muted-foreground mb-4">Select your home layout</p>
-                  <Card>
-                    <CardContent className="p-5 space-y-4">
-                      <div>
-                        <Label className="text-base mb-2 block">Bedrooms</Label>
-                        <div className="flex flex-wrap gap-2">
-                          {[...new Set(bedroomPricing.map(bp => bp.bedrooms))].sort((a, b) => a - b).map(bed => (
-                            <Button
-                              key={bed}
-                              type="button"
-                              variant={selectedBedrooms === String(bed) ? 'default' : 'outline'}
-                              onClick={() => setSelectedBedrooms(String(bed))}
-                              className="min-w-[60px]"
-                            >
-                              {bed}
-                            </Button>
-                          ))}
-                        </div>
-                      </div>
-                      <div>
-                        <Label className="text-base mb-2 block">Bathrooms</Label>
-                        <div className="flex flex-wrap gap-2">
-                          {[...new Set(bedroomPricing
-                            .filter(bp => !selectedBedrooms || bp.bedrooms === Number(selectedBedrooms))
-                            .map(bp => bp.bathrooms)
-                          )].sort((a, b) => a - b).map(bath => (
-                            <Button
-                              key={bath}
-                              type="button"
-                              variant={selectedBathrooms === String(bath) ? 'default' : 'outline'}
-                              onClick={() => setSelectedBathrooms(String(bath))}
-                              className="min-w-[60px]"
-                            >
-                              {bath}
-                            </Button>
-                          ))}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              )}
-
-              {/* Service Selection */}
+              {/* Service Package Selection */}
               <div>
-                <h2 className="text-2xl font-bold mb-2">Select a Service</h2>
-                <p className="text-muted-foreground mb-4">Choose the service type you need</p>
+                <h2 className="text-2xl font-bold mb-2">Select a Package</h2>
+                <p className="text-muted-foreground mb-4">Choose the detailing package that fits your needs</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {services.map((svc) => {
-                    const price = selectedSqFtIndex !== null 
-                      ? (svc.prices[selectedSqFtIndex] || svc.minimumPrice)
-                      : svc.minimumPrice;
-                    
+                    const price = svc.minimumPrice;
                     return (
                       <Card
                         key={svc.id}
@@ -610,11 +529,8 @@ export default function PublicBookingPage() {
                               <div className="flex items-center gap-2 mt-3">
                                 <div className="flex items-center gap-1 text-lg font-bold text-success">
                                   <DollarSign className="w-5 h-5" />
-                                  {price}
+                                  Starting at ${price}
                                 </div>
-                                {selectedSqFtIndex === null && (
-                                  <span className="text-xs text-muted-foreground">(min price)</span>
-                                )}
                               </div>
                             </div>
                             {selectedService === svc.id && (
@@ -628,7 +544,95 @@ export default function PublicBookingPage() {
                     );
                   })}
                 </div>
+                <p className="text-sm text-muted-foreground mt-3 italic">
+                  💡 Prices vary based on vehicle size and condition. Send a few photos for an exact quote.
+                </p>
               </div>
+
+              {/* Vehicle Information */}
+              {selectedService && (
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Vehicle Information</h2>
+                  <p className="text-muted-foreground mb-4">Tell us about your vehicle</p>
+                  <Card>
+                    <CardContent className="p-5 space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Vehicle Type *</Label>
+                          <Select value={vehicleType} onValueChange={setVehicleType}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select vehicle type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {['Sedan', 'Coupe', 'SUV / Crossover', 'Truck', 'Minivan', 'Sports Car', 'Luxury / Exotic', 'RV / Motorhome'].map(v => (
+                                <SelectItem key={v} value={v}>{v}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Vehicle Condition *</Label>
+                          <Select value={vehicleCondition} onValueChange={setVehicleCondition}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select condition" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {['Well Maintained', 'Light Dirt/Wear', 'Moderate — Needs Attention', 'Heavy — Neglected'].map(c => (
+                                <SelectItem key={c} value={c}>{c}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="vehicleMake">Vehicle Make *</Label>
+                          <Input id="vehicleMake" placeholder="e.g. Toyota, BMW" value={vehicleMake} onChange={(e) => setVehicleMake(e.target.value)} />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="vehicleModel">Vehicle Model *</Label>
+                          <Input id="vehicleModel" placeholder="e.g. Camry, X5" value={vehicleModel} onChange={(e) => setVehicleModel(e.target.value)} />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="vehicleYear">Vehicle Year</Label>
+                          <Input id="vehicleYear" type="number" placeholder="e.g. 2022" value={vehicleYear} onChange={(e) => setVehicleYear(e.target.value)} />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="vehicleColor">Vehicle Color</Label>
+                          <Input id="vehicleColor" placeholder="e.g. Black, White" value={vehicleColor} onChange={(e) => setVehicleColor(e.target.value)} />
+                        </div>
+                      </div>
+
+                      {/* Service Location */}
+                      <div className="space-y-3 pt-2">
+                        <Label className="text-base">Service Location *</Label>
+                        <div className="flex gap-4">
+                          <label className={cn(
+                            "flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all flex-1",
+                            serviceLocation === 'mobile' ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
+                          )}>
+                            <input type="radio" name="serviceLocation" value="mobile" checked={serviceLocation === 'mobile'} onChange={() => setServiceLocation('mobile')} className="sr-only" />
+                            <MapPin className="w-5 h-5 text-primary" />
+                            <div>
+                              <p className="font-medium">Mobile (We Come to You)</p>
+                              <p className="text-xs text-muted-foreground">We detail at your location</p>
+                            </div>
+                          </label>
+                          <label className={cn(
+                            "flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all flex-1",
+                            serviceLocation === 'shop' ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
+                          )}>
+                            <input type="radio" name="serviceLocation" value="shop" checked={serviceLocation === 'shop'} onChange={() => setServiceLocation('shop')} className="sr-only" />
+                            <MapPin className="w-5 h-5 text-primary" />
+                            <div>
+                              <p className="font-medium">Shop Drop-Off</p>
+                              <p className="text-xs text-muted-foreground">Drop off at our shop</p>
+                            </div>
+                          </label>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )
 
               {/* Extras */}
               {displaySettings.show_addons_on_booking && service && !service.name.toLowerCase().includes('deep') && (
