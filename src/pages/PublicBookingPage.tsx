@@ -307,7 +307,12 @@ export default function PublicBookingPage() {
             duration: service?.duration || 120,
             total_amount: calculateTotal(),
             frequency: selectedFrequency,
-            notes: customerInfo.notes || undefined,
+            notes: [
+                vehicleType && `Vehicle: ${vehicleYear ? vehicleYear + ' ' : ''}${vehicleMake} ${vehicleModel}${vehicleColor ? ' (' + vehicleColor + ')' : ''} — ${vehicleType}`,
+                vehicleCondition && `Condition: ${vehicleCondition}`,
+                serviceLocation && `Location: ${serviceLocation === 'mobile' ? 'Mobile (We Come to You)' : 'Shop Drop-Off'}`,
+                customerInfo.notes,
+              ].filter(Boolean).join('\n') || undefined,
             extras: selectedExtras.length > 0 ? { names: extraNames } : undefined,
             organization_id: organizationId || undefined,
             organization_slug: orgSlug || undefined,
