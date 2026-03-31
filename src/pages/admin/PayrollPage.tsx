@@ -221,7 +221,7 @@ export default function PayrollPage() {
       if (!organizationId) return [];
       const { data, error } = await supabase
         .from('staff')
-        .select('*')
+        .select('*, package_pay_rates, commission_rate, pay_type')
         .eq('organization_id', organizationId)
         .eq('is_active', true);
       if (error) throw error;
