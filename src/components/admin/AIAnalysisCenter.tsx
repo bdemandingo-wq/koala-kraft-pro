@@ -150,8 +150,8 @@ export function AIAnalysisCenter() {
     queryKey: ['ai-low-stock', orgId],
     queryFn: async () => {
       if (!orgId) return [];
-      const { data } = await supabase.from('inventory_items').select('product_name, quantity_on_hand, reorder_threshold, unit').eq('organization_id', orgId);
-      return (data || []).filter(i => (i.quantity_on_hand || 0) <= (i.reorder_threshold || 0));
+      const { data } = await supabase.from('inventory_items').select('name, quantity, min_quantity, unit').eq('organization_id', orgId);
+      return (data || []).filter((i: any) => (i.quantity || 0) <= (i.min_quantity || 0)).map((i: any) => ({ product_name: i.name, quantity_on_hand: i.quantity, reorder_threshold: i.min_quantity, unit: i.unit || 'units' }));
     },
     enabled: !!orgId,
   });
