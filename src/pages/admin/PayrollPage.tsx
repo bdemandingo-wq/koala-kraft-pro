@@ -295,7 +295,7 @@ export default function PayrollPage() {
       nwEnd.setHours(23, 59, 59, 999);
       const { data, error } = await supabase
         .from('bookings')
-        .select(`*, customer:customers(*), staff:staff(*)`)
+        .select(`*, customer:customers(*), staff:staff(*), service:services(name)`)
         .eq('organization_id', organizationId)
         .neq('status', 'cancelled')
         .gte('scheduled_at', currentWeekStart.toISOString())
