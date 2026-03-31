@@ -158,8 +158,8 @@ export default function InventoryPage() {
 
   const getStatusBadge = (item: InventoryItem) => {
     if (item.quantity <= 0) return <Badge variant="destructive">Out of Stock</Badge>;
-    if (item.quantity <= item.min_quantity && item.min_quantity > 0) return <Badge className="bg-amber-500 text-white hover:bg-amber-600">Low Stock</Badge>;
-    return <Badge className="bg-emerald-500 text-white hover:bg-emerald-600">In Stock</Badge>;
+    if (item.quantity <= item.min_quantity && item.min_quantity > 0) return <Badge variant="secondary" className="border-amber-500 text-amber-700 dark:text-amber-400">Low Stock</Badge>;
+    return <Badge variant="secondary" className="border-emerald-500 text-emerald-700 dark:text-emerald-400">In Stock</Badge>;
   };
 
   return (
