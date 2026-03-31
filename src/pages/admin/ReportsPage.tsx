@@ -18,6 +18,7 @@ import {
 import { useMemo, useState, useEffect } from 'react';
 import { format, subMonths, isAfter, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 import { ProfitMarginReport } from '@/components/admin/ProfitMarginReport';
 import { TechnicianPerformanceDashboard } from '@/components/admin/CleanerPerformanceDashboard';
 import { ProfitByServiceChart } from '@/components/admin/ProfitByServiceChart';
@@ -66,9 +67,9 @@ export default function ReportsPage() {
   const [workingHours, setWorkingHours] = useState<any[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
   const [recurringBookings, setRecurringBookings] = useState<any[]>([]);
-  const [recurringStats, setRecurringStats] = useState<{ recurringClients: number; recurringCleans: number; recurringRevenue: number }>({
+  const [recurringStats, setRecurringStats] = useState<{ recurringClients: number; recurringServices: number; recurringRevenue: number }>({
     recurringClients: 0,
-    recurringCleans: 0,
+    recurringServices: 0,
     recurringRevenue: 0
   });
   const { isTestMode, maskName } = useTestMode();
@@ -90,7 +91,7 @@ export default function ReportsPage() {
       const totalRecurringPlans = recData.length;
       setRecurringStats({
         recurringClients: totalRecurringPlans,
-        recurringCleans: 0,
+        recurringServices: 0,
         recurringRevenue: 0,
       });
     };
@@ -107,7 +108,7 @@ export default function ReportsPage() {
     });
   }, [bookings, dateRange]);
 
-  const { serviceStats, serviceStatsAllTime, staffStats, monthlyData, totalStats, recurringCleansCount, recurringCleansRevenue } = useMemo(() => {
+  const { serviceStats, serviceStatsAllTime, staffStats, monthlyData, totalStats, recurringServicesCount, recurringServicesRevenue } = useMemo(() => {
     // Build a set of recurring customer IDs for quick lookup
     const recurringCustomerIds = new Set<string>();
     customers.forEach((c: any) => {
@@ -123,8 +124,8 @@ export default function ReportsPage() {
     // Service breakdown (all time)
     const serviceAllTimeMap = new Map<string, { name: string; count: number; revenue: number; color: string }>();
 
-    let recurringCleansCount = 0;
-    let recurringCleansRevenue = 0;
+    let recurringServicesCount = 0;
+    let recurringServicesRevenue = 0;
 
     filteredBookings.forEach((booking, index) => {
       const serviceId = booking.service?.id || 'refund';
@@ -138,11 +139,11 @@ export default function ReportsPage() {
       existing.revenue += Number(booking.total_amount || 0);
       serviceMap.set(serviceId, existing);
 
-      // Count recurring cleans - bookings from recurring customers
+      // Count recurring services - bookings from recurring customers
       const customerId = booking.customer?.id;
       if (customerId && recurringCustomerIds.has(customerId)) {
-        recurringCleansCount += 1;
-        recurringCleansRevenue += Number(booking.total_amount || 0);
+        recurringServicesCount += 1;
+        recurringServicesRevenue += Number(booking.total_amount || 0);
       }
     });
 
@@ -164,7 +165,7 @@ export default function ReportsPage() {
     const serviceStats = Array.from(serviceMap.values());
     const serviceStatsAllTime = Array.from(serviceAllTimeMap.values());
 
-    // Staff performance - include ALL staff members and show upcoming cleans
+    // Staff performance - include ALL staff members and show upcoming jobs
     const now = new Date();
     const staffStatsData = staff.map((s, index) => {
       // Get all bookings for this staff member within date range
@@ -176,8 +177,8 @@ export default function ReportsPage() {
         return sum + Number(bAny.cleaner_pay_expected || bAny.cleaner_actual_payment || 0);
       }, 0);
       
-      // Count upcoming cleans (scheduled_at > now and not cancelled/completed)
-      const upcomingCleans = staffBookings.filter(b => {
+      // Count upcoming jobs (scheduled_at > now and not cancelled/completed)
+      const upcomingJobs = staffBookings.filter(b => {
         const scheduledDate = new Date(b.scheduled_at);
         return isAfter(scheduledDate, now) && 
                !['completed', 'cancelled', 'no_show'].includes(b.status);
@@ -189,7 +190,7 @@ export default function ReportsPage() {
       return {
         name: s.name,
         bookings: completedBookings,
-        upcomingCleans,
+        upcomingJobs,
         payment: totalPayment,
       };
     });
@@ -235,8 +236,8 @@ export default function ReportsPage() {
         conversionRate,
         totalBookings,
       },
-      recurringCleansCount,
-      recurringCleansRevenue,
+      recurringServicesCount,
+      recurringServicesRevenue,
     };
   }, [filteredBookings, staff, customers, recurringBookings]);
 
@@ -313,15 +314,15 @@ export default function ReportsPage() {
           icon={<Calendar className="w-6 h-6" />}
         />
         <StatCard
-          title={`Recurring Cleans (${new Date().getFullYear()})`}
-          value={isTestMode ? 'XX' : recurringCleansCount}
+          title={`Recurring Services (${new Date().getFullYear()})`}
+          value={isTestMode ? 'XX' : recurringServicesCount}
           change={0}
-          changeLabel={isTestMode ? '$X,XXX revenue' : `$${recurringCleansRevenue.toLocaleString()} revenue`}
+          changeLabel={isTestMode ? '$X,XXX revenue' : `$${recurringServicesRevenue.toLocaleString()} revenue`}
           trend="up"
           icon={<Repeat className="w-6 h-6" />}
         />
         <StatCard
-          title="Recurring Plans"
+          title="Maintenance Plans"
           value={isTestMode ? 'XX' : recurringStats.recurringClients}
           icon={<UserCheck className="w-6 h-6" />}
         />
@@ -349,11 +350,12 @@ export default function ReportsPage() {
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="pnl">P&L Overview</TabsTrigger>
           <TabsTrigger value="clv">Customer LTV</TabsTrigger>
-          <TabsTrigger value="staff-productivity">Staff Productivity</TabsTrigger>
+          <TabsTrigger value="staff-productivity">Technician Productivity</TabsTrigger>
           <TabsTrigger value="forecasting">Revenue Forecast</TabsTrigger>
           <TabsTrigger value="profit-margin">Profit Margin</TabsTrigger>
           <TabsTrigger value="technician-performance">Technician Performance</TabsTrigger>
           <TabsTrigger value="technician-availability">Availability</TabsTrigger>
+          <TabsTrigger value="package-performance">Package Performance</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -384,7 +386,7 @@ export default function ReportsPage() {
 
             {/* Revenue by Service Pie Chart */}
             <div className="bg-card rounded-xl border border-border shadow-sm p-4 h-[380px]">
-              <h3 className="font-semibold mb-4">Revenue by Service (All time)</h3>
+              <h3 className="font-semibold mb-4">Revenue by Package (All time)</h3>
               <div className="h-[300px]">
                 {serviceStatsAllTime.length === 0 ? (
                   <div className="flex items-center justify-center h-full text-muted-foreground">
@@ -427,21 +429,21 @@ export default function ReportsPage() {
 
             {/* Staff Performance Table */}
             <div className="bg-card rounded-xl border border-border shadow-sm p-4 h-[420px] overflow-auto">
-              <h3 className="font-semibold mb-4">Staff Performance</h3>
+              <h3 className="font-semibold mb-4">Technician Performance</h3>
               {staffStats.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  No staff performance data available
+                  No technician performance data available
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="text-left border-b border-border">
-                        <th className="pb-3 font-medium text-muted-foreground">Staff Member</th>
+                     <tr className="text-left border-b border-border">
+                        <th className="pb-3 font-medium text-muted-foreground">Technician</th>
                         <th className="pb-3 font-medium text-muted-foreground text-right">Completed</th>
                         <th className="pb-3 font-medium text-muted-foreground text-right">Upcoming</th>
-                        <th className="pb-3 font-medium text-muted-foreground text-right">Total Payment</th>
-                        <th className="pb-3 font-medium text-muted-foreground text-right">Avg/Booking</th>
+                        <th className="pb-3 font-medium text-muted-foreground text-right">Total Pay</th>
+                        <th className="pb-3 font-medium text-muted-foreground text-right">Avg/Job</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -456,7 +458,7 @@ export default function ReportsPage() {
                           <td className="py-3 text-right">{isTestMode ? 'X' : staffMember.bookings}</td>
                           <td className="py-3 text-right">
                             <span className="px-2 py-1 rounded-full text-xs bg-info/10 text-info">
-                              {isTestMode ? 'X' : staffMember.upcomingCleans}
+                              {isTestMode ? 'X' : staffMember.upcomingJobs}
                             </span>
                           </td>
                           <td className="py-3 text-right font-semibold text-success">
@@ -505,6 +507,94 @@ export default function ReportsPage() {
             staff={staff} 
             workingHours={workingHours}
           />
+        </TabsContent>
+
+        <TabsContent value="package-performance" className="space-y-6">
+          {(() => {
+            const packageData = serviceStats.map(s => {
+              const returnCustomers = new Set<string>();
+              const allCustomers = new Set<string>();
+              filteredBookings
+                .filter(b => b.service?.name === s.name && b.status === 'completed')
+                .forEach(b => {
+                  const cid = b.customer?.id;
+                  if (!cid) return;
+                  if (allCustomers.has(cid)) returnCustomers.add(cid);
+                  allCustomers.add(cid);
+                });
+              const returnRate = allCustomers.size > 0 ? (returnCustomers.size / allCustomers.size) * 100 : 0;
+              return {
+                ...s,
+                avgTicket: s.count > 0 ? s.revenue / s.count : 0,
+                revenuePercent: totalStats.totalRevenue > 0 ? (s.revenue / totalStats.totalRevenue) * 100 : 0,
+                returnRate,
+              };
+            }).sort((a, b) => b.revenue - a.revenue);
+
+            return (
+              <>
+                <div className="bg-card rounded-xl border border-border p-4">
+                  <h3 className="font-semibold mb-4">Package Performance</h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="text-left border-b border-border">
+                          <th className="pb-3 font-medium text-muted-foreground">Package</th>
+                          <th className="pb-3 font-medium text-muted-foreground text-right">Jobs</th>
+                          <th className="pb-3 font-medium text-muted-foreground text-right">Revenue</th>
+                          <th className="pb-3 font-medium text-muted-foreground text-right">Avg Ticket</th>
+                          <th className="pb-3 font-medium text-muted-foreground text-right">% of Revenue</th>
+                          <th className="pb-3 font-medium text-muted-foreground text-right">Return Rate</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {packageData.map((pkg, idx) => (
+                          <tr key={pkg.name} className="border-b border-border/50 last:border-0">
+                            <td className="py-3 font-medium">{pkg.name}</td>
+                            <td className="py-3 text-right">{isTestMode ? 'X' : pkg.count}</td>
+                            <td className="py-3 text-right font-semibold text-emerald-600">
+                              {isTestMode ? '$XXX' : `$${pkg.revenue.toLocaleString()}`}
+                            </td>
+                            <td className="py-3 text-right">
+                              {isTestMode ? '$XXX' : `$${pkg.avgTicket.toFixed(0)}`}
+                            </td>
+                            <td className="py-3 text-right">{pkg.revenuePercent.toFixed(1)}%</td>
+                            <td className="py-3 text-right">
+                              <Badge variant={pkg.returnRate >= 30 ? 'default' : 'secondary'}>
+                                {pkg.returnRate.toFixed(0)}%
+                              </Badge>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div className="bg-card rounded-xl border border-border p-4">
+                  <h3 className="font-semibold mb-4">Revenue by Package</h3>
+                  <div className="h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={packageData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} />
+                        <YAxis axisLine={false} tickLine={false} tickFormatter={(v) => `$${v}`} />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: 'hsl(var(--popover))',
+                            border: '1px solid hsl(var(--border))',
+                            borderRadius: '8px',
+                          }}
+                          formatter={(value: number) => [`$${value.toLocaleString()}`, 'Revenue']}
+                        />
+                        <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </>
+            );
+          })()}
         </TabsContent>
       </Tabs>
       </SubscriptionGate>

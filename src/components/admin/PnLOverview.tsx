@@ -27,7 +27,7 @@ import {
 
 interface RecurringStats {
   recurringClients: number;
-  recurringCleans: number;
+  recurringServices: number;
   recurringRevenue: number;
 }
 
@@ -126,15 +126,18 @@ const defaultSettings: PnLSettings = {
   credit_card_percent: 2.9,
   refunds_percent: 2,
   fixed_overhead_items: [
-    { name: 'Booking Software', monthly: Array(12).fill(0) },
-    { name: 'Insurance', monthly: Array(12).fill(0) },
-    { name: 'Website Hosting', monthly: Array(12).fill(0) },
+    { name: 'CRM Software', monthly: Array(12).fill(0) },
+    { name: 'Insurance (Liability + Vehicle)', monthly: Array(12).fill(0) },
+    { name: 'Website & Domain', monthly: Array(12).fill(0) },
     { name: 'Phone/VoIP', monthly: Array(12).fill(0) },
     { name: 'Accounting Software', monthly: Array(12).fill(0) },
   ],
   variable_overhead_items: [
-    { name: 'Supplies', monthly: Array(12).fill(0) },
-    { name: 'Gas/Mileage', monthly: Array(12).fill(0) },
+    { name: 'Detailing Supplies & Chemicals', monthly: Array(12).fill(0) },
+    { name: 'Ceramic Coating Products', monthly: Array(12).fill(0) },
+    { name: 'Fuel & Vehicle Maintenance', monthly: Array(12).fill(0) },
+    { name: 'Water Supply', monthly: Array(12).fill(0) },
+    { name: 'Equipment Maintenance', monthly: Array(12).fill(0) },
   ],
   recruiting_costs: Array(12).fill(0),
 };
@@ -187,15 +190,20 @@ export function PnLOverview({ bookings, customers, recurringStats }: PnLOverview
 
   // Expense category to overhead mapping
   const EXPENSE_CATEGORY_MAP: Record<string, { type: 'fixed' | 'variable'; name: string }> = {
-    'insurance': { type: 'fixed', name: 'Insurance' },
-    'domain': { type: 'fixed', name: 'Website Hosting' },
-    'dialers': { type: 'fixed', name: 'Phone/VoIP' },
-    'office': { type: 'fixed', name: 'Office/Admin' },
-    'supplies': { type: 'variable', name: 'Supplies' },
-    'mileage': { type: 'variable', name: 'Gas/Mileage' },
-    'equipment': { type: 'variable', name: 'Equipment' },
-    'misc': { type: 'variable', name: 'Misc' },
-    'other': { type: 'variable', name: 'Other' },
+    'insurance': { type: 'fixed', name: 'Insurance (Liability + Vehicle)' },
+    'software': { type: 'fixed', name: 'CRM Software' },
+    'supplies': { type: 'variable', name: 'Detailing Supplies & Chemicals' },
+    'ceramic_products': { type: 'variable', name: 'Ceramic Coating Products' },
+    'fuel_vehicle': { type: 'variable', name: 'Fuel & Vehicle Maintenance' },
+    'water_supply': { type: 'variable', name: 'Water Supply' },
+    'equipment': { type: 'variable', name: 'Equipment Maintenance' },
+    'equipment_maintenance': { type: 'variable', name: 'Equipment Maintenance' },
+    'marketing': { type: 'variable', name: 'Marketing & Advertising' },
+    'training': { type: 'variable', name: 'Training & Certifications' },
+    'uniforms': { type: 'variable', name: 'Uniforms & Branded Gear' },
+    'wages_commissions': { type: 'variable', name: 'Technician Wages & Commissions' },
+    'tips_paid': { type: 'variable', name: 'Tips Paid Out' },
+    'misc': { type: 'variable', name: 'Miscellaneous' },
   };
 
   // State for actual expenses from Expenses page
