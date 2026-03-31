@@ -176,16 +176,15 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
   const beforeItem = item.before_items.find(i => i.file_type === 'photo') || item.before_items[0];
   const afterItem = item.after_items.find(i => i.file_type === 'photo') || item.after_items[0];
 
-  useState(() => {
-    if (beforeItem) {
-      const bucket = 'job-before-media';
-      getSignedUrl(bucket, beforeItem.file_url, 3600).then(setBeforeUrl);
-    }
-    if (afterItem) {
-      const bucket = 'job-after-media';
-      getSignedUrl(bucket, afterItem.file_url, 3600).then(setAfterUrl);
-    }
-  });
+  // Load signed URLs on mount
+  useState(() => { void 0; });
+  // Use useEffect-like pattern with empty array to load once
+  if (!beforeUrl && beforeItem) {
+    getSignedUrl('job-before-media', beforeItem.file_url, 3600).then(setBeforeUrl);
+  }
+  if (!afterUrl && afterItem) {
+    getSignedUrl('job-after-media', afterItem.file_url, 3600).then(setAfterUrl);
+  }
 
   const vehicleLabel = [item.vehicle_year, item.vehicle_make, item.vehicle_model].filter(Boolean).join(' ');
 

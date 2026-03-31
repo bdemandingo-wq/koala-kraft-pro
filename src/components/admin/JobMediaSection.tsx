@@ -310,9 +310,10 @@ function MediaThumbnail({
   const [editingNotes, setEditingNotes] = useState(false);
   const [localNotes, setLocalNotes] = useState(item.notes || '');
 
-  useState(() => {
+  // Load signed URL on first render
+  if (!url) {
     getSignedUrl(bucket, item.file_url, 3600).then(setUrl);
-  });
+  }
 
   const saveNotes = () => {
     onUpdateNotes(localNotes);
