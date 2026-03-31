@@ -239,7 +239,7 @@ export default function CompareHousecallPro() {
               <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <Clock className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">Built for Cleaning</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-2">Built for Detailing</h3>
               <p className="text-muted-foreground">
                 Housecall Pro serves 20+ industries. We Detail NC is 100% focused on making car detailing businesses successful.
               </p>
