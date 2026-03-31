@@ -878,7 +878,7 @@ export default function PublicBookingPage() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="address">Street Address *</Label>
+                      <Label htmlFor="address">Where would you like us to come? *</Label>
                       <div className="relative">
                         <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                         <Input id="address" placeholder="123 Main Street" className="pl-9" value={customerInfo.address} onChange={(e) => setCustomerInfo({ ...customerInfo, address: e.target.value })} />
