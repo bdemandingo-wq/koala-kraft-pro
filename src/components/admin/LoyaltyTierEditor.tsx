@@ -26,10 +26,10 @@ interface TierEditState {
 }
 
 const defaultTiers: Omit<TierSetting, 'id'>[] = [
-  { tier_name: 'Bronze', min_spending: 0, max_spending: 499, benefits: ['Basic scheduling', 'Email support'], color: 'orange', tier_order: 1 },
-  { tier_name: 'Silver', min_spending: 500, max_spending: 1999, benefits: ['Standard scheduling', 'Email support'], color: 'slate', tier_order: 2 },
-  { tier_name: 'Gold', min_spending: 2000, max_spending: 4999, benefits: ['Priority scheduling', '5% discount on services', 'Phone support'], color: 'amber', tier_order: 3 },
-  { tier_name: 'Platinum', min_spending: 5000, max_spending: null, benefits: ['VIP scheduling', '10% discount on services', 'Free add-on per visit', 'Dedicated support'], color: 'purple', tier_order: 4 },
+  { tier_name: 'Bronze', min_spending: 0, max_spending: 499, benefits: ['Priority booking window', 'Birthday discount ($25 off)'], color: 'orange', tier_order: 1 },
+  { tier_name: 'Silver', min_spending: 500, max_spending: 1999, benefits: ['Priority booking', '5% off all packages', 'Free tire dressing upgrade', 'Birthday discount ($25 off)'], color: 'slate', tier_order: 2 },
+  { tier_name: 'Gold', min_spending: 2000, max_spending: 4999, benefits: ['Priority booking', '10% off all packages', 'Free interior air freshener', 'Free add-on per visit', 'Birthday discount ($25 off)'], color: 'amber', tier_order: 3 },
+  { tier_name: 'Platinum', min_spending: 5000, max_spending: null, benefits: ['VIP scheduling', '15% off all packages', 'Free express detail annually', 'Free add-on per visit', 'Same-day cancellation privilege', 'Birthday discount ($25 off)'], color: 'purple', tier_order: 4 },
 ];
 
 export function LoyaltyTierEditor() {
