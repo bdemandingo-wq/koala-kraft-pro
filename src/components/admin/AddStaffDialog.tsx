@@ -132,7 +132,7 @@ export function AddStaffDialog({ open, onOpenChange }: AddStaffDialogProps) {
 
   const handleClose = () => {
     if (!showCredentials) {
-      setFormData({ name: '', email: '', phone: '', password: '', hourly_rate: '', percentage_rate: '', default_hours: '5', tax_classification: 'w2' });
+      setFormData({ name: '', email: '', phone: '', password: '', hourly_rate: '', percentage_rate: '', default_hours: '5', tax_classification: 'w2', pay_type: 'per_job' });
     }
     onOpenChange(false);
   };
