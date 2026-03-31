@@ -254,6 +254,10 @@ export function BookingFormProvider({
   // Checklist state
   const [selectedChecklistId, setSelectedChecklistId] = useState<string | null>(null);
   
+  // Vehicle state
+  const [selectedVehicleId, setSelectedVehicleId] = useState('');
+
+  
   const selectedService = services.find(s => s.id === selectedServiceId);
   const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
   
