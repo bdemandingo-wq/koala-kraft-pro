@@ -186,7 +186,8 @@ export function MyJobCard({ booking, staffInfo, onUpdateStatus, isUpdating, onEn
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { variant: 'default' | 'secondary' | 'outline' | 'destructive'; label: string }> = {
       pending: { variant: 'secondary', label: 'Pending' },
-      confirmed: { variant: 'default', label: 'Confirmed' },
+      confirmed: { variant: 'default', label: 'Scheduled' },
+      en_route: { variant: 'default', label: 'En Route' },
       in_progress: { variant: 'default', label: 'In Progress' },
       completed: { variant: 'outline', label: 'Completed' },
       cancelled: { variant: 'destructive', label: 'Cancelled' },
