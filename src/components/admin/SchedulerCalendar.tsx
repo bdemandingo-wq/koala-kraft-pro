@@ -971,7 +971,15 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
             <DialogHeader>
               <DialogTitle>Booking Details</DialogTitle>
             </DialogHeader>
-            {selectedBooking && (
+            {selectedBooking && (() => {
+              const bookingAny = selectedBooking as any;
+              const startTime = new Date(selectedBooking.scheduled_at);
+              const endTime = new Date(startTime.getTime() + selectedBooking.duration * 60 * 1000);
+              const endTimeStr = endTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+              const travelTime = bookingAny.travel_time ?? 30;
+              const fullAddr = getFullAddress(selectedBooking);
+              
+              return (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-lg font-semibold">
@@ -1014,27 +1022,48 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
                         {formatInTimezone(selectedBooking.scheduled_at, orgTimezone, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                       </p>
                       <p className="text-muted-foreground">
-                        {formatInTimezone(selectedBooking.scheduled_at, orgTimezone, { hour: 'numeric', minute: '2-digit', hour12: true })}
+                        {formatInTimezone(selectedBooking.scheduled_at, orgTimezone, { hour: 'numeric', minute: '2-digit', hour12: true })} → {endTimeStr}
+                        <span className="ml-1 text-xs">({Math.round(selectedBooking.duration / 60 * 10) / 10}h)</span>
                       </p>
+                      <p className="text-xs text-muted-foreground/70">Travel buffer: {travelTime} min</p>
                     </div>
                   </div>
                   
-                  {getFullAddress(selectedBooking) && (
-                    <div className="flex items-center gap-3 text-sm">
-                      <MapPin className="w-4 h-4 text-muted-foreground" />
-                      <p>{maskAddress(getFullAddress(selectedBooking))}</p>
+                  {fullAddr && (
+                    <div className="flex items-start gap-3 text-sm">
+                      <MapPin className="w-4 h-4 text-muted-foreground mt-0.5" />
+                      <div>
+                        <p>{maskAddress(fullAddr)}</p>
+                        <div className="flex gap-2 mt-1">
+                          <a
+                            href={`https://maps.google.com/?q=${encodeURIComponent(fullAddr)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-primary hover:underline"
+                          >
+                            Google Maps
+                          </a>
+                          <a
+                            href={`https://maps.apple.com/?q=${encodeURIComponent(fullAddr)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-primary hover:underline"
+                          >
+                            Apple Maps
+                          </a>
+                        </div>
+                      </div>
                     </div>
                   )}
 
                   {/* Staff / Team Assignments */}
                   {(selectedBooking.staff || teamMembers.length > 0) && (() => {
-                    // Filter out primary staff from team list to avoid duplicates
                     const additionalTeam = teamMembers.filter((m: any) => m.id !== selectedBooking.staff_id);
                     return (
                       <div className="flex items-start gap-3 text-sm">
                         <Users className="w-4 h-4 text-muted-foreground mt-0.5" />
                         <div>
-                          <p className="font-medium">Assigned Staff</p>
+                          <p className="font-medium">Assigned Technician</p>
                           {selectedBooking.staff && (
                             <p className="text-muted-foreground">
                               {maskName(selectedBooking.staff.name)}{additionalTeam.length > 0 ? ' (Primary)' : ''}
@@ -1049,6 +1078,8 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
                       </div>
                     );
                   })()}
+                  
+                  <p className="text-[10px] text-muted-foreground/60 italic">Duration may vary based on vehicle size and condition</p>
                 </div>
 
                 <div className="flex gap-2 pt-4 border-t flex-wrap">
