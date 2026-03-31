@@ -94,7 +94,7 @@ export default function AdminDashboard() {
   return (
     <AdminLayout
       title="Dashboard"
-      subtitle="Welcome back! Here's what's happening."
+      subtitle={`${getGreeting()}! Here's your detailing business at a glance.`}
     >
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 animate-fade-in">
         <div className="xl:col-span-2 space-y-6">
