@@ -603,6 +603,7 @@ export function BookingFormProvider({
       cardInfo,
       loadingCard,
       selectedChecklistId,
+      selectedVehicleId,
       
       customers,
       services,
