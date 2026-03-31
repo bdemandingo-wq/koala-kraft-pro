@@ -279,7 +279,7 @@ export default function StaffPage() {
             <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
               <TabsList>
                 <TabsTrigger value="all" className="gap-1.5">
-                  All Staff
+                  All Technicians
                   <Badge variant="secondary" className="ml-1 text-xs h-5 px-1.5">{staff.length}</Badge>
                 </TabsTrigger>
                 <TabsTrigger value="active" className="gap-1.5">
