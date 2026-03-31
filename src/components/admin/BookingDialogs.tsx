@@ -225,6 +225,14 @@ export function BookingDetailsDialog({
               <p className="text-sm whitespace-pre-wrap">{booking.notes}</p>
             </div>
           ) : null}
+
+          {/* Before & After Media */}
+          {booking.id && organizationId && (
+            <JobMediaSection
+              bookingId={booking.id}
+              organizationId={organizationId}
+            />
+          )}
         </div>
 
         <DialogFooter className="flex-col sm:flex-row gap-2">
