@@ -653,7 +653,7 @@ function TaxReportCard({ clientUserId }: { clientUserId?: string }) {
           </Button>
         </div>
         <p className="text-xs text-muted-foreground">
-          Report includes all completed bookings with payment details for the selected year.
+          Report includes all completed detailing services with payment details for the selected year.
         </p>
       </CardContent>
     </Card>
