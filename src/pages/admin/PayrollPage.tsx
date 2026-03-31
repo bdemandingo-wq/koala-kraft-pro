@@ -692,7 +692,7 @@ export default function PayrollPage() {
   return (
     <AdminLayout
       title="Payroll Report"
-      subtitle="Staff wages, profitability, and forecasting"
+      subtitle="Technician pay, profitability, and forecasting"
       actions={
         <Button onClick={exportCSV} className="gap-2">
           <Download className="w-4 h-4" />
