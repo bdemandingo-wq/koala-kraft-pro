@@ -63,15 +63,19 @@ interface Expense {
 
 const EXPENSE_CATEGORIES = [
   { value: 'supplies', label: 'Detailing Supplies', icon: Package },
-  { value: 'mileage', label: 'Mileage/Travel', icon: Car },
+  { value: 'ceramic_products', label: 'Ceramic Coating Products', icon: Package },
   { value: 'equipment', label: 'Equipment', icon: Wrench },
-  { value: 'office', label: 'Office/Admin', icon: Building },
-  { value: 'marketing', label: 'Marketing', icon: Receipt },
+  { value: 'equipment_maintenance', label: 'Equipment Maintenance & Repair', icon: Wrench },
+  { value: 'fuel_vehicle', label: 'Vehicle Fuel & Maintenance', icon: Car },
+  { value: 'water_supply', label: 'Water Supply', icon: Receipt },
   { value: 'insurance', label: 'Insurance', icon: Receipt },
-  { value: 'domain', label: 'Domain/Website', icon: Receipt },
-  { value: 'dialers', label: 'Dialers/Phone', icon: Receipt },
-  { value: 'misc', label: 'Misc', icon: Receipt },
-  { value: 'other', label: 'Other', icon: Receipt },
+  { value: 'marketing', label: 'Marketing & Advertising', icon: Receipt },
+  { value: 'software', label: 'Software & Subscriptions', icon: Building },
+  { value: 'wages_commissions', label: 'Technician Wages & Commissions', icon: DollarSign },
+  { value: 'tips_paid', label: 'Tips Paid Out', icon: DollarSign },
+  { value: 'uniforms', label: 'Uniforms & Branded Gear', icon: Receipt },
+  { value: 'training', label: 'Training & Certifications', icon: Receipt },
+  { value: 'misc', label: 'Miscellaneous', icon: Receipt },
 ];
 
 export default function ExpensesPage() {

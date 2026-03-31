@@ -190,15 +190,20 @@ export function PnLOverview({ bookings, customers, recurringStats }: PnLOverview
 
   // Expense category to overhead mapping
   const EXPENSE_CATEGORY_MAP: Record<string, { type: 'fixed' | 'variable'; name: string }> = {
-    'insurance': { type: 'fixed', name: 'Insurance' },
-    'domain': { type: 'fixed', name: 'Website Hosting' },
-    'dialers': { type: 'fixed', name: 'Phone/VoIP' },
-    'office': { type: 'fixed', name: 'Office/Admin' },
-    'supplies': { type: 'variable', name: 'Supplies' },
-    'mileage': { type: 'variable', name: 'Gas/Mileage' },
-    'equipment': { type: 'variable', name: 'Equipment' },
-    'misc': { type: 'variable', name: 'Misc' },
-    'other': { type: 'variable', name: 'Other' },
+    'insurance': { type: 'fixed', name: 'Insurance (Liability + Vehicle)' },
+    'software': { type: 'fixed', name: 'CRM Software' },
+    'supplies': { type: 'variable', name: 'Detailing Supplies & Chemicals' },
+    'ceramic_products': { type: 'variable', name: 'Ceramic Coating Products' },
+    'fuel_vehicle': { type: 'variable', name: 'Fuel & Vehicle Maintenance' },
+    'water_supply': { type: 'variable', name: 'Water Supply' },
+    'equipment': { type: 'variable', name: 'Equipment Maintenance' },
+    'equipment_maintenance': { type: 'variable', name: 'Equipment Maintenance' },
+    'marketing': { type: 'variable', name: 'Marketing & Advertising' },
+    'training': { type: 'variable', name: 'Training & Certifications' },
+    'uniforms': { type: 'variable', name: 'Uniforms & Branded Gear' },
+    'wages_commissions': { type: 'variable', name: 'Technician Wages & Commissions' },
+    'tips_paid': { type: 'variable', name: 'Tips Paid Out' },
+    'misc': { type: 'variable', name: 'Miscellaneous' },
   };
 
   // State for actual expenses from Expenses page

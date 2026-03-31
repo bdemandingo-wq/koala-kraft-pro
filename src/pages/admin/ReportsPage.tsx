@@ -354,6 +354,7 @@ export default function ReportsPage() {
           <TabsTrigger value="profit-margin">Profit Margin</TabsTrigger>
           <TabsTrigger value="technician-performance">Technician Performance</TabsTrigger>
           <TabsTrigger value="technician-availability">Availability</TabsTrigger>
+          <TabsTrigger value="package-performance">Package Performance</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
