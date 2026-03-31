@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import wedetailncLogo from '/images/wedetailnc-logo.webp';
+const wedetailncLogo = '/images/wedetailnc-logo.webp';
 
 interface SplashScreenProps {
   onComplete?: () => void;
