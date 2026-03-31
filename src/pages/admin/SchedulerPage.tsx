@@ -22,12 +22,13 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { useTestMode } from '@/contexts/TestModeContext';
 
-type StatusFilter = 'all' | 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled';
+type StatusFilter = 'all' | 'pending' | 'confirmed' | 'en_route' | 'in_progress' | 'completed' | 'cancelled';
 
 const filterLabels: Record<StatusFilter, string> = {
   all: 'All Bookings',
   pending: 'Pending',
-  confirmed: 'Confirmed',
+  confirmed: 'Scheduled',
+  en_route: 'En Route',
   in_progress: 'In Progress',
   completed: 'Completed',
   cancelled: 'Cancelled',
@@ -123,7 +124,10 @@ export default function SchedulerPage() {
                 Pending
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setStatusFilter('confirmed')}>
-                Confirmed
+                Scheduled
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setStatusFilter('en_route')}>
+                En Route
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setStatusFilter('in_progress')}>
                 In Progress

@@ -938,6 +938,7 @@ export type Database = {
           subtotal: number | null
           tax_amount: number | null
           total_amount: number
+          travel_time: number | null
           updated_at: string
           vehicle_id: string | null
           zip_code: string | null
@@ -990,6 +991,7 @@ export type Database = {
           subtotal?: number | null
           tax_amount?: number | null
           total_amount?: number
+          travel_time?: number | null
           updated_at?: string
           vehicle_id?: string | null
           zip_code?: string | null
@@ -1042,6 +1044,7 @@ export type Database = {
           subtotal?: number | null
           tax_amount?: number | null
           total_amount?: number
+          travel_time?: number | null
           updated_at?: string
           vehicle_id?: string | null
           zip_code?: string | null
@@ -6460,6 +6463,7 @@ export type Database = {
         | "completed"
         | "cancelled"
         | "no_show"
+        | "en_route"
       payment_status: "pending" | "partial" | "paid" | "refunded"
     }
     CompositeTypes: {
@@ -6596,6 +6600,7 @@ export const Constants = {
         "completed",
         "cancelled",
         "no_show",
+        "en_route",
       ],
       payment_status: ["pending", "partial", "paid", "refunded"],
     },

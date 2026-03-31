@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { JobMediaSection } from "@/components/admin/JobMediaSection";
+import { formatDuration, formatTimeRange, getPackageChecklist } from "@/data/detailingPackages";
 
 import { BookingWithDetails, useStaff, useUpdateBooking } from "@/hooks/useBookings";
 import { useOrgId } from "@/hooks/useOrgId";
@@ -11,15 +12,16 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, DollarSign, Percent, Clock, Send, CreditCard, FileText } from "lucide-react";
+import { Loader2, DollarSign, Percent, Clock, Send, CreditCard, FileText, MapPin, Navigation, CheckCircle2, Circle } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/lib/supabase";
 
 const STATUS_OPTIONS: Array<{ value: BookingWithDetails["status"]; label: string }> = [
-  { value: "pending", label: "Pending Payment" },
-  { value: "confirmed", label: "Unserviceded" },
+  { value: "pending", label: "Pending" },
+  { value: "confirmed", label: "Scheduled" },
+  { value: "en_route", label: "En Route" },
   { value: "in_progress", label: "In Progress" },
-  { value: "completed", label: "Clean Completed" },
+  { value: "completed", label: "Completed" },
   { value: "cancelled", label: "Cancelled" },
   { value: "no_show", label: "No Show" },
 ];
@@ -162,14 +164,38 @@ export function BookingDetailsDialog({
     }
   };
 
+  // Build full address
+  const fullAddr = [booking.address, booking.city, booking.state, booking.zip_code].filter(Boolean).join(', ');
+  
+  // Get checklist for this package
+  const checklist = getPackageChecklist(booking.service?.name);
+  
+  // Calculate end time
+  const endTime = new Date(scheduled.getTime() + booking.duration * 60 * 1000);
+  const bookingAny2 = booking as any;
+  const travelTime = bookingAny2.travel_time ?? 30;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Booking #{booking.booking_number}</DialogTitle>
+          <DialogTitle className="flex items-center justify-between">
+            <span>Booking #{booking.booking_number}</span>
+            <span className={`text-xs px-2 py-1 rounded-full ${
+              booking.status === 'completed' ? 'bg-green-500/20 text-green-600' :
+              booking.status === 'en_route' ? 'bg-cyan-500/20 text-cyan-600' :
+              booking.status === 'in_progress' ? 'bg-amber-400/20 text-amber-500' :
+              booking.status === 'confirmed' ? 'bg-blue-500/20 text-blue-600' :
+              booking.status === 'cancelled' ? 'bg-red-500/20 text-red-600' :
+              'bg-muted text-muted-foreground'
+            }`}>
+              {booking.status === 'en_route' ? 'En Route' : booking.status.replace('_', ' ')}
+            </span>
+          </DialogTitle>
         </DialogHeader>
 
         <div className="grid grid-cols-1 gap-4">
+          {/* Header Info */}
           <div className="rounded-lg border bg-card p-4">
             <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
@@ -182,21 +208,25 @@ export function BookingDetailsDialog({
                 <dd className="text-xs text-muted-foreground">{booking.customer?.email || "—"}</dd>
               </div>
               <div>
-                <dt className="text-xs text-muted-foreground">Service</dt>
+                <dt className="text-xs text-muted-foreground">Service Package</dt>
                 <dd className="text-sm font-medium">{booking.service?.name || (booking.total_amount === 0 ? 'Re-detail' : 'Service')}</dd>
               </div>
               <div>
                 <dt className="text-xs text-muted-foreground">Scheduled</dt>
                 <dd className="text-sm font-medium">{format(scheduled, "MMM d, yyyy")}</dd>
-                <dd className="text-xs text-muted-foreground">{format(scheduled, "h:mm a")}</dd>
+                <dd className="text-xs text-muted-foreground">
+                  {format(scheduled, "h:mm a")} → {format(endTime, "h:mm a")}
+                  <span className="ml-1">({formatDuration(booking.duration)})</span>
+                </dd>
+                <dd className="text-xs text-muted-foreground/60">Travel buffer: {travelTime} min</dd>
               </div>
               <div>
-                <dt className="text-xs text-muted-foreground">Staff</dt>
+                <dt className="text-xs text-muted-foreground">Technician</dt>
                 <dd className="text-sm font-medium">{booking.staff?.name || "Unassigned"}</dd>
               </div>
               <div>
                 <dt className="text-xs text-muted-foreground">Status</dt>
-                <dd className="text-sm font-medium capitalize">{booking.status.replace("_", " ")}</dd>
+                <dd className="text-sm font-medium capitalize">{booking.status === 'en_route' ? 'En Route' : booking.status.replace("_", " ")}</dd>
               </div>
               <div>
                 <dt className="text-xs text-muted-foreground">Payment</dt>
@@ -217,6 +247,52 @@ export function BookingDetailsDialog({
                 </div>
               )}
             </dl>
+          </div>
+
+          {/* Location Section */}
+          {fullAddr && (
+            <div className="rounded-lg border bg-card p-4">
+              <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                <MapPin className="w-3 h-3" /> Service Location
+              </p>
+              <p className="text-sm font-medium">{fullAddr}</p>
+              <div className="flex gap-2 mt-2">
+                <a
+                  href={`https://maps.google.com/?q=${encodeURIComponent(fullAddr)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-primary hover:underline flex items-center gap-1"
+                >
+                  <Navigation className="w-3 h-3" /> Open in Google Maps
+                </a>
+                <a
+                  href={`https://maps.apple.com/?q=${encodeURIComponent(fullAddr)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-primary hover:underline flex items-center gap-1"
+                >
+                  <Navigation className="w-3 h-3" /> Open in Apple Maps
+                </a>
+              </div>
+            </div>
+          )}
+
+          {/* Job Checklist */}
+          <div className="rounded-lg border bg-card p-4">
+            <p className="text-xs text-muted-foreground mb-2 font-medium">
+              Job Checklist — {booking.service?.name || 'Express Package'}
+            </p>
+            <div className="space-y-1.5 max-h-48 overflow-y-auto">
+              {checklist.map((item, idx) => (
+                <div key={idx} className="flex items-center gap-2 text-sm">
+                  <Circle className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0" />
+                  <span className="text-muted-foreground">{item}</span>
+                </div>
+              ))}
+            </div>
+            <p className="text-[10px] text-muted-foreground/50 mt-2 italic">
+              Duration may vary based on vehicle size and condition
+            </p>
           </div>
 
           {booking.notes ? (

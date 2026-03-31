@@ -69,20 +69,22 @@ const MONTHS = [
 
 const statusColors: Record<string, string> = {
   pending: 'bg-warning/20 text-warning border-warning/30',
-  confirmed: 'bg-primary/20 text-primary border-primary/30',
-  in_progress: 'bg-info/20 text-info border-info/30',
+  confirmed: 'bg-blue-500/20 text-blue-600 border-blue-500/30',
+  en_route: 'bg-cyan-500/20 text-cyan-600 border-cyan-500/30',
+  in_progress: 'bg-amber-400/20 text-amber-500 border-amber-400/30',
   completed: 'bg-success/20 text-success border-success/30',
   cancelled: 'bg-destructive/20 text-destructive border-destructive/30',
   no_show: 'bg-muted text-muted-foreground border-muted',
 };
 
 const statusLabels: Record<string, string> = {
-  pending: 'pending payment',
-  confirmed: 'unserviced',
-  in_progress: 'in progress',
-  completed: 'clean completed',
-  cancelled: 'cancelled',
-  no_show: 'no show',
+  pending: 'Pending',
+  confirmed: 'Scheduled',
+  en_route: 'En Route',
+  in_progress: 'In Progress',
+  completed: 'Completed',
+  cancelled: 'Cancelled',
+  no_show: 'No Show',
 };
 
 // Bolder, more distinct staff colors with higher saturation and contrast
@@ -122,7 +124,7 @@ const getStaffColor = (staffId: string | null | undefined, staffList: { id: stri
 interface SchedulerCalendarProps {
   searchTerm?: string;
   onSearchChange?: (term: string) => void;
-  statusFilter?: 'all' | 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled';
+  statusFilter?: string;
   staffFilter?: string | null;
 }
 
@@ -223,6 +225,11 @@ function DraggableBooking({ booking, index, onClick, staffList, teamStaffIds = [
     .filter(id => id !== booking.staff_id)
     .map(id => getStaffColor(id, staffList));
 
+  // Calculate end time
+  const startTime = new Date(booking.scheduled_at);
+  const endTime = new Date(startTime.getTime() + booking.duration * 60 * 1000);
+  const timeStr = `${startTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`;
+
   return (
     <div
       ref={setNodeRef}
@@ -243,7 +250,7 @@ function DraggableBooking({ booking, index, onClick, staffList, teamStaffIds = [
     >
       <div className="flex items-center gap-1">
         {!disableDrag && <GripVertical className="w-3 h-3 opacity-0 group-hover:opacity-50 shrink-0" />}
-        <span className="truncate font-medium">{formatCustomerName(booking.customer)}</span>
+        <span className="truncate font-medium text-[10px] md:text-xs">{formatCustomerName(booking.customer)}</span>
         {teamColors.length > 0 && (
           <div className="flex items-center gap-0.5 ml-auto shrink-0">
             {teamColors.map((tc, i) => (
@@ -252,6 +259,14 @@ function DraggableBooking({ booking, index, onClick, staffList, teamStaffIds = [
           </div>
         )}
       </div>
+      <div className="text-[9px] md:text-[10px] opacity-80 truncate">
+        {timeStr} · {booking.service?.name || 'Service'}
+      </div>
+      {booking.address && (
+        <div className="text-[8px] md:text-[9px] opacity-60 truncate hidden md:block">
+          <MapPin className="w-2 h-2 inline mr-0.5" />{booking.address}
+        </div>
+      )}
     </div>
   );
 }
@@ -956,7 +971,15 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
             <DialogHeader>
               <DialogTitle>Booking Details</DialogTitle>
             </DialogHeader>
-            {selectedBooking && (
+            {selectedBooking && (() => {
+              const bookingAny = selectedBooking as any;
+              const startTime = new Date(selectedBooking.scheduled_at);
+              const endTime = new Date(startTime.getTime() + selectedBooking.duration * 60 * 1000);
+              const endTimeStr = endTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+              const travelTime = bookingAny.travel_time ?? 30;
+              const fullAddr = getFullAddress(selectedBooking);
+              
+              return (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-lg font-semibold">
@@ -999,27 +1022,48 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
                         {formatInTimezone(selectedBooking.scheduled_at, orgTimezone, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                       </p>
                       <p className="text-muted-foreground">
-                        {formatInTimezone(selectedBooking.scheduled_at, orgTimezone, { hour: 'numeric', minute: '2-digit', hour12: true })}
+                        {formatInTimezone(selectedBooking.scheduled_at, orgTimezone, { hour: 'numeric', minute: '2-digit', hour12: true })} → {endTimeStr}
+                        <span className="ml-1 text-xs">({Math.round(selectedBooking.duration / 60 * 10) / 10}h)</span>
                       </p>
+                      <p className="text-xs text-muted-foreground/70">Travel buffer: {travelTime} min</p>
                     </div>
                   </div>
                   
-                  {getFullAddress(selectedBooking) && (
-                    <div className="flex items-center gap-3 text-sm">
-                      <MapPin className="w-4 h-4 text-muted-foreground" />
-                      <p>{maskAddress(getFullAddress(selectedBooking))}</p>
+                  {fullAddr && (
+                    <div className="flex items-start gap-3 text-sm">
+                      <MapPin className="w-4 h-4 text-muted-foreground mt-0.5" />
+                      <div>
+                        <p>{maskAddress(fullAddr)}</p>
+                        <div className="flex gap-2 mt-1">
+                          <a
+                            href={`https://maps.google.com/?q=${encodeURIComponent(fullAddr)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-primary hover:underline"
+                          >
+                            Google Maps
+                          </a>
+                          <a
+                            href={`https://maps.apple.com/?q=${encodeURIComponent(fullAddr)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-primary hover:underline"
+                          >
+                            Apple Maps
+                          </a>
+                        </div>
+                      </div>
                     </div>
                   )}
 
                   {/* Staff / Team Assignments */}
                   {(selectedBooking.staff || teamMembers.length > 0) && (() => {
-                    // Filter out primary staff from team list to avoid duplicates
                     const additionalTeam = teamMembers.filter((m: any) => m.id !== selectedBooking.staff_id);
                     return (
                       <div className="flex items-start gap-3 text-sm">
                         <Users className="w-4 h-4 text-muted-foreground mt-0.5" />
                         <div>
-                          <p className="font-medium">Assigned Staff</p>
+                          <p className="font-medium">Assigned Technician</p>
                           {selectedBooking.staff && (
                             <p className="text-muted-foreground">
                               {maskName(selectedBooking.staff.name)}{additionalTeam.length > 0 ? ' (Primary)' : ''}
@@ -1034,6 +1078,8 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
                       </div>
                     );
                   })()}
+                  
+                  <p className="text-[10px] text-muted-foreground/60 italic">Duration may vary based on vehicle size and condition</p>
                 </div>
 
                 <div className="flex gap-2 pt-4 border-t flex-wrap">
@@ -1082,7 +1128,8 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
                   )}
                 </div>
               </div>
-            )}
+              );
+            })()}
           </DialogContent>
         </Dialog>
 

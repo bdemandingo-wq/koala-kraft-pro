@@ -19,7 +19,7 @@ export interface BookingWithDetails {
   duration: number;
   total_amount: number;
   deposit_paid: number | null;
-  status: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
+  status: 'pending' | 'confirmed' | 'en_route' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
   payment_status: 'pending' | 'partial' | 'paid' | 'refunded';
   payment_intent_id: string | null;
   notes: string | null;
@@ -68,7 +68,7 @@ export interface CreateBookingData {
   duration: number;
   total_amount: number;
   deposit_paid?: number;
-  status?: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
+  status?: 'pending' | 'confirmed' | 'en_route' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
   payment_status?: 'pending' | 'partial' | 'paid' | 'refunded';
   payment_intent_id?: string;
   notes?: string | null;
@@ -100,7 +100,7 @@ export interface UpdateBookingData {
   duration?: number;
   total_amount?: number;
   deposit_paid?: number | null;
-  status?: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
+  status?: 'pending' | 'confirmed' | 'en_route' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
   payment_status?: 'pending' | 'partial' | 'paid' | 'refunded';
   payment_intent_id?: string | null;
   notes?: string | null;
