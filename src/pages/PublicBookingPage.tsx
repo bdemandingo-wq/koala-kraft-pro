@@ -310,7 +310,7 @@ export default function PublicBookingPage() {
             notes: [
                 vehicleType && `Vehicle: ${vehicleYear ? vehicleYear + ' ' : ''}${vehicleMake} ${vehicleModel}${vehicleColor ? ' (' + vehicleColor + ')' : ''} — ${vehicleType}`,
                 vehicleCondition && `Condition: ${vehicleCondition}`,
-                serviceLocation && `Location: ${serviceLocation === 'mobile' ? 'Mobile (We Come to You)' : 'Shop Drop-Off'}`,
+                'Location: Mobile (We Come to You)',
                 customerInfo.notes,
               ].filter(Boolean).join('\n') || undefined,
             extras: selectedExtras.length > 0 ? { names: extraNames } : undefined,
@@ -606,32 +606,12 @@ export default function PublicBookingPage() {
                         </div>
                       </div>
 
-                      {/* Service Location */}
-                      <div className="space-y-3 pt-2">
-                        <Label className="text-base">Service Location *</Label>
-                        <div className="flex gap-4">
-                          <label className={cn(
-                            "flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all flex-1",
-                            serviceLocation === 'mobile' ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
-                          )}>
-                            <input type="radio" name="serviceLocation" value="mobile" checked={serviceLocation === 'mobile'} onChange={() => setServiceLocation('mobile')} className="sr-only" />
-                            <MapPin className="w-5 h-5 text-primary" />
-                            <div>
-                              <p className="font-medium">Mobile (We Come to You)</p>
-                              <p className="text-xs text-muted-foreground">We detail at your location</p>
-                            </div>
-                          </label>
-                          <label className={cn(
-                            "flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all flex-1",
-                            serviceLocation === 'shop' ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
-                          )}>
-                            <input type="radio" name="serviceLocation" value="shop" checked={serviceLocation === 'shop'} onChange={() => setServiceLocation('shop')} className="sr-only" />
-                            <MapPin className="w-5 h-5 text-primary" />
-                            <div>
-                              <p className="font-medium">Shop Drop-Off</p>
-                              <p className="text-xs text-muted-foreground">Drop off at our shop</p>
-                            </div>
-                          </label>
+                      {/* Service Location — Mobile Only */}
+                      <div className="flex items-center gap-3 p-4 rounded-lg border-2 border-primary bg-primary/10 mt-2">
+                        <MapPin className="w-5 h-5 text-primary" />
+                        <div>
+                          <p className="font-medium">We Come to You</p>
+                          <p className="text-xs text-muted-foreground">Fully mobile — we detail at your home, office, or anywhere in Charlotte, NC</p>
                         </div>
                       </div>
                     </CardContent>
@@ -898,7 +878,7 @@ export default function PublicBookingPage() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="address">Street Address *</Label>
+                      <Label htmlFor="address">Where would you like us to come? *</Label>
                       <div className="relative">
                         <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                         <Input id="address" placeholder="123 Main Street" className="pl-9" value={customerInfo.address} onChange={(e) => setCustomerInfo({ ...customerInfo, address: e.target.value })} />

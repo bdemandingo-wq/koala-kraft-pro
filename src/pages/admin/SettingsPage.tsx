@@ -571,12 +571,14 @@ export default function SettingsPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="address">Business Address</Label>
+                <Label htmlFor="address">Service Area</Label>
                 <Input
                   id="address"
+                  placeholder="e.g. Charlotte, NC and surrounding areas"
                   value={settings.company_address}
                   onChange={(e) => updateField('company_address', e.target.value)}
                 />
+                <p className="text-xs text-muted-foreground">Fully mobile — no physical shop address needed</p>
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
