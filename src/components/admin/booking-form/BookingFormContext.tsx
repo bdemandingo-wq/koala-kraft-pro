@@ -156,6 +156,8 @@ interface BookingFormContextType extends BookingFormState {
   setCardInfo: (info: CardInfo | null) => void;
   setAppliedDiscount: (discount: AppliedDiscount | null) => void;
   setSelectedChecklistId: (id: string | null) => void;
+  selectedVehicleId: string;
+  setSelectedVehicleId: (id: string) => void;
   loadCardInfo: (email: string) => Promise<void>;
   resetForm: () => void;
   prefillFromBooking: (booking: BookingWithDetails) => void;
