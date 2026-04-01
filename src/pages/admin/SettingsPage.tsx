@@ -651,10 +651,8 @@ export default function SettingsPage() {
             <TabsTrigger className="shrink-0" value="sms">SMS</TabsTrigger>
             <TabsTrigger className="shrink-0" value="emails">Emails</TabsTrigger>
             <TabsTrigger className="shrink-0" value="reviews">Reviews</TabsTrigger>
-            <TabsTrigger className="shrink-0" value="branding">Branding</TabsTrigger>
             <TabsTrigger className="shrink-0" value="sidebar">Sidebar</TabsTrigger>
             <TabsTrigger className="shrink-0" value="mobile-nav">Mobile Nav</TabsTrigger>
-            <TabsTrigger className="shrink-0" value="import">Import Data</TabsTrigger>
             
             <TabsTrigger className="shrink-0" value="facebook">Facebook</TabsTrigger>
             <TabsTrigger className="shrink-0" value="security">Security</TabsTrigger>
