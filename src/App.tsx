@@ -69,7 +69,7 @@ const TasksPage = lazy(() => import("./pages/admin/TasksPage"));
 const AIIntelligencePage = lazy(() => import("./pages/admin/AIIntelligencePage"));
 const ClientPortalAdminPage = lazy(() => import("./pages/admin/ClientPortalPage"));
 const AutomationCenterPage = lazy(() => import("./pages/admin/AutomationCenterPage"));
-const DataImportPage = lazy(() => import("./pages/admin/DataImportPage"));
+
 const BookingPhotosPage = lazy(() => import("./pages/admin/BookingPhotosPage"));
 const PortfolioPage = lazy(() => import("./pages/admin/PortfolioPage"));
 const StaffPortal = lazy(() => import("./pages/staff/StaffPortal"));
