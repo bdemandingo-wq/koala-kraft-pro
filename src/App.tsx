@@ -228,7 +228,6 @@ const App = () => (
                       <Route path="/dashboard/checklists" element={<AdminRoute><ErrorBoundary featureName="Checklists"><ChecklistsPage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/payment-integration" element={<AdminRoute><ErrorBoundary featureName="Payment Integration"><PaymentIntegrationPage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/help" element={<AdminRoute><ErrorBoundary featureName="Help Center"><HelpPage /></ErrorBoundary></AdminRoute>} />
-                      <Route path="/dashboard/discounts" element={<AdminRoute><ErrorBoundary featureName="Discounts"><DiscountsPage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/messages" element={<AdminRoute><ErrorBoundary featureName="Messages"><MessagesPage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/tasks" element={<AdminRoute><ErrorBoundary featureName="Tasks"><TasksPage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/platform-analytics" element={<AdminRoute><ErrorBoundary featureName="Platform Analytics"><PlatformAnalyticsPage /></ErrorBoundary></AdminRoute>} />
