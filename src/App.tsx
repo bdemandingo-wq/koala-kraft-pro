@@ -61,11 +61,6 @@ const CampaignsPage = lazy(() => import("./pages/admin/CampaignsPage"));
 const ChecklistsPage = lazy(() => import("./pages/admin/ChecklistsPage"));
 const PaymentIntegrationPage = lazy(() => import("./pages/admin/PaymentIntegrationPage"));
 // Platform-aware subscription page: native apps show compliant version (no prices/payments)
-const SubscriptionPage = lazy(() => 
-  Capacitor.isNativePlatform() 
-    ? import("./pages/admin/SubscriptionPageNative")
-    : import("./pages/admin/SubscriptionPage")
-);
 const HelpPage = lazy(() => import("./pages/admin/HelpPage"));
 const DiscountsPage = lazy(() => import("./pages/admin/DiscountsPage"));
 const PlatformAnalyticsPage = lazy(() => import("./pages/admin/PlatformAnalyticsPage"));
