@@ -79,7 +79,7 @@ const defaultNavigation = [
   { name: 'Technicians', href: '/dashboard/staff', icon: UserCircle },
   { name: 'Portfolio', href: '/dashboard/portfolio', icon: Camera },
   { name: 'Inventory', href: '/dashboard/inventory', icon: Package },
-  { name: 'Discounts', href: '/dashboard/discounts', icon: Tag },
+  
   { name: 'Payroll', href: '/dashboard/payroll', icon: DollarSign },
   { name: 'Expenses', href: '/dashboard/expenses', icon: Receipt },
   { name: 'Finance & P&L', href: '/dashboard/finance', icon: Receipt },
