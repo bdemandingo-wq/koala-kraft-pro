@@ -45,7 +45,7 @@ const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const SchedulerPage = lazy(() => import("./pages/admin/SchedulerPage"));
 const BookingsPage = lazy(() => import("./pages/admin/BookingsPage"));
 const CustomersPage = lazy(() => import("./pages/admin/CustomersPage"));
-const ServicesPage = lazy(() => import("./pages/admin/ServicesPage"));
+
 const StaffPage = lazy(() => import("./pages/admin/StaffPage"));
 const PayrollPage = lazy(() => import("./pages/admin/PayrollPage"));
 const FinancePage = lazy(() => import("./pages/admin/FinancePage"));
