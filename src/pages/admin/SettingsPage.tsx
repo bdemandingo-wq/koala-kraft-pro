@@ -651,10 +651,8 @@ export default function SettingsPage() {
             <TabsTrigger className="shrink-0" value="sms">SMS</TabsTrigger>
             <TabsTrigger className="shrink-0" value="emails">Emails</TabsTrigger>
             <TabsTrigger className="shrink-0" value="reviews">Reviews</TabsTrigger>
-            <TabsTrigger className="shrink-0" value="branding">Branding</TabsTrigger>
             <TabsTrigger className="shrink-0" value="sidebar">Sidebar</TabsTrigger>
             <TabsTrigger className="shrink-0" value="mobile-nav">Mobile Nav</TabsTrigger>
-            <TabsTrigger className="shrink-0" value="import">Import Data</TabsTrigger>
             
             <TabsTrigger className="shrink-0" value="facebook">Facebook</TabsTrigger>
             <TabsTrigger className="shrink-0" value="security">Security</TabsTrigger>
@@ -1010,132 +1008,6 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
 
-        {/* Branding */}
-        <TabsContent value="branding" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Palette className="w-5 h-5" />
-                Brand Customization
-              </CardTitle>
-              <CardDescription>
-                Customize the look and feel of your booking page
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Logo Upload */}
-              <div className="space-y-3">
-                <Label>Company Logo</Label>
-                <div className="flex items-center gap-4">
-                  {settings.logo_url ? (
-                    <div className="w-20 h-20 rounded-lg border bg-background overflow-hidden flex items-center justify-center">
-                      <SignedImage 
-                        src={settings.logo_url} 
-                        alt="Company logo" 
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-20 h-20 rounded-lg border bg-muted flex items-center justify-center">
-                      <Upload className="w-8 h-8 text-muted-foreground" />
-                    </div>
-                  )}
-                  <div className="flex-1">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleLogoUpload}
-                      className="hidden"
-                      id="logo-upload"
-                    />
-                    <Label htmlFor="logo-upload" className="cursor-pointer">
-                      <Button variant="outline" className="gap-2" asChild disabled={uploadingLogo}>
-                        <span>
-                          {uploadingLogo ? (
-                            <>
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                              Uploading...
-                            </>
-                          ) : (
-                            <>
-                              <Upload className="w-4 h-4" />
-                              Upload Logo
-                            </>
-                          )}
-                        </span>
-                      </Button>
-                    </Label>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      PNG, JPG up to 2MB. This logo will appear in your sidebar.
-                    </p>
-                  </div>
-                </div>
-              </div>
-              
-              <Separator />
-              
-              {/* Color Pickers */}
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-3">
-                  <Label>Primary Color</Label>
-                  <div className="flex gap-3">
-                    <Input
-                      type="color"
-                      value={settings.primary_color}
-                      onChange={(e) => updateField('primary_color', e.target.value)}
-                      className="w-14 h-10 p-1 cursor-pointer"
-                    />
-                    <Input
-                      value={settings.primary_color}
-                      onChange={(e) => updateField('primary_color', e.target.value)}
-                      placeholder="#3b82f6"
-                      className="flex-1"
-                    />
-                  </div>
-                  <p className="text-xs text-muted-foreground">Used for buttons and key actions</p>
-                </div>
-                <div className="space-y-3">
-                  <Label>Accent Color</Label>
-                  <div className="flex gap-3">
-                    <Input
-                      type="color"
-                      value={settings.accent_color}
-                      onChange={(e) => updateField('accent_color', e.target.value)}
-                      className="w-14 h-10 p-1 cursor-pointer"
-                    />
-                    <Input
-                      value={settings.accent_color}
-                      onChange={(e) => updateField('accent_color', e.target.value)}
-                      placeholder="#14b8a6"
-                      className="flex-1"
-                    />
-                  </div>
-                  <p className="text-xs text-muted-foreground">Used for highlights and secondary elements</p>
-                </div>
-              </div>
-              
-              <div className="flex gap-2">
-                <Button className="gap-2" onClick={saveSettings} disabled={saving}>
-                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                  Save Changes
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="gap-2"
-                  onClick={() => {
-                    updateField('primary_color', '#3b82f6');
-                    updateField('accent_color', '#14b8a6');
-                    toast.info('Colors reset to defaults. Click Save to apply.');
-                  }}
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  Reset to Default
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
         {/* Sidebar Settings */}
         <TabsContent value="sidebar" className="space-y-6">
           <SidebarVisibilitySettings />
@@ -1144,27 +1016,6 @@ export default function SettingsPage() {
         {/* Mobile Nav */}
         <TabsContent value="mobile-nav" className="space-y-6">
           <MobileBottomNavSettings />
-        </TabsContent>
-
-        {/* Import Data */}
-        <TabsContent value="import" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Upload className="w-5 h-5" />
-                Import Data from Another Platform
-              </CardTitle>
-              <CardDescription>
-                Migrate your customers, staff, bookings, and services from BookingKoala or Jobber
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button onClick={() => navigate('/dashboard/import')} className="gap-2">
-                <Upload className="w-4 h-4" />
-                Open Import Wizard
-              </Button>
-            </CardContent>
-          </Card>
         </TabsContent>
 
         {/* Facebook Integration */}

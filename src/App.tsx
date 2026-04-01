@@ -45,7 +45,7 @@ const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const SchedulerPage = lazy(() => import("./pages/admin/SchedulerPage"));
 const BookingsPage = lazy(() => import("./pages/admin/BookingsPage"));
 const CustomersPage = lazy(() => import("./pages/admin/CustomersPage"));
-const ServicesPage = lazy(() => import("./pages/admin/ServicesPage"));
+
 const StaffPage = lazy(() => import("./pages/admin/StaffPage"));
 const PayrollPage = lazy(() => import("./pages/admin/PayrollPage"));
 const FinancePage = lazy(() => import("./pages/admin/FinancePage"));
@@ -57,26 +57,19 @@ const RecurringBookingsPage = lazy(() => import("./pages/admin/RecurringBookings
 const LeadsPage = lazy(() => import("./pages/admin/LeadsPage"));
 const InventoryPage = lazy(() => import("./pages/admin/InventoryPage"));
 const InvoicesPage = lazy(() => import("./pages/admin/InvoicesPage"));
-const OperationsTrackerPage = lazy(() => import("./pages/admin/OperationsTrackerPage"));
-const ClientFeedbackPage = lazy(() => import("./pages/admin/ClientFeedbackPage"));
 const CampaignsPage = lazy(() => import("./pages/admin/CampaignsPage"));
 const ChecklistsPage = lazy(() => import("./pages/admin/ChecklistsPage"));
 const PaymentIntegrationPage = lazy(() => import("./pages/admin/PaymentIntegrationPage"));
 // Platform-aware subscription page: native apps show compliant version (no prices/payments)
-const SubscriptionPage = lazy(() => 
-  Capacitor.isNativePlatform() 
-    ? import("./pages/admin/SubscriptionPageNative")
-    : import("./pages/admin/SubscriptionPage")
-);
 const HelpPage = lazy(() => import("./pages/admin/HelpPage"));
-const DiscountsPage = lazy(() => import("./pages/admin/DiscountsPage"));
+
 const PlatformAnalyticsPage = lazy(() => import("./pages/admin/PlatformAnalyticsPage"));
 const MessagesPage = lazy(() => import("./pages/admin/MessagesPage"));
 const TasksPage = lazy(() => import("./pages/admin/TasksPage"));
 const AIIntelligencePage = lazy(() => import("./pages/admin/AIIntelligencePage"));
 const ClientPortalAdminPage = lazy(() => import("./pages/admin/ClientPortalPage"));
 const AutomationCenterPage = lazy(() => import("./pages/admin/AutomationCenterPage"));
-const DataImportPage = lazy(() => import("./pages/admin/DataImportPage"));
+
 const BookingPhotosPage = lazy(() => import("./pages/admin/BookingPhotosPage"));
 const PortfolioPage = lazy(() => import("./pages/admin/PortfolioPage"));
 const StaffPortal = lazy(() => import("./pages/staff/StaffPortal"));
@@ -220,7 +213,6 @@ const App = () => (
                       <Route path="/dashboard/scheduler" element={<AdminRoute><ErrorBoundary featureName="Scheduler"><SchedulerPage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/bookings" element={<AdminRoute><ErrorBoundary featureName="Bookings"><BookingsPage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/customers" element={<AdminRoute><ErrorBoundary featureName="Customers"><CustomersPage /></ErrorBoundary></AdminRoute>} />
-                      <Route path="/dashboard/services" element={<AdminRoute><ErrorBoundary featureName="Services"><ServicesPage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/staff" element={<AdminRoute><ErrorBoundary featureName="Staff Management"><StaffPage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/payroll" element={<AdminRoute><ErrorBoundary featureName="Payroll"><PayrollPage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/finance" element={<AdminRoute><ErrorBoundary featureName="Finance"><FinancePage /></ErrorBoundary></AdminRoute>} />
@@ -232,21 +224,16 @@ const App = () => (
                       <Route path="/dashboard/leads" element={<AdminRoute><ErrorBoundary featureName="Leads"><LeadsPage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/inventory" element={<AdminRoute><ErrorBoundary featureName="Inventory"><InventoryPage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/invoices" element={<AdminRoute><ErrorBoundary featureName="Invoices"><InvoicesPage /></ErrorBoundary></AdminRoute>} />
-                      <Route path="/dashboard/operations" element={<AdminRoute><ErrorBoundary featureName="Operations Tracker"><OperationsTrackerPage /></ErrorBoundary></AdminRoute>} />
-                      <Route path="/dashboard/feedback" element={<AdminRoute><ErrorBoundary featureName="Client Feedback"><ClientFeedbackPage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/campaigns" element={<AdminRoute><ErrorBoundary featureName="Campaigns"><CampaignsPage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/checklists" element={<AdminRoute><ErrorBoundary featureName="Checklists"><ChecklistsPage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/payment-integration" element={<AdminRoute><ErrorBoundary featureName="Payment Integration"><PaymentIntegrationPage /></ErrorBoundary></AdminRoute>} />
-                      <Route path="/dashboard/subscription" element={<AdminRoute><ErrorBoundary featureName="Subscription"><SubscriptionPage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/help" element={<AdminRoute><ErrorBoundary featureName="Help Center"><HelpPage /></ErrorBoundary></AdminRoute>} />
-                      <Route path="/dashboard/discounts" element={<AdminRoute><ErrorBoundary featureName="Discounts"><DiscountsPage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/messages" element={<AdminRoute><ErrorBoundary featureName="Messages"><MessagesPage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/tasks" element={<AdminRoute><ErrorBoundary featureName="Tasks"><TasksPage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/platform-analytics" element={<AdminRoute><ErrorBoundary featureName="Platform Analytics"><PlatformAnalyticsPage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/ai-intelligence" element={<AdminRoute><ErrorBoundary featureName="AI Intelligence"><AIIntelligencePage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/client-portal" element={<AdminRoute><ErrorBoundary featureName="Client Portal"><ClientPortalAdminPage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/automation-center" element={<AdminRoute><ErrorBoundary featureName="Automation Center"><AutomationCenterPage /></ErrorBoundary></AdminRoute>} />
-                       <Route path="/dashboard/import" element={<AdminRoute><ErrorBoundary featureName="Data Import"><DataImportPage /></ErrorBoundary></AdminRoute>} />
                        <Route path="/dashboard/booking-photos" element={<AdminRoute><ErrorBoundary featureName="Booking Photos"><BookingPhotosPage /></ErrorBoundary></AdminRoute>} />
                        <Route path="/dashboard/portfolio" element={<AdminRoute><ErrorBoundary featureName="Portfolio"><PortfolioPage /></ErrorBoundary></AdminRoute>} />
 
@@ -324,7 +311,7 @@ const App = () => (
                     <Route path="/dashboard/scheduler" element={<AdminRoute><ErrorBoundary featureName="Scheduler"><SchedulerPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/bookings" element={<AdminRoute><ErrorBoundary featureName="Bookings"><BookingsPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/customers" element={<AdminRoute><ErrorBoundary featureName="Customers"><CustomersPage /></ErrorBoundary></AdminRoute>} />
-                    <Route path="/dashboard/services" element={<AdminRoute><ErrorBoundary featureName="Services"><ServicesPage /></ErrorBoundary></AdminRoute>} />
+                    
                     <Route path="/dashboard/staff" element={<AdminRoute><ErrorBoundary featureName="Staff Management"><StaffPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/payroll" element={<AdminRoute><ErrorBoundary featureName="Payroll"><PayrollPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/finance" element={<AdminRoute><ErrorBoundary featureName="Finance"><FinancePage /></ErrorBoundary></AdminRoute>} />
@@ -336,21 +323,19 @@ const App = () => (
                     <Route path="/dashboard/leads" element={<AdminRoute><ErrorBoundary featureName="Leads"><LeadsPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/inventory" element={<AdminRoute><ErrorBoundary featureName="Inventory"><InventoryPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/invoices" element={<AdminRoute><ErrorBoundary featureName="Invoices"><InvoicesPage /></ErrorBoundary></AdminRoute>} />
-                    <Route path="/dashboard/operations" element={<AdminRoute><ErrorBoundary featureName="Operations Tracker"><OperationsTrackerPage /></ErrorBoundary></AdminRoute>} />
-                    <Route path="/dashboard/feedback" element={<AdminRoute><ErrorBoundary featureName="Client Feedback"><ClientFeedbackPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/campaigns" element={<AdminRoute><ErrorBoundary featureName="Campaigns"><CampaignsPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/checklists" element={<AdminRoute><ErrorBoundary featureName="Checklists"><ChecklistsPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/payment-integration" element={<AdminRoute><ErrorBoundary featureName="Payment Integration"><PaymentIntegrationPage /></ErrorBoundary></AdminRoute>} />
-                    <Route path="/dashboard/subscription" element={<AdminRoute><ErrorBoundary featureName="Subscription"><SubscriptionPage /></ErrorBoundary></AdminRoute>} />
+                    
                     <Route path="/dashboard/help" element={<AdminRoute><ErrorBoundary featureName="Help Center"><HelpPage /></ErrorBoundary></AdminRoute>} />
-                    <Route path="/dashboard/discounts" element={<AdminRoute><ErrorBoundary featureName="Discounts"><DiscountsPage /></ErrorBoundary></AdminRoute>} />
+                    
                     <Route path="/dashboard/messages" element={<AdminRoute><ErrorBoundary featureName="Messages"><MessagesPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/tasks" element={<AdminRoute><ErrorBoundary featureName="Tasks"><TasksPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/platform-analytics" element={<AdminRoute><ErrorBoundary featureName="Platform Analytics"><PlatformAnalyticsPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/ai-intelligence" element={<AdminRoute><ErrorBoundary featureName="AI Intelligence"><AIIntelligencePage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/client-portal" element={<AdminRoute><ErrorBoundary featureName="Client Portal"><ClientPortalAdminPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/automation-center" element={<AdminRoute><ErrorBoundary featureName="Automation Center"><AutomationCenterPage /></ErrorBoundary></AdminRoute>} />
-                    <Route path="/dashboard/import" element={<AdminRoute><ErrorBoundary featureName="Data Import"><DataImportPage /></ErrorBoundary></AdminRoute>} />
+                    
                     <Route path="/dashboard/booking-photos" element={<AdminRoute><ErrorBoundary featureName="Booking Photos"><BookingPhotosPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/portfolio" element={<AdminRoute><ErrorBoundary featureName="Portfolio"><PortfolioPage /></ErrorBoundary></AdminRoute>} />
 
