@@ -57,8 +57,6 @@ const RecurringBookingsPage = lazy(() => import("./pages/admin/RecurringBookings
 const LeadsPage = lazy(() => import("./pages/admin/LeadsPage"));
 const InventoryPage = lazy(() => import("./pages/admin/InventoryPage"));
 const InvoicesPage = lazy(() => import("./pages/admin/InvoicesPage"));
-const OperationsTrackerPage = lazy(() => import("./pages/admin/OperationsTrackerPage"));
-const ClientFeedbackPage = lazy(() => import("./pages/admin/ClientFeedbackPage"));
 const CampaignsPage = lazy(() => import("./pages/admin/CampaignsPage"));
 const ChecklistsPage = lazy(() => import("./pages/admin/ChecklistsPage"));
 const PaymentIntegrationPage = lazy(() => import("./pages/admin/PaymentIntegrationPage"));
