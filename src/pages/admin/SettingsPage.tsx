@@ -1018,27 +1018,6 @@ export default function SettingsPage() {
           <MobileBottomNavSettings />
         </TabsContent>
 
-        {/* Import Data */}
-        <TabsContent value="import" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Upload className="w-5 h-5" />
-                Import Data from Another Platform
-              </CardTitle>
-              <CardDescription>
-                Migrate your customers, staff, bookings, and services from BookingKoala or Jobber
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button onClick={() => navigate('/dashboard/import')} className="gap-2">
-                <Upload className="w-4 h-4" />
-                Open Import Wizard
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
         {/* Facebook Integration */}
         <TabsContent value="facebook" className="space-y-6">
           <FacebookIntegrationCard organizationId={organization?.id || ''} />
