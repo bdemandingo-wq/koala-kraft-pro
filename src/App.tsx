@@ -285,10 +285,6 @@ const App = () => (
                     <Route path="/features/booking" element={<BookingSoftware />} />
                     <Route path="/features/crm" element={<CRMSoftware />} />
 
-                    {/* Staff Portal */}
-                    <Route path="/staff/login" element={<StaffLoginPage />} />
-                    <Route path="/staff/reset-password" element={<StaffResetPasswordPage />} />
-                    <Route path="/staff" element={<StaffRoute><ErrorBoundary featureName="Staff Portal"><StaffPortal /></ErrorBoundary></StaffRoute>} />
 
                     {/* Client Portal */}
                     <Route path="/portal" element={<PortalLoginPage />} />
