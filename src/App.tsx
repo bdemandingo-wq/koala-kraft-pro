@@ -11,7 +11,7 @@ import { OrganizationProvider } from "@/contexts/OrganizationContext";
 import { TestModeProvider } from "@/contexts/TestModeContext";
 import { ClientPortalProvider } from "@/contexts/ClientPortalContext";
 import { AdminRoute } from "@/components/AdminRoute";
-import { StaffRoute } from "@/components/StaffRoute";
+
 import { ProtectedPortalRoute } from "@/components/ProtectedPortalRoute";
 import { SessionTrackerProvider } from "@/components/SessionTrackerProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -46,8 +46,6 @@ const SchedulerPage = lazy(() => import("./pages/admin/SchedulerPage"));
 const BookingsPage = lazy(() => import("./pages/admin/BookingsPage"));
 const CustomersPage = lazy(() => import("./pages/admin/CustomersPage"));
 
-const StaffPage = lazy(() => import("./pages/admin/StaffPage"));
-const PayrollPage = lazy(() => import("./pages/admin/PayrollPage"));
 const FinancePage = lazy(() => import("./pages/admin/FinancePage"));
 const ExpensesPage = lazy(() => import("./pages/admin/ExpensesPage"));
 const ReportsPage = lazy(() => import("./pages/admin/ReportsPage"));
@@ -72,9 +70,6 @@ const AutomationCenterPage = lazy(() => import("./pages/admin/AutomationCenterPa
 
 const BookingPhotosPage = lazy(() => import("./pages/admin/BookingPhotosPage"));
 const PortfolioPage = lazy(() => import("./pages/admin/PortfolioPage"));
-const StaffPortal = lazy(() => import("./pages/staff/StaffPortal"));
-const StaffLoginPage = lazy(() => import("./pages/staff/StaffLoginPage"));
-const StaffResetPasswordPage = lazy(() => import("./pages/staff/StaffResetPasswordPage"));
 
 // Client Portal Pages
 const PortalLoginPage = lazy(() => import("./pages/portal/PortalLoginPage"));
@@ -197,10 +192,6 @@ const App = () => (
                       <Route path="/features/booking" element={<BookingSoftware />} />
                       <Route path="/features/crm" element={<CRMSoftware />} />
 
-                      {/* Staff Portal */}
-                      <Route path="/staff/login" element={<StaffLoginPage />} />
-                      <Route path="/staff/reset-password" element={<StaffResetPasswordPage />} />
-                      <Route path="/staff" element={<StaffRoute><ErrorBoundary featureName="Staff Portal"><StaffPortal /></ErrorBoundary></StaffRoute>} />
 
                       {/* Client Portal */}
                       <Route path="/portal" element={<PortalLoginPage />} />
@@ -213,8 +204,6 @@ const App = () => (
                       <Route path="/dashboard/scheduler" element={<AdminRoute><ErrorBoundary featureName="Scheduler"><SchedulerPage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/bookings" element={<AdminRoute><ErrorBoundary featureName="Bookings"><BookingsPage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/customers" element={<AdminRoute><ErrorBoundary featureName="Customers"><CustomersPage /></ErrorBoundary></AdminRoute>} />
-                      <Route path="/dashboard/staff" element={<AdminRoute><ErrorBoundary featureName="Staff Management"><StaffPage /></ErrorBoundary></AdminRoute>} />
-                      <Route path="/dashboard/payroll" element={<AdminRoute><ErrorBoundary featureName="Payroll"><PayrollPage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/finance" element={<AdminRoute><ErrorBoundary featureName="Finance"><FinancePage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/expenses" element={<AdminRoute><ErrorBoundary featureName="Expenses"><ExpensesPage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/reports" element={<AdminRoute><ErrorBoundary featureName="Reports"><ReportsPage /></ErrorBoundary></AdminRoute>} />
@@ -296,10 +285,6 @@ const App = () => (
                     <Route path="/features/booking" element={<BookingSoftware />} />
                     <Route path="/features/crm" element={<CRMSoftware />} />
 
-                    {/* Staff Portal */}
-                    <Route path="/staff/login" element={<StaffLoginPage />} />
-                    <Route path="/staff/reset-password" element={<StaffResetPasswordPage />} />
-                    <Route path="/staff" element={<StaffRoute><ErrorBoundary featureName="Staff Portal"><StaffPortal /></ErrorBoundary></StaffRoute>} />
 
                     {/* Client Portal */}
                     <Route path="/portal" element={<PortalLoginPage />} />
@@ -312,8 +297,6 @@ const App = () => (
                     <Route path="/dashboard/bookings" element={<AdminRoute><ErrorBoundary featureName="Bookings"><BookingsPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/customers" element={<AdminRoute><ErrorBoundary featureName="Customers"><CustomersPage /></ErrorBoundary></AdminRoute>} />
                     
-                    <Route path="/dashboard/staff" element={<AdminRoute><ErrorBoundary featureName="Staff Management"><StaffPage /></ErrorBoundary></AdminRoute>} />
-                    <Route path="/dashboard/payroll" element={<AdminRoute><ErrorBoundary featureName="Payroll"><PayrollPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/finance" element={<AdminRoute><ErrorBoundary featureName="Finance"><FinancePage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/expenses" element={<AdminRoute><ErrorBoundary featureName="Expenses"><ExpensesPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/reports" element={<AdminRoute><ErrorBoundary featureName="Reports"><ReportsPage /></ErrorBoundary></AdminRoute>} />

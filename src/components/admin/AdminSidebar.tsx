@@ -76,11 +76,9 @@ const defaultNavigation = [
   { name: 'Tasks', href: '/dashboard/tasks', icon: CheckSquare },
   { name: 'Leads', href: '/dashboard/leads', icon: Target },
   { name: 'Campaigns', href: '/dashboard/campaigns', icon: Zap },
-  { name: 'Technicians', href: '/dashboard/staff', icon: UserCircle },
   { name: 'Portfolio', href: '/dashboard/portfolio', icon: Camera },
   { name: 'Inventory', href: '/dashboard/inventory', icon: Package },
   
-  { name: 'Payroll', href: '/dashboard/payroll', icon: DollarSign },
   { name: 'Expenses', href: '/dashboard/expenses', icon: Receipt },
   { name: 'Finance & P&L', href: '/dashboard/finance', icon: Receipt },
   { name: 'Reports', href: '/dashboard/reports', icon: BarChart3 },

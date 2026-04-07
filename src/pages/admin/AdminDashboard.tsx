@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { TodayStats } from '@/components/admin/TodayStats';
 import { UpcomingBookings } from '@/components/admin/UpcomingBookings';
+import { TodaysJobsWidget } from '@/components/admin/TodaysJobsWidget';
 import { useBookings, useCustomers, BookingWithDetails } from '@/hooks/useBookings';
 import { Loader2 } from 'lucide-react';
 import { isToday } from 'date-fns';
@@ -94,7 +95,7 @@ export default function AdminDashboard() {
   return (
     <AdminLayout
       title="Dashboard"
-      subtitle={`${getGreeting()}! Here's your detailing business at a glance.`}
+      subtitle={`${getGreeting()}! Here's your day at a glance.`}
     >
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 animate-fade-in">
         <div className="xl:col-span-2 space-y-6">
@@ -103,6 +104,9 @@ export default function AdminDashboard() {
             payments={todayStats.payments}
             customers={todayStats.customers}
           />
+
+          {/* Today's Jobs - check-in/out, status updates, before/after */}
+          <TodaysJobsWidget bookings={bookings as BookingWithDetails[]} />
           
           <Suspense fallback={
             <div className="bg-card rounded-2xl p-6 border border-border/50 animate-pulse">
