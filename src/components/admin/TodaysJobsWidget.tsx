@@ -26,7 +26,7 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'second
 };
 
 export function TodaysJobsWidget({ bookings }: TodaysJobsWidgetProps) {
-  const { openMapsNavigation } = useMapsNavigation();
+  const { openDirections } = useMapsNavigation();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [updatingId, setUpdatingId] = useState<string | null>(null);
