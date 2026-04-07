@@ -132,7 +132,7 @@ export function TodaysJobsWidget({ bookings }: TodaysJobsWidgetProps) {
                     size="sm"
                     variant="outline"
                     className="shrink-0 h-7 text-xs"
-                    onClick={() => openMapsNavigation(fullAddress)}
+                    onClick={() => openDirections({ address: fullAddress })}
                   >
                     <Navigation className="h-3 w-3 mr-1" />
                     Navigate
