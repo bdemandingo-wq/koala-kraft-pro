@@ -11,7 +11,7 @@ import { OrganizationProvider } from "@/contexts/OrganizationContext";
 import { TestModeProvider } from "@/contexts/TestModeContext";
 import { ClientPortalProvider } from "@/contexts/ClientPortalContext";
 import { AdminRoute } from "@/components/AdminRoute";
-import { StaffRoute } from "@/components/StaffRoute";
+
 import { ProtectedPortalRoute } from "@/components/ProtectedPortalRoute";
 import { SessionTrackerProvider } from "@/components/SessionTrackerProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
