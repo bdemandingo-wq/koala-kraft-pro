@@ -297,8 +297,6 @@ const App = () => (
                     <Route path="/dashboard/bookings" element={<AdminRoute><ErrorBoundary featureName="Bookings"><BookingsPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/customers" element={<AdminRoute><ErrorBoundary featureName="Customers"><CustomersPage /></ErrorBoundary></AdminRoute>} />
                     
-                    <Route path="/dashboard/staff" element={<AdminRoute><ErrorBoundary featureName="Staff Management"><StaffPage /></ErrorBoundary></AdminRoute>} />
-                    <Route path="/dashboard/payroll" element={<AdminRoute><ErrorBoundary featureName="Payroll"><PayrollPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/finance" element={<AdminRoute><ErrorBoundary featureName="Finance"><FinancePage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/expenses" element={<AdminRoute><ErrorBoundary featureName="Expenses"><ExpensesPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/reports" element={<AdminRoute><ErrorBoundary featureName="Reports"><ReportsPage /></ErrorBoundary></AdminRoute>} />
