@@ -104,6 +104,9 @@ export default function AdminDashboard() {
             payments={todayStats.payments}
             customers={todayStats.customers}
           />
+
+          {/* Today's Jobs - check-in/out, status updates, before/after */}
+          <TodaysJobsWidget bookings={bookings as BookingWithDetails[]} />
           
           <Suspense fallback={
             <div className="bg-card rounded-2xl p-6 border border-border/50 animate-pulse">
