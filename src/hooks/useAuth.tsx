@@ -45,39 +45,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setShowSubscriptionDialog(false);
   };
 
-  const checkSubscription = async (accessToken?: string) => {
-    try {
-      const token =
-        accessToken ?? noSessionAuth.session?.access_token;
-
-      if (!token) return;
-
-      const { data, error } = await supabaseNoSession.functions.invoke("check-subscription", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (error) throw error;
-
-      setSubscription(data);
-      setShowSubscriptionDialog(!data?.subscribed);
-    } catch (error: any) {
-      const status = error?.context?.status;
-      const msg = String(error?.message ?? "");
-
-      // If the stored session is stale/invalid, clear it so the app can recover.
-      if (
-        status === 401 ||
-        msg.includes("Auth session missing") ||
-        msg.includes("session_not_found")
-      ) {
-        await signOut();
-        return;
-      }
-
-      console.error("Error checking subscription:", error);
-    }
+  const checkSubscription = async (_accessToken?: string) => {
+    // Subscription check disabled — treat all users as subscribed
+    setSubscription({ subscribed: true, trial_active: false, trial_end: null, subscription_end: null });
+    setShowSubscriptionDialog(false);
   };
 
   useEffect(() => {
