@@ -452,24 +452,22 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
           </DndContext>
         )}
 
-        {/* Platform Admin Link - Only visible for support@wedetailnc.com */}
-        {user?.email === 'support@wedetailnc.com' && (
-          <div className="mt-4 pt-4 border-t border-sidebar-border">
-            <Link
-              to="/dashboard/platform-analytics"
-              onClick={handleNavClick}
-              className={cn(
-                'sidebar-link min-h-[44px] pointer-events-auto touch-manipulation',
-                location.pathname === '/dashboard/platform-analytics' && 'active',
-                !isOpen && !isMobile && 'justify-center px-2'
-              )}
-              title={!isOpen && !isMobile ? 'Platform Analytics' : undefined}
-            >
-              <Activity className="w-5 h-5 flex-shrink-0 text-amber-500" />
-              {(isOpen || isMobile) && <span className="text-amber-500 font-medium">Platform Analytics</span>}
-            </Link>
-          </div>
-        )}
+        {/* Platform Analytics Link - visible to all owners */}
+        <div className="mt-4 pt-4 border-t border-sidebar-border">
+          <Link
+            to="/dashboard/platform-analytics"
+            onClick={handleNavClick}
+            className={cn(
+              'sidebar-link min-h-[44px] pointer-events-auto touch-manipulation',
+              location.pathname === '/dashboard/platform-analytics' && 'active',
+              !isOpen && !isMobile && 'justify-center px-2'
+            )}
+            title={!isOpen && !isMobile ? 'Platform Analytics' : undefined}
+          >
+            <Activity className="w-5 h-5 flex-shrink-0 text-amber-500" />
+            {(isOpen || isMobile) && <span className="text-amber-500 font-medium">Platform Analytics</span>}
+          </Link>
+        </div>
 
       </nav>
 

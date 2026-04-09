@@ -128,7 +128,7 @@ export default function PlatformAnalyticsPage() {
         clientPortalStats: allTimeData?.clientPortalStats,
       };
     },
-    enabled: user?.email === 'support@wedetailnc.com',
+    enabled: !!user,
   });
 
 
@@ -185,18 +185,7 @@ export default function PlatformAnalyticsPage() {
     fetchAnalytics();
   }, []);
 
-  // Check if user is platform admin
-  if (user?.email !== 'support@wedetailnc.com') {
-    return (
-      <AdminLayout title="Unauthorized" subtitle="You don't have access to this page">
-        <Card className="border-destructive/20 bg-destructive/5">
-          <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground">This page is only accessible to platform administrators.</p>
-          </CardContent>
-        </Card>
-      </AdminLayout>
-    );
-  }
+  // Page is now accessible to all authenticated org owners
 
   if (loading) {
     return (
