@@ -104,6 +104,7 @@ export default function LeadsPage() {
   const [showFunnel, setShowFunnel] = useState(false);
   const [viewMode, setViewMode] = useState<'table' | 'pipeline' | 'abandoned'>('pipeline');
   const [monthFilter, setMonthFilter] = useState('all');
+  const [fbSyncOpen, setFbSyncOpen] = useState(false);
   
   const queryClient = useQueryClient();
   const { isTestMode, maskName, maskEmail, maskPhone } = useTestMode();
