@@ -1,16 +1,27 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Seo } from "@/components/Seo";
 import { Star, Menu, X, Check, Phone, MapPin, Clock, Shield, Sparkles, Car } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
 import servicesBg from "@/assets/services-bg.jpg";
 import teamMember1 from "@/assets/team-member-1.png";
+import { supabase } from "@/lib/supabase";
 
-const packages = [
+interface PackageData {
+  badge: string;
+  name: string;
+  price: number;
+  items: string[];
+  popular?: boolean;
+  isMonthly?: boolean;
+}
+
+// Fallback hardcoded packages (used while DB loads or if no DB data)
+const fallbackPackages = [
   {
     badge: "Quick Clean",
     name: "Express Package",
-    price: "$175",
+    price: 175,
     items: [
       "Prewash, Emblems and Gas Cap Cleaning",
       "Complete Wheel, Tire and Fender Well Cleaning",
@@ -27,7 +38,7 @@ const packages = [
   {
     badge: "Most Popular",
     name: "Reset Package",
-    price: "$225",
+    price: 225,
     popular: true,
     items: [
       "Everything in Express Package +",
@@ -40,7 +51,7 @@ const packages = [
   {
     badge: "Best Value",
     name: "Deluxe Package",
-    price: "$350",
+    price: 350,
     items: [
       "Everything in Reset Package +",
       "Paint Decontamination",
@@ -53,7 +64,7 @@ const packages = [
   {
     badge: "Removes Swirls",
     name: "Elite Package",
-    price: "$480",
+    price: 480,
     items: [
       "1 Step Paint Correction (Removes 50-70% of swirls)",
       "Prewash, Emblems and Gas Cap Cleaning",
@@ -71,7 +82,7 @@ const packages = [
   {
     badge: "Ceramic Coating",
     name: "Ultimate Protect",
-    price: "$580",
+    price: 580,
     items: [
       "5 Year Ceramic Coating",
       "Prewash, Emblems and Gas Cap Cleaning",
@@ -87,7 +98,8 @@ const packages = [
   {
     badge: "Membership",
     name: "Maintenance Plan",
-    price: "$90/mo",
+    price: 90,
+    isMonthly: true,
     items: [
       "Weekly, bi-weekly, or monthly options",
       "Exterior + interior upkeep included",
@@ -96,6 +108,26 @@ const packages = [
     ],
   },
 ];
+
+// Badge mapping for DB services
+const badgeMap: Record<string, { badge: string; popular?: boolean }> = {
+  "Express Package": { badge: "Quick Clean" },
+  "Reset Package": { badge: "Most Popular", popular: true },
+  "Deluxe Package": { badge: "Best Value" },
+  "Elite Package": { badge: "Removes Swirls" },
+  "Ultimate Protect Package": { badge: "Ceramic Coating" },
+  "Maintenance Plan": { badge: "Membership" },
+};
+
+// Items mapping for DB services (since DB may not store display items)
+const itemsMap: Record<string, string[]> = {
+  "Express Package": fallbackPackages[0].items,
+  "Reset Package": fallbackPackages[1].items,
+  "Deluxe Package": fallbackPackages[2].items,
+  "Elite Package": fallbackPackages[3].items,
+  "Ultimate Protect Package": fallbackPackages[4].items,
+  "Maintenance Plan": fallbackPackages[5].items,
+};
 
 const testimonials = [
   {
@@ -116,13 +148,73 @@ const testimonials = [
   },
 ];
 
+const ORG_SLUG = "hi"; // Organization slug for booking links
+
 export default function LandingPage() {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [packages, setPackages] = useState<PackageData[]>(fallbackPackages);
+
+  // Fetch live pricing from DB
+  useEffect(() => {
+    const fetchPricing = async () => {
+      try {
+        // Get org ID from slug
+        const { data: org } = await supabase
+          .from('organizations')
+          .select('id')
+          .eq('slug', ORG_SLUG)
+          .single();
+
+        if (!org) return;
+
+        const { data: services } = await supabase
+          .from('services')
+          .select('name, price')
+          .eq('organization_id', org.id)
+          .eq('is_active', true)
+          .order('price', { ascending: true });
+
+        if (services && services.length > 0) {
+          const dbPackages = services.map((svc) => {
+            const meta = badgeMap[svc.name] || { badge: svc.name };
+            const items = itemsMap[svc.name] || [];
+            const isMonthly = svc.name === 'Maintenance Plan';
+            return {
+              badge: meta.badge,
+              name: svc.name,
+              price: Number(svc.price),
+              popular: meta.popular || false,
+              isMonthly,
+              items,
+            };
+          });
+          setPackages(dbPackages);
+        }
+      } catch (err) {
+        console.error('Failed to fetch pricing:', err);
+        // Keep fallback packages
+      }
+    };
+    fetchPricing();
+  }, []);
 
   const scrollTo = (id: string) => {
     setMobileMenuOpen(false);
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleBookNow = (serviceName?: string) => {
+    if (serviceName) {
+      navigate(`/book/${ORG_SLUG}?service=${encodeURIComponent(serviceName)}`);
+    } else {
+      navigate(`/book/${ORG_SLUG}`);
+    }
+  };
+
+  const formatPrice = (pkg: typeof packages[0]) => {
+    if (pkg.isMonthly) return `$${pkg.price}/mo`;
+    return `$${pkg.price}`;
   };
 
   return (
@@ -163,7 +255,7 @@ export default function LandingPage() {
                 Log In
               </button>
               <button
-                onClick={() => navigate("/signup")}
+                onClick={() => handleBookNow()}
                 className="text-sm bg-[#e74c5e] hover:bg-[#d43f51] text-white px-5 py-2 rounded-full transition-colors font-medium"
               >
                 Book Now
@@ -180,7 +272,7 @@ export default function LandingPage() {
               <button onClick={() => scrollTo("about")} className="block w-full text-left text-white/70 hover:text-white px-3 py-2 rounded-lg">About Us</button>
               <a href="tel:9843328570" className="block w-full text-left text-white/70 hover:text-white px-3 py-2 rounded-lg">📞 (984) 332-8570</a>
               <button onClick={() => { setMobileMenuOpen(false); navigate("/login"); }} className="block w-full text-left text-white/70 hover:text-white px-3 py-2 rounded-lg">Log In</button>
-              <button onClick={() => { setMobileMenuOpen(false); navigate("/signup"); }} className="block w-full text-center bg-[#e74c5e] hover:bg-[#d43f51] text-white px-5 py-2.5 rounded-full font-medium">Book Now</button>
+              <button onClick={() => { setMobileMenuOpen(false); handleBookNow(); }} className="block w-full text-center bg-[#e74c5e] hover:bg-[#d43f51] text-white px-5 py-2.5 rounded-full font-medium">Book Now</button>
             </div>
           )}
         </div>
@@ -200,7 +292,7 @@ export default function LandingPage() {
             Premium mobile detailing, ceramic coating &amp; paint correction — we come to you.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-            <button onClick={() => navigate("/signup")} className="bg-[#e74c5e] hover:bg-[#d43f51] text-white text-lg font-semibold px-10 py-4 rounded-full transition-colors shadow-lg">
+            <button onClick={() => handleBookNow()} className="bg-[#e74c5e] hover:bg-[#d43f51] text-white text-lg font-semibold px-10 py-4 rounded-full transition-colors shadow-lg">
               Book Now
             </button>
             <a href="tel:9843328570" className="border border-white/30 hover:border-white/60 text-white text-lg font-semibold px-10 py-4 rounded-full transition-colors backdrop-blur-sm text-center">
@@ -259,7 +351,7 @@ export default function LandingPage() {
                     <span className={`text-xs font-semibold px-3 py-1 rounded-full ${pkg.popular ? "bg-[#e74c5e] text-white" : "bg-white/10 text-white/70"}`}>
                       {pkg.badge}
                     </span>
-                    <span className="text-lg font-bold">Starting at {pkg.price}</span>
+                    <span className="text-lg font-bold">Starting at {formatPrice(pkg)}</span>
                   </div>
                   <h3 className="text-xl font-bold mb-4">{pkg.name}</h3>
                   <ul className="space-y-2 flex-1 mb-6">
@@ -271,7 +363,7 @@ export default function LandingPage() {
                     ))}
                   </ul>
                   <button
-                    onClick={() => navigate("/signup")}
+                    onClick={() => handleBookNow(pkg.name)}
                     className={`w-full py-3 rounded-full font-semibold transition-colors ${
                       pkg.popular
                         ? "bg-[#e74c5e] hover:bg-[#d43f51] text-white"
@@ -310,7 +402,7 @@ export default function LandingPage() {
           </div>
 
           <div className="text-center mt-10">
-            <button onClick={() => navigate("/signup")} className="bg-[#e74c5e] hover:bg-[#d43f51] text-white font-semibold px-8 py-3 rounded-full transition-colors">
+            <button onClick={() => handleBookNow()} className="bg-[#e74c5e] hover:bg-[#d43f51] text-white font-semibold px-8 py-3 rounded-full transition-colors">
               Book Your Detail
             </button>
           </div>
@@ -377,7 +469,7 @@ export default function LandingPage() {
           </h2>
           <p className="text-white/90 mb-8">Book your mobile detail today — we come to you anywhere in Charlotte.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button onClick={() => navigate("/signup")} className="bg-white text-[#e74c5e] font-semibold px-8 py-3 rounded-full hover:bg-white/90 transition-colors">
+            <button onClick={() => handleBookNow()} className="bg-white text-[#e74c5e] font-semibold px-8 py-3 rounded-full hover:bg-white/90 transition-colors">
               Book Now
             </button>
             <a href="tel:9843328570" className="border border-white/40 text-white font-semibold px-8 py-3 rounded-full hover:bg-white/10 transition-colors text-center">
@@ -394,7 +486,7 @@ export default function LandingPage() {
           <div className="flex items-center gap-6 text-sm text-white/50">
             <a href="tel:9843328570" className="hover:text-white/80 transition-colors">(984) 332-8570</a>
             <Link to="/privacy-policy" className="hover:text-white/80 transition-colors">Privacy Policy</Link>
-            <Link to="/signup" className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-1.5 rounded text-sm font-semibold transition-colors">Sign Up</Link>
+            <Link to="/signup" className="bg-[#e74c5e] hover:bg-[#d43f51] text-white px-4 py-1.5 rounded text-sm font-semibold transition-colors">Sign Up</Link>
           </div>
           <span className="text-xs text-white/30">© {new Date().getFullYear()} WE DETAIL NC. All rights reserved.</span>
         </div>

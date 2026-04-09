@@ -52,9 +52,26 @@ function formatTime24to12(time24: string): string {
   return `${displayHour}:${String(m).padStart(2, '0')} ${period}`;
 }
 
+// Vehicle size multipliers for pricing
+const VEHICLE_SIZE_MULTIPLIERS = [
+  { label: 'Sedan / Coupe', multiplier: 1.0 },
+  { label: 'SUV / Crossover', multiplier: 1.3 },
+  { label: 'Truck', multiplier: 1.4 },
+  { label: 'Minivan', multiplier: 1.3 },
+  { label: 'Sports Car', multiplier: 1.1 },
+  { label: 'Luxury / Exotic', multiplier: 1.5 },
+  { label: 'RV / Motorhome', multiplier: 2.0 },
+];
+
 export default function PublicBookingPage() {
   const { orgSlug } = useParams<{ orgSlug: string }>();
   
+  // Read ?service= query param for pre-selection
+  const [preSelectedService] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('service') || null;
+  });
+
   // Track booking link ref parameter for link tracking
   const [trackingRef] = useState(() => {
     const params = new URLSearchParams(window.location.search);
@@ -63,6 +80,7 @@ export default function PublicBookingPage() {
   const [step, setStep] = useState(1);
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectedSqFtIndex, setSelectedSqFtIndex] = useState<number | null>(null);
+  const [vehicleSizeIndex, setVehicleSizeIndex] = useState(0); // slider index
   const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
   const [selectedBedrooms, setSelectedBedrooms] = useState<string | null>(null);
   const [selectedBathrooms, setSelectedBathrooms] = useState<string | null>(null);
@@ -118,6 +136,24 @@ export default function PublicBookingPage() {
   } = usePublicOrgPricing(orgSlug);
 
   const isLight = bookingFormTheme === 'light';
+
+  // Pre-select service from query param
+  useEffect(() => {
+    if (preSelectedService && services.length > 0 && !selectedService) {
+      const match = services.find(s => s.name.toLowerCase() === preSelectedService.toLowerCase());
+      if (match) {
+        setSelectedService(match.id);
+      }
+    }
+  }, [preSelectedService, services, selectedService]);
+
+  // Sync vehicleType from slider
+  useEffect(() => {
+    const sizeLabel = VEHICLE_SIZE_MULTIPLIERS[vehicleSizeIndex]?.label || '';
+    if (sizeLabel && !vehicleType) {
+      setVehicleType(sizeLabel);
+    }
+  }, []);
 
   // Apply org branding colors once when loaded (no re-renders)
   // Fetch availability when date or service changes
@@ -244,6 +280,10 @@ export default function PublicBookingPage() {
     } else if (service) {
       total = service.minimumPrice;
     }
+
+    // Apply vehicle size multiplier
+    const vehicleMultiplier = VEHICLE_SIZE_MULTIPLIERS[vehicleSizeIndex]?.multiplier || 1.0;
+    total = total * vehicleMultiplier;
 
     // Add extras
     const extrasTotal = selectedExtras.reduce((sum, extraId) => {
@@ -554,6 +594,53 @@ export default function PublicBookingPage() {
                 </p>
               </div>
 
+              {/* Vehicle Size Slider */}
+              {selectedService && (
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Vehicle Size</h2>
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-muted-foreground">Adjust for your vehicle type</p>
+                    <span className="text-lg font-bold text-primary">
+                      {VEHICLE_SIZE_MULTIPLIERS[vehicleSizeIndex]?.label}
+                    </span>
+                  </div>
+                  <Card className="bg-transparent border-0 shadow-none">
+                    <CardContent className="p-5">
+                      <div className="relative">
+                        <input
+                          type="range"
+                          min={0}
+                          max={VEHICLE_SIZE_MULTIPLIERS.length - 1}
+                          step={1}
+                          value={vehicleSizeIndex}
+                          onChange={(e) => {
+                            const idx = Number(e.target.value);
+                            setVehicleSizeIndex(idx);
+                            setVehicleType(VEHICLE_SIZE_MULTIPLIERS[idx]?.label || '');
+                          }}
+                          className="w-full h-2 rounded-full appearance-none cursor-pointer accent-primary"
+                          style={{
+                            background: `linear-gradient(to right, hsl(var(--primary)) ${(vehicleSizeIndex / (VEHICLE_SIZE_MULTIPLIERS.length - 1)) * 100}%, hsl(var(--muted)) ${(vehicleSizeIndex / (VEHICLE_SIZE_MULTIPLIERS.length - 1)) * 100}%)`,
+                          }}
+                        />
+                        <div className="flex justify-between mt-2 text-xs text-muted-foreground">
+                          <span>Sedan</span>
+                          <span>RV</span>
+                        </div>
+                      </div>
+                      {/* Estimated price display */}
+                      {service && (
+                        <div className="mt-4 p-4 rounded-lg bg-muted/50 text-center">
+                          <p className="text-sm text-muted-foreground">Estimated Price</p>
+                          <p className="text-3xl font-bold text-primary">${calculateTotal().toLocaleString()}</p>
+                          <p className="text-xs text-muted-foreground mt-1">+ add-ons</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+
               {/* Vehicle Information */}
               {selectedService && (
                 <div>
@@ -564,13 +651,18 @@ export default function PublicBookingPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label>Vehicle Type *</Label>
-                          <Select value={vehicleType} onValueChange={setVehicleType}>
+                          <Select value={vehicleType} onValueChange={(v) => {
+                            setVehicleType(v);
+                            // Sync slider with dropdown
+                            const idx = VEHICLE_SIZE_MULTIPLIERS.findIndex(s => s.label === v);
+                            if (idx >= 0) setVehicleSizeIndex(idx);
+                          }}>
                             <SelectTrigger>
                               <SelectValue placeholder="Select vehicle type" />
                             </SelectTrigger>
                             <SelectContent>
-                              {['Sedan', 'Coupe', 'SUV / Crossover', 'Truck', 'Minivan', 'Sports Car', 'Luxury / Exotic', 'RV / Motorhome'].map(v => (
-                                <SelectItem key={v} value={v}>{v}</SelectItem>
+                              {VEHICLE_SIZE_MULTIPLIERS.map(v => (
+                                <SelectItem key={v.label} value={v.label}>{v.label}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
