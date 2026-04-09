@@ -70,6 +70,7 @@ const AutomationCenterPage = lazy(() => import("./pages/admin/AutomationCenterPa
 
 const BookingPhotosPage = lazy(() => import("./pages/admin/BookingPhotosPage"));
 const PortfolioPage = lazy(() => import("./pages/admin/PortfolioPage"));
+const QuickJobPage = lazy(() => import("./pages/admin/QuickJobPage"));
 
 // Client Portal Pages
 const PortalLoginPage = lazy(() => import("./pages/portal/PortalLoginPage"));

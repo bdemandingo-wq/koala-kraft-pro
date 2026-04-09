@@ -65,6 +65,7 @@ import { CSS } from '@dnd-kit/utilities';
 
 const defaultNavigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
+  { name: 'Quick Job', href: '/dashboard/quick-job', icon: Plus },
   { name: 'AI Intelligence', href: '/dashboard/ai-intelligence', icon: Brain },
   { name: 'Scheduler', href: '/dashboard/scheduler', icon: Calendar },
   { name: 'Bookings', href: '/dashboard/bookings', icon: ClipboardList },
