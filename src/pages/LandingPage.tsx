@@ -5,7 +5,6 @@ import { Star, Menu, X, Check, Phone, MapPin, Clock, Shield, Sparkles, Car } fro
 import heroBg from "@/assets/hero-bg.jpg";
 import servicesBg from "@/assets/services-bg.jpg";
 import teamMember1 from "@/assets/team-member-1.png";
-import teamMember2 from "@/assets/team-member-2.png";
 
 const packages = [
   {
@@ -346,16 +345,9 @@ export default function LandingPage() {
             </div>
 
             <div className="flex flex-col items-center gap-6">
-              <div className="flex gap-6 justify-center">
-                <div className="text-center">
-                  <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-white/10">
-                    <img src={teamMember1} alt="Team member at WE DETAIL NC" className="w-full h-full object-cover" loading="lazy" width={512} height={512} />
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-white/10">
-                    <img src={teamMember2} alt="Team member at WE DETAIL NC" className="w-full h-full object-cover" loading="lazy" width={512} height={512} />
-                  </div>
+              <div className="flex justify-center">
+                <div className="w-48 h-48 rounded-full overflow-hidden border-4 border-white/10">
+                  <img src={teamMember1} alt="Owner of WE DETAIL NC" className="w-full h-full object-cover" loading="lazy" width={512} height={512} />
                 </div>
               </div>
               <p className="font-semibold text-lg">Owner-Operated Team</p>
