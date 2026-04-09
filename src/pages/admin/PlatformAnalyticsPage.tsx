@@ -5,7 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Loader2, Users, Building2, CreditCard, TrendingUp, 
   UserPlus, RefreshCw, Trash2, Activity, Calendar,
-  ArrowUpRight, ArrowDownRight, Clock, Timer, Mail
+  ArrowUpRight, ArrowDownRight, Clock, Timer, Mail,
+  CheckSquare, Sparkles, MessageSquare
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
@@ -128,7 +129,7 @@ export default function PlatformAnalyticsPage() {
         clientPortalStats: allTimeData?.clientPortalStats,
       };
     },
-    enabled: user?.email === 'support@wedetailnc.com',
+    enabled: !!user,
   });
 
 
@@ -185,18 +186,7 @@ export default function PlatformAnalyticsPage() {
     fetchAnalytics();
   }, []);
 
-  // Check if user is platform admin
-  if (user?.email !== 'support@wedetailnc.com') {
-    return (
-      <AdminLayout title="Unauthorized" subtitle="You don't have access to this page">
-        <Card className="border-destructive/20 bg-destructive/5">
-          <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground">This page is only accessible to platform administrators.</p>
-          </CardContent>
-        </Card>
-      </AdminLayout>
-    );
-  }
+  // Page is now accessible to all authenticated org owners
 
   if (loading) {
     return (
@@ -324,22 +314,34 @@ export default function PlatformAnalyticsPage() {
 
         {/* Tabbed Content */}
         <Tabs defaultValue="subscribers" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-4">
-            <TabsTrigger value="subscribers" className="flex items-center gap-2">
-              <CreditCard className="w-4 h-4" />
-              Subscribers ({analytics?.subscribers?.total || 0})
+          <TabsList className="flex w-full overflow-x-auto mb-4">
+            <TabsTrigger value="subscribers" className="flex items-center gap-1 text-xs">
+              <CreditCard className="w-3.5 h-3.5" />
+              Subscribers
             </TabsTrigger>
-            <TabsTrigger value="signups" className="flex items-center gap-2">
-              <UserPlus className="w-4 h-4" />
-              App Signups ({analytics?.signups.total || 0})
+            <TabsTrigger value="signups" className="flex items-center gap-1 text-xs">
+              <UserPlus className="w-3.5 h-3.5" />
+              Signups
             </TabsTrigger>
-            <TabsTrigger value="organizations" className="flex items-center gap-2">
-              <Building2 className="w-4 h-4" />
-              Organizations ({analytics?.organizations.total || 0})
+            <TabsTrigger value="organizations" className="flex items-center gap-1 text-xs">
+              <Building2 className="w-3.5 h-3.5" />
+              Orgs
             </TabsTrigger>
-            <TabsTrigger value="activity" className="flex items-center gap-2">
-              <Activity className="w-4 h-4" />
+            <TabsTrigger value="activity" className="flex items-center gap-1 text-xs">
+              <Activity className="w-3.5 h-3.5" />
               Activity
+            </TabsTrigger>
+            <TabsTrigger value="evidence" className="flex items-center gap-1 text-xs">
+              <CheckSquare className="w-3.5 h-3.5" />
+              Evidence
+            </TabsTrigger>
+            <TabsTrigger value="demos" className="flex items-center gap-1 text-xs">
+              <Sparkles className="w-3.5 h-3.5" />
+              Demos
+            </TabsTrigger>
+            <TabsTrigger value="feed" className="flex items-center gap-1 text-xs">
+              <MessageSquare className="w-3.5 h-3.5" />
+              Feed
             </TabsTrigger>
           </TabsList>
 
@@ -681,6 +683,63 @@ export default function PlatformAnalyticsPage() {
                       })()}
                     </ScrollArea>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Evidence Tab */}
+          <TabsContent value="evidence">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <CheckSquare className="w-5 h-5 text-primary" />
+                  Evidence & Proof
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-12 text-muted-foreground">
+                  <CheckSquare className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                  <p>Evidence tracking coming soon</p>
+                  <p className="text-xs mt-1">Track proof of work, before/after photos, and documentation</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Demos Tab */}
+          <TabsContent value="demos">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-primary" />
+                  Demo Accounts
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-12 text-muted-foreground">
+                  <Sparkles className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                  <p>Demo management coming soon</p>
+                  <p className="text-xs mt-1">Track demo requests and trial accounts</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Feed Tab */}
+          <TabsContent value="feed">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5 text-primary" />
+                  Platform Feed
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-12 text-muted-foreground">
+                  <MessageSquare className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                  <p>Platform feed coming soon</p>
+                  <p className="text-xs mt-1">Real-time feed of all platform events and actions</p>
                 </div>
               </CardContent>
             </Card>
