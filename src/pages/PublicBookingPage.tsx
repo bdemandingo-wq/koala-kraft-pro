@@ -281,6 +281,10 @@ export default function PublicBookingPage() {
       total = service.minimumPrice;
     }
 
+    // Apply vehicle size multiplier
+    const vehicleMultiplier = VEHICLE_SIZE_MULTIPLIERS[vehicleSizeIndex]?.multiplier || 1.0;
+    total = total * vehicleMultiplier;
+
     // Add extras
     const extrasTotal = selectedExtras.reduce((sum, extraId) => {
       const extra = extras.find(e => e.id === extraId);
