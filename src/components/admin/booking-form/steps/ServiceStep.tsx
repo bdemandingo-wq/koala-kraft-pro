@@ -1,11 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileText, CheckCircle, DollarSign, PawPrint, Home, Ruler, BedDouble, ClipboardCheck, Camera } from 'lucide-react';
+import { FileText, CheckCircle, DollarSign, ClipboardCheck, Camera } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBookingForm } from '../BookingFormContext';
 import { useServicePricing } from '@/hooks/useServicePricing';
@@ -13,12 +12,7 @@ import { useOrganizationSettings } from '@/hooks/useOrganizationSettings';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useOrganization } from '@/contexts/OrganizationContext';
-import { 
-  squareFootageRanges, 
-  bedroomOptions, 
-  bathroomOptions, 
-  frequencyOptions
-} from '@/data/pricingData';
+import { frequencyOptions } from '@/data/pricingData';
 
 interface ChecklistTemplate {
   id: string;
@@ -39,12 +33,6 @@ export function ServiceStep() {
     services,
     selectedServiceId,
     setSelectedServiceId,
-    squareFootage,
-    setSquareFootage,
-    bedrooms,
-    setBedrooms,
-    bathrooms,
-    setBathrooms,
     frequency,
     setFrequency,
     customFrequencyDays,
@@ -56,14 +44,6 @@ export function ServiceStep() {
     extrasTotal,
     totalAmount,
     setTotalAmount,
-    pricingMode,
-    setPricingMode,
-    homeCondition,
-    setHomeCondition,
-    petOption,
-    setPetOption,
-    conditionTotal,
-    petTotal,
     calculatedPrice,
     selectedChecklistId,
     setSelectedChecklistId,
@@ -120,20 +100,14 @@ export function ServiceStep() {
   // Get pricing for selected service
   const servicePricing = selectedServiceId ? getServicePricing(selectedServiceId) : null;
   
-  // Use service-specific extras, pets, condition options or defaults
+  // Use service-specific extras
   const extras = servicePricing?.extras || [];
-  const petOptions = servicePricing?.pet_options || [];
-  const homeConditionOptions = servicePricing?.home_condition_options || [];
 
-  const totalAddOns = extrasTotal + conditionTotal + petTotal;
-  
+  const totalAddOns = extrasTotal;
+
   // Check visibility settings
-  const showSqft = orgSettings?.show_sqft_on_booking !== false;
-  const showBedBath = orgSettings?.show_bed_bath_on_booking !== false;
   const showAddons = orgSettings?.show_addons_on_booking !== false;
   const showFrequency = orgSettings?.show_frequency_discount !== false;
-  const showPets = orgSettings?.show_pet_options !== false;
-  const showCondition = orgSettings?.show_home_condition !== false;
   
   // Filter templates: show service-specific ones first, then generic ones
   const availableChecklists = checklistTemplates.filter(t => 
@@ -142,16 +116,6 @@ export function ServiceStep() {
   
   // Get selected checklist for preview
   const selectedChecklist = checklistTemplates.find(t => t.id === selectedChecklistId);
-
-  // If sqft pricing is hidden, force Bed & Bath pricing so totals can compute
-  useEffect(() => {
-    if (!showSqft && showBedBath && pricingMode !== 'bedroom') {
-      setPricingMode('bedroom');
-    }
-    if (showSqft && pricingMode === 'bedroom' && !showBedBath) {
-      setPricingMode('sqft');
-    }
-  }, [showSqft, showBedBath, pricingMode, setPricingMode]);
 
   return (
     <div className="space-y-6">
@@ -200,7 +164,7 @@ export function ServiceStep() {
                 ${calculatedPrice.toFixed(2)}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                Base + extras + condition + pets
+                Base price + add-ons
               </p>
             </div>
           )}
@@ -224,143 +188,6 @@ export function ServiceStep() {
               Enter a value only if you want to override the calculated price
             </p>
           </div>
-
-          {/* Pricing Mode Tabs - Only show sqft if enabled */}
-          {showSqft ? (
-            <div>
-              <Label className="text-sm font-medium mb-2 block">Pricing Method</Label>
-              <Tabs value={pricingMode} onValueChange={(v) => setPricingMode(v as 'sqft' | 'bedroom')}>
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="sqft" className="flex items-center gap-2">
-                    <Ruler className="h-4 w-4" />
-                    Square Footage
-                  </TabsTrigger>
-                  {showBedBath && (
-                    <TabsTrigger value="bedroom" className="flex items-center gap-2">
-                      <BedDouble className="h-4 w-4" />
-                      Bed & Bath
-                    </TabsTrigger>
-                  )}
-                </TabsList>
-                
-                <TabsContent value="sqft" className="mt-4">
-                  <div>
-                    <Label className="text-sm font-medium">Square Footage</Label>
-                    <Select value={squareFootage} onValueChange={setSquareFootage}>
-                      <SelectTrigger className="mt-2 h-11 bg-secondary/30 border-border/50">
-                        <SelectValue placeholder="Select sq ft range" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-popover border-border">
-                        {squareFootageRanges.map((range) => (
-                          <SelectItem key={range.label} value={range.label}>
-                            {range.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </TabsContent>
-                
-                {showBedBath && (
-                  <TabsContent value="bedroom" className="mt-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label className="text-sm font-medium">Bedrooms</Label>
-                        <Select value={bedrooms} onValueChange={setBedrooms}>
-                          <SelectTrigger className="mt-2 h-11 bg-secondary/30 border-border/50">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="bg-popover border-border">
-                            {bedroomOptions.map((opt) => (
-                              <SelectItem key={opt} value={opt}>{opt} Bedroom{opt !== '1' && opt !== '0' ? 's' : ''}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label className="text-sm font-medium">Bathrooms</Label>
-                        <Select value={bathrooms} onValueChange={setBathrooms}>
-                          <SelectTrigger className="mt-2 h-11 bg-secondary/30 border-border/50">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="bg-popover border-border">
-                            {bathroomOptions.map((opt) => (
-                              <SelectItem key={opt} value={opt}>{opt} Bath{opt !== '1' ? 's' : ''}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Base price calculated from bedroom/bathroom combination
-                    </p>
-                  </TabsContent>
-                )}
-              </Tabs>
-            </div>
-          ) : showBedBath ? (
-            /* Bed/Bath only mode when sqft is hidden but bed/bath is enabled */
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="text-sm font-medium">Bedrooms</Label>
-                <Select value={bedrooms} onValueChange={setBedrooms}>
-                  <SelectTrigger className="mt-2 h-11 bg-secondary/30 border-border/50">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border">
-                    {bedroomOptions.map((opt) => (
-                      <SelectItem key={opt} value={opt}>{opt} Bedroom{opt !== '1' && opt !== '0' ? 's' : ''}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-sm font-medium">Bathrooms</Label>
-                <Select value={bathrooms} onValueChange={setBathrooms}>
-                  <SelectTrigger className="mt-2 h-11 bg-secondary/30 border-border/50">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border">
-                    {bathroomOptions.map((opt) => (
-                      <SelectItem key={opt} value={opt}>{opt} Bath{opt !== '1' ? 's' : ''}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          ) : null}
-
-          {/* Always show bed/bath for reference when in sqft mode and bed/bath is enabled */}
-          {showSqft && showBedBath && pricingMode === 'sqft' && (
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="text-sm font-medium">Bedrooms</Label>
-                <Select value={bedrooms} onValueChange={setBedrooms}>
-                  <SelectTrigger className="mt-2 h-11 bg-secondary/30 border-border/50">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border">
-                    {bedroomOptions.map((opt) => (
-                      <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-sm font-medium">Bathrooms</Label>
-                <Select value={bathrooms} onValueChange={setBathrooms}>
-                  <SelectTrigger className="mt-2 h-11 bg-secondary/30 border-border/50">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border">
-                    {bathroomOptions.map((opt) => (
-                      <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          )}
 
           {showFrequency && (
             <div className="space-y-2">
@@ -471,76 +298,7 @@ export function ServiceStep() {
         </CardContent>
       </Card>
 
-      {/* Home Condition & Pets - only show if enabled */}
-      {(showCondition || showPets) && (
-        <Card className="border-border/50 shadow-sm">
-          <CardContent className="pt-6 space-y-5">
-            <div className="flex items-center justify-between mb-4">
-              <Label className="text-sm font-medium flex items-center gap-2">
-                <Home className="h-4 w-4 text-muted-foreground" />
-                Home Condition & Pets
-              </Label>
-              {(conditionTotal > 0 || petTotal > 0) && (
-                <Badge className="bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300">
-                  +${conditionTotal + petTotal}
-                </Badge>
-              )}
-            </div>
-            
-            {showCondition && (
-              <div>
-                <Label className="text-sm font-medium">Home Condition (1-5 scale)</Label>
-                <p className="text-xs text-muted-foreground mb-2">5 being the dirtiest - additional charges may apply</p>
-                <Select value={homeCondition.toString()} onValueChange={(v) => setHomeCondition(parseInt(v))}>
-                  <SelectTrigger className="mt-2 h-11 bg-secondary/30 border-border/50">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border">
-                    {homeConditionOptions.map((opt) => (
-                      <SelectItem key={opt.id} value={opt.id.toString()}>
-                        <div className="flex items-center justify-between w-full gap-4">
-                          <span>{opt.label}</span>
-                          {opt.price > 0 && (
-                            <span className="text-amber-600 font-medium">+${opt.price}</span>
-                          )}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-            
-            {showPets && (
-              <div>
-                <Label className="text-sm font-medium flex items-center gap-2">
-                  <PawPrint className="h-4 w-4 text-muted-foreground" />
-                  Pets
-                </Label>
-                <Select value={petOption} onValueChange={setPetOption}>
-                  <SelectTrigger className="mt-2 h-11 bg-secondary/30 border-border/50">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border">
-                    {petOptions.map((opt) => (
-                      <SelectItem key={opt.id} value={opt.id}>
-                        <div className="flex items-center justify-between w-full gap-4">
-                          <span>{opt.label}</span>
-                          {opt.price > 0 && (
-                            <span className="text-amber-600 font-medium">+${opt.price}</span>
-                          )}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Extras - only show if enabled */}
+      {/* Extras / Add-Ons - only show if enabled */}
       {showAddons && (
         <Card className="border-border/50 shadow-sm">
           <CardContent className="pt-6">
@@ -596,7 +354,7 @@ export function ServiceStep() {
                 <ClipboardCheck className="h-5 w-5 text-teal-600 dark:text-teal-400" />
               </div>
               <div>
-                <Label className="text-sm font-medium">Cleaning Checklist (Optional)</Label>
+                <Label className="text-sm font-medium">Job Checklist (Optional)</Label>
                 <p className="text-xs text-muted-foreground">Assign a checklist for quality assurance</p>
               </div>
             </div>
