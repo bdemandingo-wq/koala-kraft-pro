@@ -2,9 +2,6 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { SubscriptionGate } from '@/components/admin/SubscriptionGate';
 import { Seo } from '@/components/Seo';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrganization } from '@/contexts/OrganizationContext';
@@ -15,68 +12,59 @@ import {
   HelpCircle, Home, Calendar, ClipboardList, Users, Target,
   MessageSquare, Briefcase, UserCircle, CheckSquare, Package, DollarSign,
   Receipt, BarChart3, Sparkles, CreditCard, Tag, MapPin, Globe, Brain,
-  Activity, Lightbulb, Send, Bot, PhoneMissed,
+  Activity, Lightbulb, Bot, PhoneMissed,
 } from 'lucide-react';
 import { AutomationHealthMonitor } from '@/components/admin/automation/AutomationHealthMonitor';
 import { CRMSuggestionsPanel } from '@/components/admin/automation/CRMSuggestionsPanel';
+import { ActiveAutomationRow } from '@/components/admin/automation/ActiveAutomationRow';
+import { ReminderScheduleSection } from '@/components/admin/automation/ReminderScheduleSection';
+import { ComingSoonGrid } from '@/components/admin/automation/ComingSoonGrid';
+import { AutomationHistoryTable } from '@/components/admin/automation/AutomationHistoryTable';
 
 const automationMeta: Record<string, {
   icon: typeof Zap;
-  trigger: string;
-  action: string;
-  benefit: string;
+  description: string;
   color: string;
 }> = {
   review_request: {
     icon: Star,
-    trigger: 'Detail marked completed',
-    action: 'Sends Google review request SMS 30 min after job completion with before/after photos',
-    benefit: 'Builds your Google reputation automatically — more reviews = more bookings.',
+    description: 'Fires 30 min after booking marked complete — sends review request SMS',
     color: 'text-amber-500',
   },
   appointment_reminder: {
     icon: Clock,
-    trigger: 'Upcoming detail appointment detected',
-    action: 'Sends reminder SMS 24 hours before the scheduled detail with vehicle & address info',
-    benefit: 'Reduces no-shows and last-minute cancellations.',
+    description: 'Fires before every booking based on your reminder schedule',
     color: 'text-blue-500',
   },
   rebooking_reminder: {
     icon: RotateCcw,
-    trigger: 'Completed detail with no future booking',
-    action: 'Sends rebooking reminder based on package type (30–90 days)',
-    benefit: 'Keeps vehicles on a regular detail schedule and maximizes repeat revenue.',
+    description: 'Fires 28 days after last completed job with no future booking',
     color: 'text-green-500',
-  },
-  recurring_upsell: {
-    icon: Repeat,
-    trigger: 'Successful detail completed',
-    action: 'Offers maintenance plan 2 hours after job completion',
-    benefit: 'Converts one-time details into recurring maintenance plans.',
-    color: 'text-purple-500',
   },
   winback_60day: {
     icon: UserX,
-    trigger: 'Customer inactive for 90+ days',
-    action: 'Sends win-back SMS with returning customer discount offer',
-    benefit: 'Revives dormant clients with a personalized vehicle-specific offer.',
+    description: 'Fires after 60 days of no booking — sends win-back message',
     color: 'text-orange-500',
+  },
+  recurring_upsell: {
+    icon: Repeat,
+    description: 'Offers recurring service plan 2 hours after first completed job',
+    color: 'text-purple-500',
   },
   missed_call_textback: {
     icon: PhoneMissed,
-    trigger: 'Incoming call missed on your OpenPhone number',
-    action: "Instantly texts the caller back letting them know you'll follow up soon",
-    benefit: 'Never lose a lead from a missed call — auto-follow-up keeps prospects engaged.',
+    description: 'Instantly texts the caller back when a call is missed',
     color: 'text-red-500',
   },
   ai_sms_reply: {
     icon: Bot,
-    trigger: 'Incoming SMS received from a customer',
-    action: 'AI reads your past messages and call transcripts, then replies in your tone and style',
-    benefit: 'Never miss a lead or leave a client waiting — AI handles replies 24/7 exactly how you would.',
+    description: 'AI reads your past messages and replies in your tone 24/7',
     color: 'text-violet-500',
   },
 };
+
+const formatName = (type: string) =>
+  type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()).replace('60day', '(60 Days)');
 
 const sidebarGuide = [
   { icon: Home, name: 'Dashboard', description: 'Your business overview — today\'s stats, upcoming bookings, and key metrics at a glance.' },
@@ -110,19 +98,20 @@ const sidebarGuide = [
 export default function AutomationCenterPage() {
   const { organization } = useOrganization();
   const queryClient = useQueryClient();
+  const orgId = organization?.id;
 
   const { data: automations = [], isLoading } = useQuery({
-    queryKey: ['organization-automations', organization?.id],
+    queryKey: ['organization-automations', orgId],
     queryFn: async () => {
-      if (!organization?.id) return [];
+      if (!orgId) return [];
       const { data, error } = await supabase
         .from('organization_automations')
         .select('*')
-        .eq('organization_id', organization.id);
+        .eq('organization_id', orgId);
       if (error) throw error;
       return data || [];
     },
-    enabled: !!organization?.id,
+    enabled: !!orgId,
   });
 
   const toggleMutation = useMutation({
@@ -140,125 +129,113 @@ export default function AutomationCenterPage() {
     onError: () => toast.error('Failed to update automation'),
   });
 
-  const formatName = (type: string) =>
-    type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()).replace('60day', '(60 Days)');
+  // Only show automations that have meta defined
+  const activeAutomations = automations.filter(a => automationMeta[a.automation_type]);
 
   return (
     <AdminLayout title="Automation Center">
       <Seo title="Automation Center" description="Manage your automated workflows and learn about platform features." />
       <SubscriptionGate feature="Automation Center">
-      <div className="space-y-6">
-        <Tabs defaultValue="automations" className="space-y-4">
-          <TabsList className="flex-wrap h-auto gap-1">
-            <TabsTrigger value="automations" className="gap-2"><Zap className="w-4 h-4" /> Automations</TabsTrigger>
-            <TabsTrigger value="health" className="gap-2"><Activity className="w-4 h-4" /> Health Monitor</TabsTrigger>
-            <TabsTrigger value="suggestions" className="gap-2"><Lightbulb className="w-4 h-4" /> Suggestions</TabsTrigger>
-            <TabsTrigger value="guide" className="gap-2"><HelpCircle className="w-4 h-4" /> Feature Guide</TabsTrigger>
-          </TabsList>
+        <div className="space-y-6">
+          <Tabs defaultValue="automations" className="space-y-4">
+            <TabsList className="flex-wrap h-auto gap-1">
+              <TabsTrigger value="automations" className="gap-2"><Zap className="w-4 h-4" /> Automations</TabsTrigger>
+              <TabsTrigger value="health" className="gap-2"><Activity className="w-4 h-4" /> Health Monitor</TabsTrigger>
+              <TabsTrigger value="suggestions" className="gap-2"><Lightbulb className="w-4 h-4" /> Suggestions</TabsTrigger>
+              <TabsTrigger value="guide" className="gap-2"><HelpCircle className="w-4 h-4" /> Feature Guide</TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="automations" className="space-y-4">
-            {isLoading ? (
-              <div className="grid gap-4 md:grid-cols-2">
-                {[1, 2, 3, 4, 5, 6].map(i => (
-                  <Card key={i} className="animate-pulse"><CardContent className="h-48" /></Card>
-                ))}
+            <TabsContent value="automations" className="space-y-8">
+              {/* SECTION 1: Active Automations */}
+              <div className="space-y-3">
+                <h2 className="text-lg font-semibold text-foreground">Active Automations</h2>
+                {isLoading ? (
+                  <div className="space-y-3">
+                    {[1, 2, 3].map(i => (
+                      <div key={i} className="border rounded-lg p-4 animate-pulse bg-muted/30 h-24" />
+                    ))}
+                  </div>
+                ) : activeAutomations.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-4">No automations configured yet.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {activeAutomations.map((auto) => {
+                      const meta = automationMeta[auto.automation_type];
+                      return (
+                        <ActiveAutomationRow
+                          key={auto.id}
+                          id={auto.id}
+                          name={formatName(auto.automation_type)}
+                          description={meta.description}
+                          icon={meta.icon}
+                          iconColor={meta.color}
+                          isEnabled={auto.is_enabled}
+                          lastFiredAt={(auto as any).last_fired_at}
+                          fireCount={(auto as any).fire_count ?? 0}
+                          onToggle={(id, enabled) => toggleMutation.mutate({ id, is_enabled: enabled })}
+                        >
+                          {auto.automation_type === 'appointment_reminder' && orgId && (
+                            <ReminderScheduleSection organizationId={orgId} />
+                          )}
+                        </ActiveAutomationRow>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="grid gap-4 md:grid-cols-2">
-                {automations.map((auto) => {
-                  const meta = automationMeta[auto.automation_type];
-                  if (!meta) return null;
-                  const Icon = meta.icon;
-                  return (
-                    <Card key={auto.id} className="relative overflow-hidden">
-                      <div className={`absolute top-0 left-0 w-1 h-full ${auto.is_enabled ? 'bg-green-500' : 'bg-muted-foreground/30'}`} />
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-lg bg-muted ${meta.color}`}>
-                              <Icon className="w-5 h-5" />
-                            </div>
-                            <div>
-                              <CardTitle className="text-base">{formatName(auto.automation_type)}</CardTitle>
-                              <Badge variant={auto.is_enabled ? 'default' : 'secondary'} className="mt-1 text-xs">
-                                {auto.is_enabled ? 'Auto' : 'Manual Only'}
-                              </Badge>
-                            </div>
-                          </div>
-                          <Switch
-                            checked={auto.is_enabled}
-                            onCheckedChange={(checked) => toggleMutation.mutate({ id: auto.id, is_enabled: checked })}
-                          />
-                        </div>
-                      </CardHeader>
-                      <CardContent className="space-y-3 text-sm">
-                        <div>
-                          <span className="font-medium text-muted-foreground">Trigger: </span>
-                          <span className="text-foreground">{meta.trigger}</span>
-                        </div>
-                        <div>
-                          <span className="font-medium text-muted-foreground">Action: </span>
-                          <span className="text-foreground">{meta.action}</span>
-                        </div>
-                        <div className="flex items-start gap-2 p-2 rounded-md bg-muted/50">
-                          <Sparkles className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                          <span className="text-muted-foreground">{meta.benefit}</span>
-                        </div>
-                        {!auto.is_enabled && (
-                          <div className="pt-2 border-t">
-                            <p className="text-xs text-muted-foreground mb-2">
-                              Automatic sending is off. You can still trigger this manually from the relevant page (Bookings, Customers, etc.).
-                            </p>
-                            <Badge variant="outline" className="text-xs gap-1">
-                              <Send className="w-3 h-3" />
-                              Manual mode — send from booking/customer actions
-                            </Badge>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            )}
-          </TabsContent>
 
-          <TabsContent value="health" className="space-y-4">
-            <AutomationHealthMonitor />
-          </TabsContent>
-
-          <TabsContent value="suggestions" className="space-y-4">
-            <CRMSuggestionsPanel />
-          </TabsContent>
-
-          <TabsContent value="guide" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Platform Feature Guide</CardTitle>
-                <CardDescription>Learn what each section of the platform does to get the most out of your account.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-3 md:grid-cols-2">
-                  {sidebarGuide.map((item) => {
-                    const Icon = item.icon;
-                    return (
-                      <div key={item.name} className="flex items-start gap-3 p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
-                        <div className="p-2 rounded-md bg-muted flex-shrink-0">
-                          <Icon className="w-4 h-4 text-muted-foreground" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-sm text-foreground">{item.name}</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
+              {/* SECTION 2: Coming Soon */}
+              <div className="space-y-3">
+                <div>
+                  <h2 className="text-lg font-semibold text-foreground">Available Automations</h2>
+                  <p className="text-sm text-muted-foreground">Coming soon — these automations are not yet enabled for your account.</p>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
+                <ComingSoonGrid />
+              </div>
+
+              {/* SECTION 3: Automation History */}
+              <div className="space-y-3">
+                <h2 className="text-lg font-semibold text-foreground">Automation History</h2>
+                {orgId && <AutomationHistoryTable organizationId={orgId} />}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="health" className="space-y-4">
+              <AutomationHealthMonitor />
+            </TabsContent>
+
+            <TabsContent value="suggestions" className="space-y-4">
+              <CRMSuggestionsPanel />
+            </TabsContent>
+
+            <TabsContent value="guide" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Platform Feature Guide</CardTitle>
+                  <CardDescription>Learn what each section of the platform does to get the most out of your account.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-3 md:grid-cols-2">
+                    {sidebarGuide.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <div key={item.name} className="flex items-start gap-3 p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
+                          <div className="p-2 rounded-md bg-muted flex-shrink-0">
+                            <Icon className="w-4 h-4 text-muted-foreground" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-sm text-foreground">{item.name}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
       </SubscriptionGate>
     </AdminLayout>
   );
