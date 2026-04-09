@@ -67,25 +67,25 @@ import { CSS } from '@dnd-kit/utilities';
 const defaultNavigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
   { name: 'Quick Job', href: '/dashboard/quick-job', icon: Plus },
-  { name: 'AI Intelligence', href: '/dashboard/ai-intelligence', icon: Brain },
+  { name: 'Media Gallery', href: '/dashboard/booking-photos', icon: ImageIcon },
   { name: 'Scheduler', href: '/dashboard/scheduler', icon: Calendar },
   { name: 'Bookings', href: '/dashboard/bookings', icon: ClipboardList },
-  { name: 'Recurring', href: '/dashboard/recurring', icon: Repeat },
   { name: 'Customers', href: '/dashboard/customers', icon: Users },
-  { name: 'Client Portal', href: '/dashboard/client-portal', icon: Globe },
+  { name: 'Portfolio', href: '/dashboard/portfolio', icon: Camera },
   { name: 'Invoices', href: '/dashboard/invoices', icon: Receipt },
+  { name: 'Finance & P&L', href: '/dashboard/finance', icon: Receipt },
+
+  { name: 'AI Intelligence', href: '/dashboard/ai-intelligence', icon: Brain },
+  { name: 'Recurring', href: '/dashboard/recurring', icon: Repeat },
+  { name: 'Client Portal', href: '/dashboard/client-portal', icon: Globe },
   { name: 'Messages', href: '/dashboard/messages', icon: MessageSquare },
   { name: 'Tasks', href: '/dashboard/tasks', icon: CheckSquare },
   { name: 'Leads', href: '/dashboard/leads', icon: Target },
   { name: 'Campaigns', href: '/dashboard/campaigns', icon: Zap },
-  { name: 'Media Gallery', href: '/dashboard/booking-photos', icon: ImageIcon },
-  { name: 'Portfolio', href: '/dashboard/portfolio', icon: Camera },
   { name: 'Inventory', href: '/dashboard/inventory', icon: Package },
-  
   { name: 'Expenses', href: '/dashboard/expenses', icon: Receipt },
-  { name: 'Finance & P&L', href: '/dashboard/finance', icon: Receipt },
   { name: 'Reports', href: '/dashboard/reports', icon: BarChart3 },
-  
+
   { name: 'Automation Center', href: '/dashboard/automation-center', icon: Zap },
   { name: 'Payment Setup', href: '/dashboard/payment-integration', icon: CreditCard },
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
