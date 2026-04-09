@@ -157,6 +157,12 @@ export default function LandingPage() {
                 <Phone className="h-3.5 w-3.5" /> (984) 332-8570
               </a>
               <button
+                onClick={() => navigate("/login")}
+                className="text-sm text-white/70 hover:text-white transition-colors font-medium"
+              >
+                Log In
+              </button>
+              <button
                 onClick={() => navigate("/signup")}
                 className="text-sm bg-[#e74c5e] hover:bg-[#d43f51] text-white px-5 py-2 rounded-full transition-colors font-medium"
               >
