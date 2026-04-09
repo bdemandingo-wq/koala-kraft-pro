@@ -38,6 +38,7 @@ import { SidebarVisibilitySettings } from '@/components/admin/SidebarVisibilityS
 import { MobileBottomNavSettings } from '@/components/admin/MobileBottomNavSettings';
 import { BookingFormShareCard } from '@/components/admin/BookingFormShareCard';
 import { LoyaltyTierEditor } from '@/components/admin/LoyaltyTierEditor';
+import { OwnerAvailabilitySettings } from '@/components/admin/OwnerAvailabilitySettings';
 import { EmailSettingsCard } from '@/components/admin/EmailSettingsCard';
 import { DomainVerificationCard } from '@/components/admin/DomainVerificationCard';
 
