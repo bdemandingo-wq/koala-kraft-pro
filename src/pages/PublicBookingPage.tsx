@@ -137,6 +137,24 @@ export default function PublicBookingPage() {
 
   const isLight = bookingFormTheme === 'light';
 
+  // Pre-select service from query param
+  useEffect(() => {
+    if (preSelectedService && services.length > 0 && !selectedService) {
+      const match = services.find(s => s.name.toLowerCase() === preSelectedService.toLowerCase());
+      if (match) {
+        setSelectedService(match.id);
+      }
+    }
+  }, [preSelectedService, services, selectedService]);
+
+  // Sync vehicleType from slider
+  useEffect(() => {
+    const sizeLabel = VEHICLE_SIZE_MULTIPLIERS[vehicleSizeIndex]?.label || '';
+    if (sizeLabel && !vehicleType) {
+      setVehicleType(sizeLabel);
+    }
+  }, []);
+
   // Apply org branding colors once when loaded (no re-renders)
   // Fetch availability when date or service changes
   const fetchAvailability = useCallback(async () => {
