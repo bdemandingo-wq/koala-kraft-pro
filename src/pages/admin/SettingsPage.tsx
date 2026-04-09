@@ -780,6 +780,11 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
 
+        {/* Availability */}
+        <TabsContent value="availability" className="space-y-6">
+          <OwnerAvailabilitySettings />
+        </TabsContent>
+
         {/* Booking Form Sharing */}
         <TabsContent value="booking-form" className="space-y-6">
           <BookingFormShareCard organizationSlug={organization?.slug} />
