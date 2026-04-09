@@ -32,6 +32,8 @@ import {
   Camera,
   Plus,
   Check,
+  PlusCircle,
+  Image,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState, useEffect, useMemo } from 'react';
@@ -65,6 +67,8 @@ import { CSS } from '@dnd-kit/utilities';
 
 const defaultNavigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
+  { name: 'Quick Job', href: '/dashboard/quick-job', icon: PlusCircle },
+  { name: 'Media Gallery', href: '/dashboard/booking-photos', icon: Image },
   { name: 'AI Intelligence', href: '/dashboard/ai-intelligence', icon: Brain },
   { name: 'Scheduler', href: '/dashboard/scheduler', icon: Calendar },
   { name: 'Bookings', href: '/dashboard/bookings', icon: ClipboardList },
@@ -78,11 +82,11 @@ const defaultNavigation = [
   { name: 'Campaigns', href: '/dashboard/campaigns', icon: Zap },
   { name: 'Portfolio', href: '/dashboard/portfolio', icon: Camera },
   { name: 'Inventory', href: '/dashboard/inventory', icon: Package },
-  
+
   { name: 'Expenses', href: '/dashboard/expenses', icon: Receipt },
   { name: 'Finance & P&L', href: '/dashboard/finance', icon: Receipt },
   { name: 'Reports', href: '/dashboard/reports', icon: BarChart3 },
-  
+
   { name: 'Automation Center', href: '/dashboard/automation-center', icon: Zap },
   { name: 'Payment Setup', href: '/dashboard/payment-integration', icon: CreditCard },
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
@@ -93,6 +97,7 @@ const iconMap: Record<string, typeof Home> = {
   Home, Calendar, ClipboardList, Repeat, Users, Target, MapPin, MessageSquare,
   Briefcase, UserCircle, CheckSquare, Package, DollarSign, Receipt, BarChart3,
   Sparkles, CreditCard, HelpCircle, Tag, Activity, Brain, Globe, Zap, Camera,
+  PlusCircle, Image,
 };
 
 interface NavItem {
