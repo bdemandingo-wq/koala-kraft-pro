@@ -47,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkSubscription = async (_accessToken?: string) => {
     // Subscription check disabled — treat all users as subscribed
-    setSubscription({ subscribed: true, subscription_tier: 'business', subscription_status: 'active' });
+    setSubscription({ subscribed: true, trial_active: false, trial_end: null, subscription_end: null });
     setShowSubscriptionDialog(false);
   };
 
