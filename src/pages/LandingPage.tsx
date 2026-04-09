@@ -179,6 +179,7 @@ export default function LandingPage() {
               <button onClick={() => scrollTo("testimonials")} className="block w-full text-left text-white/70 hover:text-white px-3 py-2 rounded-lg">Testimonials</button>
               <button onClick={() => scrollTo("about")} className="block w-full text-left text-white/70 hover:text-white px-3 py-2 rounded-lg">About Us</button>
               <a href="tel:9843328570" className="block w-full text-left text-white/70 hover:text-white px-3 py-2 rounded-lg">📞 (984) 332-8570</a>
+              <button onClick={() => { setMobileMenuOpen(false); navigate("/login"); }} className="block w-full text-left text-white/70 hover:text-white px-3 py-2 rounded-lg">Log In</button>
               <button onClick={() => { setMobileMenuOpen(false); navigate("/signup"); }} className="block w-full text-center bg-[#e74c5e] hover:bg-[#d43f51] text-white px-5 py-2.5 rounded-full font-medium">Book Now</button>
             </div>
           )}
