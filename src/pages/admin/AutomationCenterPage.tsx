@@ -15,7 +15,7 @@ import {
   HelpCircle, Home, Calendar, ClipboardList, Users, Target,
   MessageSquare, Briefcase, UserCircle, CheckSquare, Package, DollarSign,
   Receipt, BarChart3, Sparkles, CreditCard, Tag, MapPin, Globe, Brain,
-  Activity, Lightbulb, Send,
+  Activity, Lightbulb, Send, Bot, PhoneMissed,
 } from 'lucide-react';
 import { AutomationHealthMonitor } from '@/components/admin/automation/AutomationHealthMonitor';
 import { CRMSuggestionsPanel } from '@/components/admin/automation/CRMSuggestionsPanel';
@@ -62,6 +62,20 @@ const automationMeta: Record<string, {
     benefit: 'Revives dormant clients with a personalized vehicle-specific offer.',
     color: 'text-orange-500',
   },
+  missed_call_textback: {
+    icon: PhoneMissed,
+    trigger: 'Incoming call missed on your OpenPhone number',
+    action: "Instantly texts the caller back letting them know you'll follow up soon",
+    benefit: 'Never lose a lead from a missed call — auto-follow-up keeps prospects engaged.',
+    color: 'text-red-500',
+  },
+  ai_sms_reply: {
+    icon: Bot,
+    trigger: 'Incoming SMS received from a customer',
+    action: 'AI reads your past messages and call transcripts, then replies in your tone and style',
+    benefit: 'Never miss a lead or leave a client waiting — AI handles replies 24/7 exactly how you would.',
+    color: 'text-violet-500',
+  },
 };
 
 const sidebarGuide = [
@@ -80,9 +94,9 @@ const sidebarGuide = [
   { icon: Zap, name: 'Campaigns', description: 'Create and send SMS marketing campaigns to targeted customer segments.' },
   { icon: MessageSquare, name: 'Feedback', description: 'Track client complaints, feedback, and resolution status.' },
   { icon: Briefcase, name: 'Services', description: 'Configure your service offerings, pricing, and duration settings.' },
-  { icon: UserCircle, name: 'Staff', description: 'Manage your appointment team — profiles, assignments, availability, and performance.' },
-  { icon: CheckSquare, name: 'Checklists', description: 'Create service checklists that staff follow during each job for quality control.' },
-  { icon: Package, name: 'Inventory', description: 'Track detailing supplies, equipment, and reorder levels.' },
+  { icon: UserCircle, name: 'Staff', description: 'Manage your team — profiles, assignments, availability, and performance.' },
+  { icon: CheckSquare, name: 'Checklists', description: 'Create job checklists that staff follow during each appointment for quality control.' },
+  { icon: Package, name: 'Inventory', description: 'Track supplies, equipment, and reorder levels.' },
   { icon: Tag, name: 'Discounts', description: 'Create and manage discount codes for promotions and special offers.' },
   { icon: DollarSign, name: 'Payroll', description: 'Track staff wages, hours worked, and process payroll payments.' },
   { icon: Receipt, name: 'Expenses', description: 'Log and categorize business expenses for P&L tracking.' },
