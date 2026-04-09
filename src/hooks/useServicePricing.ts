@@ -15,7 +15,7 @@ export interface ServicePricingData {
   service_id: string;
   sqft_prices: number[];
   bedroom_pricing: { bedrooms: string; bathrooms: string; basePrice: number }[];
-  extras: { id: string; name: string; price: number; note: string; icon?: string }[];
+  extras: { id: string; name: string; price: number; note?: string; icon?: string }[];
   pet_options: { id: string; label: string; price: number }[];
   home_condition_options: { id: number; label: string; price: number }[];
   minimum_price: number;

@@ -14,7 +14,7 @@ export interface Extra {
   id: string;
   name: string;
   price: number;
-  note: string;
+  note?: string;
   icon?: string;
 }
 
