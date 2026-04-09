@@ -129,7 +129,7 @@ export default function PlatformAnalyticsPage() {
         clientPortalStats: allTimeData?.clientPortalStats,
       };
     },
-    enabled: !!user,
+    enabled: user?.email === 'support@tidywisecleaning.com',
   });
 
 
@@ -186,7 +186,18 @@ export default function PlatformAnalyticsPage() {
     fetchAnalytics();
   }, []);
 
-  // Page is now accessible to all authenticated org owners
+  // Check if user is platform admin
+  if (user?.email !== 'support@tidywisecleaning.com') {
+    return (
+      <AdminLayout title="Unauthorized" subtitle="You don't have access to this page">
+        <Card className="border-destructive/20 bg-destructive/5">
+          <CardContent className="py-12 text-center">
+            <p className="text-muted-foreground">This page is only accessible to platform administrators.</p>
+          </CardContent>
+        </Card>
+      </AdminLayout>
+    );
+  }
 
   if (loading) {
     return (
