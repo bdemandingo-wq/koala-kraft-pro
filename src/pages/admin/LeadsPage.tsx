@@ -43,6 +43,7 @@ import { format, startOfMonth, endOfMonth, subMonths, isWithinInterval, formatDi
 import { useTestMode } from '@/contexts/TestModeContext';
 import { useOrganization } from '@/contexts/OrganizationContext';
 import { LeadPipelineBoard } from '@/components/admin/LeadPipelineBoard';
+import { FacebookLeadsSyncDialog } from '@/components/admin/FacebookLeadsSyncDialog';
 
 
 
@@ -103,6 +104,7 @@ export default function LeadsPage() {
   const [showFunnel, setShowFunnel] = useState(false);
   const [viewMode, setViewMode] = useState<'table' | 'pipeline' | 'abandoned'>('pipeline');
   const [monthFilter, setMonthFilter] = useState('all');
+  const [fbSyncOpen, setFbSyncOpen] = useState(false);
   
   const queryClient = useQueryClient();
   const { isTestMode, maskName, maskEmail, maskPhone } = useTestMode();
@@ -401,6 +403,10 @@ export default function LeadsPage() {
           >
             <TrendingDown className="w-4 h-4" />
             Funnel Report
+          </Button>
+          <Button variant="outline" className="gap-2" onClick={() => setFbSyncOpen(true)}>
+            <Download className="w-4 h-4" />
+            Sync FB Leads
           </Button>
           <Button variant="outline" className="gap-2" onClick={exportLeadsExcel}>
             <Download className="w-4 h-4" />
@@ -862,6 +868,13 @@ export default function LeadsPage() {
         }}
       />
       
+      {organization?.id && (
+        <FacebookLeadsSyncDialog
+          open={fbSyncOpen}
+          onOpenChange={setFbSyncOpen}
+          organizationId={organization.id}
+        />
+      )}
     </AdminLayout>
   );
 }
