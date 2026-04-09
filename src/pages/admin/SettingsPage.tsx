@@ -197,7 +197,13 @@ function FacebookIntegrationCard({ organizationId }: { organizationId: string })
                 {copied ? <span className="text-green-600 text-xs">✓</span> : <Copy className="w-4 h-4" />}
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground">Paste this URL into your Facebook Developer Portal webhook settings</p>
+            <p className="text-xs text-muted-foreground">
+              Paste this URL into your{' '}
+              <a href="https://developers.facebook.com/apps/" target="_blank" rel="noopener noreferrer" className="underline text-primary hover:text-primary/80">
+                Facebook Developer Portal
+              </a>{' '}
+              webhook settings
+            </p>
           </div>
 
           <div className="space-y-2">
