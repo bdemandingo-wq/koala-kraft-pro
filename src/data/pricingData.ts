@@ -53,6 +53,8 @@ export interface DetailingExtra {
   id: string;
   name: string;
   price: number;
+  note?: string;
+  icon?: string;
 }
 
 export const extras: DetailingExtra[] = [
