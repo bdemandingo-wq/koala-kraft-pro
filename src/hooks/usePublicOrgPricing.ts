@@ -143,12 +143,13 @@ export function usePublicOrgPricing(orgSlug: string | undefined): PublicOrgData 
       }
 
       try {
-        const { data, error: invokeError } = await supabase.functions.invoke<PublicBookingDataResponse>(
-          'public-booking-data',
-          { body: { orgSlug } },
-        );
+        // Use RPC instead of edge function to avoid cold start delays
+        const { data: rpcResult, error: rpcError } = await supabase
+          .rpc('get_public_booking_data', { p_org_slug: orgSlug });
 
-        if (invokeError) throw invokeError;
+        if (rpcError) throw rpcError;
+        
+        const data = rpcResult as unknown as PublicBookingDataResponse;
         if (!data?.success) throw new Error(data?.error || 'Failed to load booking data');
         if (!data.organization) throw new Error('Organization not found');
 
