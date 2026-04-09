@@ -77,6 +77,7 @@ const defaultNavigation = [
   { name: 'Tasks', href: '/dashboard/tasks', icon: CheckSquare },
   { name: 'Leads', href: '/dashboard/leads', icon: Target },
   { name: 'Campaigns', href: '/dashboard/campaigns', icon: Zap },
+  { name: 'Media Gallery', href: '/dashboard/booking-photos', icon: ImageIcon },
   { name: 'Portfolio', href: '/dashboard/portfolio', icon: Camera },
   { name: 'Inventory', href: '/dashboard/inventory', icon: Package },
   
