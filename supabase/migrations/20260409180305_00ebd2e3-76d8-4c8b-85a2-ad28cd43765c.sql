@@ -1,0 +1,3 @@
+ALTER TABLE public.organization_automations
+  ADD COLUMN IF NOT EXISTS last_fired_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS fire_count INTEGER NOT NULL DEFAULT 0;

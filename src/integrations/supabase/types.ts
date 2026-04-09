@@ -3821,8 +3821,10 @@ export type Database = {
           automation_type: string
           created_at: string
           description: string | null
+          fire_count: number
           id: string
           is_enabled: boolean
+          last_fired_at: string | null
           organization_id: string
           updated_at: string
         }
@@ -3830,8 +3832,10 @@ export type Database = {
           automation_type: string
           created_at?: string
           description?: string | null
+          fire_count?: number
           id?: string
           is_enabled?: boolean
+          last_fired_at?: string | null
           organization_id: string
           updated_at?: string
         }
@@ -3839,8 +3843,10 @@ export type Database = {
           automation_type?: string
           created_at?: string
           description?: string | null
+          fire_count?: number
           id?: string
           is_enabled?: boolean
+          last_fired_at?: string | null
           organization_id?: string
           updated_at?: string
         }
