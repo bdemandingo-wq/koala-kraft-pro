@@ -92,7 +92,7 @@ serve(async (req) => {
 
     // Get subscription data - ONLY We Detail NC CRM subscribers (filter by product ID)
     // WE DETAIL NC Pro Subscription product ID - only count these as CRM subscribers
-    const WE DETAIL NC_CRM_PRODUCT_ID = "prod_Tg3zSKe9hRHLZy";
+    const WE_DETAIL_NC_CRM_PRODUCT_ID = "prod_Tg3zSKe9hRHLZy";
     
     let activeSubscriptions = 0;
     let trialSubscriptions = 0;
@@ -105,7 +105,7 @@ serve(async (req) => {
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (stripeKey) {
       console.log("[PLATFORM-ANALYTICS] Fetching Stripe subscription data...");
-      console.log("[PLATFORM-ANALYTICS] Filtering for We Detail NC CRM product:", WE DETAIL NC_CRM_PRODUCT_ID);
+      console.log("[PLATFORM-ANALYTICS] Filtering for We Detail NC CRM product:", WE_DETAIL_NC_CRM_PRODUCT_ID);
       const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
       const thirtyDaysAgoTimestamp = Math.floor(thirtyDaysAgo.getTime() / 1000);
       
@@ -120,7 +120,7 @@ serve(async (req) => {
         // Filter to only We Detail NC CRM subscriptions
         const crmSubscriptions = allSubscriptions.data.filter((sub: Stripe.Subscription) => {
           const productId = sub.items.data[0]?.price?.product;
-          return productId === WE DETAIL NC_CRM_PRODUCT_ID;
+          return productId === WE_DETAIL_NC_CRM_PRODUCT_ID;
         });
         console.log("[PLATFORM-ANALYTICS] Filtered to CRM subscriptions:", crmSubscriptions.length);
         
