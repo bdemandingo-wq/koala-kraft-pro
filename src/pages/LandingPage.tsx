@@ -394,6 +394,7 @@ export default function LandingPage() {
           <div className="flex items-center gap-6 text-sm text-white/50">
             <a href="tel:9843328570" className="hover:text-white/80 transition-colors">(984) 332-8570</a>
             <Link to="/privacy-policy" className="hover:text-white/80 transition-colors">Privacy Policy</Link>
+            <Link to="/signup" className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-1.5 rounded text-sm font-semibold transition-colors">Sign Up</Link>
           </div>
           <span className="text-xs text-white/30">© {new Date().getFullYear()} WE DETAIL NC. All rights reserved.</span>
         </div>
