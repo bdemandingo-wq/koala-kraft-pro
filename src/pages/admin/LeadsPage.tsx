@@ -43,6 +43,7 @@ import { format, startOfMonth, endOfMonth, subMonths, isWithinInterval, formatDi
 import { useTestMode } from '@/contexts/TestModeContext';
 import { useOrganization } from '@/contexts/OrganizationContext';
 import { LeadPipelineBoard } from '@/components/admin/LeadPipelineBoard';
+import { FacebookLeadsSyncDialog } from '@/components/admin/FacebookLeadsSyncDialog';
 
 
 
