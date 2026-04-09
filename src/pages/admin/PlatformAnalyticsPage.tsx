@@ -5,7 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Loader2, Users, Building2, CreditCard, TrendingUp, 
   UserPlus, RefreshCw, Trash2, Activity, Calendar,
-  ArrowUpRight, ArrowDownRight, Clock, Timer, Mail
+  ArrowUpRight, ArrowDownRight, Clock, Timer, Mail,
+  CheckSquare, Sparkles, MessageSquare
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
