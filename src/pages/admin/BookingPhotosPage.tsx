@@ -258,11 +258,25 @@ export default function BookingPhotosPage() {
 
     if (videoFile) {
       return (
-        <div className="w-full h-full bg-muted flex items-center justify-center relative">
-          <Film className="w-10 h-10 text-muted-foreground" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-10 h-10 rounded-full bg-black/50 flex items-center justify-center">
-              <Play className="w-5 h-5 text-white ml-0.5" />
+        <div className="w-full h-full bg-muted relative overflow-hidden">
+          {src ? (
+            <video
+              src={src}
+              className="w-full h-full object-cover"
+              preload="metadata"
+              muted
+              playsInline
+              autoPlay
+              loop
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <Film className="w-10 h-10 text-muted-foreground" />
+            </div>
+          )}
+          <div className="absolute inset-0 flex items-center justify-center bg-background/20 pointer-events-none">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background/80 text-foreground backdrop-blur-sm">
+              <Play className="w-5 h-5 ml-0.5" />
             </div>
           </div>
         </div>
