@@ -7,6 +7,15 @@ import servicesBg from "@/assets/services-bg.jpg";
 import teamMember1 from "@/assets/team-member-1.png";
 import { supabase } from "@/lib/supabase";
 
+interface PackageData {
+  badge: string;
+  name: string;
+  price: number;
+  items: string[];
+  popular?: boolean;
+  isMonthly?: boolean;
+}
+
 // Fallback hardcoded packages (used while DB loads or if no DB data)
 const fallbackPackages = [
   {
