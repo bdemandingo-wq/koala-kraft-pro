@@ -5,14 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
-import { 
   Dialog,
   DialogContent,
   DialogHeader,
@@ -23,13 +15,6 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/lib/supabase';
 import { useOrganization } from '@/contexts/OrganizationContext';
 import { useServicePricing, ServicePricingData } from '@/hooks/useServicePricing';
-import { 
-  squareFootageRanges,
-  bedroomPricing as defaultBedroomPricing,
-  extras as defaultExtras,
-  petOptions as defaultPetOptions,
-  homeConditionOptions as defaultHomeConditionOptions,
-} from '@/data/pricingData';
 import { Save, Pencil, Plus, Trash2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -49,12 +34,6 @@ export function ServicePricingEditor() {
   const [editValue, setEditValue] = useState('');
   const [isAddExtraOpen, setIsAddExtraOpen] = useState(false);
   const [newExtra, setNewExtra] = useState({ name: '', price: '' });
-  const [isAddPetOpen, setIsAddPetOpen] = useState(false);
-  const [newPet, setNewPet] = useState({ label: '', price: '' });
-  const [isAddConditionOpen, setIsAddConditionOpen] = useState(false);
-  const [newCondition, setNewCondition] = useState({ label: '', price: '' });
-  const [isAddBedroomOpen, setIsAddBedroomOpen] = useState(false);
-  const [newBedroom, setNewBedroom] = useState({ bedrooms: '', bathrooms: '', price: '' });
 
   // Fetch services from database
   useEffect(() => {
@@ -105,40 +84,6 @@ export function ServicePricingEditor() {
     }
   };
 
-  const handleSqftPriceEdit = (index: number, newPrice: number) => {
-    if (!currentPricing) return;
-    const newPrices = [...currentPricing.sqft_prices];
-    newPrices[index] = newPrice;
-    setCurrentPricing({ ...currentPricing, sqft_prices: newPrices });
-    setEditingCell(null);
-  };
-
-  const handleBedroomPriceEdit = (index: number, newPrice: number) => {
-    if (!currentPricing) return;
-    const newPricing = [...currentPricing.bedroom_pricing];
-    newPricing[index] = { ...newPricing[index], basePrice: newPrice };
-    setCurrentPricing({ ...currentPricing, bedroom_pricing: newPricing });
-    setEditingCell(null);
-  };
-
-  const handleDeleteBedroom = (index: number) => {
-    if (!currentPricing) return;
-    const newPricing = currentPricing.bedroom_pricing.filter((_, i) => i !== index);
-    setCurrentPricing({ ...currentPricing, bedroom_pricing: newPricing });
-  };
-
-  const handleAddBedroom = () => {
-    if (!currentPricing || !newBedroom.bedrooms || !newBedroom.bathrooms || !newBedroom.price) return;
-    const bedroomItem = {
-      bedrooms: newBedroom.bedrooms,
-      bathrooms: newBedroom.bathrooms,
-      basePrice: parseFloat(newBedroom.price),
-    };
-    setCurrentPricing({ ...currentPricing, bedroom_pricing: [...currentPricing.bedroom_pricing, bedroomItem] });
-    setNewBedroom({ bedrooms: '', bathrooms: '', price: '' });
-    setIsAddBedroomOpen(false);
-  };
-
   const handleExtraEdit = (index: number, field: 'name' | 'price', value: string | number) => {
     if (!currentPricing) return;
     const newExtras = [...currentPricing.extras];
@@ -164,58 +109,6 @@ export function ServicePricingEditor() {
     setCurrentPricing({ ...currentPricing, extras: [...currentPricing.extras, extra] });
     setNewExtra({ name: '', price: '' });
     setIsAddExtraOpen(false);
-  };
-
-  const handlePetOptionEdit = (index: number, newPrice: number) => {
-    if (!currentPricing) return;
-    const newOptions = [...currentPricing.pet_options];
-    newOptions[index] = { ...newOptions[index], price: newPrice };
-    setCurrentPricing({ ...currentPricing, pet_options: newOptions });
-    setEditingCell(null);
-  };
-
-  const handleConditionEdit = (index: number, newPrice: number) => {
-    if (!currentPricing) return;
-    const newOptions = [...currentPricing.home_condition_options];
-    newOptions[index] = { ...newOptions[index], price: newPrice };
-    setCurrentPricing({ ...currentPricing, home_condition_options: newOptions });
-    setEditingCell(null);
-  };
-
-  const handleDeletePet = (index: number) => {
-    if (!currentPricing) return;
-    const newOptions = currentPricing.pet_options.filter((_, i) => i !== index);
-    setCurrentPricing({ ...currentPricing, pet_options: newOptions });
-  };
-
-  const handleAddPet = () => {
-    if (!currentPricing || !newPet.label || !newPet.price) return;
-    const pet = {
-      id: `pet_${Date.now()}`,
-      label: newPet.label,
-      price: parseFloat(newPet.price),
-    };
-    setCurrentPricing({ ...currentPricing, pet_options: [...currentPricing.pet_options, pet] });
-    setNewPet({ label: '', price: '' });
-    setIsAddPetOpen(false);
-  };
-
-  const handleDeleteCondition = (index: number) => {
-    if (!currentPricing) return;
-    const newOptions = currentPricing.home_condition_options.filter((_, i) => i !== index);
-    setCurrentPricing({ ...currentPricing, home_condition_options: newOptions });
-  };
-
-  const handleAddCondition = () => {
-    if (!currentPricing || !newCondition.label || !newCondition.price) return;
-    const condition = {
-      id: Date.now(),
-      label: newCondition.label,
-      price: parseFloat(newCondition.price),
-    };
-    setCurrentPricing({ ...currentPricing, home_condition_options: [...currentPricing.home_condition_options, condition] });
-    setNewCondition({ label: '', price: '' });
-    setIsAddConditionOpen(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent, onSave: () => void) => {
@@ -282,174 +175,21 @@ export function ServicePricingEditor() {
 
       {selectedServiceId && currentPricing && (
         <>
-          {/* Square Footage Pricing */}
+          {/* Base Pricing */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Square Footage Pricing</CardTitle>
-              <p className="text-sm text-muted-foreground">Click any price to edit</p>
+              <CardTitle className="text-lg">Base Pricing</CardTitle>
+              <p className="text-sm text-muted-foreground">Set the minimum price for this service</p>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      {squareFootageRanges.map((range, i) => (
-                        <TableHead key={range.label} className="text-center min-w-[90px]">
-                          {range.label}
-                        </TableHead>
-                      ))}
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <TableRow>
-                      {squareFootageRanges.map((range, index) => (
-                        <TableCell 
-                          key={index}
-                          className="text-center cursor-pointer hover:bg-secondary/50 transition-colors"
-                          onClick={() => {
-                            setEditingCell({ type: 'sqft', index });
-                            setEditValue((currentPricing.sqft_prices[index] || 0).toString());
-                          }}
-                        >
-                          {editingCell?.type === 'sqft' && editingCell.index === index ? (
-                            <Input
-                              value={editValue}
-                              onChange={(e) => setEditValue(e.target.value)}
-                              onBlur={() => handleSqftPriceEdit(index, parseFloat(editValue) || 0)}
-                              onKeyDown={(e) => handleKeyDown(e, () => handleSqftPriceEdit(index, parseFloat(editValue) || 0))}
-                              className="w-20 h-8 text-center mx-auto"
-                              autoFocus
-                              type="number"
-                            />
-                          ) : (
-                            <span className="inline-flex items-center gap-1">
-                              ${currentPricing.sqft_prices[index] || 0}
-                              <Pencil className="w-3 h-3 opacity-0 group-hover:opacity-50" />
-                            </span>
-                          )}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </div>
-              <div className="mt-4">
-                <Label>Minimum Price</Label>
+              <div>
+                <Label>Minimum Price ($)</Label>
                 <Input
                   type="number"
                   value={currentPricing.minimum_price}
                   onChange={(e) => setCurrentPricing({ ...currentPricing, minimum_price: parseFloat(e.target.value) || 0 })}
                   className="w-32 mt-1"
                 />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Bedroom/Bathroom Pricing */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-lg">Bedroom & Bathroom Pricing</CardTitle>
-                  <p className="text-sm text-muted-foreground">Click any price to edit</p>
-                </div>
-                <Dialog open={isAddBedroomOpen} onOpenChange={setIsAddBedroomOpen}>
-                  <DialogTrigger asChild>
-                    <Button size="sm">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Row
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Add Bedroom/Bathroom Pricing</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div>
-                        <Label>Bedrooms</Label>
-                        <Input
-                          value={newBedroom.bedrooms}
-                          onChange={(e) => setNewBedroom({ ...newBedroom, bedrooms: e.target.value })}
-                          placeholder="e.g., 4"
-                        />
-                      </div>
-                      <div>
-                        <Label>Bathrooms</Label>
-                        <Input
-                          value={newBedroom.bathrooms}
-                          onChange={(e) => setNewBedroom({ ...newBedroom, bathrooms: e.target.value })}
-                          placeholder="e.g., 2.5"
-                        />
-                      </div>
-                      <div>
-                        <Label>Base Price ($)</Label>
-                        <Input
-                          type="number"
-                          value={newBedroom.price}
-                          onChange={(e) => setNewBedroom({ ...newBedroom, price: e.target.value })}
-                          placeholder="200"
-                        />
-                      </div>
-                      <Button onClick={handleAddBedroom} className="w-full">Add Pricing Row</Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Bedrooms</TableHead>
-                      <TableHead>Bathrooms</TableHead>
-                      <TableHead className="text-center">Base Price</TableHead>
-                      <TableHead className="w-10"></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {currentPricing.bedroom_pricing.map((item, index) => (
-                      <TableRow key={`${item.bedrooms}-${item.bathrooms}-${index}`} className="group">
-                        <TableCell className="font-medium">{item.bedrooms} Bed</TableCell>
-                        <TableCell>{item.bathrooms} Bath</TableCell>
-                        <TableCell 
-                          className="text-center cursor-pointer hover:bg-secondary/50 transition-colors"
-                          onClick={() => {
-                            setEditingCell({ type: 'bedroom', index });
-                            setEditValue(item.basePrice.toString());
-                          }}
-                        >
-                          {editingCell?.type === 'bedroom' && editingCell.index === index ? (
-                            <Input
-                              value={editValue}
-                              onChange={(e) => setEditValue(e.target.value)}
-                              onBlur={() => handleBedroomPriceEdit(index, parseFloat(editValue) || 0)}
-                              onKeyDown={(e) => handleKeyDown(e, () => handleBedroomPriceEdit(index, parseFloat(editValue) || 0))}
-                              className="w-24 h-8 text-center mx-auto"
-                              autoFocus
-                              type="number"
-                            />
-                          ) : (
-                            <span className="inline-flex items-center gap-1">
-                              ${item.basePrice}
-                              <Pencil className="w-3 h-3 opacity-0 group-hover:opacity-50" />
-                            </span>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 opacity-0 group-hover:opacity-100"
-                            onClick={() => handleDeleteBedroom(index)}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
               </div>
             </CardContent>
           </Card>
@@ -479,7 +219,7 @@ export function ServicePricingEditor() {
                         <Input
                           value={newExtra.name}
                           onChange={(e) => setNewExtra({ ...newExtra, name: e.target.value })}
-                          placeholder="e.g., Interior Detail"
+                          placeholder="e.g., Engine Bay Clean"
                         />
                       </div>
                       <div>
@@ -541,173 +281,6 @@ export function ServicePricingEditor() {
               </div>
             </CardContent>
           </Card>
-
-          {/* Pet & Condition Options */}
-          <div className="grid md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">Pet Options</CardTitle>
-                  <Dialog open={isAddPetOpen} onOpenChange={setIsAddPetOpen}>
-                    <DialogTrigger asChild>
-                      <Button size="sm" variant="outline" className="h-8 w-8 p-0 rounded-full">
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Add Pet Option</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <div>
-                          <Label>Label</Label>
-                          <Input
-                            value={newPet.label}
-                            onChange={(e) => setNewPet({ ...newPet, label: e.target.value })}
-                            placeholder="e.g., Large Dog"
-                          />
-                        </div>
-                        <div>
-                          <Label>Price ($)</Label>
-                          <Input
-                            type="number"
-                            value={newPet.price}
-                            onChange={(e) => setNewPet({ ...newPet, price: e.target.value })}
-                            placeholder="15"
-                          />
-                        </div>
-                        <Button onClick={handleAddPet} className="w-full">Add Pet Option</Button>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableBody>
-                    {currentPricing.pet_options.map((opt, index) => (
-                      <TableRow key={opt.id} className="group">
-                        <TableCell>{opt.label}</TableCell>
-                        <TableCell 
-                          className="text-right cursor-pointer hover:bg-secondary/50"
-                          onClick={() => {
-                            setEditingCell({ type: 'pet', index });
-                            setEditValue(opt.price.toString());
-                          }}
-                        >
-                          {editingCell?.type === 'pet' && editingCell.index === index ? (
-                            <Input
-                              value={editValue}
-                              onChange={(e) => setEditValue(e.target.value)}
-                              onBlur={() => handlePetOptionEdit(index, parseFloat(editValue) || 0)}
-                              onKeyDown={(e) => handleKeyDown(e, () => handlePetOptionEdit(index, parseFloat(editValue) || 0))}
-                              className="w-20 h-7 text-center ml-auto"
-                              autoFocus
-                              type="number"
-                            />
-                          ) : (
-                            <span>${opt.price}</span>
-                          )}
-                        </TableCell>
-                        <TableCell className="w-10">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 opacity-0 group-hover:opacity-100 text-destructive hover:text-destructive"
-                            onClick={() => handleDeletePet(index)}
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">Home Condition Options</CardTitle>
-                  <Dialog open={isAddConditionOpen} onOpenChange={setIsAddConditionOpen}>
-                    <DialogTrigger asChild>
-                      <Button size="sm" variant="outline" className="h-8 w-8 p-0 rounded-full">
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Add Condition Option</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <div>
-                          <Label>Label</Label>
-                          <Input
-                            value={newCondition.label}
-                            onChange={(e) => setNewCondition({ ...newCondition, label: e.target.value })}
-                            placeholder="e.g., Very Dirty"
-                          />
-                        </div>
-                        <div>
-                          <Label>Extra Price ($)</Label>
-                          <Input
-                            type="number"
-                            value={newCondition.price}
-                            onChange={(e) => setNewCondition({ ...newCondition, price: e.target.value })}
-                            placeholder="50"
-                          />
-                        </div>
-                        <Button onClick={handleAddCondition} className="w-full">Add Condition</Button>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableBody>
-                    {currentPricing.home_condition_options.map((opt, index) => (
-                      <TableRow key={opt.id} className="group">
-                        <TableCell className="text-sm">{opt.label}</TableCell>
-                        <TableCell 
-                          className="text-right cursor-pointer hover:bg-secondary/50"
-                          onClick={() => {
-                            setEditingCell({ type: 'condition', index });
-                            setEditValue(opt.price.toString());
-                          }}
-                        >
-                          {editingCell?.type === 'condition' && editingCell.index === index ? (
-                            <Input
-                              value={editValue}
-                              onChange={(e) => setEditValue(e.target.value)}
-                              onBlur={() => handleConditionEdit(index, parseFloat(editValue) || 0)}
-                              onKeyDown={(e) => handleKeyDown(e, () => handleConditionEdit(index, parseFloat(editValue) || 0))}
-                              className="w-20 h-7 text-center ml-auto"
-                              autoFocus
-                              type="number"
-                            />
-                          ) : (
-                            <span>+${opt.price}</span>
-                          )}
-                        </TableCell>
-                        <TableCell className="w-10">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 opacity-0 group-hover:opacity-100 text-destructive hover:text-destructive"
-                            onClick={() => handleDeleteCondition(index)}
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </div>
         </>
       )}
     </div>
