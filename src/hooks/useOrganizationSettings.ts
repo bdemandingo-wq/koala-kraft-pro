@@ -24,12 +24,12 @@ export interface OrganizationPricingSettings {
 }
 
 const defaultSettings: Omit<OrganizationPricingSettings, 'organization_id'> = {
-  show_sqft_on_booking: true,
+  show_sqft_on_booking: false,
   show_addons_on_booking: true,
   show_frequency_discount: true,
-  show_pet_options: true,
-  show_home_condition: true,
-  show_bed_bath_on_booking: true,
+  show_pet_options: false,
+  show_home_condition: false,
+  show_bed_bath_on_booking: false,
   sales_tax_percent: 0,
   demo_mode_enabled: false,
   loyalty_program_enabled: true,

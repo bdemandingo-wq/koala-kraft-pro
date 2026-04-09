@@ -86,16 +86,6 @@ export function FormDisplaySettings() {
 
   const toggleOptions = [
     {
-      key: 'show_sqft_on_booking' as const,
-      label: 'Square Footage Pricing',
-      description: 'Show square footage input field on booking form',
-    },
-    {
-      key: 'show_bed_bath_on_booking' as const,
-      label: 'Bed & Bath Selection',
-      description: 'Show bedroom and bathroom selection on booking form',
-    },
-    {
       key: 'show_addons_on_booking' as const,
       label: 'Add-On Extras',
       description: 'Show add-on services selection on booking form',
@@ -104,16 +94,6 @@ export function FormDisplaySettings() {
       key: 'show_frequency_discount' as const,
       label: 'Frequency Discount',
       description: 'Show recurring service frequency options with discounts',
-    },
-    {
-      key: 'show_pet_options' as const,
-      label: 'Pet Options',
-      description: 'Show pet fee options on booking form',
-    },
-    {
-      key: 'show_home_condition' as const,
-      label: 'Home Condition',
-      description: 'Show home condition pricing options',
     },
   ];
 
