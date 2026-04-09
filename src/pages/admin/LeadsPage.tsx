@@ -868,6 +868,13 @@ export default function LeadsPage() {
         }}
       />
       
+      {organization?.id && (
+        <FacebookLeadsSyncDialog
+          open={fbSyncOpen}
+          onOpenChange={setFbSyncOpen}
+          organizationId={organization.id}
+        />
+      )}
     </AdminLayout>
   );
 }
