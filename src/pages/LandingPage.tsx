@@ -157,6 +157,12 @@ export default function LandingPage() {
                 <Phone className="h-3.5 w-3.5" /> (984) 332-8570
               </a>
               <button
+                onClick={() => navigate("/login")}
+                className="text-sm text-white/70 hover:text-white transition-colors font-medium"
+              >
+                Log In
+              </button>
+              <button
                 onClick={() => navigate("/signup")}
                 className="text-sm bg-[#e74c5e] hover:bg-[#d43f51] text-white px-5 py-2 rounded-full transition-colors font-medium"
               >
@@ -173,6 +179,7 @@ export default function LandingPage() {
               <button onClick={() => scrollTo("testimonials")} className="block w-full text-left text-white/70 hover:text-white px-3 py-2 rounded-lg">Testimonials</button>
               <button onClick={() => scrollTo("about")} className="block w-full text-left text-white/70 hover:text-white px-3 py-2 rounded-lg">About Us</button>
               <a href="tel:9843328570" className="block w-full text-left text-white/70 hover:text-white px-3 py-2 rounded-lg">📞 (984) 332-8570</a>
+              <button onClick={() => { setMobileMenuOpen(false); navigate("/login"); }} className="block w-full text-left text-white/70 hover:text-white px-3 py-2 rounded-lg">Log In</button>
               <button onClick={() => { setMobileMenuOpen(false); navigate("/signup"); }} className="block w-full text-center bg-[#e74c5e] hover:bg-[#d43f51] text-white px-5 py-2.5 rounded-full font-medium">Book Now</button>
             </div>
           )}
