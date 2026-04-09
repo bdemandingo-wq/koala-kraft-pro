@@ -6511,6 +6511,7 @@ export type Database = {
           tier_order: number
         }[]
       }
+      get_public_booking_data: { Args: { p_org_slug: string }; Returns: Json }
       get_user_organization_id: { Args: never; Returns: string }
       has_role: {
         Args: {
