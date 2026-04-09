@@ -226,6 +226,7 @@ const App = () => (
                       <Route path="/dashboard/automation-center" element={<AdminRoute><ErrorBoundary featureName="Automation Center"><AutomationCenterPage /></ErrorBoundary></AdminRoute>} />
                        <Route path="/dashboard/booking-photos" element={<AdminRoute><ErrorBoundary featureName="Booking Photos"><BookingPhotosPage /></ErrorBoundary></AdminRoute>} />
                        <Route path="/dashboard/portfolio" element={<AdminRoute><ErrorBoundary featureName="Portfolio"><PortfolioPage /></ErrorBoundary></AdminRoute>} />
+                       <Route path="/dashboard/quick-job" element={<AdminRoute><ErrorBoundary featureName="Quick Job"><QuickJobPage /></ErrorBoundary></AdminRoute>} />
 
                       <Route path="/admin" element={<AdminRoute><ErrorBoundary featureName="Dashboard"><AdminDashboard /></ErrorBoundary></AdminRoute>} />
                       <Route path="/admin/*" element={<AdminRoute><ErrorBoundary featureName="Dashboard"><AdminDashboard /></ErrorBoundary></AdminRoute>} />
@@ -322,6 +323,7 @@ const App = () => (
                     
                     <Route path="/dashboard/booking-photos" element={<AdminRoute><ErrorBoundary featureName="Booking Photos"><BookingPhotosPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/portfolio" element={<AdminRoute><ErrorBoundary featureName="Portfolio"><PortfolioPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/quick-job" element={<AdminRoute><ErrorBoundary featureName="Quick Job"><QuickJobPage /></ErrorBoundary></AdminRoute>} />
 
                     {/* Legacy admin routes */}
                     <Route path="/admin" element={<AdminRoute><ErrorBoundary featureName="Dashboard"><AdminDashboard /></ErrorBoundary></AdminRoute>} />
