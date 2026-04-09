@@ -645,6 +645,7 @@ export default function SettingsPage() {
         <div className="w-full max-w-5xl overflow-x-auto [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
            <TabsList className="w-max min-w-full flex flex-nowrap justify-start gap-1">
             <TabsTrigger className="shrink-0" value="general">General</TabsTrigger>
+            <TabsTrigger className="shrink-0" value="availability">Availability</TabsTrigger>
             <TabsTrigger className="shrink-0" value="booking-form">Booking Form</TabsTrigger>
             <TabsTrigger className="shrink-0" value="pricing">Pricing</TabsTrigger>
             <TabsTrigger className="shrink-0" value="loyalty">Loyalty</TabsTrigger>
