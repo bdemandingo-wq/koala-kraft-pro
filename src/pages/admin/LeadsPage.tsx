@@ -404,6 +404,10 @@ export default function LeadsPage() {
             <TrendingDown className="w-4 h-4" />
             Funnel Report
           </Button>
+          <Button variant="outline" className="gap-2" onClick={() => setFbSyncOpen(true)}>
+            <Download className="w-4 h-4" />
+            Sync FB Leads
+          </Button>
           <Button variant="outline" className="gap-2" onClick={exportLeadsExcel}>
             <Download className="w-4 h-4" />
             Export Excel
