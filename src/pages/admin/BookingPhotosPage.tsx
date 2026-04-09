@@ -219,14 +219,19 @@ export default function BookingPhotosPage() {
         const path = `${organization.id}/${uploadBookingId}/${pf.id}.${ext}`;
         const { error: upErr } = await supabase.storage.from(bucket).upload(path, pf.file);
         if (upErr) { console.error(upErr); continue; }
-        await supabase.from('job_media').insert({
+        const detectedType = pf.file.type.startsWith('video/') ? 'video' : 'photo';
+        const { error: dbErr } = await supabase.from('job_media').insert({
           booking_id: uploadBookingId,
           organization_id: organization.id,
           file_name: pf.file.name,
-          file_type: pf.file.type,
+          file_type: detectedType,
           file_url: path,
           media_type: uploadMediaType,
         });
+        if (dbErr) {
+          console.error('DB insert error:', dbErr);
+          toast.error(`Failed to save record for ${pf.file.name}: ${dbErr.message}`);
+        }
       }
       toast.success(`${pendingFiles.length} file(s) uploaded!`);
       setPendingFiles([]);
