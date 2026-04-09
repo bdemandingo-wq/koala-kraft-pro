@@ -52,9 +52,26 @@ function formatTime24to12(time24: string): string {
   return `${displayHour}:${String(m).padStart(2, '0')} ${period}`;
 }
 
+// Vehicle size multipliers for pricing
+const VEHICLE_SIZE_MULTIPLIERS = [
+  { label: 'Sedan / Coupe', multiplier: 1.0 },
+  { label: 'SUV / Crossover', multiplier: 1.3 },
+  { label: 'Truck', multiplier: 1.4 },
+  { label: 'Minivan', multiplier: 1.3 },
+  { label: 'Sports Car', multiplier: 1.1 },
+  { label: 'Luxury / Exotic', multiplier: 1.5 },
+  { label: 'RV / Motorhome', multiplier: 2.0 },
+];
+
 export default function PublicBookingPage() {
   const { orgSlug } = useParams<{ orgSlug: string }>();
   
+  // Read ?service= query param for pre-selection
+  const [preSelectedService] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('service') || null;
+  });
+
   // Track booking link ref parameter for link tracking
   const [trackingRef] = useState(() => {
     const params = new URLSearchParams(window.location.search);
@@ -63,6 +80,7 @@ export default function PublicBookingPage() {
   const [step, setStep] = useState(1);
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectedSqFtIndex, setSelectedSqFtIndex] = useState<number | null>(null);
+  const [vehicleSizeIndex, setVehicleSizeIndex] = useState(0); // slider index
   const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
   const [selectedBedrooms, setSelectedBedrooms] = useState<string | null>(null);
   const [selectedBathrooms, setSelectedBathrooms] = useState<string | null>(null);
