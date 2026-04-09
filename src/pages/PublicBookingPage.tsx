@@ -425,12 +425,9 @@ export default function PublicBookingPage() {
   if (pricingLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto animate-pulse">
-            <CalendarIcon className="w-8 h-8 text-primary" />
-          </div>
+        <div className="text-center space-y-3">
           <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto" />
-          <p className="text-muted-foreground">Loading booking form...</p>
+          <p className="text-sm text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
