@@ -65,6 +65,7 @@ import { CSS } from '@dnd-kit/utilities';
 
 const defaultNavigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
+  { name: 'Quick Job', href: '/dashboard/quick-job', icon: Plus },
   { name: 'AI Intelligence', href: '/dashboard/ai-intelligence', icon: Brain },
   { name: 'Scheduler', href: '/dashboard/scheduler', icon: Calendar },
   { name: 'Bookings', href: '/dashboard/bookings', icon: ClipboardList },
@@ -92,7 +93,7 @@ const defaultNavigation = [
 const iconMap: Record<string, typeof Home> = {
   Home, Calendar, ClipboardList, Repeat, Users, Target, MapPin, MessageSquare,
   Briefcase, UserCircle, CheckSquare, Package, DollarSign, Receipt, BarChart3,
-  Sparkles, CreditCard, HelpCircle, Tag, Activity, Brain, Globe, Zap, Camera,
+  Sparkles, CreditCard, HelpCircle, Tag, Activity, Brain, Globe, Zap, Camera, Plus,
 };
 
 interface NavItem {
