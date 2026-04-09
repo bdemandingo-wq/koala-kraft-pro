@@ -153,7 +153,7 @@ const ORG_SLUG = "hi"; // Organization slug for booking links
 export default function LandingPage() {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [packages, setPackages] = useState(fallbackPackages);
+  const [packages, setPackages] = useState<PackageData[]>(fallbackPackages);
 
   // Fetch live pricing from DB
   useEffect(() => {
