@@ -92,7 +92,7 @@ serve(async (req) => {
 
     // Get subscription data - ONLY We Detail NC CRM subscribers (filter by product ID)
     // WE DETAIL NC Pro Subscription product ID - only count these as CRM subscribers
-    const WE DETAIL NC_CRM_PRODUCT_ID = "prod_Tg3zSKe9hRHLZy";
+    const WE_DETAIL_NC_CRM_PRODUCT_ID = "prod_Tg3zSKe9hRHLZy";
     
     let activeSubscriptions = 0;
     let trialSubscriptions = 0;
