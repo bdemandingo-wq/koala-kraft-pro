@@ -6,7 +6,6 @@
  */
 
 import { useEffect, useState } from 'react';
-const wedetailncLogo = '/images/wedetailnc-logo.webp';
 
 interface SplashScreenProps {
   onComplete?: () => void;
@@ -34,19 +33,9 @@ export function SplashScreen({ onComplete, minDuration = 800 }: SplashScreenProp
       }`}
     >
       <div className="flex flex-col items-center gap-6">
-        {/* Logo with pulse animation */}
+        {/* Glow effect */}
         <div className="relative">
-          {/* Glow effect */}
           <div className="absolute inset-0 blur-2xl bg-primary/20 rounded-full scale-150 animate-pulse" />
-          
-          {/* Logo */}
-          <div className="relative animate-[scale-in_0.5s_ease-out]">
-            <img 
-              src={wedetailncLogo} 
-              alt="WE DETAIL NC" 
-              className="h-20 w-auto object-contain"
-            />
-          </div>
         </div>
         
         {/* Brand name */}
