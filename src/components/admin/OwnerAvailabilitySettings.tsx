@@ -86,6 +86,7 @@ export function OwnerAvailabilitySettings() {
         .insert({
           organization_id: organization.id,
           name,
+          email: `owner@${(organization.slug || 'business')}.local`,
           is_active: true,
           default_hours: 5,
         })
