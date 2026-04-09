@@ -32,6 +32,7 @@ import {
   Camera,
   Plus,
   Check,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState, useEffect, useMemo } from 'react';
@@ -77,6 +78,7 @@ const defaultNavigation = [
   { name: 'Tasks', href: '/dashboard/tasks', icon: CheckSquare },
   { name: 'Leads', href: '/dashboard/leads', icon: Target },
   { name: 'Campaigns', href: '/dashboard/campaigns', icon: Zap },
+  { name: 'Media Gallery', href: '/dashboard/booking-photos', icon: ImageIcon },
   { name: 'Portfolio', href: '/dashboard/portfolio', icon: Camera },
   { name: 'Inventory', href: '/dashboard/inventory', icon: Package },
   
@@ -93,7 +95,7 @@ const defaultNavigation = [
 const iconMap: Record<string, typeof Home> = {
   Home, Calendar, ClipboardList, Repeat, Users, Target, MapPin, MessageSquare,
   Briefcase, UserCircle, CheckSquare, Package, DollarSign, Receipt, BarChart3,
-  Sparkles, CreditCard, HelpCircle, Tag, Activity, Brain, Globe, Zap, Camera, Plus,
+  Sparkles, CreditCard, HelpCircle, Tag, Activity, Brain, Globe, Zap, Camera, Plus, ImageIcon,
 };
 
 interface NavItem {
