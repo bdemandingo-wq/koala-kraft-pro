@@ -237,16 +237,6 @@ export default function LoginPage() {
 
             </form>
 
-            {/* Sign up link */}
-            <div className="mt-6 text-center text-sm">
-              <span className="text-muted-foreground">Don't have an account? </span>
-              <Link
-                to="/signup"
-                className="text-primary hover:underline font-medium"
-              >
-                Create account
-              </Link>
-            </div>
 
             {/* Staff & Client Portal links */}
             <div className="mt-4 pt-4 border-t border-border space-y-2">
