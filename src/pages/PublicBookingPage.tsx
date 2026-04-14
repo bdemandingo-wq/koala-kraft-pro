@@ -97,8 +97,8 @@ export default function PublicBookingPage() {
   const [orgTimezone, setOrgTimezone] = useState<string>('America/New_York');
   const [customerTimezone] = useState<string>(() => Intl.DateTimeFormat().resolvedOptions().timeZone);
   
-  // Vehicle info fields
-  const [vehicleType, setVehicleType] = useState<string>('');
+  // Vehicle info fields — default type synced to slider position 0
+  const [vehicleType, setVehicleType] = useState<string>(VEHICLE_SIZE_MULTIPLIERS[0].label);
   const [vehicleMake, setVehicleMake] = useState('');
   const [vehicleModel, setVehicleModel] = useState('');
   const [vehicleYear, setVehicleYear] = useState('');
@@ -147,13 +147,7 @@ export default function PublicBookingPage() {
     }
   }, [preSelectedService, services, selectedService]);
 
-  // Sync vehicleType from slider
-  useEffect(() => {
-    const sizeLabel = VEHICLE_SIZE_MULTIPLIERS[vehicleSizeIndex]?.label || '';
-    if (sizeLabel && !vehicleType) {
-      setVehicleType(sizeLabel);
-    }
-  }, []);
+  // vehicleType is initialised from slider default — no extra sync effect needed
 
   // Apply org branding colors once when loaded (no re-renders)
   // Fetch availability when date or service changes
@@ -405,7 +399,14 @@ export default function PublicBookingPage() {
 
   const canProceed = () => {
     switch (step) {
-      case 1: return selectedService !== null;
+      case 1:
+        return (
+          selectedService !== null &&
+          vehicleType.trim() !== '' &&
+          vehicleCondition.trim() !== '' &&
+          vehicleMake.trim() !== '' &&
+          vehicleModel.trim() !== ''
+        );
       case 2: return selectedDate !== undefined && selectedTime !== null;
       case 3: return customerInfo.name && customerInfo.email && customerInfo.phone && customerInfo.address;
       case 4: return cardSaved;
@@ -642,7 +643,9 @@ export default function PublicBookingPage() {
               {selectedService && (
                 <div>
                   <h2 className="text-2xl font-bold mb-2">Vehicle Information</h2>
-                  <p className="text-muted-foreground mb-4">Tell us about your vehicle</p>
+                  <p className="text-muted-foreground mb-4">
+                    Tell us about your vehicle <span className="text-destructive font-medium">(required to continue)</span>
+                  </p>
                   <Card>
                     <CardContent className="p-5 space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -700,7 +703,7 @@ export default function PublicBookingPage() {
                         <MapPin className="w-5 h-5 text-primary" />
                         <div>
                           <p className="font-medium">We Come to You</p>
-                          <p className="text-xs text-muted-foreground">Fully mobile — we detail at your home, office, or anywhere in Charlotte, NC</p>
+                          <p className="text-xs text-muted-foreground">Fully mobile — we detail at your home, office, or anywhere in South Florida</p>
                         </div>
                       </div>
                     </CardContent>
@@ -849,15 +852,27 @@ export default function PublicBookingPage() {
                       </div>
                       <div className="text-right">
                         <p className="font-medium">{service?.name}</p>
-                        {selectedSqFtIndex !== null && (
-                          <p className="text-sm text-muted-foreground">
-                            {squareFootageRanges[selectedSqFtIndex].label}
-                          </p>
-                        )}
+                        <p className="text-sm text-muted-foreground">{vehicleType}</p>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
+              )}
+
+              {/* Inline validation hint — shown only when service is selected but required fields missing */}
+              {selectedService && (!vehicleType || !vehicleCondition || !vehicleMake || !vehicleModel) && (
+                <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-sm text-destructive">
+                  <span className="mt-0.5">⚠️</span>
+                  <div>
+                    <p className="font-medium">Complete the required vehicle fields to continue:</p>
+                    <ul className="mt-1 list-disc list-inside space-y-0.5 text-destructive/80">
+                      {!vehicleType      && <li>Vehicle Type</li>}
+                      {!vehicleCondition && <li>Vehicle Condition</li>}
+                      {!vehicleMake      && <li>Vehicle Make</li>}
+                      {!vehicleModel     && <li>Vehicle Model</li>}
+                    </ul>
+                  </div>
+                </div>
               )}
             </div>
           )}
