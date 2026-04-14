@@ -118,7 +118,7 @@ export default function PaymentIntegrationPage() {
 
   const handleTestConnection = async () => {
     const v = validateStripeKeys(publishableKey, secretKey);
-    if (!v.ok) { toast.error(v.message); return; }
+    if (!v.ok) { toast.error((v as { ok: false; message: string }).message); return; }
     setIsTesting(true);
     setTestedOk(false);
     try {
@@ -141,7 +141,7 @@ export default function PaymentIntegrationPage() {
   const handleSaveKeys = async () => {
     if (!testedOk) { toast.error("Please test your connection first"); return; }
     const v = validateStripeKeys(publishableKey, secretKey);
-    if (!v.ok) { toast.error(v.message); return; }
+    if (!v.ok) { toast.error((v as { ok: false; message: string }).message); return; }
     if (!organization?.id) return;
 
     setIsSaving(true);

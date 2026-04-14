@@ -256,8 +256,16 @@ export default function LoginPage() {
           </CardContent>
         </Card>
 
+        {/* Sign up link */}
+        <div className="mt-6 text-center text-sm">
+          <span className="text-muted-foreground">Don't have an account? </span>
+          <Link to="/signup" className="text-primary hover:underline font-medium">
+            Sign Up
+          </Link>
+        </div>
+
         {/* Legal links */}
-        <div className="mt-6 text-center text-xs text-muted-foreground">
+        <div className="mt-4 text-center text-xs text-muted-foreground">
           By continuing you agree to our{' '}
           <TermsOfServiceDialog>
             <button className="underline underline-offset-4 hover:text-foreground transition-colors">
