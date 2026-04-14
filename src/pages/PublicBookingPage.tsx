@@ -96,6 +96,12 @@ export default function PublicBookingPage() {
   const [step, setStep] = useState(1);
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectedSqFtIndex, setSelectedSqFtIndex] = useState<number | null>(null);
+  const [vehicleSizeIndexInit] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const vt = params.get('vehicleType');
+    const idx = VEHICLE_SIZE_MULTIPLIERS.findIndex(v => v.label === vt);
+    return idx >= 0 ? idx : 0;
+  });
   const [vehicleSizeIndex, setVehicleSizeIndex] = useState(vehicleSizeIndexInit);
   const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
   const [selectedBedrooms, setSelectedBedrooms] = useState<string | null>(null);
@@ -119,12 +125,6 @@ export default function PublicBookingPage() {
     const vt = params.get('vehicleType');
     if (vt && VEHICLE_SIZE_MULTIPLIERS.some(v => v.label === vt)) return vt;
     return VEHICLE_SIZE_MULTIPLIERS[0].label;
-  });
-  const [vehicleSizeIndexInit] = useState(() => {
-    const params = new URLSearchParams(window.location.search);
-    const vt = params.get('vehicleType');
-    const idx = VEHICLE_SIZE_MULTIPLIERS.findIndex(v => v.label === vt);
-    return idx >= 0 ? idx : 0;
   });
   const [vehicleMake, setVehicleMake] = useState('');
   const [vehicleModel, setVehicleModel] = useState('');
