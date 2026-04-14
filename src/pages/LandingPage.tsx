@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Seo } from "@/components/Seo";
 import { Star, Menu, X, Phone, MapPin, Instagram, Mail } from "lucide-react";
@@ -19,6 +19,22 @@ const T = {
 const LOGO = "https://remainclean.com/assets/logo-B_QawJUt.png";
 const FONT = "https://cdn.gpteng.co/mcp-widgets/v1/fonts/CameraPlainVariable.woff2";
 const ORG_SLUG = "remainclean";
+
+const VEHICLE_TYPES = [
+  "Sedan / Coupe",
+  "SUV / Crossover",
+  "Truck",
+  "Minivan",
+  "Sports Car",
+  "Luxury / Exotic",
+  "RV / Motorhome",
+];
+
+const BOOK_SERVICES = [
+  { icon: "🚿", name: "Exterior Wash & Shine" },
+  { icon: "🪥", name: "Interior Details"       },
+  { icon: "✨", name: "Buff & Wax"              },
+];
 
 const services = [
   {
@@ -96,13 +112,39 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // Inline booking form state
+  const [bkService,     setBkService]     = useState("");
+  const [bkVehicle,     setBkVehicle]     = useState(VEHICLE_TYPES[0]);
+  const [bkName,        setBkName]        = useState("");
+  const [bkPhone,       setBkPhone]       = useState("");
+  const [bkEmail,       setBkEmail]       = useState("");
+  const [bkError,       setBkError]       = useState("");
+  const bookSectionRef = useRef<HTMLElement>(null);
+
+  const handleInlineBook = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!bkService) { setBkError("Please select a service."); return; }
+    if (!bkName.trim()) { setBkError("Please enter your name."); return; }
+    if (!bkPhone.trim()) { setBkError("Please enter your phone number."); return; }
+    setBkError("");
+    const params = new URLSearchParams({
+      service:     bkService,
+      vehicleType: bkVehicle,
+      name:        bkName.trim(),
+      phone:       bkPhone.trim(),
+      ...(bkEmail.trim() && { email: bkEmail.trim() }),
+    });
+    navigate(`/book/${ORG_SLUG}?${params.toString()}`);
+  };
+
   const scrollTo = (id: string) => {
     setMenuOpen(false);
     if (id === "top") return window.scrollTo({ top: 0, behavior: "smooth" });
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const bookNow = () => navigate(`/book/${ORG_SLUG}`);
+  // Scroll to inline booking form; navigate is used by the form submit itself
+  const bookNow = () => document.getElementById("book")?.scrollIntoView({ behavior: "smooth" });
   const goToLogin = () => navigate("/login");
 
   /* shared button styles */
@@ -435,6 +477,208 @@ export default function LandingPage() {
             {[...Array(5)].map((_, i) => (
               <Star key={i} size={18} style={{ fill: "#facc15", color: "#facc15" }} />
             ))}
+          </div>
+        </section>
+
+        {/* ── 4.5 Inline Booking Form ──────────────────────────────────── */}
+        <section
+          id="book"
+          ref={bookSectionRef}
+          style={{
+            backgroundColor: T.card,
+            borderTop: `1px solid ${T.border}`,
+            borderBottom: `1px solid ${T.border}`,
+            padding: "4rem 1rem",
+          }}
+        >
+          <div style={{ maxWidth: "860px", margin: "0 auto" }}>
+            <h2
+              className="rc-serif"
+              style={{
+                textAlign: "center",
+                fontSize: "clamp(1.75rem, 5vw, 2.5rem)",
+                fontWeight: 800,
+                color: T.fg,
+                marginBottom: "0.5rem",
+              }}
+            >
+              Book Your Detail
+            </h2>
+            <p style={{ textAlign: "center", color: T.mutedFg, marginBottom: "2.5rem", fontSize: "0.9375rem" }}>
+              Fill in a few details and we'll take you straight to your appointment.
+            </p>
+
+            <form onSubmit={handleInlineBook} noValidate>
+              {/* Service selection */}
+              <div style={{ marginBottom: "1.5rem" }}>
+                <p style={{ color: T.fg, fontWeight: 600, fontSize: "0.875rem", marginBottom: "0.75rem" }}>
+                  Select a Service <span style={{ color: "oklch(57.7% .245 27.325)" }}>*</span>
+                </p>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "0.875rem" }}>
+                  {BOOK_SERVICES.map((svc) => (
+                    <button
+                      key={svc.name}
+                      type="button"
+                      onClick={() => { setBkService(svc.name); setBkError(""); }}
+                      style={{
+                        backgroundColor: bkService === svc.name ? `oklch(79.5% .105 85 / 12%)` : T.bg,
+                        border: `2px solid ${bkService === svc.name ? T.primary : T.border}`,
+                        borderRadius: "0.75rem",
+                        padding: "1.25rem 1rem",
+                        cursor: "pointer",
+                        textAlign: "center",
+                        transition: "all .2s",
+                        color: T.fg,
+                      }}
+                    >
+                      <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>{svc.icon}</div>
+                      <div style={{ fontWeight: 600, fontSize: "0.875rem" }}>{svc.name}</div>
+                      {bkService === svc.name && (
+                        <div style={{ color: T.primary, fontSize: "0.75rem", marginTop: "0.375rem", fontWeight: 700 }}>✓ Selected</div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Vehicle type */}
+              <div style={{ marginBottom: "1.5rem" }}>
+                <label style={{ display: "block", color: T.fg, fontWeight: 600, fontSize: "0.875rem", marginBottom: "0.5rem" }}>
+                  Vehicle Type <span style={{ color: "oklch(57.7% .245 27.325)" }}>*</span>
+                </label>
+                <div style={{ position: "relative" }}>
+                  <select
+                    value={bkVehicle}
+                    onChange={(e) => setBkVehicle(e.target.value)}
+                    required
+                    style={{
+                      width: "100%",
+                      padding: "0.75rem 2.5rem 0.75rem 1rem",
+                      backgroundColor: T.bg,
+                      color: T.fg,
+                      border: `1px solid ${T.border}`,
+                      borderRadius: "0.625rem",
+                      fontSize: "0.9375rem",
+                      appearance: "none",
+                      cursor: "pointer",
+                      outline: "none",
+                    }}
+                  >
+                    {VEHICLE_TYPES.map((v) => (
+                      <option key={v} value={v} style={{ backgroundColor: T.card, color: T.fg }}>{v}</option>
+                    ))}
+                  </select>
+                  {/* Chevron */}
+                  <span style={{ position: "absolute", right: "0.875rem", top: "50%", transform: "translateY(-50%)", color: T.mutedFg, pointerEvents: "none", fontSize: "0.75rem" }}>▼</span>
+                </div>
+              </div>
+
+              {/* Name + Phone row */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1rem" }}>
+                <div>
+                  <label style={{ display: "block", color: T.fg, fontWeight: 600, fontSize: "0.875rem", marginBottom: "0.5rem" }}>
+                    Your Name <span style={{ color: "oklch(57.7% .245 27.325)" }}>*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="John Smith"
+                    value={bkName}
+                    onChange={(e) => setBkName(e.target.value)}
+                    required
+                    style={{
+                      width: "100%",
+                      padding: "0.75rem 1rem",
+                      backgroundColor: T.bg,
+                      color: T.fg,
+                      border: `1px solid ${T.border}`,
+                      borderRadius: "0.625rem",
+                      fontSize: "0.9375rem",
+                      outline: "none",
+                      boxSizing: "border-box",
+                    }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: "block", color: T.fg, fontWeight: 600, fontSize: "0.875rem", marginBottom: "0.5rem" }}>
+                    Phone Number <span style={{ color: "oklch(57.7% .245 27.325)" }}>*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    placeholder="(954) 555-0123"
+                    value={bkPhone}
+                    onChange={(e) => setBkPhone(e.target.value)}
+                    required
+                    style={{
+                      width: "100%",
+                      padding: "0.75rem 1rem",
+                      backgroundColor: T.bg,
+                      color: T.fg,
+                      border: `1px solid ${T.border}`,
+                      borderRadius: "0.625rem",
+                      fontSize: "0.9375rem",
+                      outline: "none",
+                      boxSizing: "border-box",
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Email (optional) */}
+              <div style={{ marginBottom: "1.5rem" }}>
+                <label style={{ display: "block", color: T.fg, fontWeight: 600, fontSize: "0.875rem", marginBottom: "0.5rem" }}>
+                  Email <span style={{ color: T.mutedFg, fontWeight: 400 }}>(optional)</span>
+                </label>
+                <input
+                  type="email"
+                  placeholder="you@example.com"
+                  value={bkEmail}
+                  onChange={(e) => setBkEmail(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "0.75rem 1rem",
+                    backgroundColor: T.bg,
+                    color: T.fg,
+                    border: `1px solid ${T.border}`,
+                    borderRadius: "0.625rem",
+                    fontSize: "0.9375rem",
+                    outline: "none",
+                    boxSizing: "border-box",
+                  }}
+                />
+              </div>
+
+              {/* Validation error */}
+              {bkError && (
+                <div style={{ color: "oklch(57.7% .245 27.325)", fontSize: "0.875rem", marginBottom: "1rem", display: "flex", alignItems: "center", gap: "0.375rem" }}>
+                  ⚠️ {bkError}
+                </div>
+              )}
+
+              {/* Submit */}
+              <button
+                type="submit"
+                className="rc-btn-primary"
+                style={{
+                  width: "100%",
+                  padding: "1rem",
+                  fontSize: "1rem",
+                  fontWeight: 700,
+                  backgroundColor: T.primary,
+                  color: T.primaryFg,
+                  border: "none",
+                  borderRadius: "0.625rem",
+                  cursor: "pointer",
+                  transition: "opacity .2s",
+                  letterSpacing: "0.02em",
+                }}
+              >
+                Book Appointment →
+              </button>
+
+              <p style={{ textAlign: "center", color: T.mutedFg, fontSize: "0.75rem", marginTop: "0.875rem" }}>
+                No payment now. You'll pick your date/time and pay after service.
+              </p>
+            </form>
           </div>
         </section>
 

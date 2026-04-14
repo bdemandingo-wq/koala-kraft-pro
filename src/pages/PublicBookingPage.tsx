@@ -66,10 +66,26 @@ const VEHICLE_SIZE_MULTIPLIERS = [
 export default function PublicBookingPage() {
   const { orgSlug } = useParams<{ orgSlug: string }>();
   
-  // Read ?service= query param for pre-selection
+  // Read query params for pre-filling from landing page inline form
   const [preSelectedService] = useState(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get('service') || null;
+  });
+  const [preFilledVehicleType] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('vehicleType') || null;
+  });
+  const [preFilledName] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('name') || '';
+  });
+  const [preFilledPhone] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('phone') || '';
+  });
+  const [preFilledEmail] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('email') || '';
   });
 
   // Track booking link ref parameter for link tracking
@@ -80,7 +96,7 @@ export default function PublicBookingPage() {
   const [step, setStep] = useState(1);
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectedSqFtIndex, setSelectedSqFtIndex] = useState<number | null>(null);
-  const [vehicleSizeIndex, setVehicleSizeIndex] = useState(0); // slider index
+  const [vehicleSizeIndex, setVehicleSizeIndex] = useState(vehicleSizeIndexInit);
   const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
   const [selectedBedrooms, setSelectedBedrooms] = useState<string | null>(null);
   const [selectedBathrooms, setSelectedBathrooms] = useState<string | null>(null);
@@ -97,8 +113,19 @@ export default function PublicBookingPage() {
   const [orgTimezone, setOrgTimezone] = useState<string>('America/New_York');
   const [customerTimezone] = useState<string>(() => Intl.DateTimeFormat().resolvedOptions().timeZone);
   
-  // Vehicle info fields — default type synced to slider position 0
-  const [vehicleType, setVehicleType] = useState<string>(VEHICLE_SIZE_MULTIPLIERS[0].label);
+  // Vehicle info fields — default type synced to slider position 0; override with ?vehicleType= param
+  const [vehicleType, setVehicleType] = useState<string>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const vt = params.get('vehicleType');
+    if (vt && VEHICLE_SIZE_MULTIPLIERS.some(v => v.label === vt)) return vt;
+    return VEHICLE_SIZE_MULTIPLIERS[0].label;
+  });
+  const [vehicleSizeIndexInit] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const vt = params.get('vehicleType');
+    const idx = VEHICLE_SIZE_MULTIPLIERS.findIndex(v => v.label === vt);
+    return idx >= 0 ? idx : 0;
+  });
   const [vehicleMake, setVehicleMake] = useState('');
   const [vehicleModel, setVehicleModel] = useState('');
   const [vehicleYear, setVehicleYear] = useState('');
@@ -107,9 +134,9 @@ export default function PublicBookingPage() {
   const [serviceLocation, setServiceLocation] = useState<string>('mobile');
 
   const [customerInfo, setCustomerInfo] = useState({
-    name: '',
-    email: '',
-    phone: '',
+    name: preFilledName,
+    email: preFilledEmail,
+    phone: preFilledPhone,
     address: '',
     city: '',
     state: '',
