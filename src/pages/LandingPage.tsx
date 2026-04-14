@@ -1,494 +1,581 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Seo } from "@/components/Seo";
-import { Star, Menu, X, Check, Phone, MapPin, Clock, Shield, Sparkles, Car } from "lucide-react";
-import heroBg from "@/assets/hero-bg.jpg";
-import servicesBg from "@/assets/services-bg.jpg";
-import teamMember1 from "@/assets/team-member-1.png";
-import { supabase } from "@/lib/supabase";
+import { Star, Menu, X, Phone, MapPin, Instagram, Mail } from "lucide-react";
 
-interface PackageData {
-  badge: string;
-  name: string;
-  price: number;
-  items: string[];
-  popular?: boolean;
-  isMonthly?: boolean;
-}
+const ORG_SLUG = "remainclean";
 
-// Fallback hardcoded packages (used while DB loads or if no DB data)
-const fallbackPackages = [
+const services = [
   {
-    badge: "Quick Clean",
-    name: "Express Package",
-    price: 175,
-    items: [
-      "Prewash, Emblems and Gas Cap Cleaning",
-      "Complete Wheel, Tire and Fender Well Cleaning",
-      "Bug Removal",
-      "Foam Bath",
-      "Door Jambs Cleaned",
-      "Tires Dressed",
-      "Streak Free Windows",
-      "Interior Air Blowout",
-      "Vacuum",
-      "Streak Free Glass",
-    ],
+    icon: "🚿",
+    name: "Exterior Wash & Shine",
+    description:
+      "Hand wash, dry, tire shine, and window cleaning for a spotless finish.",
   },
   {
-    badge: "Most Popular",
-    name: "Reset Package",
-    price: 225,
-    popular: true,
-    items: [
-      "Everything in Express Package +",
-      "Trim Restored",
-      "Spray Sealant (up to 3 months protection)",
-      "Dash, Cup Holders and Plastic Trim Cleaned",
-      "Leather and Vinyl Cleaned",
-    ],
+    icon: "🪥",
+    name: "Interior Details",
+    description:
+      "Deep vacuum, wipe-down, dashboard & console detailing, and fresh scent.",
   },
   {
-    badge: "Best Value",
-    name: "Deluxe Package",
-    price: 350,
-    items: [
-      "Everything in Reset Package +",
-      "Paint Decontamination",
-      "Claybar Treatment",
-      "Buff on Ceramic Wax",
-      "Leather and Vinyl Conditioned",
-      "Steam Cleaning",
-    ],
-  },
-  {
-    badge: "Removes Swirls",
-    name: "Elite Package",
-    price: 480,
-    items: [
-      "1 Step Paint Correction (Removes 50-70% of swirls)",
-      "Prewash, Emblems and Gas Cap Cleaning",
-      "Complete Wheel, Tire and Fender Well Cleaning",
-      "Bug Removal",
-      "Foam Bath",
-      "Door Jambs Cleaned",
-      "Tires Dressed",
-      "Streak Free Windows",
-      "Interior Air Blowout",
-      "Vacuum",
-      "Streak Free Glass",
-    ],
-  },
-  {
-    badge: "Ceramic Coating",
-    name: "Ultimate Protect",
-    price: 580,
-    items: [
-      "5 Year Ceramic Coating",
-      "Prewash, Emblems and Gas Cap Cleaning",
-      "Complete Wheel, Tire and Fender Well Cleaning",
-      "Bug Removal",
-      "Foam Bath",
-      "Door Jambs Cleaned",
-      "Tires Dressed",
-      "Streak Free Windows",
-      "Streak Free Glass",
-    ],
-  },
-  {
-    badge: "Membership",
-    name: "Maintenance Plan",
-    price: 90,
-    isMonthly: true,
-    items: [
-      "Weekly, bi-weekly, or monthly options",
-      "Exterior + interior upkeep included",
-      "Flexible scheduling",
-      "Priority access",
-    ],
+    icon: "✨",
+    name: "Buff & Wax",
+    description:
+      "Professional buffing and wax coating for lasting protection and shine.",
   },
 ];
 
-// Badge mapping for DB services
-const badgeMap: Record<string, { badge: string; popular?: boolean }> = {
-  "Express Package": { badge: "Quick Clean" },
-  "Reset Package": { badge: "Most Popular", popular: true },
-  "Deluxe Package": { badge: "Best Value" },
-  "Elite Package": { badge: "Removes Swirls" },
-  "Ultimate Protect Package": { badge: "Ceramic Coating" },
-  "Maintenance Plan": { badge: "Membership" },
-};
-
-// Items mapping for DB services (since DB may not store display items)
-const itemsMap: Record<string, string[]> = {
-  "Express Package": fallbackPackages[0].items,
-  "Reset Package": fallbackPackages[1].items,
-  "Deluxe Package": fallbackPackages[2].items,
-  "Elite Package": fallbackPackages[3].items,
-  "Ultimate Protect Package": fallbackPackages[4].items,
-  "Maintenance Plan": fallbackPackages[5].items,
-};
+const serviceAreas = [
+  { icon: "📍", name: "Fort Lauderdale" },
+  { icon: "📍", name: "Miami-Dade" },
+  { icon: "📍", name: "West Palm Beach" },
+];
 
 const testimonials = [
   {
-    name: "Arlene Green",
-    text: "I had the pleasure of having my car detailed by Justus. It was the best experience ever! Justus was very punctual and informative. My car looks brand new!!! My floors and seats look immaculate.",
+    name: "Marcus J.",
+    location: "Fort Lauderdale",
+    text: "Hands down the best mobile detail I've ever had. My BMW looked better than the day I drove it off the lot. Will definitely be using them again!",
   },
   {
-    name: "Rohan Rudolph",
-    text: "The cars look great! You have outdone yourself! Thank you for getting all the pollen, leaves and blossoms off/out of the cars. Justus does great work for a very reasonable price. Very satisfied customer.",
+    name: "Sophia R.",
+    location: "Miami-Dade",
+    text: "Got the Gold package and it was worth every penny. The interior smells amazing and the paint is gleaming. These guys really care about their work.",
   },
   {
-    name: "Danie Pearce",
-    text: "Justus did an amazing job on my vehicle. Very professional and thorough. I will definitely be using his services again. Highly recommend!",
+    name: "David T.",
+    location: "West Palm Beach",
+    text: "I've tried other detailers but nobody comes close to Remain Clean. The Platinum package is a full transformation. My neighbors thought I got a new car!",
   },
   {
-    name: "Lisa Rems",
-    text: "Outstanding service from start to finish. My SUV has never looked this good. The attention to detail is incredible and the convenience of mobile service is unbeatable.",
+    name: "Ashley M.",
+    location: "Fort Lauderdale",
+    text: "Super professional and on time. They came right to my driveway and had my Audi looking showroom-ready in no time. Highly recommend!",
+  },
+  {
+    name: "Carlos G.",
+    location: "Miami-Dade",
+    text: "The buff and wax service removed years of sun damage from my truck. The paint looks brand new. Amazing attention to detail.",
+  },
+  {
+    name: "Nicole W.",
+    location: "West Palm Beach",
+    text: "Love the rewards program! Already on my 6th wash. The consistency is what keeps me coming back — every time feels like the first time.",
   },
 ];
 
-const ORG_SLUG = "hi"; // Organization slug for booking links
+const quickLinks = [
+  { label: "Home", anchor: "top" },
+  { label: "Services & Pricing", anchor: "services" },
+  { label: "Book Appointment", anchor: "book" },
+  { label: "Rewards", anchor: "rewards" },
+  { label: "Contact", anchor: "contact" },
+];
 
 export default function LandingPage() {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [packages, setPackages] = useState<PackageData[]>(fallbackPackages);
-
-  // Fetch live pricing from DB
-  useEffect(() => {
-    const fetchPricing = async () => {
-      try {
-        // Get org ID from slug
-        const { data: org } = await supabase
-          .from('organizations')
-          .select('id')
-          .eq('slug', ORG_SLUG)
-          .single();
-
-        if (!org) return;
-
-        const { data: services } = await supabase
-          .from('services')
-          .select('name, price')
-          .eq('organization_id', org.id)
-          .eq('is_active', true)
-          .order('price', { ascending: true });
-
-        if (services && services.length > 0) {
-          const dbPackages = services.map((svc) => {
-            const meta = badgeMap[svc.name] || { badge: svc.name };
-            const items = itemsMap[svc.name] || [];
-            const isMonthly = svc.name === 'Maintenance Plan';
-            return {
-              badge: meta.badge,
-              name: svc.name,
-              price: Number(svc.price),
-              popular: meta.popular || false,
-              isMonthly,
-              items,
-            };
-          });
-          setPackages(dbPackages);
-        }
-      } catch (err) {
-        console.error('Failed to fetch pricing:', err);
-        // Keep fallback packages
-      }
-    };
-    fetchPricing();
-  }, []);
 
   const scrollTo = (id: string) => {
     setMobileMenuOpen(false);
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const handleBookNow = (serviceName?: string) => {
-    if (serviceName) {
-      navigate(`/book/${ORG_SLUG}?service=${encodeURIComponent(serviceName)}`);
+    if (id === "top") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
-      navigate(`/book/${ORG_SLUG}`);
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
     }
   };
 
-  const formatPrice = (pkg: typeof packages[0]) => {
-    if (pkg.isMonthly) return `$${pkg.price}/mo`;
-    return `$${pkg.price}`;
+  const handleBookNow = () => {
+    navigate(`/book/${ORG_SLUG}`);
   };
 
   return (
-    <div className="min-h-screen bg-[#111] text-white">
+    <div
+      className="min-h-screen text-[#c5c1b9]"
+      style={{ backgroundColor: "#131313", fontFamily: "'Segoe UI', Roboto, -apple-system, sans-serif" }}
+    >
       <Seo
-        title="Mobile Detailing in Charlotte, NC | WE DETAIL NC"
-        description="Mobile detailing, ceramic coating & paint correction in Charlotte — we come to you. Book your detail today."
+        title="Remain Clean Services | Premium Mobile Detailing — Fort Lauderdale, Miami-Dade & West Palm Beach"
+        description="Premium mobile detailing — we bring the showroom to you. Serving Fort Lauderdale, Miami-Dade & West Palm Beach. Open 7 days a week, 8AM–9PM."
         canonicalPath="/"
-        ogImage="/images/wedetailnc-og.png"
-        jsonLd={[
-          {
-            "@type": "LocalBusiness",
-            name: "WE DETAIL NC",
-            url: "https://wedetailnc.com",
-            description: "Mobile detailing, ceramic coating & paint correction in Charlotte, NC.",
-            address: { "@type": "PostalAddress", addressLocality: "Charlotte", addressRegion: "NC" },
-            telephone: "(984) 332-8570",
-          },
-        ]}
       />
 
-      {/* ── Nav ── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-4 pt-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="bg-[#111]/80 backdrop-blur-md rounded-full px-6 py-3 flex items-center justify-between border border-white/5">
-            <a href="/" className="font-bold text-lg tracking-wide">WE DETAIL NC</a>
-            <div className="hidden md:flex items-center gap-6">
-              <button onClick={() => scrollTo("services")} className="text-sm text-white/70 hover:text-white transition-colors">Services</button>
-              <button onClick={() => scrollTo("testimonials")} className="text-sm text-white/70 hover:text-white transition-colors">Testimonials</button>
-              <button onClick={() => scrollTo("about")} className="text-sm text-white/70 hover:text-white transition-colors">About Us</button>
-              <a href="tel:9843328570" className="text-sm text-white/70 hover:text-white transition-colors flex items-center gap-1">
-                <Phone className="h-3.5 w-3.5" /> (984) 332-8570
-              </a>
-              <button
-                onClick={() => navigate("/login")}
-                className="text-sm text-white/70 hover:text-white transition-colors font-medium"
-              >
-                Log In
-              </button>
-              <button
-                onClick={() => handleBookNow()}
-                className="text-sm bg-[#e74c5e] hover:bg-[#d43f51] text-white px-5 py-2 rounded-full transition-colors font-medium"
-              >
-                Book Now
-              </button>
-            </div>
-            <button className="md:hidden p-1 text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
-              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
-          </div>
-          {mobileMenuOpen && (
-            <div className="md:hidden mt-2 bg-[#111]/95 backdrop-blur-md rounded-2xl border border-white/10 p-4 space-y-2">
-              <button onClick={() => scrollTo("services")} className="block w-full text-left text-white/70 hover:text-white px-3 py-2 rounded-lg">Services</button>
-              <button onClick={() => scrollTo("testimonials")} className="block w-full text-left text-white/70 hover:text-white px-3 py-2 rounded-lg">Testimonials</button>
-              <button onClick={() => scrollTo("about")} className="block w-full text-left text-white/70 hover:text-white px-3 py-2 rounded-lg">About Us</button>
-              <a href="tel:9843328570" className="block w-full text-left text-white/70 hover:text-white px-3 py-2 rounded-lg">📞 (984) 332-8570</a>
-              <button onClick={() => { setMobileMenuOpen(false); navigate("/login"); }} className="block w-full text-left text-white/70 hover:text-white px-3 py-2 rounded-lg">Log In</button>
-              <button onClick={() => { setMobileMenuOpen(false); handleBookNow(); }} className="block w-full text-center bg-[#e74c5e] hover:bg-[#d43f51] text-white px-5 py-2.5 rounded-full font-medium">Book Now</button>
-            </div>
-          )}
-        </div>
-      </nav>
+      {/* ── Status Banner ── */}
+      <div
+        className="w-full text-center text-xs py-2 px-4 font-medium tracking-wide"
+        style={{ backgroundColor: "#1b1b1b", color: "#c5c1b9", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+      >
+        Open 7 Days a Week&nbsp;•&nbsp;8AM – 9PM
+      </div>
 
-      {/* ── Hero ── */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center px-4">
-        <div className="absolute inset-0">
-          <img src={heroBg} alt="Luxury car interior" className="w-full h-full object-cover" width={1920} height={1080} />
-          <div className="absolute inset-0 bg-black/55" />
-        </div>
-        <div className="relative z-10 text-center max-w-4xl mx-auto">
-          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black leading-[1.05] mb-6 tracking-tight uppercase" style={{ fontFamily: "'Arial Black', 'Impact', sans-serif" }}>
-            Mobile Detailing in Charlotte, NC
-          </h1>
-          <p className="text-lg sm:text-xl text-white/80 mb-10 max-w-2xl mx-auto">
-            Premium mobile detailing, ceramic coating &amp; paint correction — we come to you.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-            <button onClick={() => handleBookNow()} className="bg-[#e74c5e] hover:bg-[#d43f51] text-white text-lg font-semibold px-10 py-4 rounded-full transition-colors shadow-lg">
+      {/* ── Nav ── */}
+      <nav
+        className="sticky top-0 z-50 px-4 py-3"
+        style={{ backgroundColor: "rgba(19,19,19,0.95)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+      >
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          {/* Logo */}
+          <a
+            href="/"
+            className="font-bold text-base tracking-widest uppercase"
+            style={{ color: "#dcdad5" }}
+          >
+            Remain Clean Services
+          </a>
+
+          {/* Desktop links */}
+          <div className="hidden md:flex items-center gap-7">
+            {[
+              { label: "Home", anchor: "top" },
+              { label: "Services", anchor: "services" },
+              { label: "Gallery", anchor: "gallery" },
+              { label: "Rewards", anchor: "rewards" },
+              { label: "Contact", anchor: "contact" },
+            ].map(({ label, anchor }) => (
+              <button
+                key={label}
+                onClick={() => scrollTo(anchor)}
+                className="text-sm transition-colors"
+                style={{ color: "#c5c1b9" }}
+                onMouseEnter={(e) => ((e.target as HTMLElement).style.color = "#dcdad5")}
+                onMouseLeave={(e) => ((e.target as HTMLElement).style.color = "#c5c1b9")}
+              >
+                {label}
+              </button>
+            ))}
+            <a
+              href="tel:9549131307"
+              className="text-sm flex items-center gap-1.5 transition-colors"
+              style={{ color: "#c5c1b9" }}
+            >
+              <Phone className="h-3.5 w-3.5" />
+              Call Now: (954)-913-1307
+            </a>
+            <button
+              onClick={handleBookNow}
+              className="text-sm font-semibold px-5 py-2 rounded-full transition-all active:scale-[0.98]"
+              style={{ backgroundColor: "#575ECF", color: "#fff" }}
+              onMouseEnter={(e) => ((e.target as HTMLElement).style.backgroundColor = "#4a50c0")}
+              onMouseLeave={(e) => ((e.target as HTMLElement).style.backgroundColor = "#575ECF")}
+            >
               Book Now
             </button>
-            <a href="tel:9843328570" className="border border-white/30 hover:border-white/60 text-white text-lg font-semibold px-10 py-4 rounded-full transition-colors backdrop-blur-sm text-center">
-              Get a Quote
+          </div>
+
+          {/* Mobile hamburger */}
+          <button
+            className="md:hidden p-1"
+            style={{ color: "#dcdad5" }}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
+
+        {/* Mobile menu */}
+        {mobileMenuOpen && (
+          <div
+            className="md:hidden mt-2 rounded-2xl p-4 space-y-2"
+            style={{ backgroundColor: "#1b1b1b", border: "1px solid rgba(255,255,255,0.08)" }}
+          >
+            {[
+              { label: "Home", anchor: "top" },
+              { label: "Services", anchor: "services" },
+              { label: "Gallery", anchor: "gallery" },
+              { label: "Rewards", anchor: "rewards" },
+              { label: "Contact", anchor: "contact" },
+            ].map(({ label, anchor }) => (
+              <button
+                key={label}
+                onClick={() => scrollTo(anchor)}
+                className="block w-full text-left px-3 py-2 rounded-lg text-sm"
+                style={{ color: "#c5c1b9" }}
+              >
+                {label}
+              </button>
+            ))}
+            <a
+              href="tel:9549131307"
+              className="block px-3 py-2 rounded-lg text-sm"
+              style={{ color: "#c5c1b9" }}
+            >
+              📞 (954)-913-1307
+            </a>
+            <button
+              onClick={() => { setMobileMenuOpen(false); handleBookNow(); }}
+              className="block w-full text-center py-2.5 rounded-full text-sm font-semibold"
+              style={{ backgroundColor: "#575ECF", color: "#fff" }}
+            >
+              Book Now
+            </button>
+          </div>
+        )}
+      </nav>
+
+      {/* ── Promo Banner ── */}
+      <div
+        className="w-full text-center py-2.5 px-4 text-sm font-medium"
+        style={{ backgroundColor: "#1b1b1b", borderBottom: "1px solid rgba(255,255,255,0.06)", color: "#c5c1b9" }}
+      >
+        💰 Use code <span style={{ color: "#dcdad5", fontWeight: 700 }}>MarioWorld4L</span> for up to $20 off!
+      </div>
+
+      {/* ── Hero ── */}
+      <section
+        className="relative min-h-screen flex flex-col items-center justify-center px-4 text-center"
+        style={{
+          background: "linear-gradient(to bottom, #131313 0%, #1a1a1a 100%)",
+        }}
+      >
+        {/* Subtle shimmer overlay */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: "radial-gradient(ellipse at 50% 30%, rgba(87,94,207,0.08) 0%, transparent 70%)",
+          }}
+        />
+        <div className="relative z-10 max-w-4xl mx-auto">
+          <div
+            className="inline-block text-xs font-semibold px-4 py-1.5 rounded-full mb-6 tracking-widest uppercase"
+            style={{ backgroundColor: "#1b1b1b", color: "#c5c1b9", border: "1px solid rgba(255,255,255,0.1)" }}
+          >
+            Premium Mobile Detailing
+          </div>
+          <h1
+            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black leading-[1.05] mb-6 tracking-tight uppercase"
+            style={{ color: "#dcdad5", fontFamily: "'Arial Black', Impact, sans-serif" }}
+          >
+            REMAIN CLEAN<br className="hidden sm:block" /> SERVICES
+          </h1>
+          <p className="text-lg sm:text-xl mb-10 max-w-2xl mx-auto" style={{ color: "#c5c1b9" }}>
+            Premium mobile detailing — we bring the showroom to you.{" "}
+            <span style={{ color: "#dcdad5" }}>
+              Serving Fort Lauderdale, Miami-Dade &amp; West Palm Beach.
+            </span>
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10">
+            <button
+              onClick={handleBookNow}
+              className="font-semibold text-lg px-10 py-4 rounded-full transition-all active:scale-[0.98]"
+              style={{ backgroundColor: "#575ECF", color: "#fff" }}
+            >
+              Book Appointment
+            </button>
+            <a
+              href="tel:9549131307"
+              className="font-semibold text-lg px-10 py-4 rounded-full transition-colors text-center"
+              style={{
+                border: "1px solid rgba(197,193,185,0.3)",
+                color: "#dcdad5",
+                backgroundColor: "rgba(255,255,255,0.04)",
+              }}
+            >
+              Call (954)-913-1307
             </a>
           </div>
           <div className="flex justify-center gap-1">
-            {[...Array(5)].map((_, i) => <Star key={i} className="h-6 w-6 fill-yellow-400 text-yellow-400" />)}
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ── Trust Bar ── */}
-      <section className="bg-[#1a1a1a] border-y border-white/5 py-8">
-        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center px-4">
-          {[
-            { icon: Star, label: "5-Star Rated" },
-            { icon: Car, label: "Fully Mobile" },
-            { icon: Sparkles, label: "Luxury-Level Results" },
-            { icon: Clock, label: "Time-Saving Service" },
-          ].map(({ icon: Icon, label }) => (
-            <div key={label} className="flex flex-col items-center gap-2">
-              <Icon className="h-6 w-6 text-[#e74c5e]" />
-              <span className="text-sm font-medium text-white/90">{label}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Services / Packages ── */}
-      <section id="services" className="scroll-mt-20">
-        <div className="relative py-20 px-4">
-          <div className="absolute inset-0">
-            <img src={servicesBg} alt="Ceramic coated paint" className="w-full h-full object-cover" loading="lazy" width={1920} height={1080} />
-            <div className="absolute inset-0 bg-black/70" />
-          </div>
-          <div className="relative z-10 max-w-7xl mx-auto">
-            <h2 className="text-4xl md:text-5xl font-black text-center uppercase tracking-tight mb-4" style={{ fontFamily: "'Arial Black', 'Impact', sans-serif" }}>
-              Detailing Packages
-            </h2>
-            <p className="text-center text-white/60 mb-12 max-w-lg mx-auto">
-              Choose a package that fits your vehicle and goals.
-            </p>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {packages.map((pkg) => (
-                <div
-                  key={pkg.name}
-                  className={`rounded-2xl border p-6 flex flex-col ${
-                    pkg.popular
-                      ? "border-[#e74c5e]/50 bg-[#e74c5e]/5 ring-1 ring-[#e74c5e]/20"
-                      : "border-white/10 bg-white/5"
-                  } backdrop-blur-sm`}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <span className={`text-xs font-semibold px-3 py-1 rounded-full ${pkg.popular ? "bg-[#e74c5e] text-white" : "bg-white/10 text-white/70"}`}>
-                      {pkg.badge}
-                    </span>
-                    <span className="text-lg font-bold">Starting at {formatPrice(pkg)}</span>
-                  </div>
-                  <h3 className="text-xl font-bold mb-4">{pkg.name}</h3>
-                  <ul className="space-y-2 flex-1 mb-6">
-                    {pkg.items.map((item) => (
-                      <li key={item} className="flex items-start gap-2 text-sm text-white/80">
-                        <Check className="h-4 w-4 text-[#e74c5e] mt-0.5 shrink-0" />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                  <button
-                    onClick={() => handleBookNow(pkg.name)}
-                    className={`w-full py-3 rounded-full font-semibold transition-colors ${
-                      pkg.popular
-                        ? "bg-[#e74c5e] hover:bg-[#d43f51] text-white"
-                        : "bg-white/10 hover:bg-white/20 text-white"
-                    }`}
-                  >
-                    Book Now
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Testimonials ── */}
-      <section id="testimonials" className="scroll-mt-20 bg-[#111] py-20 px-4">
+      {/* ── Services Section ── */}
+      <section id="services" className="scroll-mt-20 py-20 px-4" style={{ backgroundColor: "#1a1a1a" }}>
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-black text-center uppercase tracking-tight mb-4" style={{ fontFamily: "'Arial Black', 'Impact', sans-serif" }}>
-            Testimonials
+          <h2
+            className="text-4xl md:text-5xl font-black text-center uppercase tracking-tight mb-3"
+            style={{ color: "#dcdad5", fontFamily: "'Arial Black', Impact, sans-serif" }}
+          >
+            Our Services
           </h2>
-          <p className="text-center text-white/60 mb-12 max-w-lg mx-auto">
-            Real reviews from real clients. We focus on quality, communication, and results you can see immediately.
+          <p className="text-center mb-12" style={{ color: "#c5c1b9" }}>
+            Three core services. Four luxury packages.
           </p>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            {testimonials.map((t) => (
-              <div key={t.name} className="bg-white/5 border border-white/10 rounded-2xl p-6">
-                <div className="flex gap-1 mb-4">
-                  {[...Array(5)].map((_, i) => <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />)}
-                </div>
-                <p className="text-white/80 mb-4 leading-relaxed">"{t.text}"</p>
-                <p className="font-semibold">{t.name}</p>
+          <div className="grid md:grid-cols-3 gap-6">
+            {services.map((svc) => (
+              <div
+                key={svc.name}
+                className="rounded-2xl p-8 flex flex-col items-center text-center transition-all"
+                style={{
+                  backgroundColor: "#131313",
+                  border: "1px solid rgba(255,255,255,0.07)",
+                }}
+                onMouseEnter={(e) =>
+                  ((e.currentTarget as HTMLElement).style.backgroundColor = "rgba(255,255,255,0.04)")
+                }
+                onMouseLeave={(e) =>
+                  ((e.currentTarget as HTMLElement).style.backgroundColor = "#131313")
+                }
+              >
+                <span className="text-5xl mb-5">{svc.icon}</span>
+                <h3 className="text-xl font-bold mb-3" style={{ color: "#dcdad5" }}>
+                  {svc.name}
+                </h3>
+                <p className="text-sm leading-relaxed" style={{ color: "#c5c1b9" }}>
+                  {svc.description}
+                </p>
               </div>
             ))}
           </div>
 
           <div className="text-center mt-10">
-            <button onClick={() => handleBookNow()} className="bg-[#e74c5e] hover:bg-[#d43f51] text-white font-semibold px-8 py-3 rounded-full transition-colors">
-              Book Your Detail
+            <button
+              onClick={handleBookNow}
+              className="font-semibold px-8 py-3 rounded-full text-sm transition-all"
+              style={{ backgroundColor: "#575ECF", color: "#fff" }}
+            >
+              View All Packages &amp; Pricing →
             </button>
           </div>
         </div>
       </section>
 
-      {/* ── About ── */}
-      <section id="about" className="scroll-mt-20 bg-[#1a1a1a] py-20 px-4">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-black text-center uppercase tracking-tight mb-12" style={{ fontFamily: "'Arial Black', 'Impact', sans-serif" }}>
-            About Us
+      {/* ── Service Areas ── */}
+      <section className="py-16 px-4" style={{ backgroundColor: "#131313", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="max-w-4xl mx-auto text-center">
+          <h2
+            className="text-3xl md:text-4xl font-black uppercase tracking-tight mb-3"
+            style={{ color: "#dcdad5", fontFamily: "'Arial Black', Impact, sans-serif" }}
+          >
+            We Come to You
           </h2>
+          <p className="mb-10" style={{ color: "#c5c1b9" }}>
+            Proudly serving all of South Florida
+          </p>
+          <div className="flex flex-wrap justify-center gap-6">
+            {serviceAreas.map((area) => (
+              <div
+                key={area.name}
+                className="flex items-center gap-2.5 px-6 py-3 rounded-full"
+                style={{
+                  backgroundColor: "#1b1b1b",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  color: "#dcdad5",
+                }}
+              >
+                <MapPin className="h-4 w-4" style={{ color: "#575ECF" }} />
+                <span className="font-medium text-sm">{area.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="space-y-5 text-white/80 leading-relaxed">
-              <h3 className="text-2xl font-bold text-white">Our Story</h3>
-              <p>
-                We Detail Charlotte is a premium, fully mobile detailing service in Charlotte NC.
-                If you're looking for high-quality car detailing in Charlotte NC, we make it simple
-                and convenient by coming directly to you.
-              </p>
-              <p>
-                I gained hands-on experience working on high end vehicles at Rolls-Royce, where
-                attention to detail and quality standards are everything. That's the same level of
-                care I bring to every vehicle I touch.
-              </p>
-              <p>
-                We come to you anywhere in Charlotte and deliver professional results — from
-                maintenance details to deep cleans — so you don't have to waste time driving to a
-                shop or waiting around.
-              </p>
-            </div>
+      {/* ── Testimonials ── */}
+      <section id="testimonials" className="scroll-mt-20 py-20 px-4" style={{ backgroundColor: "#1a1a1a" }}>
+        <div className="max-w-6xl mx-auto">
+          <h2
+            className="text-4xl md:text-5xl font-black text-center uppercase tracking-tight mb-3"
+            style={{ color: "#dcdad5", fontFamily: "'Arial Black', Impact, sans-serif" }}
+          >
+            What Our Clients Say
+          </h2>
+          <p className="text-center mb-12" style={{ color: "#c5c1b9" }}>
+            Real reviews from satisfied customers across South Florida.
+          </p>
 
-            <div className="flex flex-col items-center gap-6">
-              <div className="flex justify-center">
-                <div className="w-48 h-48 rounded-full overflow-hidden border-4 border-white/10">
-                  <img src={teamMember1} alt="Owner of WE DETAIL NC" className="w-full h-full object-cover" loading="lazy" width={512} height={512} />
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {testimonials.map((t) => (
+              <div
+                key={t.name}
+                className="rounded-2xl p-6 flex flex-col"
+                style={{
+                  backgroundColor: "#131313",
+                  border: "1px solid rgba(255,255,255,0.07)",
+                }}
+              >
+                <div className="flex gap-1 mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                  ))}
+                </div>
+                <p className="text-sm leading-relaxed flex-1 mb-4" style={{ color: "#c5c1b9" }}>
+                  "{t.text}"
+                </p>
+                <div>
+                  <p className="font-semibold text-sm" style={{ color: "#dcdad5" }}>
+                    {t.name}
+                  </p>
+                  <p className="text-xs" style={{ color: "#888" }}>
+                    {t.location}
+                  </p>
                 </div>
               </div>
-              <p className="font-semibold text-lg">Owner-Operated Team</p>
-              <div className="grid grid-cols-2 gap-4 mt-4 w-full max-w-xs">
-                {[
-                  { icon: Star, label: "5-Star Rated" },
-                  { icon: MapPin, label: "Fully Mobile" },
-                  { icon: Sparkles, label: "Luxury Results" },
-                  { icon: Shield, label: "Insured" },
-                ].map(({ icon: Icon, label }) => (
-                  <div key={label} className="flex items-center gap-2 text-sm text-white/70">
-                    <Icon className="h-4 w-4 text-[#e74c5e]" />
-                    {label}
-                  </div>
-                ))}
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ── CTA ── */}
-      <section className="bg-[#e74c5e] py-16 px-4 text-center">
+      {/* ── Rewards Section ── */}
+      <section
+        id="rewards"
+        className="scroll-mt-20 py-16 px-4 text-center"
+        style={{ backgroundColor: "#131313", borderTop: "1px solid rgba(255,255,255,0.06)" }}
+      >
         <div className="max-w-2xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight mb-4" style={{ fontFamily: "'Arial Black', 'Impact', sans-serif" }}>
+          <div className="text-4xl mb-4">🏆</div>
+          <h2
+            className="text-3xl md:text-4xl font-black uppercase tracking-tight mb-3"
+            style={{ color: "#dcdad5", fontFamily: "'Arial Black', Impact, sans-serif" }}
+          >
+            Rewards Program
+          </h2>
+          <p className="mb-8" style={{ color: "#c5c1b9" }}>
+            Earn points with every detail. Redeem for discounts, free services, and exclusive perks.
+            The more you clean, the more you save.
+          </p>
+          <button
+            onClick={handleBookNow}
+            className="font-semibold px-8 py-3 rounded-full text-sm transition-all"
+            style={{ backgroundColor: "#575ECF", color: "#fff" }}
+          >
+            Join Rewards Program
+          </button>
+        </div>
+      </section>
+
+      {/* ── CTA Banner ── */}
+      <section
+        className="py-16 px-4 text-center"
+        style={{
+          background: "linear-gradient(135deg, #575ECF 0%, #3d44a8 100%)",
+        }}
+      >
+        <div className="max-w-2xl mx-auto">
+          <h2
+            className="text-3xl md:text-4xl font-black uppercase tracking-tight mb-3"
+            style={{ color: "#fff", fontFamily: "'Arial Black', Impact, sans-serif" }}
+          >
             Ready for a Showroom Finish?
           </h2>
-          <p className="text-white/90 mb-8">Book your mobile detail today — we come to you anywhere in Charlotte.</p>
+          <p className="mb-8" style={{ color: "rgba(255,255,255,0.85)" }}>
+            Book your mobile detail today. Satisfaction guaranteed.
+          </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button onClick={() => handleBookNow()} className="bg-white text-[#e74c5e] font-semibold px-8 py-3 rounded-full hover:bg-white/90 transition-colors">
+            <button
+              onClick={handleBookNow}
+              className="font-semibold px-8 py-3 rounded-full transition-colors text-sm active:scale-[0.98]"
+              style={{ backgroundColor: "#fff", color: "#575ECF" }}
+            >
               Book Now
             </button>
-            <a href="tel:9843328570" className="border border-white/40 text-white font-semibold px-8 py-3 rounded-full hover:bg-white/10 transition-colors text-center">
-              Call (984) 332-8570
-            </a>
+            <button
+              onClick={() => document.getElementById("rewards")?.scrollIntoView({ behavior: "smooth" })}
+              className="font-semibold px-8 py-3 rounded-full text-sm transition-colors"
+              style={{ border: "1px solid rgba(255,255,255,0.5)", color: "#fff", backgroundColor: "rgba(255,255,255,0.08)" }}
+            >
+              Join Rewards Program
+            </button>
           </div>
         </div>
       </section>
 
       {/* ── Footer ── */}
-      <footer className="bg-[#111] border-t border-white/10 py-8 px-4">
-        <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <span className="font-bold tracking-wide">WE DETAIL NC</span>
-          <div className="flex items-center gap-6 text-sm text-white/50">
-            <a href="tel:9843328570" className="hover:text-white/80 transition-colors">(984) 332-8570</a>
-            <Link to="/privacy-policy" className="hover:text-white/80 transition-colors">Privacy Policy</Link>
-            
+      <footer
+        id="contact"
+        className="scroll-mt-20 py-14 px-4"
+        style={{ backgroundColor: "#0e0e0e", borderTop: "1px solid rgba(255,255,255,0.07)" }}
+      >
+        <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-10">
+          {/* Brand */}
+          <div>
+            <p
+              className="font-bold text-base tracking-widest uppercase mb-3"
+              style={{ color: "#dcdad5" }}
+            >
+              REMAIN CLEAN SERVICES
+            </p>
+            <p className="text-sm leading-relaxed" style={{ color: "#c5c1b9" }}>
+              Premium mobile detailing serving South Florida.
+            </p>
+            <p className="text-xs mt-4" style={{ color: "#666" }}>
+              Fort Lauderdale • Miami-Dade • West Palm Beach
+            </p>
           </div>
-          <span className="text-xs text-white/30">© {new Date().getFullYear()} WE DETAIL NC. All rights reserved.</span>
+
+          {/* Quick Links */}
+          <div>
+            <p
+              className="font-semibold text-sm mb-4 uppercase tracking-wider"
+              style={{ color: "#dcdad5" }}
+            >
+              Quick Links
+            </p>
+            <ul className="space-y-2">
+              {quickLinks.map((link) => (
+                <li key={link.label}>
+                  <button
+                    onClick={() => scrollTo(link.anchor)}
+                    className="text-sm transition-colors"
+                    style={{ color: "#c5c1b9" }}
+                    onMouseEnter={(e) => ((e.target as HTMLElement).style.color = "#dcdad5")}
+                    onMouseLeave={(e) => ((e.target as HTMLElement).style.color = "#c5c1b9")}
+                  >
+                    {link.label}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Contact & Hours */}
+          <div>
+            <p
+              className="font-semibold text-sm mb-4 uppercase tracking-wider"
+              style={{ color: "#dcdad5" }}
+            >
+              Contact &amp; Hours
+            </p>
+            <ul className="space-y-3 text-sm" style={{ color: "#c5c1b9" }}>
+              <li className="flex items-center gap-2">
+                <Phone className="h-4 w-4 shrink-0" style={{ color: "#575ECF" }} />
+                <a href="tel:9549131307" className="hover:text-[#dcdad5] transition-colors">
+                  (954)-913-1307
+                </a>
+              </li>
+              <li className="flex items-center gap-2">
+                <Mail className="h-4 w-4 shrink-0" style={{ color: "#575ECF" }} />
+                <a
+                  href="mailto:Remaincleanservicesllc@yahoo.com"
+                  className="hover:text-[#dcdad5] transition-colors break-all"
+                >
+                  Remaincleanservicesllc@yahoo.com
+                </a>
+              </li>
+              <li className="flex items-center gap-2">
+                <Instagram className="h-4 w-4 shrink-0" style={{ color: "#575ECF" }} />
+                <a
+                  href="https://instagram.com/remaincleanservice"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-[#dcdad5] transition-colors"
+                >
+                  @remaincleanservice
+                </a>
+              </li>
+              <li className="mt-3">
+                <p className="font-medium mb-0.5" style={{ color: "#dcdad5" }}>Hours of Operation</p>
+                <p>Monday – Sunday</p>
+                <p>8:00 AM – 9:00 PM</p>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div
+          className="max-w-6xl mx-auto mt-10 pt-6 text-center text-xs"
+          style={{ borderTop: "1px solid rgba(255,255,255,0.06)", color: "#555" }}
+        >
+          © 2026 Remain Clean Services LLC. All rights reserved.
+          {" · "}
+          <Link to="/privacy-policy" className="hover:text-[#c5c1b9] transition-colors">
+            Privacy Policy
+          </Link>
         </div>
       </footer>
     </div>
