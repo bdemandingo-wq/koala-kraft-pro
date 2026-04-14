@@ -3,34 +3,42 @@ import { Link, useNavigate } from "react-router-dom";
 import { Seo } from "@/components/Seo";
 import { Star, Menu, X, Phone, MapPin, Instagram, Mail } from "lucide-react";
 
+/* ─── Theme tokens from remainclean.com CSS ───────────────────────────────── */
+const T = {
+  bg:          "oklch(14.5% .005 285)",   // --background
+  card:        "oklch(18% .005 285)",     // --card
+  secondary:   "oklch(22% .005 285)",     // --secondary
+  muted:       "oklch(25% .005 285)",     // --muted
+  border:      "oklch(30% .005 285)",     // --border
+  fg:          "oklch(98.5% 0 0)",        // --foreground  (near-white)
+  mutedFg:     "oklch(65% .01 285)",      // --muted-foreground
+  primary:     "oklch(79.5% .105 85)",    // --primary (gold)
+  primaryFg:   "oklch(14.5% .005 285)",   // --primary-foreground (dark on gold)
+} as const;
+
+const LOGO = "https://remainclean.com/assets/logo-B_QawJUt.png";
+const FONT = "https://cdn.gpteng.co/mcp-widgets/v1/fonts/CameraPlainVariable.woff2";
 const ORG_SLUG = "remainclean";
 
 const services = [
   {
     icon: "🚿",
     name: "Exterior Wash & Shine",
-    description:
-      "Hand wash, dry, tire shine, and window cleaning for a spotless finish.",
+    desc: "Hand wash, dry, tire shine, and window cleaning for a spotless finish.",
   },
   {
     icon: "🪥",
     name: "Interior Details",
-    description:
-      "Deep vacuum, wipe-down, dashboard & console detailing, and fresh scent.",
+    desc: "Deep vacuum, wipe-down, dashboard & console detailing, and fresh scent.",
   },
   {
     icon: "✨",
     name: "Buff & Wax",
-    description:
-      "Professional buffing and wax coating for lasting protection and shine.",
+    desc: "Professional buffing and wax coating for lasting protection and shine.",
   },
 ];
 
-const serviceAreas = [
-  { icon: "📍", name: "Fort Lauderdale" },
-  { icon: "📍", name: "Miami-Dade" },
-  { icon: "📍", name: "West Palm Beach" },
-];
+const areas = ["Fort Lauderdale", "Miami-Dade", "West Palm Beach"];
 
 const testimonials = [
   {
@@ -65,519 +73,699 @@ const testimonials = [
   },
 ];
 
-const quickLinks = [
-  { label: "Home", anchor: "top" },
-  { label: "Services & Pricing", anchor: "services" },
-  { label: "Book Appointment", anchor: "book" },
-  { label: "Rewards", anchor: "rewards" },
-  { label: "Contact", anchor: "contact" },
+const navLinks = [
+  { label: "Home",     anchor: "top"          },
+  { label: "Services", anchor: "services"      },
+  { label: "Gallery",  anchor: "gallery"       },
+  { label: "Book Now", anchor: "book",  cta: true },
+  { label: "Rewards",  anchor: "rewards"       },
+  { label: "Contact",  anchor: "contact"       },
 ];
 
+const footerQuickLinks = [
+  { label: "Home",                anchor: "top"      },
+  { label: "Services & Pricing",  anchor: "services" },
+  { label: "Book Appointment",    anchor: "book"     },
+  { label: "Rewards",             anchor: "rewards"  },
+  { label: "Contact",             anchor: "contact"  },
+];
+
+/* ─────────────────────────────────────────────────────────────────────────── */
 export default function LandingPage() {
   const navigate = useNavigate();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const scrollTo = (id: string) => {
-    setMobileMenuOpen(false);
-    if (id === "top") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    } else {
-      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-    }
+    setMenuOpen(false);
+    if (id === "top") return window.scrollTo({ top: 0, behavior: "smooth" });
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleBookNow = () => {
-    navigate(`/book/${ORG_SLUG}`);
+  const bookNow = () => navigate(`/book/${ORG_SLUG}`);
+
+  /* shared button styles */
+  const btnPrimary: React.CSSProperties = {
+    backgroundColor: T.primary,
+    color: T.primaryFg,
+    borderRadius: "9999px",
+    fontWeight: 600,
+    padding: "0.75rem 2rem",
+    fontSize: "0.875rem",
+    transition: "opacity .2s",
+    cursor: "pointer",
+    border: "none",
+    display: "inline-block",
+    textDecoration: "none",
+  };
+  const btnOutline: React.CSSProperties = {
+    backgroundColor: "transparent",
+    color: T.fg,
+    borderRadius: "9999px",
+    fontWeight: 600,
+    padding: "0.75rem 2rem",
+    fontSize: "0.875rem",
+    transition: "background-color .2s",
+    cursor: "pointer",
+    border: `1px solid ${T.border}`,
+    display: "inline-block",
+    textDecoration: "none",
   };
 
   return (
-    <div
-      className="min-h-screen text-[#c5c1b9]"
-      style={{ backgroundColor: "#131313", fontFamily: "'Segoe UI', Roboto, -apple-system, sans-serif" }}
-    >
+    <>
+      {/* ── Inject the CameraPlainVariable font ─────────────────────────── */}
+      <style>{`
+        @font-face {
+          font-family: 'CameraPlainVariable';
+          src: url('${FONT}') format('woff2');
+          font-weight: 100 900;
+          font-display: swap;
+        }
+        .rc-serif {
+          font-family: 'CameraPlainVariable', Georgia, serif;
+        }
+        .rc-btn-primary:hover { opacity: 0.88; }
+        .rc-btn-outline:hover  { background-color: oklch(30% .005 285); }
+        .rc-nav-link { color: ${T.mutedFg}; background: none; border: none; cursor: pointer; font-size: 0.875rem; transition: color .2s; }
+        .rc-nav-link:hover { color: ${T.fg}; }
+        .rc-card:hover { background-color: oklch(20% .005 285) !important; }
+        .rc-area-pill:hover { background-color: oklch(25% .005 285) !important; }
+      `}</style>
+
       <Seo
         title="Remain Clean Services | Premium Mobile Detailing — Fort Lauderdale, Miami-Dade & West Palm Beach"
-        description="Premium mobile detailing — we bring the showroom to you. Serving Fort Lauderdale, Miami-Dade & West Palm Beach. Open 7 days a week, 8AM–9PM."
+        description="Premium mobile detailing — we bring the showroom to you. Serving Fort Lauderdale, Miami-Dade & West Palm Beach. Open 7 days a week 8AM–9PM."
         canonicalPath="/"
       />
 
-      {/* ── Status Banner ── */}
-      <div
-        className="w-full text-center text-xs py-2 px-4 font-medium tracking-wide"
-        style={{ backgroundColor: "#1b1b1b", color: "#c5c1b9", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
-      >
-        Open 7 Days a Week&nbsp;•&nbsp;8AM – 9PM
-      </div>
+      <div style={{ backgroundColor: T.bg, color: T.fg, minHeight: "100vh" }}>
 
-      {/* ── Nav ── */}
-      <nav
-        className="sticky top-0 z-50 px-4 py-3"
-        style={{ backgroundColor: "rgba(19,19,19,0.95)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
-      >
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          {/* Logo */}
-          <a
-            href="/"
-            className="font-bold text-base tracking-widest uppercase"
-            style={{ color: "#dcdad5" }}
-          >
-            Remain Clean Services
-          </a>
-
-          {/* Desktop links */}
-          <div className="hidden md:flex items-center gap-7">
-            {[
-              { label: "Home", anchor: "top" },
-              { label: "Services", anchor: "services" },
-              { label: "Gallery", anchor: "gallery" },
-              { label: "Rewards", anchor: "rewards" },
-              { label: "Contact", anchor: "contact" },
-            ].map(({ label, anchor }) => (
-              <button
-                key={label}
-                onClick={() => scrollTo(anchor)}
-                className="text-sm transition-colors"
-                style={{ color: "#c5c1b9" }}
-                onMouseEnter={(e) => ((e.target as HTMLElement).style.color = "#dcdad5")}
-                onMouseLeave={(e) => ((e.target as HTMLElement).style.color = "#c5c1b9")}
-              >
-                {label}
-              </button>
-            ))}
-            <a
-              href="tel:9549131307"
-              className="text-sm flex items-center gap-1.5 transition-colors"
-              style={{ color: "#c5c1b9" }}
-            >
-              <Phone className="h-3.5 w-3.5" />
-              Call Now: (954)-913-1307
-            </a>
-            <button
-              onClick={handleBookNow}
-              className="text-sm font-semibold px-5 py-2 rounded-full transition-all active:scale-[0.98]"
-              style={{ backgroundColor: "#575ECF", color: "#fff" }}
-              onMouseEnter={(e) => ((e.target as HTMLElement).style.backgroundColor = "#4a50c0")}
-              onMouseLeave={(e) => ((e.target as HTMLElement).style.backgroundColor = "#575ECF")}
-            >
-              Book Now
-            </button>
-          </div>
-
-          {/* Mobile hamburger */}
-          <button
-            className="md:hidden p-1"
-            style={{ color: "#dcdad5" }}
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
+        {/* ── 1. Status Banner ───────────────────────────────────────────── */}
+        <div
+          style={{
+            backgroundColor: T.card,
+            borderBottom: `1px solid ${T.border}`,
+            textAlign: "center",
+            padding: "0.5rem 1rem",
+            fontSize: "0.75rem",
+            color: T.mutedFg,
+            letterSpacing: "0.05em",
+          }}
+        >
+          Open 7 Days a Week&nbsp;&bull;&nbsp;8AM – 9PM
         </div>
 
-        {/* Mobile menu */}
-        {mobileMenuOpen && (
+        {/* ── 2. Navigation ──────────────────────────────────────────────── */}
+        <nav
+          style={{
+            position: "sticky",
+            top: 0,
+            zIndex: 50,
+            backgroundColor: T.bg,
+            borderBottom: `1px solid ${T.border}`,
+            backdropFilter: "blur(12px)",
+          }}
+        >
           <div
-            className="md:hidden mt-2 rounded-2xl p-4 space-y-2"
-            style={{ backgroundColor: "#1b1b1b", border: "1px solid rgba(255,255,255,0.08)" }}
+            style={{
+              maxWidth: "1280px",
+              margin: "0 auto",
+              padding: "0.875rem 1.5rem",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
           >
-            {[
-              { label: "Home", anchor: "top" },
-              { label: "Services", anchor: "services" },
-              { label: "Gallery", anchor: "gallery" },
-              { label: "Rewards", anchor: "rewards" },
-              { label: "Contact", anchor: "contact" },
-            ].map(({ label, anchor }) => (
-              <button
-                key={label}
-                onClick={() => scrollTo(anchor)}
-                className="block w-full text-left px-3 py-2 rounded-lg text-sm"
-                style={{ color: "#c5c1b9" }}
+            {/* Logo + wordmark */}
+            <a href="/" style={{ display: "flex", alignItems: "center", gap: "0.625rem", textDecoration: "none" }}>
+              <img
+                src={LOGO}
+                alt="Remain Clean Services"
+                style={{
+                  width: "2rem",
+                  height: "2rem",
+                  borderRadius: "9999px",
+                  objectFit: "cover",
+                  border: `1px solid ${T.border}`,
+                }}
+              />
+              <span
+                className="rc-serif"
+                style={{ color: T.fg, fontWeight: 700, fontSize: "0.9rem", letterSpacing: "0.04em" }}
               >
-                {label}
-              </button>
-            ))}
-            <a
-              href="tel:9549131307"
-              className="block px-3 py-2 rounded-lg text-sm"
-              style={{ color: "#c5c1b9" }}
-            >
-              📞 (954)-913-1307
+                Remain Clean Services
+              </span>
             </a>
+
+            {/* Desktop links */}
+            <div className="rc-desktop-nav" style={{ display: "flex", alignItems: "center", gap: "1.75rem" }}>
+              <style>{`
+                @media (max-width: 767px) { .rc-desktop-nav { display: none !important; } }
+              `}</style>
+              {navLinks.map(({ label, anchor, cta }) =>
+                cta ? (
+                  <button
+                    key={label}
+                    onClick={bookNow}
+                    className="rc-btn-primary"
+                    style={{ ...btnPrimary, padding: "0.5rem 1.25rem" }}
+                  >
+                    {label}
+                  </button>
+                ) : (
+                  <button key={label} className="rc-nav-link" onClick={() => scrollTo(anchor)}>
+                    {label}
+                  </button>
+                )
+              )}
+              <a
+                href="tel:9549131307"
+                className="rc-nav-link"
+                style={{ display: "flex", alignItems: "center", gap: "0.375rem", textDecoration: "none", color: T.mutedFg, fontSize: "0.875rem" }}
+              >
+                <Phone size={13} />
+                Call Now: (954)-913-1307
+              </a>
+            </div>
+
+            {/* Mobile hamburger */}
             <button
-              onClick={() => { setMobileMenuOpen(false); handleBookNow(); }}
-              className="block w-full text-center py-2.5 rounded-full text-sm font-semibold"
-              style={{ backgroundColor: "#575ECF", color: "#fff" }}
+              onClick={() => setMenuOpen(!menuOpen)}
+              style={{ background: "none", border: "none", color: T.fg, cursor: "pointer", padding: "0.25rem" }}
+              className="rc-mobile-toggle"
+              aria-label="Toggle menu"
             >
-              Book Now
+              <style>{`@media (min-width: 768px) { .rc-mobile-toggle { display: none !important; } }`}</style>
+              {menuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
           </div>
-        )}
-      </nav>
 
-      {/* ── Promo Banner ── */}
-      <div
-        className="w-full text-center py-2.5 px-4 text-sm font-medium"
-        style={{ backgroundColor: "#1b1b1b", borderBottom: "1px solid rgba(255,255,255,0.06)", color: "#c5c1b9" }}
-      >
-        💰 Use code <span style={{ color: "#dcdad5", fontWeight: 700 }}>MarioWorld4L</span> for up to $20 off!
-      </div>
+          {/* Mobile menu */}
+          {menuOpen && (
+            <div
+              style={{
+                backgroundColor: T.card,
+                borderTop: `1px solid ${T.border}`,
+                padding: "1rem 1.5rem",
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.25rem",
+              }}
+            >
+              {navLinks.map(({ label, anchor, cta }) =>
+                cta ? (
+                  <button
+                    key={label}
+                    onClick={bookNow}
+                    className="rc-btn-primary"
+                    style={{ ...btnPrimary, width: "100%", marginTop: "0.5rem" }}
+                  >
+                    {label}
+                  </button>
+                ) : (
+                  <button
+                    key={label}
+                    className="rc-nav-link"
+                    style={{ textAlign: "left", padding: "0.625rem 0.5rem", borderRadius: "0.5rem", width: "100%" }}
+                    onClick={() => scrollTo(anchor)}
+                  >
+                    {label}
+                  </button>
+                )
+              )}
+              <a
+                href="tel:9549131307"
+                style={{ color: T.mutedFg, textDecoration: "none", padding: "0.625rem 0.5rem", fontSize: "0.875rem" }}
+              >
+                📞 (954)-913-1307
+              </a>
+            </div>
+          )}
+        </nav>
 
-      {/* ── Hero ── */}
-      <section
-        className="relative min-h-screen flex flex-col items-center justify-center px-4 text-center"
-        style={{
-          background: "linear-gradient(to bottom, #131313 0%, #1a1a1a 100%)",
-        }}
-      >
-        {/* Subtle shimmer overlay */}
+        {/* ── 3. Promo Banner ────────────────────────────────────────────── */}
         <div
-          className="absolute inset-0 pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse at 50% 30%, rgba(87,94,207,0.08) 0%, transparent 70%)",
+            backgroundColor: T.secondary,
+            borderBottom: `1px solid ${T.border}`,
+            textAlign: "center",
+            padding: "0.625rem 1rem",
+            fontSize: "0.8125rem",
+            color: T.mutedFg,
           }}
-        />
-        <div className="relative z-10 max-w-4xl mx-auto">
+        >
+          💰 Use code{" "}
+          <strong style={{ color: T.primary }}>MarioWorld4L</strong>
+          {" "}for up to $20 off!
+        </div>
+
+        {/* ── 4. Hero ────────────────────────────────────────────────────── */}
+        <section
+          style={{
+            minHeight: "90vh",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "4rem 1rem",
+            textAlign: "center",
+            background: `linear-gradient(to bottom, ${T.bg}, ${T.bg}, ${T.secondary})`,
+          }}
+        >
+          {/* Logo mark */}
+          <img
+            src={LOGO}
+            alt="Remain Clean Services"
+            style={{
+              width: "8rem",
+              height: "8rem",
+              borderRadius: "9999px",
+              objectFit: "cover",
+              border: `2px solid ${T.border}`,
+              boxShadow: `0 8px 32px oklch(79.5% .105 85 / 20%)`,
+              marginBottom: "1.75rem",
+            }}
+          />
+
+          {/* Status pill */}
           <div
-            className="inline-block text-xs font-semibold px-4 py-1.5 rounded-full mb-6 tracking-widest uppercase"
-            style={{ backgroundColor: "#1b1b1b", color: "#c5c1b9", border: "1px solid rgba(255,255,255,0.1)" }}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.375rem",
+              backgroundColor: T.card,
+              border: `1px solid ${T.border}`,
+              borderRadius: "9999px",
+              padding: "0.3rem 0.875rem",
+              fontSize: "0.75rem",
+              color: T.mutedFg,
+              marginBottom: "1.5rem",
+              letterSpacing: "0.04em",
+            }}
           >
-            Premium Mobile Detailing
+            <span style={{ width: "6px", height: "6px", borderRadius: "9999px", backgroundColor: T.primary, display: "inline-block" }} />
+            Open 7 Days a Week • 8AM – 9PM
           </div>
+
+          {/* Main heading */}
           <h1
-            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black leading-[1.05] mb-6 tracking-tight uppercase"
-            style={{ color: "#dcdad5", fontFamily: "'Arial Black', Impact, sans-serif" }}
+            className="rc-serif"
+            style={{
+              fontSize: "clamp(2.5rem, 8vw, 4rem)",
+              fontWeight: 800,
+              lineHeight: 1.1,
+              color: T.fg,
+              marginBottom: "1.25rem",
+              maxWidth: "700px",
+            }}
           >
-            REMAIN CLEAN<br className="hidden sm:block" /> SERVICES
+            REMAIN{" "}
+            <span style={{ color: T.primary }}>CLEAN</span>
+            {" "}SERVICES
           </h1>
-          <p className="text-lg sm:text-xl mb-10 max-w-2xl mx-auto" style={{ color: "#c5c1b9" }}>
+
+          {/* Tagline */}
+          <p
+            style={{
+              fontSize: "1.125rem",
+              color: T.mutedFg,
+              maxWidth: "520px",
+              marginBottom: "2.5rem",
+              lineHeight: 1.65,
+            }}
+          >
             Premium mobile detailing — we bring the showroom to you.{" "}
-            <span style={{ color: "#dcdad5" }}>
+            <span style={{ color: T.fg }}>
               Serving Fort Lauderdale, Miami-Dade &amp; West Palm Beach.
             </span>
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10">
-            <button
-              onClick={handleBookNow}
-              className="font-semibold text-lg px-10 py-4 rounded-full transition-all active:scale-[0.98]"
-              style={{ backgroundColor: "#575ECF", color: "#fff" }}
-            >
+
+          {/* CTAs */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.875rem", justifyContent: "center", marginBottom: "2rem" }}>
+            <button onClick={bookNow} className="rc-btn-primary" style={{ ...btnPrimary, padding: "0.875rem 2.25rem", fontSize: "1rem" }}>
               Book Appointment
             </button>
-            <a
-              href="tel:9549131307"
-              className="font-semibold text-lg px-10 py-4 rounded-full transition-colors text-center"
-              style={{
-                border: "1px solid rgba(197,193,185,0.3)",
-                color: "#dcdad5",
-                backgroundColor: "rgba(255,255,255,0.04)",
-              }}
-            >
+            <a href="tel:9549131307" className="rc-btn-outline" style={{ ...btnOutline, padding: "0.875rem 2.25rem", fontSize: "1rem" }}>
               Call (954)-913-1307
             </a>
           </div>
-          <div className="flex justify-center gap-1">
+
+          {/* Stars */}
+          <div style={{ display: "flex", gap: "0.25rem" }}>
             {[...Array(5)].map((_, i) => (
-              <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+              <Star key={i} size={18} style={{ fill: "#facc15", color: "#facc15" }} />
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ── Services Section ── */}
-      <section id="services" className="scroll-mt-20 py-20 px-4" style={{ backgroundColor: "#1a1a1a" }}>
-        <div className="max-w-6xl mx-auto">
-          <h2
-            className="text-4xl md:text-5xl font-black text-center uppercase tracking-tight mb-3"
-            style={{ color: "#dcdad5", fontFamily: "'Arial Black', Impact, sans-serif" }}
-          >
-            Our Services
-          </h2>
-          <p className="text-center mb-12" style={{ color: "#c5c1b9" }}>
-            Three core services. Four luxury packages.
-          </p>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {services.map((svc) => (
-              <div
-                key={svc.name}
-                className="rounded-2xl p-8 flex flex-col items-center text-center transition-all"
-                style={{
-                  backgroundColor: "#131313",
-                  border: "1px solid rgba(255,255,255,0.07)",
-                }}
-                onMouseEnter={(e) =>
-                  ((e.currentTarget as HTMLElement).style.backgroundColor = "rgba(255,255,255,0.04)")
-                }
-                onMouseLeave={(e) =>
-                  ((e.currentTarget as HTMLElement).style.backgroundColor = "#131313")
-                }
-              >
-                <span className="text-5xl mb-5">{svc.icon}</span>
-                <h3 className="text-xl font-bold mb-3" style={{ color: "#dcdad5" }}>
-                  {svc.name}
-                </h3>
-                <p className="text-sm leading-relaxed" style={{ color: "#c5c1b9" }}>
-                  {svc.description}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center mt-10">
-            <button
-              onClick={handleBookNow}
-              className="font-semibold px-8 py-3 rounded-full text-sm transition-all"
-              style={{ backgroundColor: "#575ECF", color: "#fff" }}
+        {/* ── 5. Services ────────────────────────────────────────────────── */}
+        <section id="services" style={{ backgroundColor: T.secondary, padding: "5rem 1rem" }}>
+          <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+            <h2
+              className="rc-serif"
+              style={{
+                textAlign: "center",
+                fontSize: "clamp(1.75rem, 5vw, 2.5rem)",
+                fontWeight: 800,
+                color: T.fg,
+                marginBottom: "0.5rem",
+              }}
             >
-              View All Packages &amp; Pricing →
-            </button>
-          </div>
-        </div>
-      </section>
+              Our Services
+            </h2>
+            <p style={{ textAlign: "center", color: T.mutedFg, marginBottom: "3rem", fontSize: "0.9375rem" }}>
+              Three core services. Four luxury packages.
+            </p>
 
-      {/* ── Service Areas ── */}
-      <section className="py-16 px-4" style={{ backgroundColor: "#131313", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-        <div className="max-w-4xl mx-auto text-center">
-          <h2
-            className="text-3xl md:text-4xl font-black uppercase tracking-tight mb-3"
-            style={{ color: "#dcdad5", fontFamily: "'Arial Black', Impact, sans-serif" }}
-          >
-            We Come to You
-          </h2>
-          <p className="mb-10" style={{ color: "#c5c1b9" }}>
-            Proudly serving all of South Florida
-          </p>
-          <div className="flex flex-wrap justify-center gap-6">
-            {serviceAreas.map((area) => (
-              <div
-                key={area.name}
-                className="flex items-center gap-2.5 px-6 py-3 rounded-full"
-                style={{
-                  backgroundColor: "#1b1b1b",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  color: "#dcdad5",
-                }}
-              >
-                <MapPin className="h-4 w-4" style={{ color: "#575ECF" }} />
-                <span className="font-medium text-sm">{area.name}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Testimonials ── */}
-      <section id="testimonials" className="scroll-mt-20 py-20 px-4" style={{ backgroundColor: "#1a1a1a" }}>
-        <div className="max-w-6xl mx-auto">
-          <h2
-            className="text-4xl md:text-5xl font-black text-center uppercase tracking-tight mb-3"
-            style={{ color: "#dcdad5", fontFamily: "'Arial Black', Impact, sans-serif" }}
-          >
-            What Our Clients Say
-          </h2>
-          <p className="text-center mb-12" style={{ color: "#c5c1b9" }}>
-            Real reviews from satisfied customers across South Florida.
-          </p>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {testimonials.map((t) => (
-              <div
-                key={t.name}
-                className="rounded-2xl p-6 flex flex-col"
-                style={{
-                  backgroundColor: "#131313",
-                  border: "1px solid rgba(255,255,255,0.07)",
-                }}
-              >
-                <div className="flex gap-1 mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  ))}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1.25rem" }}>
+              {services.map((svc) => (
+                <div
+                  key={svc.name}
+                  className="rc-card"
+                  style={{
+                    backgroundColor: T.card,
+                    border: `1px solid ${T.border}`,
+                    borderRadius: "0.75rem",
+                    padding: "2rem 1.5rem",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    textAlign: "center",
+                    transition: "background-color .2s",
+                    cursor: "default",
+                  }}
+                >
+                  <span style={{ fontSize: "2.75rem", marginBottom: "1.25rem" }}>{svc.icon}</span>
+                  <h3
+                    className="rc-serif"
+                    style={{ color: T.fg, fontWeight: 700, fontSize: "1.125rem", marginBottom: "0.75rem" }}
+                  >
+                    {svc.name}
+                  </h3>
+                  <p style={{ color: T.mutedFg, fontSize: "0.875rem", lineHeight: 1.65 }}>{svc.desc}</p>
                 </div>
-                <p className="text-sm leading-relaxed flex-1 mb-4" style={{ color: "#c5c1b9" }}>
-                  "{t.text}"
-                </p>
-                <div>
-                  <p className="font-semibold text-sm" style={{ color: "#dcdad5" }}>
-                    {t.name}
-                  </p>
-                  <p className="text-xs" style={{ color: "#888" }}>
-                    {t.location}
-                  </p>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
+
+            <div style={{ textAlign: "center", marginTop: "2.5rem" }}>
+              <button onClick={bookNow} className="rc-btn-primary" style={btnPrimary}>
+                View All Packages &amp; Pricing →
+              </button>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ── Rewards Section ── */}
-      <section
-        id="rewards"
-        className="scroll-mt-20 py-16 px-4 text-center"
-        style={{ backgroundColor: "#131313", borderTop: "1px solid rgba(255,255,255,0.06)" }}
-      >
-        <div className="max-w-2xl mx-auto">
-          <div className="text-4xl mb-4">🏆</div>
-          <h2
-            className="text-3xl md:text-4xl font-black uppercase tracking-tight mb-3"
-            style={{ color: "#dcdad5", fontFamily: "'Arial Black', Impact, sans-serif" }}
-          >
-            Rewards Program
-          </h2>
-          <p className="mb-8" style={{ color: "#c5c1b9" }}>
-            Earn points with every detail. Redeem for discounts, free services, and exclusive perks.
-            The more you clean, the more you save.
-          </p>
-          <button
-            onClick={handleBookNow}
-            className="font-semibold px-8 py-3 rounded-full text-sm transition-all"
-            style={{ backgroundColor: "#575ECF", color: "#fff" }}
-          >
-            Join Rewards Program
-          </button>
-        </div>
-      </section>
+        {/* ── 6. Service Areas ───────────────────────────────────────────── */}
+        <section
+          style={{
+            backgroundColor: T.bg,
+            borderTop: `1px solid ${T.border}`,
+            padding: "4rem 1rem",
+            textAlign: "center",
+          }}
+        >
+          <div style={{ maxWidth: "700px", margin: "0 auto" }}>
+            <h2
+              className="rc-serif"
+              style={{ color: T.fg, fontWeight: 800, fontSize: "clamp(1.5rem, 4vw, 2rem)", marginBottom: "0.5rem" }}
+            >
+              We Come to You
+            </h2>
+            <p style={{ color: T.mutedFg, marginBottom: "2.5rem", fontSize: "0.9375rem" }}>
+              Proudly serving all of South Florida
+            </p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.875rem", justifyContent: "center" }}>
+              {areas.map((area) => (
+                <div
+                  key={area}
+                  className="rc-area-pill"
+                  style={{
+                    backgroundColor: T.card,
+                    border: `1px solid ${T.border}`,
+                    borderRadius: "9999px",
+                    padding: "0.625rem 1.375rem",
+                    fontSize: "0.875rem",
+                    color: T.fg,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    transition: "background-color .2s",
+                    cursor: "default",
+                  }}
+                >
+                  <MapPin size={14} style={{ color: T.primary }} />
+                  {area}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
-      {/* ── CTA Banner ── */}
-      <section
-        className="py-16 px-4 text-center"
-        style={{
-          background: "linear-gradient(135deg, #575ECF 0%, #3d44a8 100%)",
-        }}
-      >
-        <div className="max-w-2xl mx-auto">
-          <h2
-            className="text-3xl md:text-4xl font-black uppercase tracking-tight mb-3"
-            style={{ color: "#fff", fontFamily: "'Arial Black', Impact, sans-serif" }}
-          >
-            Ready for a Showroom Finish?
-          </h2>
-          <p className="mb-8" style={{ color: "rgba(255,255,255,0.85)" }}>
-            Book your mobile detail today. Satisfaction guaranteed.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button
-              onClick={handleBookNow}
-              className="font-semibold px-8 py-3 rounded-full transition-colors text-sm active:scale-[0.98]"
-              style={{ backgroundColor: "#fff", color: "#575ECF" }}
+        {/* ── 7. Testimonials ────────────────────────────────────────────── */}
+        <section
+          id="testimonials"
+          style={{ backgroundColor: T.secondary, padding: "5rem 1rem" }}
+        >
+          <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+            <h2
+              className="rc-serif"
+              style={{
+                textAlign: "center",
+                fontSize: "clamp(1.75rem, 5vw, 2.5rem)",
+                fontWeight: 800,
+                color: T.fg,
+                marginBottom: "0.5rem",
+              }}
             >
-              Book Now
-            </button>
-            <button
-              onClick={() => document.getElementById("rewards")?.scrollIntoView({ behavior: "smooth" })}
-              className="font-semibold px-8 py-3 rounded-full text-sm transition-colors"
-              style={{ border: "1px solid rgba(255,255,255,0.5)", color: "#fff", backgroundColor: "rgba(255,255,255,0.08)" }}
+              What Our Clients Say
+            </h2>
+            <p style={{ textAlign: "center", color: T.mutedFg, marginBottom: "3rem", fontSize: "0.9375rem" }}>
+              Real reviews from satisfied customers across South Florida.
+            </p>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.25rem" }}>
+              {testimonials.map((t) => (
+                <div
+                  key={t.name}
+                  style={{
+                    backgroundColor: T.card,
+                    border: `1px solid ${T.border}`,
+                    borderRadius: "0.75rem",
+                    padding: "1.5rem",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <div style={{ display: "flex", gap: "0.2rem", marginBottom: "1rem" }}>
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} size={14} style={{ fill: "#facc15", color: "#facc15" }} />
+                    ))}
+                  </div>
+                  <p style={{ color: T.mutedFg, fontSize: "0.875rem", lineHeight: 1.7, flex: 1, marginBottom: "1rem" }}>
+                    "{t.text}"
+                  </p>
+                  <div>
+                    <p style={{ color: T.fg, fontWeight: 600, fontSize: "0.875rem" }}>{t.name}</p>
+                    <p style={{ color: T.mutedFg, fontSize: "0.75rem" }}>{t.location}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── 8. Rewards ─────────────────────────────────────────────────── */}
+        <section
+          id="rewards"
+          style={{
+            backgroundColor: T.bg,
+            borderTop: `1px solid ${T.border}`,
+            padding: "4.5rem 1rem",
+            textAlign: "center",
+          }}
+        >
+          <div style={{ maxWidth: "560px", margin: "0 auto" }}>
+            <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>🏆</div>
+            <h2
+              className="rc-serif"
+              style={{ color: T.fg, fontWeight: 800, fontSize: "clamp(1.5rem, 4vw, 2rem)", marginBottom: "0.75rem" }}
             >
+              Rewards Program
+            </h2>
+            <p style={{ color: T.mutedFg, marginBottom: "2rem", fontSize: "0.9375rem", lineHeight: 1.65 }}>
+              Earn points with every detail and redeem them for discounts, free services, and exclusive perks.
+              The more you clean, the more you save.
+            </p>
+            <button onClick={bookNow} className="rc-btn-primary" style={btnPrimary}>
               Join Rewards Program
             </button>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ── Footer ── */}
-      <footer
-        id="contact"
-        className="scroll-mt-20 py-14 px-4"
-        style={{ backgroundColor: "#0e0e0e", borderTop: "1px solid rgba(255,255,255,0.07)" }}
-      >
-        <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-10">
-          {/* Brand */}
-          <div>
-            <p
-              className="font-bold text-base tracking-widest uppercase mb-3"
-              style={{ color: "#dcdad5" }}
-            >
-              REMAIN CLEAN SERVICES
-            </p>
-            <p className="text-sm leading-relaxed" style={{ color: "#c5c1b9" }}>
-              Premium mobile detailing serving South Florida.
-            </p>
-            <p className="text-xs mt-4" style={{ color: "#666" }}>
-              Fort Lauderdale • Miami-Dade • West Palm Beach
-            </p>
-          </div>
-
-          {/* Quick Links */}
-          <div>
-            <p
-              className="font-semibold text-sm mb-4 uppercase tracking-wider"
-              style={{ color: "#dcdad5" }}
-            >
-              Quick Links
-            </p>
-            <ul className="space-y-2">
-              {quickLinks.map((link) => (
-                <li key={link.label}>
-                  <button
-                    onClick={() => scrollTo(link.anchor)}
-                    className="text-sm transition-colors"
-                    style={{ color: "#c5c1b9" }}
-                    onMouseEnter={(e) => ((e.target as HTMLElement).style.color = "#dcdad5")}
-                    onMouseLeave={(e) => ((e.target as HTMLElement).style.color = "#c5c1b9")}
-                  >
-                    {link.label}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Contact & Hours */}
-          <div>
-            <p
-              className="font-semibold text-sm mb-4 uppercase tracking-wider"
-              style={{ color: "#dcdad5" }}
-            >
-              Contact &amp; Hours
-            </p>
-            <ul className="space-y-3 text-sm" style={{ color: "#c5c1b9" }}>
-              <li className="flex items-center gap-2">
-                <Phone className="h-4 w-4 shrink-0" style={{ color: "#575ECF" }} />
-                <a href="tel:9549131307" className="hover:text-[#dcdad5] transition-colors">
-                  (954)-913-1307
-                </a>
-              </li>
-              <li className="flex items-center gap-2">
-                <Mail className="h-4 w-4 shrink-0" style={{ color: "#575ECF" }} />
-                <a
-                  href="mailto:Remaincleanservicesllc@yahoo.com"
-                  className="hover:text-[#dcdad5] transition-colors break-all"
-                >
-                  Remaincleanservicesllc@yahoo.com
-                </a>
-              </li>
-              <li className="flex items-center gap-2">
-                <Instagram className="h-4 w-4 shrink-0" style={{ color: "#575ECF" }} />
-                <a
-                  href="https://instagram.com/remaincleanservice"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-[#dcdad5] transition-colors"
-                >
-                  @remaincleanservice
-                </a>
-              </li>
-              <li className="mt-3">
-                <p className="font-medium mb-0.5" style={{ color: "#dcdad5" }}>Hours of Operation</p>
-                <p>Monday – Sunday</p>
-                <p>8:00 AM – 9:00 PM</p>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div
-          className="max-w-6xl mx-auto mt-10 pt-6 text-center text-xs"
-          style={{ borderTop: "1px solid rgba(255,255,255,0.06)", color: "#555" }}
+        {/* ── 9. CTA Banner ──────────────────────────────────────────────── */}
+        <section
+          style={{
+            background: `linear-gradient(135deg, ${T.primary}, oklch(70% .11 85))`,
+            padding: "4.5rem 1rem",
+            textAlign: "center",
+          }}
         >
-          © 2026 Remain Clean Services LLC. All rights reserved.
-          {" · "}
-          <Link to="/privacy-policy" className="hover:text-[#c5c1b9] transition-colors">
-            Privacy Policy
-          </Link>
-        </div>
-      </footer>
-    </div>
+          <div style={{ maxWidth: "600px", margin: "0 auto" }}>
+            <h2
+              className="rc-serif"
+              style={{
+                color: T.primaryFg,
+                fontWeight: 800,
+                fontSize: "clamp(1.75rem, 5vw, 2.5rem)",
+                marginBottom: "0.75rem",
+              }}
+            >
+              Ready for a Showroom Finish?
+            </h2>
+            <p style={{ color: "oklch(20% .005 285 / 75%)", marginBottom: "2rem", fontSize: "0.9375rem" }}>
+              Book your mobile detail today. Satisfaction guaranteed.
+            </p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.875rem", justifyContent: "center" }}>
+              <button
+                onClick={bookNow}
+                className="rc-btn-primary"
+                style={{
+                  ...btnPrimary,
+                  backgroundColor: T.primaryFg,
+                  color: T.primary,
+                }}
+              >
+                Book Now
+              </button>
+              <button
+                onClick={() => document.getElementById("rewards")?.scrollIntoView({ behavior: "smooth" })}
+                style={{
+                  ...btnOutline,
+                  borderColor: "oklch(14.5% .005 285 / 40%)",
+                  color: T.primaryFg,
+                }}
+                className="rc-btn-outline"
+              >
+                Join Rewards Program
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* ── 10. Footer ─────────────────────────────────────────────────── */}
+        <footer
+          id="contact"
+          style={{
+            backgroundColor: T.bg,
+            borderTop: `1px solid ${T.border}`,
+            padding: "3.5rem 1.5rem",
+          }}
+        >
+          <div
+            style={{
+              maxWidth: "1100px",
+              margin: "0 auto",
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+              gap: "2.5rem",
+            }}
+          >
+            {/* Brand */}
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "0.75rem" }}>
+                <img
+                  src={LOGO}
+                  alt="Remain Clean Services"
+                  style={{ width: "2rem", height: "2rem", borderRadius: "9999px", objectFit: "cover", border: `1px solid ${T.border}` }}
+                />
+                <span className="rc-serif" style={{ color: T.fg, fontWeight: 700, fontSize: "0.875rem" }}>
+                  REMAIN CLEAN SERVICES
+                </span>
+              </div>
+              <p style={{ color: T.mutedFg, fontSize: "0.8125rem", lineHeight: 1.65 }}>
+                Premium mobile detailing serving South Florida.
+              </p>
+              <p style={{ color: T.border, fontSize: "0.75rem", marginTop: "0.75rem" }}>
+                Fort Lauderdale • Miami-Dade • West Palm Beach
+              </p>
+            </div>
+
+            {/* Quick Links */}
+            <div>
+              <p style={{ color: T.fg, fontWeight: 600, fontSize: "0.8125rem", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: "1rem" }}>
+                Quick Links
+              </p>
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                {footerQuickLinks.map((l) => (
+                  <li key={l.label}>
+                    <button
+                      className="rc-nav-link"
+                      style={{ padding: 0 }}
+                      onClick={() => scrollTo(l.anchor)}
+                    >
+                      {l.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Contact & Hours */}
+            <div>
+              <p style={{ color: T.fg, fontWeight: 600, fontSize: "0.8125rem", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: "1rem" }}>
+                Contact &amp; Hours
+              </p>
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                <li>
+                  <a href="tel:9549131307" style={{ color: T.mutedFg, textDecoration: "none", fontSize: "0.875rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <Phone size={14} style={{ color: T.primary, flexShrink: 0 }} />
+                    (954)-913-1307
+                  </a>
+                </li>
+                <li>
+                  <a href="mailto:Remaincleanservicesllc@yahoo.com" style={{ color: T.mutedFg, textDecoration: "none", fontSize: "0.875rem", display: "flex", alignItems: "flex-start", gap: "0.5rem", wordBreak: "break-all" }}>
+                    <Mail size={14} style={{ color: T.primary, flexShrink: 0, marginTop: "0.125rem" }} />
+                    Remaincleanservicesllc@yahoo.com
+                  </a>
+                </li>
+                <li>
+                  <a href="https://instagram.com/remaincleanservice" target="_blank" rel="noopener noreferrer" style={{ color: T.mutedFg, textDecoration: "none", fontSize: "0.875rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <Instagram size={14} style={{ color: T.primary, flexShrink: 0 }} />
+                    @remaincleanservice
+                  </a>
+                </li>
+                <li style={{ marginTop: "0.25rem" }}>
+                  <p style={{ color: T.fg, fontWeight: 600, fontSize: "0.8125rem", marginBottom: "0.25rem" }}>Hours of Operation</p>
+                  <p style={{ color: T.mutedFg, fontSize: "0.8125rem" }}>Monday – Sunday</p>
+                  <p style={{ color: T.mutedFg, fontSize: "0.8125rem" }}>8:00 AM – 9:00 PM</p>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Copyright */}
+          <div
+            style={{
+              maxWidth: "1100px",
+              margin: "2.5rem auto 0",
+              paddingTop: "1.5rem",
+              borderTop: `1px solid ${T.border}`,
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "0.75rem",
+              fontSize: "0.75rem",
+              color: T.border,
+            }}
+          >
+            <span>© 2026 Remain Clean Services LLC. All rights reserved.</span>
+            <Link to="/privacy-policy" style={{ color: T.mutedFg, textDecoration: "none" }}>
+              Privacy Policy
+            </Link>
+          </div>
+        </footer>
+      </div>
+    </>
   );
 }
