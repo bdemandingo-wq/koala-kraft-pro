@@ -22,6 +22,7 @@ import { useAppStateHandler } from '@/hooks/useAppStateHandler';
 const LandingPage = lazy(() => import("./pages/LandingPage"));
 
 // New auth pages with no session persistence
+const RemainCleanBookingPage = lazy(() => import("./pages/RemainCleanBookingPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const SignupPage = lazy(() => import("./pages/SignupPage"));
 // Native redirect for signup (App Store compliance - no in-app signup on native)
@@ -158,6 +159,7 @@ const App = () => (
                         <Route path="/auth" element={<AuthPage />} />
 
                       {/* Public Routes - Lazy Loaded */}
+                      <Route path="/book/remainclean" element={<RemainCleanBookingPage />} />
                       <Route path="/book/:orgSlug" element={<PublicBookingPage />} />
                       <Route path="/c/:code" element={<RedirectPage />} />
                       <Route path="/card-saved" element={<CardSavedPage />} />
