@@ -117,7 +117,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Seo title="Log In | We Detail NC - Car Detailing Business Software" description="Log in to your We Detail NC account to manage bookings, staff, and grow your car detailing business." canonicalPath="/login" noIndex />
+      <Seo title="Log In | Remain Clean Services" description="Log in to your Remain Clean Services admin account to manage bookings, customers, and your detailing business." canonicalPath="/login" noIndex />
       <div className="w-full max-w-md">
         {/* Back to home link */}
         <Link 

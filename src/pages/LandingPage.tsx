@@ -74,12 +74,13 @@ const testimonials = [
 ];
 
 const navLinks = [
-  { label: "Home",     anchor: "top"          },
-  { label: "Services", anchor: "services"      },
-  { label: "Gallery",  anchor: "gallery"       },
-  { label: "Book Now", anchor: "book",  cta: true },
-  { label: "Rewards",  anchor: "rewards"       },
-  { label: "Contact",  anchor: "contact"       },
+  { label: "Home",     anchor: "top"               },
+  { label: "Services", anchor: "services"           },
+  { label: "Gallery",  anchor: "gallery"            },
+  { label: "Book Now", anchor: "book",   cta: true  },
+  { label: "Rewards",  anchor: "rewards"            },
+  { label: "Contact",  anchor: "contact"            },
+  { label: "Log In",   anchor: "login",  login: true},
 ];
 
 const footerQuickLinks = [
@@ -102,6 +103,7 @@ export default function LandingPage() {
   };
 
   const bookNow = () => navigate(`/book/${ORG_SLUG}`);
+  const goToLogin = () => navigate("/login");
 
   /* shared button styles */
   const btnPrimary: React.CSSProperties = {
@@ -222,13 +224,22 @@ export default function LandingPage() {
               <style>{`
                 @media (max-width: 767px) { .rc-desktop-nav { display: none !important; } }
               `}</style>
-              {navLinks.map(({ label, anchor, cta }) =>
+              {navLinks.map(({ label, anchor, cta, login }) =>
                 cta ? (
                   <button
                     key={label}
                     onClick={bookNow}
                     className="rc-btn-primary"
                     style={{ ...btnPrimary, padding: "0.5rem 1.25rem" }}
+                  >
+                    {label}
+                  </button>
+                ) : login ? (
+                  <button
+                    key={label}
+                    onClick={goToLogin}
+                    className="rc-nav-link"
+                    style={{ color: T.mutedFg, fontWeight: 500 }}
                   >
                     {label}
                   </button>
@@ -272,13 +283,22 @@ export default function LandingPage() {
                 gap: "0.25rem",
               }}
             >
-              {navLinks.map(({ label, anchor, cta }) =>
+              {navLinks.map(({ label, anchor, cta, login }) =>
                 cta ? (
                   <button
                     key={label}
                     onClick={bookNow}
                     className="rc-btn-primary"
                     style={{ ...btnPrimary, width: "100%", marginTop: "0.5rem" }}
+                  >
+                    {label}
+                  </button>
+                ) : login ? (
+                  <button
+                    key={label}
+                    onClick={goToLogin}
+                    className="rc-nav-link"
+                    style={{ textAlign: "left", padding: "0.625rem 0.5rem", borderRadius: "0.5rem", width: "100%", fontWeight: 500 }}
                   >
                     {label}
                   </button>
