@@ -574,10 +574,10 @@ export default function OnboardingPage() {
               </p>
               
               <div className="flex gap-3">
-                <Button 
-                  variant="outline" 
-                  className="flex-1" 
-                  onClick={() => setStep(2)}
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setStep(1)}
                 >
                   <ArrowLeft className="mr-2 h-4 w-4" /> Back
                 </Button>
