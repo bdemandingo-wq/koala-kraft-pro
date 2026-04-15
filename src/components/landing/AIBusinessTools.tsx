@@ -228,6 +228,7 @@ export function AIBusinessTools() {
                       { state: hasReviewSystem, setter: setHasReviewSystem, label: "I have a review collection system", icon: Target },
                     ].map((item, i) => (
                       <button
+                        type="button"
                         key={i}
                         onClick={() => item.setter(!item.state)}
                         className={cn(

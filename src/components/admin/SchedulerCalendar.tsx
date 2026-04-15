@@ -731,6 +731,7 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
                   ) : (
                     searchResults.slice(0, 10).map((booking) => (
                       <button
+                        type="button"
                         key={booking.id}
                         className="w-full p-3 text-left hover:bg-muted/50 border-b border-border last:border-0"
                         onClick={() => {
@@ -879,6 +880,7 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
                               ))}
                               {overflowCount > 0 && (
                                 <button
+                                  type="button"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     setDayBookingsPopup({ date: date!, bookings: dayBookings });
@@ -927,6 +929,7 @@ export function SchedulerCalendar({ searchTerm = '', onSearchChange, statusFilte
                     : 'Customer';
                   return (
                     <button
+                      type="button"
                       key={booking.id}
                       onClick={() => {
                         setDayBookingsPopup(null);

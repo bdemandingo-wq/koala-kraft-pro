@@ -141,6 +141,7 @@ function SortableNavItem({ item, isActive, isOpen, isMobile, onNavClick }: Sorta
       className="flex items-center group pointer-events-auto touch-manipulation"
     >
       <button
+        type="button"
         {...attributes}
         {...listeners}
         className={cn(
@@ -476,6 +477,7 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
       {/* Business Switcher */}
       <div className="border-t border-sidebar-border p-3">
         <button
+          type="button"
           onClick={() => setIsProfileOpen(!isProfileOpen)}
           className={cn(
             "w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-sidebar-accent transition-colors min-h-[44px] pointer-events-auto touch-manipulation",
@@ -526,6 +528,7 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
                   const roleLabel = orgItem.role === 'owner' ? 'Owner' : orgItem.role === 'admin' ? 'Admin' : 'Member';
                   return (
                     <button
+                      type="button"
                       key={orgItem.organization.id}
                       onClick={() => {
                         if (!isActive) {
@@ -556,7 +559,8 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
             )}
 
             {/* Add New Business */}
-            <button 
+            <button
+              type="button"
               onClick={() => {
                 setIsProfileOpen(false);
                 navigate('/onboarding?new=true');
@@ -569,7 +573,8 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
             </button>
 
             {/* Settings */}
-            <button 
+            <button
+              type="button"
               onClick={() => {
                 setIsProfileOpen(false);
                 navigate('/dashboard/settings');
@@ -582,7 +587,8 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
             </button>
 
             {/* Logout */}
-            <button 
+            <button
+              type="button"
               onClick={handleLogout}
               className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-destructive hover:bg-destructive/10 transition-colors min-h-[44px] pointer-events-auto touch-manipulation"
             >

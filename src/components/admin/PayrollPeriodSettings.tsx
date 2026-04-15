@@ -107,6 +107,7 @@ export function PayrollPeriodSettings() {
           <label className="text-sm font-medium">Pay Frequency</label>
           <div className="flex rounded-lg border bg-muted p-1 w-fit">
             <button
+              type="button"
               onClick={() => setFrequency('weekly')}
               className={cn(
                 'px-4 py-1.5 rounded-md text-sm font-medium transition-all',
@@ -118,6 +119,7 @@ export function PayrollPeriodSettings() {
               Weekly
             </button>
             <button
+              type="button"
               onClick={() => { setFrequency('biweekly'); setUseCustomDays(false); }}
               className={cn(
                 'px-4 py-1.5 rounded-md text-sm font-medium transition-all',
@@ -137,6 +139,7 @@ export function PayrollPeriodSettings() {
           <div className="flex gap-1 flex-wrap">
             {DAYS.map(d => (
               <button
+                type="button"
                 key={d.value}
                 onClick={() => setStartDay(d.value)}
                 className={cn(
@@ -177,6 +180,7 @@ export function PayrollPeriodSettings() {
               <div className="flex gap-1 flex-wrap pl-6">
                 {DAYS.map(d => (
                   <button
+                    type="button"
                     key={d.value}
                     onClick={() => toggleCustomDay(d.value)}
                     className={cn(

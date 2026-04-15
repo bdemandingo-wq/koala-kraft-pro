@@ -515,7 +515,7 @@ export function AutomationHealthMonitor() {
               >
                 <div className="rounded-lg border bg-card overflow-hidden">
                   <CollapsibleTrigger asChild>
-                    <button className="flex items-center gap-4 p-3 w-full text-left hover:bg-muted/50 transition-colors">
+                    <button type="button" className="flex items-center gap-4 p-3 w-full text-left hover:bg-muted/50 transition-colors">
                       <div className={`p-2 rounded-md bg-muted ${queue.color}`}>
                         <Icon className="w-4 h-4" />
                       </div>

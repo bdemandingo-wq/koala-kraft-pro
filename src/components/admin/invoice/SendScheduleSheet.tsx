@@ -58,6 +58,7 @@ export function SendScheduleSheet({
 
         <div className="py-4 space-y-4">
           <button
+            type="button"
             className="flex items-center justify-between w-full py-3 px-4 hover:bg-muted rounded-lg transition-colors border"
             onClick={handleSelectImmediate}
           >
@@ -73,6 +74,7 @@ export function SendScheduleSheet({
           </button>
 
           <button
+            type="button"
             className="flex items-center justify-between w-full py-3 px-4 hover:bg-muted rounded-lg transition-colors border"
             onClick={() => setShowCalendar(true)}
           >

@@ -23,7 +23,7 @@ export default function PaymentProcessing() {
 
   const handleStartFreeTrial = () => {
     sessionStorage.setItem("selectedIndustry", "Car Detailing");
-    navigate("/auth", { state: { mode: "signup" } });
+    navigate("/signup");
   };
 
   return (

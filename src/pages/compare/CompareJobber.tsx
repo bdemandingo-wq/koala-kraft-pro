@@ -66,7 +66,7 @@ export default function CompareJobber() {
 
   const handleStartFreeTrial = () => {
     sessionStorage.setItem("selectedIndustry", "Car Detailing");
-    navigate("/auth", { state: { mode: "signup" } });
+    navigate("/signup");
   };
 
   const renderValue = (value: boolean | string) => {
@@ -94,7 +94,7 @@ export default function CompareJobber() {
             <div className="hidden md:flex items-center gap-8">
               <a href="/#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
               <a href="/blog" className="text-muted-foreground hover:text-foreground transition-colors">Blog</a>
-              <Button variant="ghost" onClick={() => navigate("/auth")}>Log In</Button>
+              <Button variant="ghost" onClick={() => navigate("/login")}>Log In</Button>
               <Button onClick={handleStartFreeTrial}>Start Free Trial</Button>
             </div>
             <button 
@@ -109,7 +109,7 @@ export default function CompareJobber() {
               <div className="flex flex-col gap-4">
                 <a href="/#features" className="text-muted-foreground hover:text-foreground">Features</a>
                 <a href="/blog" className="text-muted-foreground hover:text-foreground">Blog</a>
-                <Button variant="ghost" className="justify-start" onClick={() => navigate("/auth")}>Log In</Button>
+                <Button variant="ghost" className="justify-start" onClick={() => navigate("/login")}>Log In</Button>
                 <Button onClick={handleStartFreeTrial}>Start Free Trial</Button>
               </div>
             </div>

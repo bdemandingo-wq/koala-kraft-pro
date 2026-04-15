@@ -143,7 +143,7 @@ export function CompetitorComparison() {
                 <Button
                   variant="secondary"
                   className="w-full mt-6"
-                  onClick={() => navigate("/auth?mode=signup")}
+                  onClick={() => navigate("/signup")}
                 >
                   Start 2-Month Free Trial
                 </Button>
@@ -186,7 +186,7 @@ export function CompetitorComparison() {
         </div>
 
         <div className="text-center mt-12">
-          <Button size="lg" onClick={() => navigate("/auth?mode=signup")}>
+          <Button size="lg" onClick={() => navigate("/signup")}>
             Try WE DETAIL NC Free — No Credit Card Required
           </Button>
           <p className="text-sm text-muted-foreground mt-3">

@@ -70,6 +70,7 @@ export function TaskItem({ id, content, isCompleted, dueDate, onToggle, onDelete
       )}
     >
       <button
+        type="button"
         className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground touch-none"
         {...attributes}
         {...listeners}

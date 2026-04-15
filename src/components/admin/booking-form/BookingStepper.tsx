@@ -116,6 +116,7 @@ function SortableStep({ step, index, currentStep, totalSteps, onClick }: Sortabl
     <div ref={setNodeRef} style={style} className="flex items-center">
       <div className="flex items-center group">
         <button
+          type="button"
           {...attributes}
           {...listeners}
           className={cn(
@@ -126,6 +127,7 @@ function SortableStep({ step, index, currentStep, totalSteps, onClick }: Sortabl
           <GripVertical className="w-3 h-3 text-muted-foreground" />
         </button>
         <button
+          type="button"
           onClick={onClick}
           className={cn(
             "flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-200",

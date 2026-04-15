@@ -22,7 +22,7 @@ export default function BookingSoftware() {
 
   const handleStartFreeTrial = () => {
     sessionStorage.setItem("selectedIndustry", "Car Detailing");
-    navigate("/auth", { state: { mode: "signup" } });
+    navigate("/signup");
   };
 
   return (

@@ -314,6 +314,7 @@ export function PnLCalendar({ bookings, expenses, teamPaysByBooking }: PnLCalend
 
               return (
                 <button
+                  type="button"
                   key={i}
                   onClick={() => {
                     setCurrentMonth(monthDate);

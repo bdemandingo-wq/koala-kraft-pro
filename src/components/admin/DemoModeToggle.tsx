@@ -34,6 +34,7 @@ export function DemoModeToggle({ isOpen, isMobile = false }: DemoModeToggleProps
 
   return (
     <button
+      type="button"
       onClick={handleToggle}
       className={cn(
         "w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",

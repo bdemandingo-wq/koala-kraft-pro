@@ -11,6 +11,7 @@ import { OrganizationProvider } from "@/contexts/OrganizationContext";
 import { TestModeProvider } from "@/contexts/TestModeContext";
 import { ClientPortalProvider } from "@/contexts/ClientPortalContext";
 import { AdminRoute } from "@/components/AdminRoute";
+import { StaffRoute } from "@/components/StaffRoute";
 
 import { ProtectedPortalRoute } from "@/components/ProtectedPortalRoute";
 import { SessionTrackerProvider } from "@/components/SessionTrackerProvider";
@@ -25,8 +26,6 @@ const LandingPage = lazy(() => import("./pages/LandingPage"));
 const RemainCleanBookingPage = lazy(() => import("./pages/RemainCleanBookingPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const SignupPage = lazy(() => import("./pages/SignupPage"));
-// Native redirect for signup (App Store compliance - no in-app signup on native)
-const NativeSignupRedirect = lazy(() => import("./pages/NativeSignupRedirect"));
 const LogoutPage = lazy(() => import("./pages/LogoutPage"));
 
 // Legacy auth page (kept for backwards compatibility)
@@ -72,6 +71,19 @@ const AutomationCenterPage = lazy(() => import("./pages/admin/AutomationCenterPa
 const BookingPhotosPage = lazy(() => import("./pages/admin/BookingPhotosPage"));
 const PortfolioPage = lazy(() => import("./pages/admin/PortfolioPage"));
 const QuickJobPage = lazy(() => import("./pages/admin/QuickJobPage"));
+const PayrollPage = lazy(() => import("./pages/admin/PayrollPage"));
+const StaffPage = lazy(() => import("./pages/admin/StaffPage"));
+const ServicesPage = lazy(() => import("./pages/admin/ServicesPage"));
+const ClientFeedbackPage = lazy(() => import("./pages/admin/ClientFeedbackPage"));
+const OperationsTrackerPage = lazy(() => import("./pages/admin/OperationsTrackerPage"));
+const DiscountsPage = lazy(() => import("./pages/admin/DiscountsPage"));
+const SubscriptionPage = lazy(() => import("./pages/admin/SubscriptionPage"));
+const SubscriptionPageNative = lazy(() => import("./pages/admin/SubscriptionPageNative"));
+
+// Staff portal pages
+const StaffLoginPage = lazy(() => import("./pages/staff/StaffLoginPage"));
+const StaffPortal = lazy(() => import("./pages/staff/StaffPortal"));
+const StaffResetPasswordPage = lazy(() => import("./pages/staff/StaffResetPasswordPage"));
 
 // Client Portal Pages
 const PortalLoginPage = lazy(() => import("./pages/portal/PortalLoginPage"));
@@ -230,6 +242,19 @@ const App = () => (
                        <Route path="/dashboard/portfolio" element={<AdminRoute><ErrorBoundary featureName="Portfolio"><PortfolioPage /></ErrorBoundary></AdminRoute>} />
                        <Route path="/dashboard/quick-job" element={<AdminRoute><ErrorBoundary featureName="Quick Job"><QuickJobPage /></ErrorBoundary></AdminRoute>} />
 
+                       <Route path="/dashboard/payroll" element={<AdminRoute><ErrorBoundary featureName="Payroll"><PayrollPage /></ErrorBoundary></AdminRoute>} />
+                       <Route path="/dashboard/staff" element={<AdminRoute><ErrorBoundary featureName="Staff"><StaffPage /></ErrorBoundary></AdminRoute>} />
+                       <Route path="/dashboard/services" element={<AdminRoute><ErrorBoundary featureName="Services"><ServicesPage /></ErrorBoundary></AdminRoute>} />
+                       <Route path="/dashboard/feedback" element={<AdminRoute><ErrorBoundary featureName="Feedback"><ClientFeedbackPage /></ErrorBoundary></AdminRoute>} />
+                       <Route path="/dashboard/operations" element={<AdminRoute><ErrorBoundary featureName="Operations"><OperationsTrackerPage /></ErrorBoundary></AdminRoute>} />
+                       <Route path="/dashboard/discounts" element={<AdminRoute><ErrorBoundary featureName="Discounts"><DiscountsPage /></ErrorBoundary></AdminRoute>} />
+                       <Route path="/dashboard/subscription" element={<AdminRoute><ErrorBoundary featureName="Subscription"><SubscriptionPageNative /></ErrorBoundary></AdminRoute>} />
+
+                      {/* Staff Portal Routes */}
+                      <Route path="/staff/login" element={<StaffLoginPage />} />
+                      <Route path="/staff/reset-password" element={<StaffResetPasswordPage />} />
+                      <Route path="/staff" element={<StaffRoute><ErrorBoundary featureName="Staff Portal"><StaffPortal /></ErrorBoundary></StaffRoute>} />
+
                       <Route path="/admin" element={<AdminRoute><ErrorBoundary featureName="Dashboard"><AdminDashboard /></ErrorBoundary></AdminRoute>} />
                       <Route path="/admin/*" element={<AdminRoute><ErrorBoundary featureName="Dashboard"><AdminDashboard /></ErrorBoundary></AdminRoute>} />
 
@@ -254,6 +279,7 @@ const App = () => (
                     <Route path="/auth" element={<AuthPage />} />
 
                     {/* Public Routes - Lazy Loaded */}
+                    <Route path="/book/remainclean" element={<RemainCleanBookingPage />} />
                     <Route path="/book/:orgSlug" element={<PublicBookingPage />} />
                     <Route path="/c/:code" element={<RedirectPage />} />
                     <Route path="/card-saved" element={<CardSavedPage />} />
@@ -326,6 +352,18 @@ const App = () => (
                     <Route path="/dashboard/booking-photos" element={<AdminRoute><ErrorBoundary featureName="Booking Photos"><BookingPhotosPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/portfolio" element={<AdminRoute><ErrorBoundary featureName="Portfolio"><PortfolioPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/quick-job" element={<AdminRoute><ErrorBoundary featureName="Quick Job"><QuickJobPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/payroll" element={<AdminRoute><ErrorBoundary featureName="Payroll"><PayrollPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/staff" element={<AdminRoute><ErrorBoundary featureName="Staff"><StaffPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/services" element={<AdminRoute><ErrorBoundary featureName="Services"><ServicesPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/feedback" element={<AdminRoute><ErrorBoundary featureName="Feedback"><ClientFeedbackPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/operations" element={<AdminRoute><ErrorBoundary featureName="Operations"><OperationsTrackerPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/discounts" element={<AdminRoute><ErrorBoundary featureName="Discounts"><DiscountsPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/subscription" element={<AdminRoute><ErrorBoundary featureName="Subscription"><SubscriptionPage /></ErrorBoundary></AdminRoute>} />
+
+                    {/* Staff Portal Routes */}
+                    <Route path="/staff/login" element={<StaffLoginPage />} />
+                    <Route path="/staff/reset-password" element={<StaffResetPasswordPage />} />
+                    <Route path="/staff" element={<StaffRoute><ErrorBoundary featureName="Staff Portal"><StaffPortal /></ErrorBoundary></StaffRoute>} />
 
                     {/* Legacy admin routes */}
                     <Route path="/admin" element={<AdminRoute><ErrorBoundary featureName="Dashboard"><AdminDashboard /></ErrorBoundary></AdminRoute>} />

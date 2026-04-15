@@ -141,6 +141,7 @@ export function PortalVehiclesTab() {
             <CardContent className="p-0">
               {/* Vehicle header */}
               <button
+                type="button"
                 className="w-full p-4 flex items-center justify-between text-left hover:bg-muted/50 transition-colors"
                 onClick={() => toggleVehicle(vehicle.id)}
               >

@@ -270,6 +270,7 @@ export function BulkEditBookingsDialog({
               <div className="flex flex-wrap gap-2">
                 {DAY_NAMES.map((name, idx) => (
                   <button
+                    type="button"
                     key={idx}
                     onClick={() => toggleDay(idx)}
                     className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${
@@ -373,6 +374,7 @@ export function BulkEditBookingsDialog({
                       <Badge key={id} variant="secondary" className="gap-1 pr-1">
                         {staff?.name || 'Unknown'}
                         <button
+                          type="button"
                           onClick={() => setEditStaffIds((prev) => prev.filter((sid) => sid !== id))}
                           className="ml-0.5 rounded-full hover:bg-muted p-0.5"
                         >

@@ -249,6 +249,7 @@ export function LoyaltyTierEditor() {
                     {benefit}
                     {isEditing && (
                       <button
+                        type="button"
                         onClick={() => removeBenefit(tier.id, tier.benefits, benefit)}
                         className="ml-1 hover:text-destructive"
                       >

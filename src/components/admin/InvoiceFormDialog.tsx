@@ -452,7 +452,8 @@ export function InvoiceFormDialog({
         <DialogContent className="max-w-lg p-0 gap-0 max-h-[100vh] flex flex-col overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b">
-            <button 
+            <button
+              type="button"
               onClick={() => onOpenChange(false)}
               className="text-muted-foreground hover:text-foreground"
             >

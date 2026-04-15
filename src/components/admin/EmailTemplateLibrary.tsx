@@ -98,6 +98,7 @@ export function EmailTemplateLibrary({ open, onOpenChange, onSelectTemplate }: E
                     const isSelected = selectedId === template.id;
                     return (
                       <button
+                        type="button"
                         key={template.id}
                         onClick={() => setSelectedId(isSelected ? null : template.id)}
                         className={cn(

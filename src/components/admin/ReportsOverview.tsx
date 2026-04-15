@@ -192,6 +192,7 @@ export function ReportsOverview({ bookings, customers }: ReportsOverviewProps) {
       <div className="flex items-center gap-1 mb-4 overflow-x-auto pb-2">
         {periods.map((p) => (
           <button
+            type="button"
             key={p}
             onClick={() => setPeriod(p)}
             className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${

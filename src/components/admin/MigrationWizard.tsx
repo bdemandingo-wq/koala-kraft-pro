@@ -227,6 +227,7 @@ export function MigrationWizard() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {(['bookingkoala', 'jobber'] as Source[]).map((s) => (
                 <button
+                  type="button"
                   key={s}
                   onClick={() => setSource(s)}
                   className={cn(
@@ -254,6 +255,7 @@ export function MigrationWizard() {
                 const Icon = config.icon;
                 return (
                   <button
+                    type="button"
                     key={key}
                     onClick={() => setDataType(key)}
                     className={cn(

@@ -865,6 +865,7 @@ export function AIAnalysisCenter() {
           <div className="flex flex-wrap gap-1.5 mb-3">
             {quickQuestionCategories.map((cat, i) => (
               <button
+                type="button"
                 key={i}
                 onClick={() => setActiveQuestionCategory(i)}
                 style={{
@@ -888,6 +889,7 @@ export function AIAnalysisCenter() {
           <div className="flex flex-wrap gap-2 mb-4">
             {quickQuestionCategories[activeQuestionCategory].questions.map((q, i) => (
               <button
+                type="button"
                 key={i}
                 onClick={() => sendChat(q)}
                 style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${BORDER}`, borderRadius: 20, padding: '6px 14px', fontSize: 12, color: 'rgba(255,255,255,0.6)', fontFamily: labelFont, cursor: 'pointer' }}

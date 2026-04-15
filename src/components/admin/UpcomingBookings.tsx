@@ -225,7 +225,8 @@ export function UpcomingBookings({ bookings }: UpcomingBookingsProps) {
                       </Badge>
                     </div>
                     <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                        <button 
+                        <button
+                          type="button"
                           className="flex items-center gap-1 hover:text-primary transition-colors"
                           onClick={(e) => handleCustomerClick(booking, e)}
                         >
