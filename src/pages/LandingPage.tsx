@@ -92,7 +92,7 @@ const testimonials = [
 const navLinks = [
   { label: "Home",     anchor: "top"               },
   { label: "Services", anchor: "services"           },
-  { label: "Gallery",  anchor: "gallery"            },
+  { label: "Gallery",  href: "/remainclean/gallery" },
   { label: "Book Now", anchor: "book",   cta: true  },
   { label: "Rewards",  anchor: "rewards"            },
   { label: "Contact",  anchor: "contact"            },
