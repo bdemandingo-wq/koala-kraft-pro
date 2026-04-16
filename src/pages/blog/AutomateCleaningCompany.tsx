@@ -15,7 +15,7 @@ export default function AutomateCleaningCompany() {
         title="How to Automate Your Detailing Company (2025 Guide)"
         description="Learn how to automate booking, scheduling, invoicing, and client communication for your detailing company. Save 15+ hours per week with the right tools."
         canonicalPath="/blog/how-to-automate-cleaning-company"
-        ogImage="/images/wedetailnc-og.png"
+        ogImage="/images/remainclean-og.png"
         ogType="article"
         article={{ publishedTime: "2025-10-10", section: "Automation" }}
         jsonLd={{
@@ -23,14 +23,14 @@ export default function AutomateCleaningCompany() {
           "headline": "How to Automate Your Detailing Company",
           "description": "Learn how to automate your detailing company and save 15+ hours per week.",
           "datePublished": "2025-10-10",
-          "author": { "@type": "Organization", "name": "We Detail NC" },
+          "author": { "@type": "Organization", "name": "Remain Clean Services" },
         }}
       />
 
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <a href="/" className="font-bold text-xl text-foreground">WE DETAIL NC</a>
+            <a href="/" className="font-bold text-xl text-foreground">REMAIN CLEAN SERVICES</a>
             <div className="hidden md:flex items-center gap-8">
               <a href="/blog" className="text-muted-foreground hover:text-foreground">Blog</a>
               <a href="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</a>
@@ -82,7 +82,7 @@ export default function AutomateCleaningCompany() {
 
             <div className="bg-primary/5 rounded-xl p-6 mt-8 border border-primary/20">
               <h3 className="text-xl font-bold text-foreground mb-2">Automate Your Car Detailing Business Today</h3>
-              <p className="text-muted-foreground mb-4">We Detail NC automates booking, scheduling, invoicing, reminders, and reporting in one platform. Start your free 60-day trial.</p>
+              <p className="text-muted-foreground mb-4">Remain Clean Services automates booking, scheduling, invoicing, reminders, and reporting in one platform. Start your free 60-day trial.</p>
               <Button onClick={() => navigate("/signup")}>
                 Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -98,7 +98,7 @@ export default function AutomateCleaningCompany() {
       </section>
 
       <footer className="border-t border-border py-8 px-4 text-center text-sm text-muted-foreground">
-        <p>© {new Date().getFullYear()} We Detail NC. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} Remain Clean Services. All rights reserved.</p>
       </footer>
     </div>
   );

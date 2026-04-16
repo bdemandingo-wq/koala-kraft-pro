@@ -36,7 +36,7 @@ const comparisonData = [
 
 const testimonials = [
   {
-    quote: "Housecall Pro was built for plumbers and HVAC. We Detail NC actually understands car detailing businesses.",
+    quote: "Housecall Pro was built for plumbers and HVAC. Remain Clean Services actually understands car detailing businesses.",
     author: "Jennifer M.",
     role: "Pristine Home Technicians",
     rating: 5
@@ -73,10 +73,10 @@ export default function CompareHousecallPro() {
   return (
     <div className="min-h-screen bg-background">
       <Seo 
-        title="WE DETAIL NC vs Housecall Pro (2026)"
-        description="Compare WE DETAIL NC vs Housecall Pro for car detailing businesses. Detailing-specific features, payroll, and $50/mo flat pricing vs Housecall Pro's $59–$199/mo."
+        title="REMAIN CLEAN SERVICES vs Housecall Pro (2026)"
+        description="Compare REMAIN CLEAN SERVICES vs Housecall Pro for car detailing businesses. Detailing-specific features, payroll, and $50/mo flat pricing vs Housecall Pro's $59–$199/mo."
         canonicalPath="/compare/housecall-pro"
-        ogImage="/images/wedetailnc-og.png"
+        ogImage="/images/remainclean-og.png"
       />
 
       {/* Navigation */}
@@ -84,7 +84,7 @@ export default function CompareHousecallPro() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <a href="/" className="flex items-center gap-2">
-              <span className="font-bold text-xl text-foreground">WE DETAIL NC</span>
+              <span className="font-bold text-xl text-foreground">REMAIN CLEAN SERVICES</span>
             </a>
             <div className="hidden md:flex items-center gap-8">
               <a href="/#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
@@ -120,11 +120,11 @@ export default function CompareHousecallPro() {
             2026 Comparison
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
-            We Detail NC vs Housecall Pro:<br/>
+            Remain Clean Services vs Housecall Pro:<br/>
             <span className="text-primary">Built for Detailing, Not Plumbing</span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Housecall Pro was built for plumbers and HVAC techs. We Detail NC is built specifically for car detailing businesses with <strong>square footage pricing, automated payroll, and P&L reports</strong>—all for a flat $50/month.
+            Housecall Pro was built for plumbers and HVAC techs. Remain Clean Services is built specifically for car detailing businesses with <strong>square footage pricing, automated payroll, and P&L reports</strong>—all for a flat $50/month.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="h-12 px-8" onClick={handleStartFreeTrial}>
@@ -169,7 +169,7 @@ export default function CompareHousecallPro() {
             Feature-by-Feature Comparison
           </h2>
           <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
-            See what you get with We Detail NC vs Housecall Pro. Green checkmarks mean included.
+            See what you get with Remain Clean Services vs Housecall Pro. Green checkmarks mean included.
           </p>
 
           <div className="bg-card rounded-xl border border-border overflow-hidden">
@@ -178,7 +178,7 @@ export default function CompareHousecallPro() {
                 <thead>
                   <tr className="bg-secondary/50">
                     <th className="text-left p-4 font-semibold text-foreground">Feature</th>
-                    <th className="text-center p-4 font-semibold text-primary">We Detail NC</th>
+                    <th className="text-center p-4 font-semibold text-primary">Remain Clean Services</th>
                     <th className="text-center p-4 font-semibold text-muted-foreground">Housecall Pro</th>
                   </tr>
                 </thead>
@@ -201,7 +201,7 @@ export default function CompareHousecallPro() {
 
           <div className="mt-8 text-center">
             <Button size="lg" onClick={handleStartFreeTrial}>
-              Switch to We Detail NC Today <ArrowRight className="ml-2 h-4 w-4" />
+              Switch to Remain Clean Services Today <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -211,7 +211,7 @@ export default function CompareHousecallPro() {
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-secondary/30">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl font-bold text-foreground text-center mb-12">
-            Why Car Detailing Businesses Choose We Detail NC
+            Why Car Detailing Businesses Choose Remain Clean Services
           </h2>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -221,7 +221,7 @@ export default function CompareHousecallPro() {
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-2">Save $100+/Month</h3>
               <p className="text-muted-foreground">
-                Housecall Pro's Pro plan costs $199/month. We Detail NC gives you more detailing features for just $50/month flat.
+                Housecall Pro's Pro plan costs $199/month. Remain Clean Services gives you more detailing features for just $50/month flat.
               </p>
             </div>
 
@@ -241,7 +241,7 @@ export default function CompareHousecallPro() {
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-2">Built for Detailing</h3>
               <p className="text-muted-foreground">
-                Housecall Pro serves 20+ industries. We Detail NC is 100% focused on making car detailing businesses successful.
+                Housecall Pro serves 20+ industries. Remain Clean Services is 100% focused on making car detailing businesses successful.
               </p>
             </div>
           </div>
@@ -303,7 +303,7 @@ export default function CompareHousecallPro() {
       <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-border">
         <div className="max-w-5xl mx-auto text-center">
           <p className="text-muted-foreground">
-            © 2026 We Detail NC. A Housecall Pro alternative for car detailing businesses.
+            © 2026 Remain Clean Services. A Housecall Pro alternative for car detailing businesses.
           </p>
           <div className="flex flex-wrap justify-center gap-6 mt-4">
             <Link to="/" className="text-muted-foreground hover:text-foreground">Home</Link>
@@ -321,7 +321,7 @@ export default function CompareHousecallPro() {
         __html: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "SoftwareApplication",
-          "name": "We Detail NC",
+          "name": "Remain Clean Services",
           "applicationCategory": "BusinessApplication",
           "operatingSystem": "Web, iOS, Android",
           "offers": {

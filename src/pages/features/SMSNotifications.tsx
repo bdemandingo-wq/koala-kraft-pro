@@ -73,7 +73,7 @@ export default function SMSNotifications() {
   return (
     <div className="min-h-screen bg-background">
       <Seo 
-        title="SMS Client Notifications for Car Detailing Businesses | WE DETAIL NC"
+        title="SMS Client Notifications for Car Detailing Businesses | REMAIN CLEAN SERVICES"
         description="Automated SMS notifications for detailing companies. Booking confirmations, reminders, on-my-way alerts, and review requests. Reduce no-shows by 80%."
         canonicalPath="/features/sms-notifications"
       />
@@ -83,7 +83,7 @@ export default function SMSNotifications() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <a href="/" className="flex items-center gap-2">
-              <span className="font-bold text-xl text-foreground">WE DETAIL NC</span>
+              <span className="font-bold text-xl text-foreground">REMAIN CLEAN SERVICES</span>
             </a>
             <div className="hidden md:flex items-center gap-8">
               <a href="/#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
@@ -227,7 +227,7 @@ export default function SMSNotifications() {
       {/* Footer */}
       <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-border">
         <div className="max-w-5xl mx-auto text-center">
-          <p className="text-muted-foreground">© 2026 WE DETAIL NC. SMS notifications for car detailing businesses.</p>
+          <p className="text-muted-foreground">© 2026 REMAIN CLEAN SERVICES. SMS notifications for car detailing businesses.</p>
           <div className="flex justify-center gap-6 mt-4">
             <Link to="/" className="text-muted-foreground hover:text-foreground">Home</Link>
             <Link to="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</Link>
@@ -241,7 +241,7 @@ export default function SMSNotifications() {
         __html: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "SoftwareApplication",
-          "name": "WE DETAIL NC SMS Notifications",
+          "name": "REMAIN CLEAN SERVICES SMS Notifications",
           "applicationCategory": "BusinessApplication",
           "operatingSystem": "Web, iOS, Android",
           "offers": { "@type": "Offer", "price": "50", "priceCurrency": "USD" },

@@ -30,7 +30,7 @@ const staticPosts = [
   },
   {
     slug: "booking-koala-vs-jobber-vs-wedetailnc",
-    title: "Booking Koala vs Jobber vs We Detail NC: Which Software Wins in 2026?",
+    title: "Booking Koala vs Jobber vs Remain Clean Services: Which Software Wins in 2026?",
     excerpt: "Complete side-by-side comparison of pricing, features, and customer support. Find out which car detailing business software is best for your company.",
     category: "Comparison",
     readTime: "10 min read",
@@ -104,8 +104,8 @@ const featureArticles = [
   },
   {
     slug: "/compare/jobber",
-    title: "We Detail NC vs Jobber: Complete 2026 Comparison",
-    excerpt: "See how We Detail NC stacks up against Jobber on pricing, features, and ease of use.",
+    title: "Remain Clean Services vs Jobber: Complete 2026 Comparison",
+    excerpt: "See how Remain Clean Services stacks up against Jobber on pricing, features, and ease of use.",
     category: "Comparison",
     readTime: "8 min read",
     date: "January 2026",
@@ -114,7 +114,7 @@ const featureArticles = [
   },
   {
     slug: "/compare/booking-koala",
-    title: "We Detail NC vs Booking Koala: Feature-by-Feature Breakdown",
+    title: "Remain Clean Services vs Booking Koala: Feature-by-Feature Breakdown",
     excerpt: "Detailed comparison of two popular car detailing business software platforms.",
     category: "Comparison",
     readTime: "8 min read",
@@ -125,7 +125,7 @@ const featureArticles = [
   {
     slug: "/compare/housecall-pro",
     title: "Best Housecall Pro Alternative for Car Detailing Businesses",
-    excerpt: "Looking for a Housecall Pro alternative? See why detailing companies are switching to We Detail NC.",
+    excerpt: "Looking for a Housecall Pro alternative? See why detailing companies are switching to Remain Clean Services.",
     category: "Comparison",
     readTime: "6 min read",
     date: "January 2026",
@@ -171,10 +171,10 @@ export default function BlogIndex() {
   return (
     <div className="min-h-screen bg-background">
       <Seo 
-        title="Car Detailing Business Resources & Guides | WE DETAIL NC Blog"
+        title="Car Detailing Business Resources & Guides | REMAIN CLEAN SERVICES Blog"
         description="Expert guides on starting and growing a car detailing business. Learn about automated payroll software for detailing services, inventory management, scheduling tips, and more."
         canonicalPath="/blog"
-        ogImage="/images/wedetailnc-og.png"
+        ogImage="/images/remainclean-og.png"
       />
 
       {/* Navigation */}
@@ -182,7 +182,7 @@ export default function BlogIndex() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link to="/" className="flex items-center gap-2">
-              <span className="font-bold text-xl text-foreground">WE DETAIL NC</span>
+              <span className="font-bold text-xl text-foreground">REMAIN CLEAN SERVICES</span>
             </Link>
             <Button asChild>
               <Link to="/auth">Start Free Trial</Link>
@@ -284,7 +284,7 @@ export default function BlogIndex() {
       {/* Footer */}
       <footer className="py-8 px-4 border-t border-border">
         <div className="max-w-7xl mx-auto text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} WE DETAIL NC. All rights reserved.
+          © {new Date().getFullYear()} REMAIN CLEAN SERVICES. All rights reserved.
         </div>
       </footer>
     </div>

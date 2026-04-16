@@ -96,7 +96,7 @@ export function useBiometricAuth() {
 
       // Verify with biometrics first
       await NativeBiometric.verifyIdentity({
-        reason: 'Sign in to We Detail NC',
+        reason: 'Sign in to Remain Clean Services',
         title: 'Biometric Login',
         subtitle: 'Use Face ID or Touch ID to sign in',
         description: 'Quick and secure login',

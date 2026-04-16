@@ -90,8 +90,8 @@ serve(async (req) => {
       .gte('created_at', thirtyDaysAgo.toISOString())
       .order('created_at', { ascending: false });
 
-    // Get subscription data - ONLY We Detail NC CRM subscribers (filter by product ID)
-    // WE DETAIL NC Pro Subscription product ID - only count these as CRM subscribers
+    // Get subscription data - ONLY Remain Clean Services CRM subscribers (filter by product ID)
+    // REMAIN CLEAN SERVICES Pro Subscription product ID - only count these as CRM subscribers
     const WE_DETAIL_NC_CRM_PRODUCT_ID = "prod_Tg3zSKe9hRHLZy";
     
     let activeSubscriptions = 0;
@@ -105,7 +105,7 @@ serve(async (req) => {
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (stripeKey) {
       console.log("[PLATFORM-ANALYTICS] Fetching Stripe subscription data...");
-      console.log("[PLATFORM-ANALYTICS] Filtering for We Detail NC CRM product:", WE_DETAIL_NC_CRM_PRODUCT_ID);
+      console.log("[PLATFORM-ANALYTICS] Filtering for Remain Clean Services CRM product:", WE_DETAIL_NC_CRM_PRODUCT_ID);
       const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
       const thirtyDaysAgoTimestamp = Math.floor(thirtyDaysAgo.getTime() / 1000);
       
@@ -117,7 +117,7 @@ serve(async (req) => {
         });
         console.log("[PLATFORM-ANALYTICS] Found total subscriptions:", allSubscriptions.data.length);
         
-        // Filter to only We Detail NC CRM subscriptions
+        // Filter to only Remain Clean Services CRM subscriptions
         const crmSubscriptions = allSubscriptions.data.filter((sub: Stripe.Subscription) => {
           const productId = sub.items.data[0]?.price?.product;
           return productId === WE_DETAIL_NC_CRM_PRODUCT_ID;
@@ -182,7 +182,7 @@ serve(async (req) => {
           }
         }
 
-        console.log("[PLATFORM-ANALYTICS] Total We Detail NC subscribers:", totalSubscribers);
+        console.log("[PLATFORM-ANALYTICS] Total Remain Clean Services subscribers:", totalSubscribers);
         
         // Sort by subscription created date (most recent first)
         subscribersList.sort((a, b) => {

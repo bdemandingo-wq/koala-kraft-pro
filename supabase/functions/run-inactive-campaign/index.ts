@@ -223,7 +223,7 @@ const handler = async (req: Request): Promise<Response> => {
       .maybeSingle();
     
     const orgSlug = orgData?.slug || organizationId;
-    const projectUrl = Deno.env.get("PROJECT_URL") || "https://joinwedetailnc.lovable.app";
+    const projectUrl = Deno.env.get("PROJECT_URL") || "https://joinkoala-kraft-pro.lovable.app";
 
     // Send SMS to each inactive customer
     let sentCount = 0;

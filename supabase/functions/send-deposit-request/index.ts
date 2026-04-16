@@ -100,7 +100,7 @@ const handler = async (req: Request): Promise<Response> => {
       .maybeSingle();
 
     const companyName = businessSettings?.company_name || 'Your detailing service';
-    const appUrl = (businessSettings?.app_url || Deno.env.get("PROJECT_URL") || req.headers.get("origin") || "https://joinwedetailnc.lovable.app").replace(/\/+$/, '');
+    const appUrl = (businessSettings?.app_url || Deno.env.get("PROJECT_URL") || req.headers.get("origin") || "https://joinkoala-kraft-pro.lovable.app").replace(/\/+$/, '');
 
     // Shorten the deposit link
     const shortCode = Math.random().toString(36).substring(2, 8).toUpperCase();

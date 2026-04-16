@@ -42,14 +42,14 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("[send-welcome-email] Sending welcome email to:", email);
 
-    // Welcome emails for NEW signups use the main We Detail NC account
+    // Welcome emails for NEW signups use the main Remain Clean Services account
     // This is a platform-level email, not organization-specific
     // (Users create their organization AFTER signup, so no org context exists yet)
-    const WDN_DEFAULT_EMAIL = "support@joinwedetailnc.com";
-    const WDN_DEFAULT_NAME = "We Detail NC";
+    const RCS_DEFAULT_EMAIL = "support@remaincleanservices.com";
+    const RCS_DEFAULT_NAME = "Remain Clean Services";
     
-    const senderEmail = WDN_DEFAULT_EMAIL;
-    const companyName = WDN_DEFAULT_NAME;
+    const senderEmail = RCS_DEFAULT_EMAIL;
+    const companyName = RCS_DEFAULT_NAME;
     const primaryColor = "#1e5bb0";
     const accentColor = "#14b8a6";
 
@@ -138,7 +138,7 @@ const handler = async (req: Request): Promise<Response> => {
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin:30px 0;">
                 <tr>
                   <td style="text-align:center;">
-                    <a href="https://wedetailnc.lovable.app/dashboard" style="display:inline-block;background:linear-gradient(135deg, ${primaryColor} 0%, ${accentColor} 100%);color:#ffffff;text-decoration:none;padding:16px 40px;border-radius:8px;font-size:16px;font-weight:600;box-shadow:0 4px 14px rgba(30,91,176,0.4);">Go to Dashboard</a>
+                    <a href="https://koala-kraft-pro.lovable.app/dashboard" style="display:inline-block;background:linear-gradient(135deg, ${primaryColor} 0%, ${accentColor} 100%);color:#ffffff;text-decoration:none;padding:16px 40px;border-radius:8px;font-size:16px;font-weight:600;box-shadow:0 4px 14px rgba(30,91,176,0.4);">Go to Dashboard</a>
                   </td>
                 </tr>
               </table>

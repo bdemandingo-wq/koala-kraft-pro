@@ -341,8 +341,8 @@ export function AIAnalysisCenter() {
     setSummaryLoading(true);
     setActiveTab('ask-ai');
     const prompt = period === 'weekly'
-      ? `Generate a comprehensive weekly business summary for We Detail NC. Include revenue, jobs completed, top packages, technician performance, lead activity, and inventory status. Use the live data provided.`
-      : `Generate a comprehensive monthly business report for We Detail NC. Include total revenue vs last month, jobs completed, average ticket, top packages by revenue, vehicle type breakdown, technician rankings, customer acquisition, lead conversion, churn risks, and inventory alerts. Provide 3–5 actionable recommendations.`;
+      ? `Generate a comprehensive weekly business summary for Remain Clean Services. Include revenue, jobs completed, top packages, technician performance, lead activity, and inventory status. Use the live data provided.`
+      : `Generate a comprehensive monthly business report for Remain Clean Services. Include total revenue vs last month, jobs completed, average ticket, top packages by revenue, vehicle type breakdown, technician rankings, customer acquisition, lead conversion, churn risks, and inventory alerts. Provide 3–5 actionable recommendations.`;
     await sendChat(prompt);
     setSummaryLoading(false);
   }, []);
@@ -764,7 +764,7 @@ export function AIAnalysisCenter() {
                           size="sm"
                           onClick={() => {
                             setActiveTab('ask-ai');
-                            setChatInput(`Draft a re-engagement message for ${c.first_name} ${c.last_name}, who last booked a ${c.serviceName} detail ${c.daysSince} days ago. Mention We Detail NC's mobile service and offer a small incentive to rebook.`);
+                            setChatInput(`Draft a re-engagement message for ${c.first_name} ${c.last_name}, who last booked a ${c.serviceName} detail ${c.daysSince} days ago. Mention Remain Clean Services's mobile service and offer a small incentive to rebook.`);
                           }}
                           style={{ background: `${TEAL}18`, color: TEAL, border: `1px solid ${TEAL}30`, fontSize: 12, fontFamily: labelFont }}
                           className="hover:opacity-80"
@@ -859,7 +859,7 @@ export function AIAnalysisCenter() {
 
         {/* ─── Tab 5: Ask AI ─── */}
         <TabsContent value="ask-ai">
-          <h3 style={{ fontFamily: labelFont, fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Ask We Detail NC AI</h3>
+          <h3 style={{ fontFamily: labelFont, fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Ask Remain Clean Services AI</h3>
 
           {/* Category pills */}
           <div className="flex flex-wrap gap-1.5 mb-3">

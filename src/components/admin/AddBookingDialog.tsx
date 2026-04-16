@@ -47,7 +47,7 @@ export function AddBookingDialog({
           </div>
           <h3 className="text-lg font-semibold mb-2">Subscription Required</h3>
           <p className="text-muted-foreground mb-4 max-w-sm">
-            Creating new bookings requires an active subscription. Manage your subscription at joinwedetailnc.lovable.app
+            Creating new bookings requires an active subscription. Manage your subscription at joinkoala-kraft-pro.lovable.app
           </p>
           <Button 
             onClick={() => {

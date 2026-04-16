@@ -4,7 +4,7 @@ import Stripe from "https://esm.sh/stripe@18.5.0";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-const APP_URL = "https://joinwedetailnc.lovable.app";
+const APP_URL = "https://joinkoala-kraft-pro.lovable.app";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",

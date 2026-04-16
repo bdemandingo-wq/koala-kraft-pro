@@ -14,7 +14,7 @@ const capabilities = [
   { icon: Target, title: "Lead Tracking & Auto Follow-Up", description: "Track leads and follow up automatically. Never lose a potential customer again." },
   { icon: BarChart3, title: "Client Segmentation", description: "Segment clients by service type, frequency, or location. See your best clients at a glance." },
   { icon: Heart, title: "Retention Insights", description: "Identify at-risk customers before they churn. Build loyalty with data-driven decisions." },
-  { icon: Users, title: "Scales With You", description: "Whether you have 10 clients or 500, We Detail NC keeps everything organized so you can focus on delivering great cleans." },
+  { icon: Users, title: "Scales With You", description: "Whether you have 10 clients or 500, Remain Clean Services keeps everything organized so you can focus on delivering great cleans." },
 ];
 
 export default function CRMSoftware() {
@@ -29,13 +29,13 @@ export default function CRMSoftware() {
   return (
     <div className="min-h-screen bg-background">
       <Seo 
-        title="CRM for Cleaning Companies | Manage Clients & Jobs | We Detail NC"
-        description="We Detail NC CRM keeps all your appointment clients, job history, and notes in one place. Stay organized and grow your car detailing business faster."
+        title="CRM for Cleaning Companies | Manage Clients & Jobs | Remain Clean Services"
+        description="Remain Clean Services CRM keeps all your appointment clients, job history, and notes in one place. Stay organized and grow your car detailing business faster."
         canonicalPath="/features/crm"
-        ogImage="/images/wedetailnc-og.png"
+        ogImage="/images/remainclean-og.png"
         jsonLd={{
           "@type": "SoftwareApplication",
-          "name": "We Detail NC CRM",
+          "name": "Remain Clean Services CRM",
           "applicationCategory": "BusinessApplication",
           "description": "CRM software designed for detailing companies to manage clients, track leads, and automate communication.",
           "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "description": "60-day free trial" }
@@ -46,7 +46,7 @@ export default function CRMSoftware() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <a href="/" className="flex items-center gap-2">
-              <span className="font-bold text-xl text-foreground">WE DETAIL NC</span>
+              <span className="font-bold text-xl text-foreground">REMAIN CLEAN SERVICES</span>
             </a>
             <div className="hidden md:flex items-center gap-8">
               <a href="/#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
@@ -85,7 +85,7 @@ export default function CRMSoftware() {
             <span className="text-primary">for Car Detailing Business Owners</span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Spreadsheets can't scale your business. We Detail NC gives you a simple, powerful CRM designed for detailing companies — so you always know who your clients are, what they need, and when they last booked.
+            Spreadsheets can't scale your business. Remain Clean Services gives you a simple, powerful CRM designed for detailing companies — so you always know who your clients are, what they need, and when they last booked.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="text-lg px-8 h-14" onClick={handleStartFreeTrial}>
@@ -101,7 +101,7 @@ export default function CRMSoftware() {
       {/* What you can do */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted/30">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-foreground mb-12">What You Can Do With We Detail NC CRM</h2>
+          <h2 className="text-3xl font-bold text-center text-foreground mb-12">What You Can Do With Remain Clean Services CRM</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {capabilities.map((c, i) => (
               <div key={i} className="bg-card rounded-xl p-6 border border-border">
@@ -121,7 +121,7 @@ export default function CRMSoftware() {
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl font-bold text-foreground mb-4">Who It's For</h2>
           <p className="text-lg text-muted-foreground">
-            Whether you have 10 clients or 500, We Detail NC keeps everything organized so you can focus on delivering great cleans — not chasing down information.
+            Whether you have 10 clients or 500, Remain Clean Services keeps everything organized so you can focus on delivering great cleans — not chasing down information.
           </p>
         </div>
       </section>
@@ -130,7 +130,7 @@ export default function CRMSoftware() {
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-primary/5">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl font-bold text-foreground mb-4">See Your Business in One Place</h2>
-          <p className="text-lg text-muted-foreground mb-8">Join hundreds of car detailing businesses using We Detail NC CRM. Start free, no credit card required.</p>
+          <p className="text-lg text-muted-foreground mb-8">Join hundreds of car detailing businesses using Remain Clean Services CRM. Start free, no credit card required.</p>
           <Button size="lg" className="text-lg px-8 h-14" onClick={handleStartFreeTrial}>
             Start Free Trial <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
@@ -144,7 +144,7 @@ export default function CRMSoftware() {
       </section>
 
       <footer className="border-t border-border py-8 px-4 text-center text-sm text-muted-foreground">
-        <p>© {new Date().getFullYear()} We Detail NC. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} Remain Clean Services. All rights reserved.</p>
       </footer>
     </div>
   );

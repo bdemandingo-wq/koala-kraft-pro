@@ -15,7 +15,7 @@ const blogPosts = [
   },
   {
     slug: "booking-koala-vs-jobber-vs-wedetailnc",
-    title: "Booking Koala vs Jobber vs We Detail NC: Which Software Wins?",
+    title: "Booking Koala vs Jobber vs Remain Clean Services: Which Software Wins?",
     excerpt: "Side-by-side comparison of the top 3 car detailing business software platforms. See pricing, features, and which one is right for your business.",
     category: "Comparison",
     readTime: "10 min read",

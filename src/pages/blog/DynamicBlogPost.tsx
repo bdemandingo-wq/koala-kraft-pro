@@ -43,7 +43,7 @@ export default function DynamicBlogPost() {
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               <Link to="/" className="flex items-center gap-2">
-                <span className="font-bold text-xl text-foreground">WE DETAIL NC</span>
+                <span className="font-bold text-xl text-foreground">REMAIN CLEAN SERVICES</span>
               </Link>
               <Button asChild>
                 <Link to="/auth">Start Free Trial</Link>
@@ -65,7 +65,7 @@ export default function DynamicBlogPost() {
   return (
     <div className="min-h-screen bg-background">
       <Seo 
-        title={post.meta_title || `${post.title} | WE DETAIL NC Blog`}
+        title={post.meta_title || `${post.title} | REMAIN CLEAN SERVICES Blog`}
         description={post.meta_description || post.excerpt}
         canonicalPath={`/blog/post/${post.slug}`}
       />
@@ -75,7 +75,7 @@ export default function DynamicBlogPost() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link to="/" className="flex items-center gap-2">
-              <span className="font-bold text-xl text-foreground">WE DETAIL NC</span>
+              <span className="font-bold text-xl text-foreground">REMAIN CLEAN SERVICES</span>
             </Link>
             <Button asChild>
               <Link to="/auth">Start Free Trial</Link>
@@ -142,7 +142,7 @@ export default function DynamicBlogPost() {
               Ready to streamline your car detailing business?
             </h2>
             <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
-              Try WE DETAIL NC to manage bookings, staff, and payments for your car detailing business.
+              Try REMAIN CLEAN SERVICES to manage bookings, staff, and payments for your car detailing business.
             </p>
             <Button size="lg" asChild>
               <Link to="/auth">Start Your Free Trial</Link>
@@ -154,7 +154,7 @@ export default function DynamicBlogPost() {
       {/* Footer */}
       <footer className="py-8 px-4 border-t border-border">
         <div className="max-w-7xl mx-auto text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} WE DETAIL NC. All rights reserved.
+          © {new Date().getFullYear()} REMAIN CLEAN SERVICES. All rights reserved.
         </div>
       </footer>
     </div>

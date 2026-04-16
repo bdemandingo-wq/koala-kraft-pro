@@ -173,8 +173,8 @@ const handler = async (req: Request): Promise<Response> => {
       customer: customerId,
       mode: "setup",  // SETUP mode = save card only, NO charge
       payment_method_types: ["card"],
-      success_url: "https://joinwedetailnc.lovable.app/card-saved?success=true",
-      cancel_url: "https://joinwedetailnc.lovable.app/card-saved?cancelled=true",
+      success_url: "https://joinkoala-kraft-pro.lovable.app/card-saved?success=true",
+      cancel_url: "https://joinkoala-kraft-pro.lovable.app/card-saved?cancelled=true",
       metadata: {
         bookingId: bookingId || "",
         customerName: customerName,

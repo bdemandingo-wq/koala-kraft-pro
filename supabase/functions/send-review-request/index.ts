@@ -87,7 +87,7 @@ const handler = async (req: Request): Promise<Response> => {
     const token = crypto.randomUUID();
     
     // Use org-specific app URL, fallback to global PROJECT_URL
-    const projectUrl = (businessSettings?.app_url || Deno.env.get("PROJECT_URL") || "https://joinwedetailnc.lovable.app").replace(/\/+$/, '');
+    const projectUrl = (businessSettings?.app_url || Deno.env.get("PROJECT_URL") || "https://joinkoala-kraft-pro.lovable.app").replace(/\/+$/, '');
     const reviewPageUrl = `${projectUrl}/review/${token}`;
 
     // Get staff_id from booking to associate review with technician

@@ -6,15 +6,15 @@ export default function PrivacyPolicyPage() {
   return (
     <div className="min-h-screen bg-background">
       <Seo
-        title="Privacy Policy | We Detail NC"
-        description="Read We Detail NC's Privacy Policy. Learn what information we collect and how we use it to provide app functionality."
+        title="Privacy Policy | Remain Clean Services"
+        description="Read Remain Clean Services's Privacy Policy. Learn what information we collect and how we use it to provide app functionality."
         canonicalPath="/privacy-policy"
       />
 
       <header className="border-b border-border bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4 sm:px-6">
           <div className="flex items-center gap-3">
-            <span className="text-lg font-bold text-foreground">WE DETAIL NC</span>
+            <span className="text-lg font-bold text-foreground">REMAIN CLEAN SERVICES</span>
             <span className="text-sm text-muted-foreground">Privacy Policy</span>
           </div>
           <Button variant="outline" asChild>
@@ -30,7 +30,7 @@ export default function PrivacyPolicyPage() {
 
           <div className="prose prose-sm mt-8 max-w-none text-foreground dark:prose-invert">
             <p>
-              This Privacy Policy explains how <strong>We Detail NC</strong> ("we", "us", "our") collects, uses, and shares
+              This Privacy Policy explains how <strong>Remain Clean Services</strong> ("we", "us", "our") collects, uses, and shares
               information when you use our website and app (the "Services").
             </p>
 
@@ -106,7 +106,7 @@ export default function PrivacyPolicyPage() {
             </p>
             <ul>
               <li>Navigate to <strong>Settings → Security</strong> in the app and select <strong>"Delete My Account"</strong>.</li>
-              <li>Alternatively, email us at <strong>support@joinwedetailnc.com</strong> with the subject line "Account Deletion Request".</li>
+              <li>Alternatively, email us at <strong>support@remaincleanservices.com</strong> with the subject line "Account Deletion Request".</li>
             </ul>
             <p>
               Upon receiving a deletion request, we will delete or anonymize your personal data within 30 days, unless we are required to retain it for legal or compliance purposes.
@@ -123,7 +123,7 @@ export default function PrivacyPolicyPage() {
 
             <h2>Contact Us</h2>
             <p>
-              If you have questions about this Privacy Policy, please contact us at <strong>support@joinwedetailnc.com</strong>.
+              If you have questions about this Privacy Policy, please contact us at <strong>support@remaincleanservices.com</strong>.
             </p>
           </div>
         </article>

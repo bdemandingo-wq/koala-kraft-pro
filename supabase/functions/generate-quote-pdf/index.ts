@@ -63,7 +63,7 @@ serve(async (req) => {
       .limit(1)
       .maybeSingle();
 
-    const companyName = settings?.company_name || "We Detail NC";
+    const companyName = settings?.company_name || "Remain Clean Services";
     const companyAddress = settings?.company_address || "";
     const companyCity = settings?.company_city || "";
     const companyState = settings?.company_state || "";

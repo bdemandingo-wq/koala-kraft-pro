@@ -73,7 +73,7 @@ export default function QuoteSoftware() {
   return (
     <div className="min-h-screen bg-background">
       <Seo 
-        title="Detailing Quote Software | Instant Estimates | WE DETAIL NC"
+        title="Detailing Quote Software | Instant Estimates | REMAIN CLEAN SERVICES"
         description="Professional quote software for car detailing businesses. Auto-calculate prices, send branded estimates, and convert leads to bookings. Start free trial."
         canonicalPath="/features/quote-software"
       />
@@ -83,7 +83,7 @@ export default function QuoteSoftware() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <a href="/" className="flex items-center gap-2">
-              <span className="font-bold text-xl text-foreground">WE DETAIL NC</span>
+              <span className="font-bold text-xl text-foreground">REMAIN CLEAN SERVICES</span>
             </a>
             <div className="hidden md:flex items-center gap-8">
               <a href="/#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
@@ -227,7 +227,7 @@ export default function QuoteSoftware() {
       {/* Footer */}
       <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-border">
         <div className="max-w-5xl mx-auto text-center">
-          <p className="text-muted-foreground">© 2026 WE DETAIL NC. Quote software for car detailing businesses.</p>
+          <p className="text-muted-foreground">© 2026 REMAIN CLEAN SERVICES. Quote software for car detailing businesses.</p>
           <div className="flex justify-center gap-6 mt-4">
             <Link to="/" className="text-muted-foreground hover:text-foreground">Home</Link>
             <Link to="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</Link>
@@ -241,7 +241,7 @@ export default function QuoteSoftware() {
         __html: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "SoftwareApplication",
-          "name": "WE DETAIL NC Quote Software",
+          "name": "REMAIN CLEAN SERVICES Quote Software",
           "applicationCategory": "BusinessApplication",
           "operatingSystem": "Web, iOS, Android",
           "offers": { "@type": "Offer", "price": "50", "priceCurrency": "USD" },

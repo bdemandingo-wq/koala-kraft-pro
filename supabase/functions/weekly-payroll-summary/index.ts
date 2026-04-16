@@ -190,7 +190,7 @@ const handler = async (req: Request): Promise<Response> => {
         try {
           const resend = new Resend(RESEND_API_KEY);
           await resend.emails.send({
-            from: 'We Detail NC <noreply@resend.dev>',
+            from: 'Remain Clean Services <noreply@resend.dev>',
             to: [adminEmail],
             subject: `📊 Weekly Payroll Summary - $${totalPayroll.toFixed(2)} (${totalJobs} jobs)`,
             html: summaryHtml,

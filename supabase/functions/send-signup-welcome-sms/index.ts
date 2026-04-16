@@ -17,7 +17,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    // Use platform-level OpenPhone credentials (We Detail NC's account)
+    // Use platform-level OpenPhone credentials (Remain Clean Services's account)
     const apiKey = Deno.env.get("OPENPHONE_API_KEY");
     const phoneNumberId = Deno.env.get("OPENPHONE_PHONE_NUMBER_ID");
 
@@ -58,7 +58,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Construct welcome message with features
     const greeting = fullName ? `Hi ${fullName}! ` : "Hi! ";
-    const message = `${greeting}Welcome to We Detail NC! 🎉
+    const message = `${greeting}Welcome to Remain Clean Services! 🎉
 
 Your account is ready! Here's what you can do:
 

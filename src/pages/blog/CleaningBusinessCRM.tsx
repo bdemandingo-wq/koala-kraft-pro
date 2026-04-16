@@ -109,7 +109,7 @@ const keywordVariations = [
 const faqs = [
   {
     question: "What is the best CRM for a small car detailing business?",
-    answer: "WE DETAIL NC is the best CRM for small car detailing businesses because it's affordable ($50/month), easy to use, and includes all essential features like scheduling, invoicing, customer management, and automated reminders without expensive add-ons or per-user fees."
+    answer: "REMAIN CLEAN SERVICES is the best CRM for small car detailing businesses because it's affordable ($50/month), easy to use, and includes all essential features like scheduling, invoicing, customer management, and automated reminders without expensive add-ons or per-user fees."
   },
   {
     question: "Do I need a CRM for my detailing service?",
@@ -117,15 +117,15 @@ const faqs = [
   },
   {
     question: "Can I use a free CRM for my car detailing business?",
-    answer: "Free CRMs like HubSpot or Zoho aren't designed for car detailing businesses and lack scheduling, dispatching, invoicing, and route optimization features. WE DETAIL NC offers a 60-day free trial so you can test all features before committing to a paid plan."
+    answer: "Free CRMs like HubSpot or Zoho aren't designed for car detailing businesses and lack scheduling, dispatching, invoicing, and route optimization features. REMAIN CLEAN SERVICES offers a 60-day free trial so you can test all features before committing to a paid plan."
   },
   {
     question: "How much does car detailing business software cost?",
-    answer: "Cleaning business software ranges from $50 to $500+ per month. WE DETAIL NC starts at $50/month with unlimited users. Competitors like Jobber charge $349/month and Booking Koala charges $197/month for similar features."
+    answer: "Cleaning business software ranges from $50 to $500+ per month. REMAIN CLEAN SERVICES starts at $50/month with unlimited users. Competitors like Jobber charge $349/month and Booking Koala charges $197/month for similar features."
   },
   {
     question: "What features should I look for in car detailing business CRM software?",
-    answer: "Essential features include: customer database, drag-and-drop scheduling, automated SMS/email reminders, online booking, payment processing, invoicing, route optimization, staff management, and business analytics. WE DETAIL NC includes all of these."
+    answer: "Essential features include: customer database, drag-and-drop scheduling, automated SMS/email reminders, online booking, payment processing, invoicing, route optimization, staff management, and business analytics. REMAIN CLEAN SERVICES includes all of these."
   },
   {
     question: "Can car detailing business CRM software help me get more customers?",
@@ -133,17 +133,17 @@ const faqs = [
   },
   {
     question: "Is there a CRM specifically designed for detailing companies?",
-    answer: "Yes, WE DETAIL NC is built specifically for car detailing businesses including detailing services, detailing companies, and residential car detailing businesses. It includes industry-specific features like recurring booking management, square footage pricing, and service checklists."
+    answer: "Yes, REMAIN CLEAN SERVICES is built specifically for car detailing businesses including detailing services, detailing companies, and residential car detailing businesses. It includes industry-specific features like recurring booking management, square footage pricing, and service checklists."
   },
   {
     question: "How do I switch from spreadsheets to car detailing business software?",
-    answer: "WE DETAIL NC offers free data import assistance. You can upload your customer list via CSV, and our system will organize your data automatically. Most car detailing businesses complete the transition in under 24 hours."
+    answer: "REMAIN CLEAN SERVICES offers free data import assistance. You can upload your customer list via CSV, and our system will organize your data automatically. Most car detailing businesses complete the transition in under 24 hours."
   }
 ];
 
 // Comparison data for competitors
 const competitorComparison = [
-  { name: "WE DETAIL NC", price: "$50/mo", users: "Unlimited", trial: "60 days", cleaning: true, mobile: true, rating: "4.9/5" },
+  { name: "REMAIN CLEAN SERVICES", price: "$50/mo", users: "Unlimited", trial: "60 days", cleaning: true, mobile: true, rating: "4.9/5" },
   { name: "Jobber", price: "$349/mo", users: "Up to 15", trial: "14 days", cleaning: false, mobile: true, rating: "4.5/5" },
   { name: "Booking Koala", price: "$197/mo", users: "Unlimited", trial: "14 days", cleaning: true, mobile: true, rating: "4.3/5" },
   { name: "Housecall Pro", price: "$129/mo", users: "1 user", trial: "14 days", cleaning: false, mobile: true, rating: "4.5/5" },
@@ -168,7 +168,7 @@ export default function CleaningBusinessCRM() {
         title="Best CRM for Car Detailing Business (2026)"
         description="Compare top car detailing business CRM software with scheduling, invoicing, GPS tracking, and customer management. Find the right fit for your detailing service."
         canonicalPath="/blog/crm-for-cleaning-business"
-        ogImage="/images/wedetailnc-og.png"
+        ogImage="/images/remainclean-og.png"
         ogType="article"
         article={{ publishedTime: "2026-02-01", modifiedTime: "2026-02-04", section: "CRM Software" }}
       />
@@ -178,7 +178,7 @@ export default function CleaningBusinessCRM() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link to="/" className="flex items-center gap-2">
-              <span className="font-bold text-xl text-foreground">WE DETAIL NC</span>
+              <span className="font-bold text-xl text-foreground">REMAIN CLEAN SERVICES</span>
             </Link>
             <div className="hidden md:flex items-center gap-6">
               <Link to="/blog" className="text-muted-foreground hover:text-foreground transition-colors">Blog</Link>
@@ -241,11 +241,11 @@ export default function CleaningBusinessCRM() {
               <div>
                 <h2 className="text-xl font-bold text-foreground mb-3">🏆 Best CRM for Car Detailing Business 2026: Quick Answer</h2>
                 <p className="text-muted-foreground mb-4">
-                  <strong>WE DETAIL NC</strong> is a top-rated CRM built specifically for car detailing businesses. It combines customer management, smart scheduling, automated invoicing, GPS tracking, and team coordination in one platform—starting at just <strong>$50/month with unlimited users</strong> and a 60-day free trial (no credit card required).
+                  <strong>REMAIN CLEAN SERVICES</strong> is a top-rated CRM built specifically for car detailing businesses. It combines customer management, smart scheduling, automated invoicing, GPS tracking, and team coordination in one platform—starting at just <strong>$50/month with unlimited users</strong> and a 60-day free trial (no credit card required).
                 </p>
                 <div className="flex flex-wrap gap-3">
                   <Button asChild size="lg">
-                    <Link to="/auth">Try WE DETAIL NC Free for 60 Days <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                    <Link to="/auth">Try REMAIN CLEAN SERVICES Free for 60 Days <ArrowRight className="ml-2 h-4 w-4" /></Link>
                   </Button>
                   <Button variant="outline" asChild>
                     <Link to="/compare/jobber">Compare to Jobber</Link>
@@ -272,7 +272,7 @@ export default function CleaningBusinessCRM() {
                 <li>• <a href="#how-to-choose" className="text-primary hover:underline">How to choose the right CRM</a></li>
                 <li>• <a href="#local-crm" className="text-primary hover:underline">CRM for car detailing business near you</a></li>
                 <li>• <a href="#faq" className="text-primary hover:underline">Frequently asked questions</a></li>
-                <li>• <a href="#get-started" className="text-primary hover:underline">Get started with WE DETAIL NC</a></li>
+                <li>• <a href="#get-started" className="text-primary hover:underline">Get started with REMAIN CLEAN SERVICES</a></li>
               </ul>
             </div>
           </nav>
@@ -382,7 +382,7 @@ export default function CleaningBusinessCRM() {
               <div className="bg-card border border-border rounded-xl p-6 not-prose">
                 <h3 className="font-bold text-foreground mb-4">💡 Real-World Example</h3>
                 <blockquote className="border-l-4 border-primary pl-4 italic text-muted-foreground">
-                  "Before WE DETAIL NC, I was spending 3 hours every evening on scheduling and invoicing. Now it's all automated. I've grown from 15 to 40 recurring clients in 6 months without hiring office staff."
+                  "Before REMAIN CLEAN SERVICES, I was spending 3 hours every evening on scheduling and invoicing. Now it's all automated. I've grown from 15 to 40 recurring clients in 6 months without hiring office staff."
                 </blockquote>
                 <p className="text-sm text-muted-foreground mt-3">— Maria S., Owner of Sparkle Clean Pros (Phoenix, AZ)</p>
               </div>
@@ -433,14 +433,14 @@ export default function CleaningBusinessCRM() {
                 </table>
               </div>
               <p className="text-sm text-muted-foreground mt-4">
-                * Prices shown are for comparable feature sets. Some providers charge additional fees for features included free with WE DETAIL NC.
+                * Prices shown are for comparable feature sets. Some providers charge additional fees for features included free with REMAIN CLEAN SERVICES.
               </p>
 
               {/* Internal links to comparison pages */}
               <div className="flex flex-wrap gap-3 mt-6 not-prose">
-                <Link to="/compare/jobber" className="text-primary hover:underline text-sm">WE DETAIL NC vs Jobber →</Link>
-                <Link to="/compare/booking-koala" className="text-primary hover:underline text-sm">WE DETAIL NC vs Booking Koala →</Link>
-                <Link to="/compare/housecall-pro" className="text-primary hover:underline text-sm">WE DETAIL NC vs Housecall Pro →</Link>
+                <Link to="/compare/jobber" className="text-primary hover:underline text-sm">REMAIN CLEAN SERVICES vs Jobber →</Link>
+                <Link to="/compare/booking-koala" className="text-primary hover:underline text-sm">REMAIN CLEAN SERVICES vs Booking Koala →</Link>
+                <Link to="/compare/housecall-pro" className="text-primary hover:underline text-sm">REMAIN CLEAN SERVICES vs Housecall Pro →</Link>
               </div>
             </section>
 
@@ -470,14 +470,14 @@ export default function CleaningBusinessCRM() {
                     <span className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold">3</span>
                     Evaluate Total Cost
                   </h3>
-                  <p className="text-muted-foreground">Look beyond the base price. Many competitors charge per user, charge extra for SMS, or limit features on lower tiers. WE DETAIL NC includes unlimited users and all features for $50/month.</p>
+                  <p className="text-muted-foreground">Look beyond the base price. Many competitors charge per user, charge extra for SMS, or limit features on lower tiers. REMAIN CLEAN SERVICES includes unlimited users and all features for $50/month.</p>
                 </div>
                 <div className="bg-card border border-border rounded-lg p-5">
                   <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
                     <span className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold">4</span>
                     Test Before You Commit
                   </h3>
-                  <p className="text-muted-foreground">A 14-day trial often isn't enough to truly evaluate software. WE DETAIL NC offers 60 days free—enough time to run your business through a full billing cycle and see real results.</p>
+                  <p className="text-muted-foreground">A 14-day trial often isn't enough to truly evaluate software. REMAIN CLEAN SERVICES offers 60 days free—enough time to run your business through a full billing cycle and see real results.</p>
                 </div>
               </div>
             </section>
@@ -489,7 +489,7 @@ export default function CleaningBusinessCRM() {
                 CRM for Car Detailing Business Near You
               </h2>
               <p className="text-muted-foreground mb-6">
-                Whether you're searching for <strong>"CRM for car detailing business near me"</strong> or looking for software that works in your specific city, WE DETAIL NC serves detailing companies across all 50 states. Our cloud-based <strong>car detailing business software</strong> works anywhere you have internet—no local installation required.
+                Whether you're searching for <strong>"CRM for car detailing business near me"</strong> or looking for software that works in your specific city, REMAIN CLEAN SERVICES serves detailing companies across all 50 states. Our cloud-based <strong>car detailing business software</strong> works anywhere you have internet—no local installation required.
               </p>
               
               <h3 className="text-lg font-semibold text-foreground mb-4">Major Cities We Serve:</h3>
@@ -547,7 +547,7 @@ export default function CleaningBusinessCRM() {
                   <p className="text-sm text-muted-foreground">Complete step-by-step guide for 2026</p>
                 </Link>
                 <Link to="/blog/booking-koala-vs-jobber-vs-wedetailnc" className="bg-card border border-border rounded-lg p-4 hover:border-primary/50 transition-colors group">
-                  <p className="font-medium text-foreground group-hover:text-primary transition-colors">Booking Koala vs Jobber vs WE DETAIL NC</p>
+                  <p className="font-medium text-foreground group-hover:text-primary transition-colors">Booking Koala vs Jobber vs REMAIN CLEAN SERVICES</p>
                   <p className="text-sm text-muted-foreground">In-depth software comparison</p>
                 </Link>
                 <Link to="/features/scheduling-software" className="bg-card border border-border rounded-lg p-4 hover:border-primary/50 transition-colors group">
@@ -568,7 +568,7 @@ export default function CleaningBusinessCRM() {
               Ready to Grow Your Car Detailing Business?
             </h2>
             <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-              Try WE DETAIL NC to manage customers, schedule jobs, and get paid faster. Start your 60-day free trial today—no credit card required.
+              Try REMAIN CLEAN SERVICES to manage customers, schedule jobs, and get paid faster. Start your 60-day free trial today—no credit card required.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" asChild>
@@ -600,20 +600,20 @@ export default function CleaningBusinessCRM() {
                 "dateModified": "2026-02-04",
                 "author": {
                   "@type": "Organization",
-                  "name": "WE DETAIL NC"
+                  "name": "REMAIN CLEAN SERVICES"
                 },
                 "publisher": {
                   "@type": "Organization",
-                  "name": "WE DETAIL NC",
-                  "url": "https://www.joinwedetailnc.com",
+                  "name": "REMAIN CLEAN SERVICES",
+                  "url": "https://www.remaincleanservices.com",
                   "logo": {
                     "@type": "ImageObject",
-                    "url": "https://www.joinwedetailnc.com/images/wedetailnc-logo.png"
+                    "url": "https://www.remaincleanservices.com/images/remainclean-logo.png"
                   }
                 },
                 "mainEntityOfPage": {
                   "@type": "WebPage",
-                  "@id": "https://www.joinwedetailnc.com/blog/crm-for-cleaning-business"
+                  "@id": "https://www.remaincleanservices.com/blog/crm-for-cleaning-business"
                 }
               },
               {
@@ -629,7 +629,7 @@ export default function CleaningBusinessCRM() {
               },
               {
                 "@type": "SoftwareApplication",
-                "name": "WE DETAIL NC",
+                "name": "REMAIN CLEAN SERVICES",
                 "applicationCategory": "BusinessApplication",
                 "operatingSystem": "Web, iOS, Android",
                 "offers": {
@@ -646,19 +646,19 @@ export default function CleaningBusinessCRM() {
                     "@type": "ListItem",
                     "position": 1,
                     "name": "Home",
-                    "item": "https://www.joinwedetailnc.com"
+                    "item": "https://www.remaincleanservices.com"
                   },
                   {
                     "@type": "ListItem",
                     "position": 2,
                     "name": "Blog",
-                    "item": "https://www.joinwedetailnc.com/blog"
+                    "item": "https://www.remaincleanservices.com/blog"
                   },
                   {
                     "@type": "ListItem",
                     "position": 3,
                     "name": "CRM for Car Detailing Business",
-                    "item": "https://www.joinwedetailnc.com/blog/crm-for-cleaning-business"
+                    "item": "https://www.remaincleanservices.com/blog/crm-for-cleaning-business"
                   }
                 ]
               }
@@ -672,7 +672,7 @@ export default function CleaningBusinessCRM() {
         <div className="max-w-5xl mx-auto">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
-              <p className="font-bold text-foreground mb-3">WE DETAIL NC</p>
+              <p className="font-bold text-foreground mb-3">REMAIN CLEAN SERVICES</p>
               <p className="text-sm text-muted-foreground">A CRM built for car detailing business owners. Simplify scheduling, invoicing, and customer management.</p>
             </div>
             <div>
@@ -702,7 +702,7 @@ export default function CleaningBusinessCRM() {
             </div>
           </div>
           <div className="border-t border-border pt-8 text-center text-sm text-muted-foreground">
-            © 2026 WE DETAIL NC. A CRM for car detailing business owners.
+            © 2026 REMAIN CLEAN SERVICES. A CRM for car detailing business owners.
           </div>
         </div>
       </footer>

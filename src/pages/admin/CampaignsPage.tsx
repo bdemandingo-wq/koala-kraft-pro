@@ -369,7 +369,7 @@ export default function CampaignsPage() {
     setCampaignForm({
       name: "", channel: "sms", audience: "active_clients", schedule: "now",
       scheduledDate: undefined, scheduledTime: "09:00",
-      smsBody: 'Hey {first_name}! This is We Detail NC. Ready to get your vehicle looking fresh again? Book here: {booking_link} Reply STOP to opt out.',
+      smsBody: 'Hey {first_name}! This is Remain Clean Services. Ready to get your vehicle looking fresh again? Book here: {booking_link} Reply STOP to opt out.',
       emailSubject: "", emailBody: "", days_inactive: 30,
     });
     setCreateStep(1);

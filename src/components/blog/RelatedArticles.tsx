@@ -54,7 +54,7 @@ export const allArticles: RelatedArticle[] = [
   },
   {
     slug: "/blog/booking-koala-vs-jobber-vs-wedetailnc",
-    title: "Booking Koala vs Jobber vs We Detail NC: Complete Comparison",
+    title: "Booking Koala vs Jobber vs Remain Clean Services: Complete Comparison",
     category: "Comparison",
   },
   // Feature Pages
@@ -96,17 +96,17 @@ export const allArticles: RelatedArticle[] = [
   // Comparison Pages
   {
     slug: "/compare/jobber",
-    title: "We Detail NC vs Jobber: Which Is Better?",
+    title: "Remain Clean Services vs Jobber: Which Is Better?",
     category: "Comparison",
   },
   {
     slug: "/compare/booking-koala",
-    title: "We Detail NC vs Booking Koala: Feature Comparison",
+    title: "Remain Clean Services vs Booking Koala: Feature Comparison",
     category: "Comparison",
   },
   {
     slug: "/compare/housecall-pro",
-    title: "We Detail NC vs Housecall Pro Alternative",
+    title: "Remain Clean Services vs Housecall Pro Alternative",
     category: "Comparison",
   },
 ];

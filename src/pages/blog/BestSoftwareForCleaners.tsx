@@ -15,7 +15,7 @@ export default function BestSoftwareForTechnicians() {
         title="Best Software for Car Detailing Business Owners (2025)"
         description="Compare the best car detailing business software in 2025. Scheduling, CRM, invoicing, and automation tools reviewed for detailing services and detailing companies."
         canonicalPath="/blog/best-software-for-cleaning-business"
-        ogImage="/images/wedetailnc-og.png"
+        ogImage="/images/remainclean-og.png"
         ogType="article"
         article={{ publishedTime: "2025-11-20", section: "Software Reviews" }}
         jsonLd={{
@@ -23,14 +23,14 @@ export default function BestSoftwareForTechnicians() {
           "headline": "Best Software for Car Detailing Business Owners",
           "description": "Compare the best car detailing business software in 2025.",
           "datePublished": "2025-11-20",
-          "author": { "@type": "Organization", "name": "We Detail NC" },
+          "author": { "@type": "Organization", "name": "Remain Clean Services" },
         }}
       />
 
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <a href="/" className="font-bold text-xl text-foreground">WE DETAIL NC</a>
+            <a href="/" className="font-bold text-xl text-foreground">REMAIN CLEAN SERVICES</a>
             <div className="hidden md:flex items-center gap-8">
               <a href="/blog" className="text-muted-foreground hover:text-foreground">Blog</a>
               <a href="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</a>
@@ -62,8 +62,8 @@ export default function BestSoftwareForTechnicians() {
             <h2 className="text-2xl font-bold mt-8">What to Look For in Car Detailing Business Software</h2>
             <p className="text-muted-foreground">The ideal car detailing business software should offer: online booking, client CRM, team scheduling, automated notifications, invoicing, and reporting. Bonus points for mobile apps, payment processing, and a client portal.</p>
 
-            <h2 className="text-2xl font-bold mt-8">1. We Detail NC — Best All-in-One Platform</h2>
-            <p className="text-muted-foreground">We Detail NC is purpose-built for car detailing businesses with booking, scheduling, CRM, invoicing, SMS/email automation, a staff portal, client portal, and AI-powered business intelligence. Pricing starts at $50/month after a 60-day free trial.</p>
+            <h2 className="text-2xl font-bold mt-8">1. Remain Clean Services — Best All-in-One Platform</h2>
+            <p className="text-muted-foreground">Remain Clean Services is purpose-built for car detailing businesses with booking, scheduling, CRM, invoicing, SMS/email automation, a staff portal, client portal, and AI-powered business intelligence. Pricing starts at $50/month after a 60-day free trial.</p>
             <p className="text-muted-foreground"><strong>Best for:</strong> Growing car detailing businesses that want everything in one place without juggling multiple tools.</p>
 
             <h2 className="text-2xl font-bold mt-8">2. Jobber — Best for Field Service Variety</h2>
@@ -79,7 +79,7 @@ export default function BestSoftwareForTechnicians() {
             <p className="text-muted-foreground">Consider your team size, budget, and growth plans. Solo operators may start with simpler tools, but if you plan to scale, choose software that grows with you. Features like automated reminders, recurring booking, and a client portal will save you hours every week.</p>
 
             <div className="bg-primary/5 rounded-xl p-6 mt-8 border border-primary/20">
-              <h3 className="text-xl font-bold text-foreground mb-2">Try We Detail NC Free for 60 Days</h3>
+              <h3 className="text-xl font-bold text-foreground mb-2">Try Remain Clean Services Free for 60 Days</h3>
               <p className="text-muted-foreground mb-4">All-in-one car detailing business software with booking, CRM, scheduling, invoicing, and automation. No credit card required.</p>
               <Button onClick={() => navigate("/signup")}>
                 Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
@@ -96,7 +96,7 @@ export default function BestSoftwareForTechnicians() {
       </section>
 
       <footer className="border-t border-border py-8 px-4 text-center text-sm text-muted-foreground">
-        <p>© {new Date().getFullYear()} We Detail NC. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} Remain Clean Services. All rights reserved.</p>
       </footer>
     </div>
   );

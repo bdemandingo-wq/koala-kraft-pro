@@ -161,7 +161,7 @@ serve(async (req: Request) => {
                   .eq('organization_id', organizationId)
                   .maybeSingle();
 
-                const companyName = bizSettings?.company_name || 'We Detail NC';
+                const companyName = bizSettings?.company_name || 'Remain Clean Services';
 
                 if (smsSettings?.openphone_api_key && smsSettings?.openphone_phone_number_id) {
                   const smsBody = `Hey ${firstName}! Thanks for reaching out to ${companyName} 🚗 We'll be in touch shortly to get your vehicle looking brand new. Reply STOP to opt out.`;
@@ -194,7 +194,7 @@ serve(async (req: Request) => {
                   .eq('organization_id', organizationId)
                   .maybeSingle();
 
-                const companyName = bizSettings?.company_name || 'We Detail NC';
+                const companyName = bizSettings?.company_name || 'Remain Clean Services';
                 const resendKey = bizSettings?.resend_api_key || Deno.env.get("RESEND_API_KEY");
 
                 if (resendKey) {

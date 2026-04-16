@@ -55,7 +55,7 @@ const features: Feature[] = [
 
 const pricingPlans = [
   {
-    name: "WE DETAIL NC",
+    name: "REMAIN CLEAN SERVICES",
     tagline: "Built for car detailing businesses",
     price: "$50",
     priceNote: "/month",
@@ -98,7 +98,7 @@ export function CompetitorComparison() {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-            WE DETAIL NC vs Booking Koala vs Jobber: Which Cleaning Software Wins?
+            REMAIN CLEAN SERVICES vs Booking Koala vs Jobber: Which Cleaning Software Wins?
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Looking for Booking Koala alternatives or Jobber alternatives? Compare the best car detailing business software side by side. More features, 75% lower price.
@@ -157,7 +157,7 @@ export function CompetitorComparison() {
           <div className="p-6 border-b border-border">
             <h3 className="text-xl font-semibold text-foreground">Feature Comparison</h3>
             <p className="text-sm text-muted-foreground mt-1">
-              Every feature WE DETAIL NC offers compared to the competition
+              Every feature REMAIN CLEAN SERVICES offers compared to the competition
             </p>
           </div>
 
@@ -166,7 +166,7 @@ export function CompetitorComparison() {
               <thead>
                 <tr className="bg-muted/50">
                   <th className="text-left p-4 font-medium text-foreground">Feature</th>
-                  <th className="text-center p-4 font-medium text-primary">WE DETAIL NC</th>
+                  <th className="text-center p-4 font-medium text-primary">REMAIN CLEAN SERVICES</th>
                   <th className="text-center p-4 font-medium text-foreground">Booking Koala</th>
                   <th className="text-center p-4 font-medium text-foreground">Jobber</th>
                 </tr>
@@ -187,10 +187,10 @@ export function CompetitorComparison() {
 
         <div className="text-center mt-12">
           <Button size="lg" onClick={() => navigate("/signup")}>
-            Try WE DETAIL NC Free — No Credit Card Required
+            Try REMAIN CLEAN SERVICES Free — No Credit Card Required
           </Button>
           <p className="text-sm text-muted-foreground mt-3">
-            Trusted by car detailing businesses using WE DETAIL NC
+            Trusted by car detailing businesses using REMAIN CLEAN SERVICES
           </p>
         </div>
       </div>

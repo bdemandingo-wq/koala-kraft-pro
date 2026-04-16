@@ -57,7 +57,7 @@ export function PortalBookingMedia({ bookingId }: PortalBookingMediaProps) {
 
       {afterMedia.length > 0 && (
         <p className="text-xs text-muted-foreground text-center">
-          Share your results! Tag us <strong>@wedetailnc</strong> 🚗
+          Share your results! Tag us <strong>@remainclean</strong> 🚗
         </p>
       )}
 
