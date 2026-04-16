@@ -266,7 +266,7 @@ export default function LandingPage() {
               <style>{`
                 @media (max-width: 767px) { .rc-desktop-nav { display: none !important; } }
               `}</style>
-              {navLinks.map(({ label, anchor, cta, login }) =>
+              {navLinks.map(({ label, anchor, cta, login, href }: any) =>
                 cta ? (
                   <button
                     key={label}
@@ -283,6 +283,10 @@ export default function LandingPage() {
                     className="rc-nav-link"
                     style={{ color: T.mutedFg, fontWeight: 500 }}
                   >
+                    {label}
+                  </button>
+                ) : href ? (
+                  <button key={label} className="rc-nav-link" onClick={() => navigate(href)}>
                     {label}
                   </button>
                 ) : (
