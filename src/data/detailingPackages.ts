@@ -1,10 +1,8 @@
 // Package duration estimates (in minutes)
 export const PACKAGE_DURATIONS: Record<string, number> = {
-  'Express Package': 90,
-  'Reset Package': 150,
-  'Deluxe Package': 210,
-  'Elite Package': 240,
-  'Ultimate Protect Package': 300,
+  'Express Detail': 60,
+  'Full Detail': 150,
+  'Premium Detail': 240,
   'Maintenance Plan': 90,
 };
 
@@ -36,110 +34,58 @@ export function formatTimeRange(startIso: string, durationMinutes: number): stri
 
 // Checklists per package
 export const PACKAGE_CHECKLISTS: Record<string, string[]> = {
-  'Express Package': [
-    'Prewash complete',
-    'Emblems & gas cap cleaned',
-    'Wheels, tires & fender wells complete',
-    'Bug removal done',
-    'Foam bath complete',
-    'Door jambs cleaned',
+  'Express Detail': [
+    'Hand wash complete',
+    'Quick vacuum done',
+    'Light wipe down complete',
+    'Air freshener applied',
+    'Windows cleaned',
     'Tires dressed',
-    'Windows streak-free',
-    'Interior air blowout done',
-    'Vacuum complete',
     'Final inspection done',
   ],
-  'Reset Package': [
-    'Prewash complete',
-    'Emblems & gas cap cleaned',
-    'Wheels, tires & fender wells complete',
-    'Bug removal done',
-    'Foam bath complete',
+  'Full Detail': [
+    'Deep interior clean complete',
+    'Steam & shampoo done',
+    'Exterior wash complete',
+    'Protection applied',
     'Door jambs cleaned',
-    'Tires dressed',
     'Windows streak-free',
-    'Interior air blowout done',
-    'Vacuum complete',
-    'Trim restored',
-    'Spray sealant applied',
-    'Dash, cup holders & plastic trim cleaned',
-    'Leather & vinyl cleaned',
+    'Tires dressed',
+    'Dashboard & console detailed',
+    'Cup holders & crevices cleaned',
     'Final inspection done',
   ],
-  'Deluxe Package': [
-    'Prewash complete',
-    'Emblems & gas cap cleaned',
-    'Wheels, tires & fender wells complete',
-    'Bug removal done',
-    'Foam bath complete',
-    'Door jambs cleaned',
-    'Tires dressed',
-    'Windows streak-free',
-    'Interior air blowout done',
-    'Vacuum complete',
-    'Trim restored',
-    'Spray sealant applied',
-    'Dash, cup holders & plastic trim cleaned',
-    'Leather & vinyl cleaned',
-    'Paint decontamination complete',
-    'Clay bar treatment done',
-    'Ceramic wax buffed on',
-    'Leather & vinyl conditioned',
-    'Steam cleaning complete',
-    'Final inspection done',
-  ],
-  'Elite Package': [
-    'Prewash complete',
-    'Emblems & gas cap cleaned',
-    'Wheels, tires & fender wells complete',
-    'Bug removal done',
-    'Foam bath complete',
-    'Door jambs cleaned',
-    'Tires dressed',
-    'Windows streak-free',
-    'Interior air blowout done',
-    'Vacuum complete',
-    '1-step paint correction complete (50-70% swirl removal)',
-    'Final inspection done',
-  ],
-  'Ultimate Protect Package': [
-    'Prewash complete',
-    'Emblems & gas cap cleaned',
-    'Wheels, tires & fender wells complete',
-    'Bug removal done',
-    'Foam bath complete',
-    'Door jambs cleaned',
-    'Tires dressed',
-    'Windows streak-free',
-    'Interior air blowout done',
-    'Vacuum complete',
-    '5-year ceramic coating applied',
-    'Coating cure time noted',
+  'Premium Detail': [
+    'Clay bar treatment complete',
+    'Ceramic sealant applied',
+    'Stain & odor removal done',
+    'Leather conditioning complete',
+    'Full interior deep clean',
+    'Exterior wash & decontamination',
+    'Paint correction complete',
+    'All glass cleaned',
+    'Engine bay wipe-down',
     'Final inspection done',
   ],
   'Maintenance Plan': [
-    'Prewash complete',
-    'Emblems & gas cap cleaned',
-    'Wheels, tires & fender wells complete',
-    'Bug removal done',
-    'Foam bath complete',
-    'Door jambs cleaned',
+    'Exterior wash complete',
+    'Interior vacuum done',
+    'Dashboard wipe-down',
+    'Windows cleaned',
     'Tires dressed',
-    'Windows streak-free',
-    'Interior air blowout done',
-    'Vacuum complete',
+    'Air freshener applied',
     'Final inspection done',
   ],
 };
 
 // Get checklist for a service name (fuzzy match)
 export function getPackageChecklist(serviceName: string | null | undefined): string[] {
-  if (!serviceName) return PACKAGE_CHECKLISTS['Express Package'];
+  if (!serviceName) return PACKAGE_CHECKLISTS['Express Detail'];
   const lower = serviceName.toLowerCase();
   for (const [key, val] of Object.entries(PACKAGE_CHECKLISTS)) {
     if (lower.includes(key.toLowerCase().split(' ')[0])) return val;
   }
-  return PACKAGE_CHECKLISTS['Express Package'];
+  return PACKAGE_CHECKLISTS['Express Detail'];
 }
 
 // Status colors for the scheduler

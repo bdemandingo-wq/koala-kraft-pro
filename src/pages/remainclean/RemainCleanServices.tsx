@@ -1,67 +1,38 @@
 import { Link } from "react-router-dom";
 import { Seo } from "@/components/Seo";
-import { Check, Phone, Car } from "lucide-react";
+import { Check, Phone, Car, Crown } from "lucide-react";
 import { T, RCGlobalStyles, RCStatusBar, RCNav, RCPromo, RCFooter } from "./RCLayout";
 
-const BASIC_WASH_PACKAGES = [
-  {
-    name: "Basic Wash",
-    price: "$50",
-    popular: false,
-    cta: "Book Basic Wash",
-    features: [
-      "Exterior hand wash",
-      "Wheel & tire cleaning",
-      "Tire dressing",
-      "Exterior window cleaning",
-      "Quick interior vacuum",
-      "Dashboard wipe-down",
-    ],
-  },
-  {
-    name: "Silver Wash",
-    price: "$75",
-    popular: true,
-    cta: "Book Silver",
-    features: [
-      "Everything in Basic Wash",
-      "Full interior vacuum & detail",
-      "Door jamb cleaning",
-      "Interior window cleaning",
-      "Air freshener",
-      "Tire dressing",
-    ],
-  },
+const EXPRESS_DETAIL_SIZES = [
+  { size: "Cars", price: "$60", example: "Civic, Corolla, Model 3" },
+  { size: "Mid-Size", price: "$70", example: "RAV4, CR-V, Model Y" },
+  { size: "Full-Size", price: "$80", example: "F-150, Tahoe, Expedition" },
+];
+
+const EXPRESS_DETAIL_FEATURES = [
+  "Hand Wash",
+  "Quick Vacuum",
+  "Light Wipe Down",
+  "Air Freshener",
 ];
 
 const FULL_DETAIL_SIZES = [
-  {
-    size: "Compact / Sedan",
-    price: "$125",
-    example: "Civic, Corolla, Model 3",
-  },
-  {
-    size: "Mid-Size / SUV",
-    price: "$140",
-    example: "RAV4, CR-V, Model Y",
-  },
-  {
-    size: "Full-Size / Truck",
-    price: "$165",
-    example: "F-150, Tahoe, Expedition",
-  },
+  { size: "Cars", price: "$125", example: "Civic, Corolla, Model 3" },
+  { size: "Mid-Size", price: "$145", example: "RAV4, CR-V, Model Y" },
+  { size: "Full-Size", price: "$165", example: "F-150, Tahoe, Expedition" },
 ];
 
 const FULL_DETAIL_FEATURES = [
-  "Full interior & exterior detail",
-  "Clay bar treatment",
-  "One-step machine polish",
-  "Sealant or carnauba wax",
-  "Leather/vinyl conditioning",
-  "Engine bay wipe-down",
-  "Deep cup holder & crevice cleaning",
-  "Interior protection treatment",
-  "Exterior finishing & inspection",
+  "Deep Interior Clean",
+  "Steam & Shampoo",
+  "Exterior Wash + Protection",
+];
+
+const PREMIUM_DETAIL_FEATURES = [
+  "Clay Bar Treatment",
+  "Ceramic Sealant",
+  "Stain & Odor Removal",
+  "Leather Conditioning",
 ];
 
 export default function RemainCleanServices() {
@@ -70,7 +41,7 @@ export default function RemainCleanServices() {
       <RCGlobalStyles />
       <Seo
         title="Services & Pricing | Remain Clean Services"
-        description="Mobile detailing packages from $50. Basic, Silver, Gold & Platinum — we bring the showroom to Fort Lauderdale, Miami-Dade & West Palm Beach."
+        description="Mobile detailing packages starting at $60. Express, Full Detail & Premium — we bring the showroom to Fort Lauderdale, Miami-Dade & West Palm Beach."
         canonicalPath="/remainclean/services"
       />
 
@@ -92,74 +63,55 @@ export default function RemainCleanServices() {
             </p>
           </section>
 
-          {/* Basic Wash Packages */}
+          {/* Express Detail Section */}
           <section style={{ padding: "3rem 1.5rem 2rem" }}>
             <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-              <h2 className="rc-s" style={{ fontSize: "1.75rem", fontWeight: 800, color: T.fg, marginBottom: "0.5rem", textAlign: "center" }}>Basic Washes</h2>
-              <p style={{ color: T.mutedFg, textAlign: "center", marginBottom: "2rem", fontSize: "0.9375rem" }}>Quick exterior & interior care — same great prices.</p>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: "1.5rem" }}>
-              {BASIC_WASH_PACKAGES.map(pkg => (
-                <div key={pkg.name} className="rc-card"
-                  style={{
-                    backgroundColor: T.card,
-                    border: `1px solid ${pkg.popular ? T.primary : T.border}`,
-                    borderRadius: "1rem",
-                    padding: "2rem",
-                    display: "flex",
-                    flexDirection: "column",
-                    position: "relative",
-                    overflow: "hidden",
-                  }}>
-                  {pkg.popular && (
-                    <div style={{ position: "absolute", top: 0, right: 0, backgroundColor: T.primary, color: T.primaryFg, fontSize: "0.6875rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "0.3125rem 0.875rem", borderBottomLeftRadius: "0.625rem" }}>
-                      MOST POPULAR
-                    </div>
-                  )}
+              <h2 className="rc-s" style={{ fontSize: "1.75rem", fontWeight: 800, color: T.fg, marginBottom: "0.5rem", textAlign: "center" }}>Express Detail</h2>
+              <p style={{ color: T.mutedFg, textAlign: "center", marginBottom: "2rem", fontSize: "0.9375rem" }}>Quick refresh — priced by vehicle size.</p>
 
-                  <div style={{ marginBottom: "1.5rem" }}>
-                    <h2 className="rc-s" style={{ color: T.fg, fontWeight: 800, fontSize: "1.5rem", marginBottom: "0.25rem" }}>{pkg.name}</h2>
-                    <p style={{ color: T.primary, fontSize: "2rem", fontWeight: 800 }}>{pkg.price}</p>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: "1.5rem", marginBottom: "2.5rem" }}>
+                {EXPRESS_DETAIL_SIZES.map(s => (
+                  <div key={s.size} className="rc-card" style={{ backgroundColor: T.card, border: `1px solid ${T.border}`, borderRadius: "1rem", padding: "2rem", textAlign: "center" }}>
+                    <Car size={28} style={{ color: T.primary, marginBottom: "0.75rem" }} />
+                    <h3 className="rc-s" style={{ color: T.fg, fontWeight: 800, fontSize: "1.25rem", marginBottom: "0.25rem" }}>{s.size}</h3>
+                    <p style={{ color: T.primary, fontSize: "2rem", fontWeight: 800, marginBottom: "0.25rem" }}>{s.price}</p>
+                    <p style={{ color: T.mutedFg, fontSize: "0.8125rem" }}>{s.example}</p>
                   </div>
+                ))}
+              </div>
 
-                  <ul style={{ listStyle: "none", padding: 0, margin: "0 0 2rem", display: "flex", flexDirection: "column", gap: "0.625rem", flex: 1 }}>
-                    {pkg.features.map(f => (
-                      <li key={f} style={{ display: "flex", alignItems: "flex-start", gap: "0.625rem", fontSize: "0.9rem", color: T.mutedFg, lineHeight: 1.5 }}>
-                        <Check size={15} style={{ color: T.primary, flexShrink: 0, marginTop: "0.125rem" }} />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Link to={`/book/remainclean?package=${pkg.name}`} className="rc-btn"
-                    style={{
-                      display: "block",
-                      textAlign: "center",
-                      backgroundColor: pkg.popular ? T.primary : "transparent",
-                      color: pkg.popular ? T.primaryFg : T.fg,
-                      border: `1px solid ${pkg.popular ? T.primary : T.border}`,
-                      padding: "0.8125rem 1.5rem",
-                      borderRadius: "0.625rem",
-                      fontWeight: 700,
-                      fontSize: "0.9375rem",
-                      textDecoration: "none",
-                    }}>
-                    {pkg.cta}
+              <div className="rc-card" style={{ backgroundColor: T.card, border: `1px solid ${T.border}`, borderRadius: "1rem", padding: "2rem" }}>
+                <h3 className="rc-s" style={{ color: T.fg, fontWeight: 700, fontSize: "1.125rem", marginBottom: "1rem" }}>What's Included</h3>
+                <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: "0.625rem" }}>
+                  {EXPRESS_DETAIL_FEATURES.map(f => (
+                    <li key={f} style={{ display: "flex", alignItems: "flex-start", gap: "0.625rem", fontSize: "0.9rem", color: T.mutedFg, lineHeight: 1.5 }}>
+                      <Check size={15} style={{ color: T.primary, flexShrink: 0, marginTop: "0.125rem" }} />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <div style={{ marginTop: "1.5rem", textAlign: "center" }}>
+                  <Link to="/book/remainclean?package=Express+Detail" className="rc-btn"
+                    style={{ display: "inline-block", backgroundColor: "transparent", color: T.fg, border: `1px solid ${T.border}`, padding: "0.8125rem 2rem", borderRadius: "0.625rem", fontWeight: 700, fontSize: "0.9375rem", textDecoration: "none" }}>
+                    Book Express Detail
                   </Link>
                 </div>
-              ))}
               </div>
             </div>
           </section>
 
           {/* Full Detail Section */}
-          <section style={{ padding: "3rem 1.5rem 5rem" }}>
+          <section style={{ padding: "3rem 1.5rem" }}>
             <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
               <h2 className="rc-s" style={{ fontSize: "1.75rem", fontWeight: 800, color: T.fg, marginBottom: "0.5rem", textAlign: "center" }}>Full Detail</h2>
               <p style={{ color: T.mutedFg, textAlign: "center", marginBottom: "2rem", fontSize: "0.9375rem" }}>Complete interior & exterior transformation — priced by vehicle size.</p>
 
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: "1.5rem", marginBottom: "2.5rem" }}>
                 {FULL_DETAIL_SIZES.map(s => (
-                  <div key={s.size} className="rc-card" style={{ backgroundColor: T.card, border: `1px solid ${T.border}`, borderRadius: "1rem", padding: "2rem", textAlign: "center" }}>
+                  <div key={s.size} className="rc-card" style={{ backgroundColor: T.card, border: `1px solid ${T.primary}`, borderRadius: "1rem", padding: "2rem", textAlign: "center", position: "relative", overflow: "hidden" }}>
+                    <div style={{ position: "absolute", top: 0, right: 0, backgroundColor: T.primary, color: T.primaryFg, fontSize: "0.6875rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "0.3125rem 0.875rem", borderBottomLeftRadius: "0.625rem" }}>
+                      MOST POPULAR
+                    </div>
                     <Car size={28} style={{ color: T.primary, marginBottom: "0.75rem" }} />
                     <h3 className="rc-s" style={{ color: T.fg, fontWeight: 800, fontSize: "1.25rem", marginBottom: "0.25rem" }}>{s.size}</h3>
                     <p style={{ color: T.primary, fontSize: "2rem", fontWeight: 800, marginBottom: "0.25rem" }}>{s.price}</p>
@@ -182,6 +134,44 @@ export default function RemainCleanServices() {
                   <Link to="/book/remainclean?package=Full+Detail" className="rc-btn"
                     style={{ display: "inline-block", backgroundColor: T.primary, color: T.primaryFg, padding: "0.8125rem 2rem", borderRadius: "0.625rem", fontWeight: 700, fontSize: "0.9375rem", textDecoration: "none" }}>
                     Book Full Detail
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Premium Detail Section */}
+          <section style={{ padding: "3rem 1.5rem 5rem" }}>
+            <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+              <h2 className="rc-s" style={{ fontSize: "1.75rem", fontWeight: 800, color: T.fg, marginBottom: "0.5rem", textAlign: "center" }}>Premium Detail</h2>
+              <p style={{ color: T.mutedFg, textAlign: "center", marginBottom: "2rem", fontSize: "0.9375rem" }}>Showroom finish — the ultimate transformation.</p>
+
+              <div style={{ maxWidth: "400px", margin: "0 auto 2.5rem" }}>
+                <div className="rc-card" style={{ backgroundColor: T.card, border: `1px solid ${T.primary}`, borderRadius: "1rem", padding: "2.5rem", textAlign: "center", position: "relative", overflow: "hidden" }}>
+                  <div style={{ position: "absolute", top: 0, right: 0, backgroundColor: T.primary, color: T.primaryFg, fontSize: "0.6875rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "0.3125rem 0.875rem", borderBottomLeftRadius: "0.625rem" }}>
+                    PREMIUM
+                  </div>
+                  <Crown size={32} style={{ color: T.primary, marginBottom: "0.75rem" }} />
+                  <h3 className="rc-s" style={{ color: T.fg, fontWeight: 800, fontSize: "1.5rem", marginBottom: "0.25rem" }}>All Vehicle Sizes</h3>
+                  <p style={{ color: T.primary, fontSize: "2.5rem", fontWeight: 800, marginBottom: "0.5rem" }}>$295</p>
+                  <p style={{ color: T.mutedFg, fontSize: "0.875rem" }}>Showroom Finish</p>
+                </div>
+              </div>
+
+              <div className="rc-card" style={{ backgroundColor: T.card, border: `1px solid ${T.border}`, borderRadius: "1rem", padding: "2rem" }}>
+                <h3 className="rc-s" style={{ color: T.fg, fontWeight: 700, fontSize: "1.125rem", marginBottom: "1rem" }}>What's Included</h3>
+                <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: "0.625rem" }}>
+                  {PREMIUM_DETAIL_FEATURES.map(f => (
+                    <li key={f} style={{ display: "flex", alignItems: "flex-start", gap: "0.625rem", fontSize: "0.9rem", color: T.mutedFg, lineHeight: 1.5 }}>
+                      <Check size={15} style={{ color: T.primary, flexShrink: 0, marginTop: "0.125rem" }} />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <div style={{ marginTop: "1.5rem", textAlign: "center" }}>
+                  <Link to="/book/remainclean?package=Premium+Detail" className="rc-btn"
+                    style={{ display: "inline-block", backgroundColor: T.primary, color: T.primaryFg, padding: "0.8125rem 2rem", borderRadius: "0.625rem", fontWeight: 700, fontSize: "0.9375rem", textDecoration: "none" }}>
+                    Book Premium Detail
                   </Link>
                 </div>
               </div>
