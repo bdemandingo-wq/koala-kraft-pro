@@ -61,19 +61,33 @@ serve(async (req) => {
     })
   );
 
-  // Group into before/after pairs by booking_id
-  const pairMap = new Map<string, { before: typeof items[0] | null; after: typeof items[0] | null }>();
+  // Group into before/after pairs by booking_id, allowing multiple pairs per booking
+  const pairMap = new Map<string, { befores: typeof items[0][]; afters: typeof items[0][] }>();
   for (const item of items) {
     if (!item.signed_url) continue;
     if (!pairMap.has(item.booking_id)) {
-      pairMap.set(item.booking_id, { before: null, after: null });
+      pairMap.set(item.booking_id, { befores: [], afters: [] });
     }
-    const pair = pairMap.get(item.booking_id)!;
-    if (item.media_type === "before" && !pair.before) pair.before = item;
-    else if (item.media_type === "after" && !pair.after) pair.after = item;
+    const group = pairMap.get(item.booking_id)!;
+    if (item.media_type === "before") group.befores.push(item);
+    else if (item.media_type === "after") group.afters.push(item);
   }
 
-  const pairs = Array.from(pairMap.values()).filter(p => p.before || p.after);
+  // Build pairs: zip befores and afters, then show any remaining as standalone
+  const pairs: { before: typeof items[0] | null; after: typeof items[0] | null }[] = [];
+  for (const group of pairMap.values()) {
+    const maxPaired = Math.min(group.befores.length, group.afters.length);
+    for (let i = 0; i < maxPaired; i++) {
+      pairs.push({ before: group.befores[i], after: group.afters[i] });
+    }
+    // Remaining unpaired items shown as standalone cards
+    for (let i = maxPaired; i < group.befores.length; i++) {
+      pairs.push({ before: group.befores[i], after: null });
+    }
+    for (let i = maxPaired; i < group.afters.length; i++) {
+      pairs.push({ before: null, after: group.afters[i] });
+    }
+  }
 
   return json({ items: pairs });
 });
