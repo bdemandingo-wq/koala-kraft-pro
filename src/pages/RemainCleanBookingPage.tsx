@@ -256,7 +256,7 @@ export default function RemainCleanBookingPage() {
                   Booking Request Sent!
                 </h1>
                 <p style={{ color: T.mutedFg, marginBottom: "2rem", lineHeight: 1.7 }}>
-                  We'll confirm your appointment via phone call within a few hours.
+                  We'll confirm your appointment via phone call within a few minutes.
                 </p>
                 <div style={{ backgroundColor: T.card, border: `1px solid ${T.border}`, borderRadius: "0.75rem", padding: "1.25rem", display: "inline-block", marginBottom: "2.5rem" }}>
                   <p style={{ color: T.mutedFg, fontSize: "0.8125rem", marginBottom: "0.25rem" }}>Confirmation Number</p>
@@ -352,7 +352,7 @@ export default function RemainCleanBookingPage() {
                   </button>
 
                   <p style={{ textAlign: "center", color: T.mutedFg, fontSize: "0.8125rem", lineHeight: 1.6 }}>
-                    We'll confirm your appointment via phone call within a few hours.
+                    We'll confirm your appointment via phone call within a few minutes.
                   </p>
                 </form>
               </>
