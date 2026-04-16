@@ -860,7 +860,7 @@ export default function LandingPage() {
               Earn points with every detail and redeem them for discounts, free services, and exclusive perks.
               The more you clean, the more you save.
             </p>
-            <button onClick={bookNow} className="rc-btn-primary" style={btnPrimary}>
+            <button onClick={() => navigate("/remainclean/rewards")} className="rc-btn-primary" style={btnPrimary}>
               Join Rewards Program
             </button>
           </div>
@@ -902,7 +902,7 @@ export default function LandingPage() {
                 Book Now
               </button>
               <button
-                onClick={() => document.getElementById("rewards")?.scrollIntoView({ behavior: "smooth" })}
+                onClick={() => navigate("/remainclean/rewards")}
                 style={{
                   ...btnOutline,
                   borderColor: "oklch(14.5% .005 285 / 40%)",
