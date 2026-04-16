@@ -1,14 +1,14 @@
 import { Link } from "react-router-dom";
 import { Seo } from "@/components/Seo";
-import { Check, Phone } from "lucide-react";
+import { Check, Phone, Car } from "lucide-react";
 import { T, RCGlobalStyles, RCStatusBar, RCNav, RCPromo, RCFooter } from "./RCLayout";
 
-const PACKAGES = [
+const BASIC_WASH_PACKAGES = [
   {
-    name: "Basic",
+    name: "Basic Wash",
     price: "$50",
     popular: false,
-    cta: "Book Basic",
+    cta: "Book Basic Wash",
     features: [
       "Exterior hand wash",
       "Wheel & tire cleaning",
@@ -19,12 +19,12 @@ const PACKAGES = [
     ],
   },
   {
-    name: "Silver",
-    price: "$100",
+    name: "Silver Wash",
+    price: "$75",
     popular: true,
     cta: "Book Silver",
     features: [
-      "Everything in Basic",
+      "Everything in Basic Wash",
       "Full interior vacuum & detail",
       "Door jamb cleaning",
       "Interior window cleaning",
@@ -32,43 +32,37 @@ const PACKAGES = [
       "Tire dressing",
     ],
   },
+];
+
+const FULL_DETAIL_SIZES = [
   {
-    name: "Gold",
-    price: "$150",
-    popular: false,
-    cta: "Book Gold",
-    features: [
-      "Everything in Silver",
-      "Clay bar treatment",
-      "One-step machine polish",
-      "Sealant or carnauba wax",
-      "Leather/vinyl conditioning",
-      "Engine bay wipe-down",
-      "Deep cup holder cleaning",
-    ],
+    size: "Compact / Sedan",
+    price: "$125",
+    example: "Civic, Corolla, Model 3",
   },
   {
-    name: "Platinum",
-    price: "$200",
-    popular: false,
-    cta: "Book Platinum",
-    features: [
-      "Everything in Gold",
-      "Interior protection treatment",
-      "Premium spray wax coating",
-      "High-detail dashboard/steering wheel/panels",
-      "Exterior finishing",
-      "Maximum attention to detail",
-      "Final showroom-quality inspection",
-    ],
+    size: "Mid-Size / SUV",
+    price: "$140",
+    example: "RAV4, CR-V, Model Y",
+  },
+  {
+    size: "Full-Size / Truck",
+    price: "$165",
+    example: "F-150, Tahoe, Expedition",
   },
 ];
 
-const DISCOUNTS: Record<string, string> = {
-  Silver:   "$10 off with code MarioWorld4L",
-  Gold:     "$15 off with code MarioWorld4L",
-  Platinum: "$20 off with code MarioWorld4L",
-};
+const FULL_DETAIL_FEATURES = [
+  "Full interior & exterior detail",
+  "Clay bar treatment",
+  "One-step machine polish",
+  "Sealant or carnauba wax",
+  "Leather/vinyl conditioning",
+  "Engine bay wipe-down",
+  "Deep cup holder & crevice cleaning",
+  "Interior protection treatment",
+  "Exterior finishing & inspection",
+];
 
 export default function RemainCleanServices() {
   return (
@@ -98,10 +92,13 @@ export default function RemainCleanServices() {
             </p>
           </section>
 
-          {/* Packages */}
-          <section style={{ padding: "3rem 1.5rem 5rem" }}>
-            <div style={{ maxWidth: "1100px", margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(250px,1fr))", gap: "1.5rem" }}>
-              {PACKAGES.map(pkg => (
+          {/* Basic Wash Packages */}
+          <section style={{ padding: "3rem 1.5rem 2rem" }}>
+            <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+              <h2 className="rc-s" style={{ fontSize: "1.75rem", fontWeight: 800, color: T.fg, marginBottom: "0.5rem", textAlign: "center" }}>Basic Washes</h2>
+              <p style={{ color: T.mutedFg, textAlign: "center", marginBottom: "2rem", fontSize: "0.9375rem" }}>Quick exterior & interior care — same great prices.</p>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: "1.5rem" }}>
+              {BASIC_WASH_PACKAGES.map(pkg => (
                 <div key={pkg.name} className="rc-card"
                   style={{
                     backgroundColor: T.card,
@@ -113,7 +110,6 @@ export default function RemainCleanServices() {
                     position: "relative",
                     overflow: "hidden",
                   }}>
-
                   {pkg.popular && (
                     <div style={{ position: "absolute", top: 0, right: 0, backgroundColor: T.primary, color: T.primaryFg, fontSize: "0.6875rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "0.3125rem 0.875rem", borderBottomLeftRadius: "0.625rem" }}>
                       MOST POPULAR
@@ -123,9 +119,6 @@ export default function RemainCleanServices() {
                   <div style={{ marginBottom: "1.5rem" }}>
                     <h2 className="rc-s" style={{ color: T.fg, fontWeight: 800, fontSize: "1.5rem", marginBottom: "0.25rem" }}>{pkg.name}</h2>
                     <p style={{ color: T.primary, fontSize: "2rem", fontWeight: 800 }}>{pkg.price}</p>
-                    {DISCOUNTS[pkg.name] && (
-                      <p style={{ color: T.mutedFg, fontSize: "0.75rem", marginTop: "0.25rem" }}>💰 {DISCOUNTS[pkg.name]}</p>
-                    )}
                   </div>
 
                   <ul style={{ listStyle: "none", padding: 0, margin: "0 0 2rem", display: "flex", flexDirection: "column", gap: "0.625rem", flex: 1 }}>
@@ -154,6 +147,44 @@ export default function RemainCleanServices() {
                   </Link>
                 </div>
               ))}
+              </div>
+            </div>
+          </section>
+
+          {/* Full Detail Section */}
+          <section style={{ padding: "3rem 1.5rem 5rem" }}>
+            <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+              <h2 className="rc-s" style={{ fontSize: "1.75rem", fontWeight: 800, color: T.fg, marginBottom: "0.5rem", textAlign: "center" }}>Full Detail</h2>
+              <p style={{ color: T.mutedFg, textAlign: "center", marginBottom: "2rem", fontSize: "0.9375rem" }}>Complete interior & exterior transformation — priced by vehicle size.</p>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: "1.5rem", marginBottom: "2.5rem" }}>
+                {FULL_DETAIL_SIZES.map(s => (
+                  <div key={s.size} className="rc-card" style={{ backgroundColor: T.card, border: `1px solid ${T.border}`, borderRadius: "1rem", padding: "2rem", textAlign: "center" }}>
+                    <Car size={28} style={{ color: T.primary, marginBottom: "0.75rem" }} />
+                    <h3 className="rc-s" style={{ color: T.fg, fontWeight: 800, fontSize: "1.25rem", marginBottom: "0.25rem" }}>{s.size}</h3>
+                    <p style={{ color: T.primary, fontSize: "2rem", fontWeight: 800, marginBottom: "0.25rem" }}>{s.price}</p>
+                    <p style={{ color: T.mutedFg, fontSize: "0.8125rem" }}>{s.example}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="rc-card" style={{ backgroundColor: T.card, border: `1px solid ${T.border}`, borderRadius: "1rem", padding: "2rem" }}>
+                <h3 className="rc-s" style={{ color: T.fg, fontWeight: 700, fontSize: "1.125rem", marginBottom: "1rem" }}>What's Included</h3>
+                <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: "0.625rem" }}>
+                  {FULL_DETAIL_FEATURES.map(f => (
+                    <li key={f} style={{ display: "flex", alignItems: "flex-start", gap: "0.625rem", fontSize: "0.9rem", color: T.mutedFg, lineHeight: 1.5 }}>
+                      <Check size={15} style={{ color: T.primary, flexShrink: 0, marginTop: "0.125rem" }} />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <div style={{ marginTop: "1.5rem", textAlign: "center" }}>
+                  <Link to="/book/remainclean?package=Full+Detail" className="rc-btn"
+                    style={{ display: "inline-block", backgroundColor: T.primary, color: T.primaryFg, padding: "0.8125rem 2rem", borderRadius: "0.625rem", fontWeight: 700, fontSize: "0.9375rem", textDecoration: "none" }}>
+                    Book Full Detail
+                  </Link>
+                </div>
+              </div>
             </div>
           </section>
 
