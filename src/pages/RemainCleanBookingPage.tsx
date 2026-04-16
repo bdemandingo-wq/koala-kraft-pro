@@ -192,7 +192,7 @@ export default function RemainCleanBookingPage() {
 
             <div className="rcnav-d" style={{ display: "flex", alignItems: "center", gap: "1.75rem" }}>
               <style>{`@media(max-width:767px){.rcnav-d{display:none!important}}`}</style>
-              {[{l:"Home",t:"/"},{l:"Services",t:"/#services"},{l:"Gallery",t:"/#gallery"},{l:"Rewards",t:"/#rewards"},{l:"Contact",t:"/#contact"}].map(n =>
+              {[{l:"Home",t:"/remainclean"},{l:"Services",t:"/remainclean/services"},{l:"Gallery",t:"/remainclean/gallery"},{l:"Rewards",t:"/remainclean/rewards"},{l:"Contact",t:"/remainclean#contact"}].map(n =>
                 <Link key={n.l} to={n.t} className="rc-nl" style={{ color: T.mutedFg }}>{n.l}</Link>
               )}
               <a href="tel:9549131307" className="rc-nl" style={{ color: T.mutedFg, display: "flex", alignItems: "center", gap: "0.375rem" }}>
@@ -208,7 +208,7 @@ export default function RemainCleanBookingPage() {
           </div>
           {menuOpen && (
             <div style={{ backgroundColor: T.card, borderTop: `1px solid ${T.border}`, padding: "1rem 1.5rem", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-              {[{l:"Home",t:"/"},{l:"Services",t:"/#services"},{l:"Book Now",t:"/book/remainclean"},{l:"Rewards",t:"/#rewards"},{l:"Contact",t:"/#contact"}].map(n =>
+              {[{l:"Home",t:"/remainclean"},{l:"Services",t:"/remainclean/services"},{l:"Gallery",t:"/remainclean/gallery"},{l:"Book Now",t:"/book/remainclean"},{l:"Rewards",t:"/remainclean/rewards"},{l:"Contact",t:"/remainclean#contact"}].map(n =>
                 <Link key={n.l} to={n.t} onClick={() => setMenuOpen(false)} className="rc-nl" style={{ color: T.mutedFg, padding: "0.625rem 0.5rem" }}>{n.l}</Link>
               )}
               <a href="tel:9549131307" style={{ color: T.mutedFg, padding: "0.625rem 0.5rem", fontSize: "0.875rem", textDecoration: "none" }}>📞 (954)-913-1307</a>
@@ -351,7 +351,7 @@ export default function RemainCleanBookingPage() {
             <div>
               <p style={{ color: T.fg, fontWeight: 600, fontSize: "0.8125rem", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: "1rem" }}>Quick Links</p>
               <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                {[{l:"Home",t:"/"},{l:"Services & Pricing",t:"/#services"},{l:"Book Appointment",t:"/book/remainclean"},{l:"Rewards",t:"/#rewards"},{l:"Contact",t:"/#contact"}].map(x =>
+                {[{l:"Home",t:"/remainclean"},{l:"Services & Pricing",t:"/remainclean/services"},{l:"Book Appointment",t:"/book/remainclean"},{l:"Rewards",t:"/remainclean/rewards"},{l:"Contact",t:"/remainclean#contact"}].map(x =>
                   <li key={x.l}><Link to={x.t} className="rc-nl" style={{ color: T.mutedFg, padding: 0 }}>{x.l}</Link></li>
                 )}
               </ul>

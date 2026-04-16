@@ -24,6 +24,10 @@ const LandingPage = lazy(() => import("./pages/LandingPage"));
 
 // New auth pages with no session persistence
 const RemainCleanBookingPage = lazy(() => import("./pages/RemainCleanBookingPage"));
+const RemainCleanHome     = lazy(() => import("./pages/remainclean/RemainCleanHome"));
+const RemainCleanServices = lazy(() => import("./pages/remainclean/RemainCleanServices"));
+const RemainCleanGallery  = lazy(() => import("./pages/remainclean/RemainCleanGallery"));
+const RemainCleanRewards  = lazy(() => import("./pages/remainclean/RemainCleanRewards"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const SignupPage = lazy(() => import("./pages/SignupPage"));
 const LogoutPage = lazy(() => import("./pages/LogoutPage"));
@@ -171,6 +175,10 @@ const App = () => (
                         <Route path="/auth" element={<AuthPage />} />
 
                       {/* Public Routes - Lazy Loaded */}
+                      <Route path="/remainclean" element={<RemainCleanHome />} />
+                      <Route path="/remainclean/services" element={<RemainCleanServices />} />
+                      <Route path="/remainclean/gallery" element={<RemainCleanGallery />} />
+                      <Route path="/remainclean/rewards" element={<RemainCleanRewards />} />
                       <Route path="/book/remainclean" element={<RemainCleanBookingPage />} />
                       <Route path="/book/:orgSlug" element={<PublicBookingPage />} />
                       <Route path="/c/:code" element={<RedirectPage />} />
@@ -279,6 +287,10 @@ const App = () => (
                     <Route path="/auth" element={<AuthPage />} />
 
                     {/* Public Routes - Lazy Loaded */}
+                    <Route path="/remainclean" element={<RemainCleanHome />} />
+                    <Route path="/remainclean/services" element={<RemainCleanServices />} />
+                    <Route path="/remainclean/gallery" element={<RemainCleanGallery />} />
+                    <Route path="/remainclean/rewards" element={<RemainCleanRewards />} />
                     <Route path="/book/remainclean" element={<RemainCleanBookingPage />} />
                     <Route path="/book/:orgSlug" element={<PublicBookingPage />} />
                     <Route path="/c/:code" element={<RedirectPage />} />
