@@ -51,11 +51,6 @@ const automationMeta: Record<string, {
     description: 'Offers recurring service plan 2 hours after first completed job',
     color: 'text-purple-500',
   },
-  missed_call_textback: {
-    icon: PhoneMissed,
-    description: 'Instantly texts the caller back when a call is missed',
-    color: 'text-red-500',
-  },
   ai_sms_reply: {
     icon: Bot,
     description: 'AI reads your past messages and replies in your tone 24/7',
