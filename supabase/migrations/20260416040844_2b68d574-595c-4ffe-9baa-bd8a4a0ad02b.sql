@@ -1,0 +1,1 @@
+ALTER TABLE public.job_media ADD COLUMN IF NOT EXISTS show_in_gallery boolean DEFAULT false;

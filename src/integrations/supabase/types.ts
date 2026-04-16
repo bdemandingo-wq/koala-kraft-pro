@@ -3099,6 +3099,7 @@ export type Database = {
           media_type: string
           notes: string | null
           organization_id: string
+          show_in_gallery: boolean | null
           uploaded_at: string | null
           uploaded_by: string | null
         }
@@ -3113,6 +3114,7 @@ export type Database = {
           media_type: string
           notes?: string | null
           organization_id: string
+          show_in_gallery?: boolean | null
           uploaded_at?: string | null
           uploaded_by?: string | null
         }
@@ -3127,6 +3129,7 @@ export type Database = {
           media_type?: string
           notes?: string | null
           organization_id?: string
+          show_in_gallery?: boolean | null
           uploaded_at?: string | null
           uploaded_by?: string | null
         }
