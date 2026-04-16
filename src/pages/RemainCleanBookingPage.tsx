@@ -20,10 +20,9 @@ const LOGO = "https://remainclean.com/assets/logo-B_QawJUt.png";
 const FONT = "https://cdn.gpteng.co/mcp-widgets/v1/fonts/CameraPlainVariable.woff2";
 
 const PACKAGES = [
-  { label: "Basic — $50",     value: "Basic",    price: 50  },
-  { label: "Silver — $100",   value: "Silver",   price: 100 },
-  { label: "Gold — $150",     value: "Gold",     price: 150 },
-  { label: "Platinum — $200", value: "Platinum", price: 200 },
+  { label: "Express Detail — from $60",  value: "Express Detail",  price: 60  },
+  { label: "Full Detail — from $125",    value: "Full Detail",     price: 125 },
+  { label: "Premium Detail — $295",      value: "Premium Detail",  price: 295 },
 ];
 
 const SERVICE_AREAS = ["Fort Lauderdale", "Miami-Dade", "West Palm Beach"];
