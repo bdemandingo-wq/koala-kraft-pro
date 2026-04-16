@@ -45,11 +45,11 @@ const handler = async (req: Request): Promise<Response> => {
     // Welcome emails for NEW signups use the main We Detail NC account
     // This is a platform-level email, not organization-specific
     // (Users create their organization AFTER signup, so no org context exists yet)
-    const WE DETAIL NC_DEFAULT_EMAIL = "support@joinwedetailnc.com";
-    const WE DETAIL NC_DEFAULT_NAME = "We Detail NC";
+    const WDN_DEFAULT_EMAIL = "support@joinwedetailnc.com";
+    const WDN_DEFAULT_NAME = "We Detail NC";
     
-    const senderEmail = WE DETAIL NC_DEFAULT_EMAIL;
-    const companyName = WE DETAIL NC_DEFAULT_NAME;
+    const senderEmail = WDN_DEFAULT_EMAIL;
+    const companyName = WDN_DEFAULT_NAME;
     const primaryColor = "#1e5bb0";
     const accentColor = "#14b8a6";
 
