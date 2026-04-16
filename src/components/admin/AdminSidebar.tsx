@@ -34,6 +34,7 @@ import {
   Check,
   Image as ImageIcon,
 } from 'lucide-react';
+import remainCleanLogo from '@/assets/remain-clean-logo.png';
 import { cn } from '@/lib/utils';
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
@@ -381,24 +382,9 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
     <>
       {/* Logo */}
       <div className="flex h-16 items-center gap-3 px-6 border-b border-sidebar-border">
-        {logoUrl ? (
-          <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-background">
-            <SignedImage
-              src={logoUrl}
-              alt="Logo"
-              className="w-full h-full object-contain"
-              fallback={
-                <div className="w-full h-full flex items-center justify-center bg-muted">
-                  <Calendar className="w-5 h-5 text-muted-foreground" />
-                </div>
-              }
-            />
-          </div>
-        ) : (
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-            <Calendar className="w-5 h-5 text-primary-foreground" />
-          </div>
-        )}
+        <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-black">
+          <img src={remainCleanLogo} alt="Remain Clean Services" className="w-full h-full object-contain" />
+        </div>
         {(isOpen || isMobile) && (
           <span className="text-lg font-bold text-sidebar-foreground">{businessDisplayName}</span>
         )}
