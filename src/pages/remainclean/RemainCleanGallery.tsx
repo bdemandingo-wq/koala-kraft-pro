@@ -1,35 +1,61 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Seo } from "@/components/Seo";
-import { Phone, Play, ImageOff } from "lucide-react";
+import { Phone, Play, ImageOff, X } from "lucide-react";
 import { T, RCGlobalStyles, RCStatusBar, RCNav, RCPromo, RCFooter } from "./RCLayout";
 import { supabase } from "@/lib/supabase";
 
-interface GalleryPair {
-  before: { signed_url: string; file_type: string } | null;
-  after:  { signed_url: string; file_type: string } | null;
+interface GalleryMediaItem {
+  signed_url: string;
+  file_type: string;
 }
 
-function MediaThumb({ item, label }: { item: { signed_url: string; file_type: string } | null; label: string }) {
+interface GalleryPair {
+  before: GalleryMediaItem | null;
+  after: GalleryMediaItem | null;
+}
+
+function MediaThumb({
+  item,
+  label,
+  onOpen,
+}: {
+  item: GalleryMediaItem | null;
+  label: string;
+  onOpen: (item: GalleryMediaItem) => void;
+}) {
   const isVideo = item && (item.file_type.startsWith("video/") || item.file_type === "video");
-  return (
-    <div style={{ position: "relative", flex: 1, backgroundColor: T.secondary, borderRadius: "0.625rem", overflow: "hidden", aspectRatio: "4/3" }}>
-      {item ? (
-        isVideo ? (
-          <video
-            src={item.signed_url}
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
-            muted
-            playsInline
-            preload="metadata"
-          />
-        ) : (
-          <img src={item.signed_url} alt={label} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-        )
-      ) : (
+
+  if (!item) {
+    return (
+      <div style={{ position: "relative", flex: 1, backgroundColor: T.secondary, borderRadius: "0.625rem", overflow: "hidden", aspectRatio: "4/3" }}>
         <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <ImageOff size={24} style={{ color: T.border }} />
         </div>
+        <div style={{ position: "absolute", bottom: "0.375rem", left: "0.5rem", backgroundColor: label === "Before" ? "rgba(0,0,0,0.55)" : "oklch(40% .13 150)", color: "#fff", fontSize: "0.6875rem", fontWeight: 700, padding: "0.15rem 0.5rem", borderRadius: "9999px", letterSpacing: "0.04em" }}>
+          {label}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => onOpen(item)}
+      aria-label={`Open ${label} media`}
+      style={{ position: "relative", flex: 1, backgroundColor: T.secondary, borderRadius: "0.625rem", overflow: "hidden", aspectRatio: "4/3", border: "none", padding: 0, cursor: "pointer" }}
+    >
+      {isVideo ? (
+        <video
+          src={item.signed_url}
+          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          muted
+          playsInline
+          preload="metadata"
+        />
+      ) : (
+        <img src={item.signed_url} alt={label} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
       )}
       {isVideo && (
         <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.3)" }}>
@@ -39,13 +65,14 @@ function MediaThumb({ item, label }: { item: { signed_url: string; file_type: st
       <div style={{ position: "absolute", bottom: "0.375rem", left: "0.5rem", backgroundColor: label === "Before" ? "rgba(0,0,0,0.55)" : "oklch(40% .13 150)", color: "#fff", fontSize: "0.6875rem", fontWeight: 700, padding: "0.15rem 0.5rem", borderRadius: "9999px", letterSpacing: "0.04em" }}>
         {label}
       </div>
-    </div>
+    </button>
   );
 }
 
 export default function RemainCleanGallery() {
   const [pairs, setPairs] = useState<GalleryPair[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeMedia, setActiveMedia] = useState<GalleryMediaItem | null>(null);
 
   useEffect(() => {
     supabase.functions
@@ -56,6 +83,8 @@ export default function RemainCleanGallery() {
       .catch(() => setPairs([]))
       .finally(() => setLoading(false));
   }, []);
+
+  const activeIsVideo = activeMedia && (activeMedia.file_type.startsWith("video/") || activeMedia.file_type === "video");
 
   return (
     <>
@@ -72,8 +101,6 @@ export default function RemainCleanGallery() {
         <RCPromo />
 
         <main style={{ flex: 1 }}>
-
-          {/* Header */}
           <section style={{ padding: "5rem 1.5rem 3.5rem", textAlign: "center", background: `linear-gradient(180deg, oklch(16% .007 285) 0%, ${T.bg} 100%)` }}>
             <p style={{ color: T.primary, fontSize: "0.8125rem", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "0.75rem" }}>Before &amp; After</p>
             <h1 className="rc-s" style={{ fontSize: "clamp(2rem,5vw,3.5rem)", fontWeight: 800, color: T.fg, marginBottom: "1rem" }}>
@@ -84,7 +111,6 @@ export default function RemainCleanGallery() {
             </p>
           </section>
 
-          {/* Gallery Grid */}
           <section style={{ padding: "2rem 1.5rem 5rem" }}>
             <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
               {loading ? (
@@ -105,8 +131,8 @@ export default function RemainCleanGallery() {
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "1.25rem" }}>
                   {pairs.map((pair, i) => (
                     <div key={i} className="rc-card" style={{ backgroundColor: T.card, border: `1px solid ${T.border}`, borderRadius: "1rem", padding: "1rem", display: "flex", gap: "0.625rem" }}>
-                      <MediaThumb item={pair.before} label="Before" />
-                      <MediaThumb item={pair.after} label="After" />
+                      <MediaThumb item={pair.before} label="Before" onOpen={setActiveMedia} />
+                      <MediaThumb item={pair.after} label="After" onOpen={setActiveMedia} />
                     </div>
                   ))}
                 </div>
@@ -114,7 +140,6 @@ export default function RemainCleanGallery() {
             </div>
           </section>
 
-          {/* CTA */}
           <section style={{ padding: "5rem 1.5rem", textAlign: "center", backgroundColor: T.card }}>
             <div style={{ maxWidth: "520px", margin: "0 auto" }}>
               <h2 className="rc-s" style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 800, color: T.fg, marginBottom: "1rem" }}>
@@ -135,10 +160,45 @@ export default function RemainCleanGallery() {
               </div>
             </div>
           </section>
-
         </main>
 
         <RCFooter />
+
+        {activeMedia && (
+          <div
+            onClick={() => setActiveMedia(null)}
+            style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.88)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "1.5rem" }}
+          >
+            <button
+              type="button"
+              aria-label="Close gallery preview"
+              onClick={() => setActiveMedia(null)}
+              style={{ position: "absolute", top: "1rem", right: "1rem", width: "2.75rem", height: "2.75rem", borderRadius: "9999px", border: `1px solid ${T.border}`, backgroundColor: T.card, color: T.fg, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+            >
+              <X size={18} />
+            </button>
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{ width: "100%", maxWidth: "1000px", maxHeight: "85vh", display: "flex", alignItems: "center", justifyContent: "center" }}
+            >
+              {activeIsVideo ? (
+                <video
+                  src={activeMedia.signed_url}
+                  controls
+                  autoPlay
+                  playsInline
+                  style={{ width: "100%", maxHeight: "85vh", borderRadius: "1rem", backgroundColor: T.bg }}
+                />
+              ) : (
+                <img
+                  src={activeMedia.signed_url}
+                  alt="Gallery preview"
+                  style={{ width: "100%", maxHeight: "85vh", objectFit: "contain", borderRadius: "1rem" }}
+                />
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
