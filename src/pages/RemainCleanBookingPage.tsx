@@ -141,7 +141,7 @@ export default function RemainCleanBookingPage() {
           address:           form.area,
           service_name:      `${form.pkg} Package`,
           total_amount:      pkg?.price ?? 0,
-          scheduled_at:      `${form.date}T${to24(form.time)}:00`,
+          scheduled_at:      new Date(`${form.date}T${to24(form.time)}:00`).toISOString(),
           notes:             [`Vehicle: ${form.vehicle}`, `Area: ${form.area}`, form.notes].filter(Boolean).join("\n"),
           organization_slug: "remainclean",
         },
