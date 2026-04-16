@@ -357,7 +357,7 @@ const handler = async (req: Request): Promise<Response> => {
       // Non-blocking
     }
 
-    // Optionally send admin email notification
+    // Send admin email notification with correct fields
     try {
       await fetch(`${SUPABASE_URL}/functions/v1/send-admin-booking-notification`, {
         method: 'POST',
@@ -366,12 +366,67 @@ const handler = async (req: Request): Promise<Response> => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          bookingId: booking.id,
+          customerName:   `${payload.first_name} ${payload.last_name}`.trim(),
+          customerEmail:  payload.email,
+          serviceName:    payload.service_name || 'Detail Service',
+          scheduledAt:    payload.scheduled_at,
+          totalAmount:    payload.total_amount || 0,
+          address:        payload.address || '',
           organizationId,
         }),
       });
     } catch (notifyError) {
       console.error("[external-booking-webhook] Failed to send admin notification:", notifyError);
+    }
+
+    // Always notify these two addresses for every booking submitted through this webhook
+    try {
+      const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+      if (RESEND_API_KEY) {
+        const bookingDate = new Date(payload.scheduled_at);
+        const dateStr = bookingDate.toLocaleDateString('en-US', { timeZone: 'America/New_York', weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+        const timeStr = bookingDate.toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit', hour12: true });
+
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${RESEND_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from: 'Remain Clean Bookings <notifications@tidywisecleaning.com>',
+            to: ['support@tidywisecleaning.com', 'prophtjeff@yahoo.com'],
+            subject: `🚗 New Booking #RC-${booking.booking_number} — ${payload.first_name} ${payload.last_name}`,
+            html: `
+              <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f9f9f9;padding:24px;border-radius:10px;">
+                <div style="background:#1b1b1b;color:#e8c96a;padding:20px;border-radius:8px 8px 0 0;text-align:center;">
+                  <h2 style="margin:0;font-size:20px;">🚗 New Remain Clean Booking</h2>
+                  <p style="margin:6px 0 0;opacity:.75;font-size:13px;">Booking #RC-${booking.booking_number}</p>
+                </div>
+                <div style="background:#fff;padding:24px;border-radius:0 0 8px 8px;border:1px solid #e5e7eb;">
+                  <table style="width:100%;border-collapse:collapse;font-size:15px;">
+                    <tr><td style="padding:10px 0;color:#6b7280;width:130px;">Customer</td><td style="font-weight:600;color:#111;">${payload.first_name} ${payload.last_name}</td></tr>
+                    <tr style="border-top:1px solid #f3f4f6;"><td style="padding:10px 0;color:#6b7280;">Phone</td><td style="font-weight:600;color:#111;">${payload.phone || '—'}</td></tr>
+                    <tr style="border-top:1px solid #f3f4f6;"><td style="padding:10px 0;color:#6b7280;">Email</td><td style="font-weight:600;color:#111;">${payload.email}</td></tr>
+                    <tr style="border-top:1px solid #f3f4f6;"><td style="padding:10px 0;color:#6b7280;">Package</td><td style="font-weight:600;color:#111;">${payload.service_name || '—'}</td></tr>
+                    <tr style="border-top:1px solid #f3f4f6;"><td style="padding:10px 0;color:#6b7280;">Service Area</td><td style="font-weight:600;color:#111;">${payload.address || '—'}</td></tr>
+                    <tr style="border-top:1px solid #f3f4f6;"><td style="padding:10px 0;color:#6b7280;">Date & Time</td><td style="font-weight:600;color:#111;">${dateStr} at ${timeStr}</td></tr>
+                    <tr style="border-top:1px solid #f3f4f6;"><td style="padding:10px 0;color:#6b7280;">Amount</td><td style="font-weight:600;color:#111;">$${(payload.total_amount || 0).toFixed(2)}</td></tr>
+                    ${payload.notes ? `<tr style="border-top:1px solid #f3f4f6;"><td style="padding:10px 0;color:#6b7280;">Notes</td><td style="font-weight:600;color:#111;">${payload.notes}</td></tr>` : ''}
+                  </table>
+                  <div style="margin-top:20px;padding:14px;background:#f0fdf4;border-radius:6px;border:1px solid #bbf7d0;text-align:center;">
+                    <p style="margin:0;font-size:14px;color:#15803d;font-weight:600;">Total: $${(payload.total_amount || 0).toFixed(2)}</p>
+                  </div>
+                </div>
+                <p style="text-align:center;font-size:12px;color:#9ca3af;margin-top:16px;">Log in to your dashboard to confirm or manage this booking.</p>
+              </div>
+            `,
+          }),
+        });
+        console.log("[external-booking-webhook] Direct notification sent to support@tidywisecleaning.com + prophtjeff@yahoo.com");
+      }
+    } catch (directNotifyError) {
+      console.error("[external-booking-webhook] Failed to send direct notification emails:", directNotifyError);
     }
 
     return new Response(
