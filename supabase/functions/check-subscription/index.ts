@@ -7,7 +7,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// WE DETAIL NC Pro product ID
+// REMAIN CLEAN SERVICES Pro product ID
 const PRO_PRODUCT_ID = "prod_Tg3zSKe9hRHLZy";
 
 // Trial duration in days (from organization creation date)

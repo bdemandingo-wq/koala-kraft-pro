@@ -22,7 +22,7 @@ export default function HowToStartCleaningBusiness() {
         title="How to Start a Car Detailing Business (2026)"
         description="Step-by-step guide to starting a car detailing business. Covers payroll, scheduling, inventory management, pricing, and lead generation for detailing services."
         canonicalPath="/blog/how-to-start-a-cleaning-business"
-        ogImage="/images/wedetailnc-og.png"
+        ogImage="/images/remainclean-og.png"
         ogType="article"
         article={{ publishedTime: "2026-01-15", section: "Business Guide" }}
         jsonLd={{
@@ -30,9 +30,9 @@ export default function HowToStartCleaningBusiness() {
           "headline": "How to Start a Car Detailing Business in 2026",
           "datePublished": "2026-01-15",
           "dateModified": "2026-03-01",
-          "author": { "@type": "Organization", "name": "WE DETAIL NC" },
-          "publisher": { "@type": "Organization", "name": "WE DETAIL NC", "url": "https://www.joinwedetailnc.com", "logo": { "@type": "ImageObject", "url": "https://www.joinwedetailnc.com/images/wedetailnc-logo.png" } },
-          "mainEntityOfPage": { "@type": "WebPage", "@id": "https://www.joinwedetailnc.com/blog/how-to-start-a-cleaning-business" }
+          "author": { "@type": "Organization", "name": "REMAIN CLEAN SERVICES" },
+          "publisher": { "@type": "Organization", "name": "REMAIN CLEAN SERVICES", "url": "https://www.remaincleanservices.com", "logo": { "@type": "ImageObject", "url": "https://www.remaincleanservices.com/images/remainclean-logo.png" } },
+          "mainEntityOfPage": { "@type": "WebPage", "@id": "https://www.remaincleanservices.com/blog/how-to-start-a-cleaning-business" }
         }}
       />
 
@@ -41,7 +41,7 @@ export default function HowToStartCleaningBusiness() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link to="/" className="flex items-center gap-2">
-              <span className="font-bold text-xl text-foreground">WE DETAIL NC</span>
+              <span className="font-bold text-xl text-foreground">REMAIN CLEAN SERVICES</span>
             </Link>
             <Button asChild>
               <Link to="/auth">Start Free Trial</Link>
@@ -196,7 +196,7 @@ export default function HowToStartCleaningBusiness() {
               <div className="bg-primary/5 border border-primary/20 rounded-xl p-6 mb-6">
                 <h3 className="text-lg font-semibold text-foreground mb-2">💡 Pro Tip</h3>
                 <p className="text-muted-foreground mb-4">
-                  WE DETAIL NC's <strong>Smart Scheduler</strong> automatically assigns technicians based on location, skills, and availability—reducing travel time by up to 30%.
+                  REMAIN CLEAN SERVICES's <strong>Smart Scheduler</strong> automatically assigns technicians based on location, skills, and availability—reducing travel time by up to 30%.
                 </p>
                 <Button asChild variant="outline">
                   <Link to="/auth">
@@ -233,7 +233,7 @@ export default function HowToStartCleaningBusiness() {
               <div className="bg-primary/5 border border-primary/20 rounded-xl p-6 mb-6">
                 <h3 className="text-lg font-semibold text-foreground mb-2">💡 Pro Tip</h3>
                 <p className="text-muted-foreground mb-4">
-                  WE DETAIL NC's <strong>Payroll Tab</strong> automatically calculates wages based on check-in times, job rates, and tip distributions—saving hours of manual work each week.
+                  REMAIN CLEAN SERVICES's <strong>Payroll Tab</strong> automatically calculates wages based on check-in times, job rates, and tip distributions—saving hours of manual work each week.
                 </p>
                 <Button asChild variant="outline">
                   <Link to="/auth">
@@ -245,7 +245,7 @@ export default function HowToStartCleaningBusiness() {
               <div className="bg-warning/10 border border-warning/20 rounded-xl p-6">
                 <h3 className="text-lg font-semibold text-foreground mb-2">⚠️ Important: 1099 Contractors</h3>
                 <p className="text-muted-foreground">
-                  If you pay contractors more than $600/year, you'll need to issue 1099 forms. WE DETAIL NC tracks contractor earnings year-to-date and alerts you when filing is required.
+                  If you pay contractors more than $600/year, you'll need to issue 1099 forms. REMAIN CLEAN SERVICES tracks contractor earnings year-to-date and alerts you when filing is required.
                 </p>
               </div>
             </section>
@@ -279,7 +279,7 @@ export default function HowToStartCleaningBusiness() {
               <div className="bg-primary/5 border border-primary/20 rounded-xl p-6">
                 <h3 className="text-lg font-semibold text-foreground mb-2">💡 Pro Tip</h3>
                 <p className="text-muted-foreground mb-4">
-                  WE DETAIL NC's <strong>Leads Section</strong> captures inquiries automatically from your booking form and tracks the entire customer journey—from first contact to first clean.
+                  REMAIN CLEAN SERVICES's <strong>Leads Section</strong> captures inquiries automatically from your booking form and tracks the entire customer journey—from first contact to first clean.
                 </p>
                 <Button asChild variant="outline">
                   <Link to="/auth">
@@ -317,7 +317,7 @@ export default function HowToStartCleaningBusiness() {
               </div>
 
               <p className="text-muted-foreground leading-relaxed">
-                Set minimum quantity alerts so you never run out. Track cost-per-unit to see which suppliers offer the best value. WE DETAIL NC's inventory system integrates with your job tracking, so you can see actual supply usage patterns.
+                Set minimum quantity alerts so you never run out. Track cost-per-unit to see which suppliers offer the best value. REMAIN CLEAN SERVICES's inventory system integrates with your job tracking, so you can see actual supply usage patterns.
               </p>
             </section>
 
@@ -357,7 +357,7 @@ export default function HowToStartCleaningBusiness() {
               <div className="bg-primary/5 border border-primary/20 rounded-xl p-6">
                 <h3 className="text-lg font-semibold text-foreground mb-2">💡 Pro Tip</h3>
                 <p className="text-muted-foreground mb-4">
-                  WE DETAIL NC includes an <strong>In-App SMS Inbox</strong> that syncs with OpenPhone, so all customer and team communications are in one place.
+                  REMAIN CLEAN SERVICES includes an <strong>In-App SMS Inbox</strong> that syncs with OpenPhone, so all customer and team communications are in one place.
                 </p>
                 <Button asChild variant="outline">
                   <Link to="/auth">
@@ -373,7 +373,7 @@ export default function HowToStartCleaningBusiness() {
                 Ready to Start Your Car Detailing Business?
               </h2>
               <p className="text-muted-foreground mb-6 leading-relaxed">
-                Starting a car detailing business in 2026 is easier than ever—if you have the right tools. With WE DETAIL NC, you get everything you need in one platform: smart scheduling, <strong>automated payroll software for detailing services</strong>, a <strong>car detailing business inventory management tool</strong>, lead tracking, and <strong>real-time messenger for detailing teams</strong>.
+                Starting a car detailing business in 2026 is easier than ever—if you have the right tools. With REMAIN CLEAN SERVICES, you get everything you need in one platform: smart scheduling, <strong>automated payroll software for detailing services</strong>, a <strong>car detailing business inventory management tool</strong>, lead tracking, and <strong>real-time messenger for detailing teams</strong>.
               </p>
               <p className="text-muted-foreground mb-8 leading-relaxed">
                 Stop piecing together multiple tools. Start with a platform built specifically for car detailing businesses.
@@ -387,7 +387,7 @@ export default function HowToStartCleaningBusiness() {
               Launch your car detailing business today
             </h2>
             <p className="text-primary-foreground/80 mb-8 max-w-2xl mx-auto">
-              Try WE DETAIL NC to manage bookings, staff, and customers—all in one place.
+              Try REMAIN CLEAN SERVICES to manage bookings, staff, and customers—all in one place.
             </p>
             <Button size="lg" variant="secondary" asChild>
               <Link to="/auth">
@@ -408,7 +408,7 @@ export default function HowToStartCleaningBusiness() {
       {/* Footer */}
       <footer className="py-8 px-4 border-t border-border">
         <div className="max-w-4xl mx-auto text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} WE DETAIL NC. All rights reserved.
+          © {new Date().getFullYear()} REMAIN CLEAN SERVICES. All rights reserved.
         </div>
       </footer>
     </div>

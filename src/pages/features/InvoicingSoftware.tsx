@@ -75,7 +75,7 @@ export default function InvoicingSoftware() {
     <div className="min-h-screen bg-background">
       <Seo 
         title="Car Detailing Business Invoicing Software"
-        description="Create branded invoices, accept online payments, and automate reminders. Get paid 2x faster with We Detail NC invoicing for detailing companies."
+        description="Create branded invoices, accept online payments, and automate reminders. Get paid 2x faster with Remain Clean Services invoicing for detailing companies."
         canonicalPath="/features/invoicing-software"
       />
 
@@ -84,7 +84,7 @@ export default function InvoicingSoftware() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <a href="/" className="flex items-center gap-2">
-              <span className="font-bold text-xl text-foreground">WE DETAIL NC</span>
+              <span className="font-bold text-xl text-foreground">REMAIN CLEAN SERVICES</span>
             </a>
             <div className="hidden md:flex items-center gap-8">
               <a href="/#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
@@ -124,7 +124,7 @@ export default function InvoicingSoftware() {
             <span className="text-primary">for Car Detailing Businesses</span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Stop using spreadsheets and paper invoices. We Detail NC creates professional invoices automatically after every detailing. <strong>Get paid 2x faster</strong> with online payments and automated reminders.
+            Stop using spreadsheets and paper invoices. Remain Clean Services creates professional invoices automatically after every detailing. <strong>Get paid 2x faster</strong> with online payments and automated reminders.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="h-12 px-8" onClick={handleStartFreeTrial}>
@@ -165,7 +165,7 @@ export default function InvoicingSoftware() {
       <section id="benefits" className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl font-bold text-foreground text-center mb-4">
-            How We Detail NC Invoicing Works
+            How Remain Clean Services Invoicing Works
           </h2>
           <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
             Create, send, and track invoices without lifting a finger. Get paid faster with online payments.
@@ -231,7 +231,7 @@ export default function InvoicingSoftware() {
       {/* Footer */}
       <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-border">
         <div className="max-w-5xl mx-auto text-center">
-          <p className="text-muted-foreground">© 2026 We Detail NC. Professional invoicing for car detailing businesses.</p>
+          <p className="text-muted-foreground">© 2026 Remain Clean Services. Professional invoicing for car detailing businesses.</p>
           <div className="flex flex-wrap justify-center gap-6 mt-4">
             <Link to="/" className="text-muted-foreground hover:text-foreground">Home</Link>
             <Link to="/features/payment-processing" className="text-muted-foreground hover:text-foreground">Payments</Link>
@@ -247,7 +247,7 @@ export default function InvoicingSoftware() {
         __html: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "SoftwareApplication",
-          "name": "We Detail NC Invoicing Software",
+          "name": "Remain Clean Services Invoicing Software",
           "applicationCategory": "BusinessApplication",
           "operatingSystem": "Web, iOS, Android",
           "offers": { "@type": "Offer", "price": "50", "priceCurrency": "USD" },

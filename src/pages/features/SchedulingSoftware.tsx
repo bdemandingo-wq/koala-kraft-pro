@@ -35,13 +35,13 @@ export default function SchedulingSoftware() {
   return (
     <div className="min-h-screen bg-background">
       <Seo 
-        title="Car Detailing Business Scheduling Software | We Detail NC"
-        description="Schedule your appointment team in minutes with We Detail NC. Drag-and-drop scheduling, automatic reminders, and real-time updates for your whole team."
+        title="Car Detailing Business Scheduling Software | Remain Clean Services"
+        description="Schedule your appointment team in minutes with Remain Clean Services. Drag-and-drop scheduling, automatic reminders, and real-time updates for your whole team."
         canonicalPath="/features/scheduling-software"
-        ogImage="/images/wedetailnc-og.png"
+        ogImage="/images/remainclean-og.png"
         jsonLd={{
           "@type": "SoftwareApplication",
-          "name": "We Detail NC Scheduling Software",
+          "name": "Remain Clean Services Scheduling Software",
           "applicationCategory": "BusinessApplication",
           "operatingSystem": "Web, iOS, Android",
           "offers": { "@type": "Offer", "price": "50", "priceCurrency": "USD" },
@@ -53,7 +53,7 @@ export default function SchedulingSoftware() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <a href="/" className="flex items-center gap-2">
-              <span className="font-bold text-xl text-foreground">WE DETAIL NC</span>
+              <span className="font-bold text-xl text-foreground">REMAIN CLEAN SERVICES</span>
             </a>
             <div className="hidden md:flex items-center gap-8">
               <a href="/#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
@@ -92,7 +92,7 @@ export default function SchedulingSoftware() {
             <span className="text-primary">Your Appointment Operation</span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Juggling technicians, clients, and jobs manually is costing you time and money. We Detail NC makes scheduling effortless — assign jobs, manage your team, and handle last-minute changes without the headache.
+            Juggling technicians, clients, and jobs manually is costing you time and money. Remain Clean Services makes scheduling effortless — assign jobs, manage your team, and handle last-minute changes without the headache.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="text-lg px-8 h-14" onClick={handleStartFreeTrial}>
@@ -157,7 +157,7 @@ export default function SchedulingSoftware() {
 
       <footer className="border-t border-border py-8 px-4 text-center text-sm text-muted-foreground">
         <div className="max-w-5xl mx-auto">
-          <p>© {new Date().getFullYear()} We Detail NC. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Remain Clean Services. All rights reserved.</p>
           <div className="flex flex-wrap justify-center gap-6 mt-4">
             <Link to="/" className="text-muted-foreground hover:text-foreground">Home</Link>
             <Link to="/features/booking" className="text-muted-foreground hover:text-foreground">Booking</Link>

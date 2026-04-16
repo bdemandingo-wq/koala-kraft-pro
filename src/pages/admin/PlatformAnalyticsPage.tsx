@@ -356,13 +356,13 @@ export default function PlatformAnalyticsPage() {
             </TabsTrigger>
           </TabsList>
 
-          {/* We Detail NC Subscribers Tab - Only shows users with subscriptions */}
+          {/* Remain Clean Services Subscribers Tab - Only shows users with subscriptions */}
           <TabsContent value="subscribers">
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <CreditCard className="w-5 h-5 text-primary" />
-                  We Detail NC Subscribers
+                  Remain Clean Services Subscribers
                   <Badge variant="secondary" className="ml-auto">
                     +{analytics?.subscribers?.last30Days || 0} last 30 days
                   </Badge>
@@ -411,8 +411,8 @@ export default function PlatformAnalyticsPage() {
                   ) : (
                     <div className="text-center py-12 text-muted-foreground">
                       <CreditCard className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                      <p>No We Detail NC subscribers found</p>
-                      <p className="text-xs mt-1">Only users with active We Detail NC subscriptions appear here</p>
+                      <p>No Remain Clean Services subscribers found</p>
+                      <p className="text-xs mt-1">Only users with active Remain Clean Services subscriptions appear here</p>
                     </div>
                   )}
                 </ScrollArea>

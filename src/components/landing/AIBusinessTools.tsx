@@ -169,7 +169,7 @@ export function AIBusinessTools() {
               ) : (
                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                   <div className="text-center">
-                    <p className="text-muted-foreground mb-2">Your projected monthly revenue with WE DETAIL NC</p>
+                    <p className="text-muted-foreground mb-2">Your projected monthly revenue with REMAIN CLEAN SERVICES</p>
                     <p className="text-5xl sm:text-6xl font-bold text-primary">
                       ${projectedMonthlyRevenue.toLocaleString()}
                     </p>
@@ -301,7 +301,7 @@ export function AIBusinessTools() {
                       <CheckCircle2 className="h-6 w-6 text-primary flex-shrink-0 mt-0.5" />
                       <div>
                         <p className="font-semibold text-foreground mb-1">
-                          WE DETAIL NC includes all these features
+                          REMAIN CLEAN SERVICES includes all these features
                         </p>
                         <p className="text-sm text-muted-foreground">
                           Get scheduling, payments, recurring bookings, expense tracking, automated reminders, and review collection all in one platform.

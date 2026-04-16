@@ -339,7 +339,7 @@ export default function PortalDashboardPage() {
     return (
       <main className="min-h-screen bg-background">
         <Seo
-          title="We Detail NC — Client Portal"
+          title="Remain Clean Services — Client Portal"
           description="View your vehicles, service history, and book your next detail."
           canonicalPath="/portal/dashboard"
         />
@@ -532,7 +532,7 @@ export default function PortalDashboardPage() {
 
         {/* Footer */}
         <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-2 text-center text-[10px] text-muted-foreground pb-[calc(env(safe-area-inset-bottom)+8px)]">
-          Powered by We Detail NC | <a href="tel:9843328570" className="underline">(984) 332-8570</a>
+          Powered by Remain Clean Services | <a href="tel:9843328570" className="underline">(984) 332-8570</a>
         </div>
 
         {cancelDialog}
@@ -544,7 +544,7 @@ export default function PortalDashboardPage() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5">
       <Seo
-        title="We Detail NC — Client Portal"
+        title="Remain Clean Services — Client Portal"
         description="View your vehicles, service history, and book your next detail."
         canonicalPath="/portal/dashboard"
       />
@@ -556,7 +556,7 @@ export default function PortalDashboardPage() {
             <h1 className="text-lg font-bold">
               Welcome back, {customer.first_name} 👋
             </h1>
-            <p className="text-sm text-muted-foreground">Here's your vehicle history with We Detail NC</p>
+            <p className="text-sm text-muted-foreground">Here's your vehicle history with Remain Clean Services</p>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" className="relative" onClick={() => {}}>
@@ -926,7 +926,7 @@ export default function PortalDashboardPage() {
 
       {/* Footer */}
       <footer className="border-t mt-8 py-4 text-center text-sm text-muted-foreground">
-        Powered by We Detail NC | <a href="tel:9843328570" className="underline">(984) 332-8570</a>
+        Powered by Remain Clean Services | <a href="tel:9843328570" className="underline">(984) 332-8570</a>
       </footer>
 
       {cancelDialog}

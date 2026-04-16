@@ -74,7 +74,7 @@ export default function AutomatedDispatching() {
   return (
     <div className="min-h-screen bg-background">
       <Seo
-        title="Automated Dispatching for Car Detailing Businesses | WE DETAIL NC"
+        title="Automated Dispatching for Car Detailing Businesses | REMAIN CLEAN SERVICES"
         description="Smart dispatching software for detailing companies. GPS-based technician assignment, route optimization, and real-time job tracking. Start your free trial."
         canonicalPath="/features/automated-dispatching"
       />
@@ -84,7 +84,7 @@ export default function AutomatedDispatching() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <a href="/" className="flex items-center gap-2">
-              <span className="font-bold text-xl text-foreground">WE DETAIL NC</span>
+              <span className="font-bold text-xl text-foreground">REMAIN CLEAN SERVICES</span>
             </a>
             <div className="hidden md:flex items-center gap-8">
               <a href="/#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
@@ -124,7 +124,7 @@ export default function AutomatedDispatching() {
             <span className="text-primary">for Car Detailing Businesses</span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Stop manually assigning jobs. WE DETAIL NC automatically dispatches technicians based on location, skills, and availability. <strong>Save 5+ hours per week</strong> on scheduling.
+            Stop manually assigning jobs. REMAIN CLEAN SERVICES automatically dispatches technicians based on location, skills, and availability. <strong>Save 5+ hours per week</strong> on scheduling.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="h-12 px-8" onClick={handleStartFreeTrial}>
@@ -168,7 +168,7 @@ export default function AutomatedDispatching() {
             How Smart Dispatching Works
           </h2>
           <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
-            WE DETAIL NC uses AI to assign the right technician to every job automatically.
+            REMAIN CLEAN SERVICES uses AI to assign the right technician to every job automatically.
           </p>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -228,7 +228,7 @@ export default function AutomatedDispatching() {
       {/* Footer */}
       <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-border">
         <div className="max-w-5xl mx-auto text-center">
-          <p className="text-muted-foreground">© 2026 WE DETAIL NC. Smart dispatching for car detailing businesses.</p>
+          <p className="text-muted-foreground">© 2026 REMAIN CLEAN SERVICES. Smart dispatching for car detailing businesses.</p>
           <div className="flex justify-center gap-6 mt-4">
             <Link to="/" className="text-muted-foreground hover:text-foreground">Home</Link>
             <Link to="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</Link>
@@ -242,7 +242,7 @@ export default function AutomatedDispatching() {
         __html: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "SoftwareApplication",
-          "name": "WE DETAIL NC Automated Dispatching",
+          "name": "REMAIN CLEAN SERVICES Automated Dispatching",
           "applicationCategory": "BusinessApplication",
           "operatingSystem": "Web, iOS, Android",
           "offers": { "@type": "Offer", "price": "50", "priceCurrency": "USD" },

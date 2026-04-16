@@ -15,7 +15,7 @@ export default function GrowCleaningBusiness2025() {
         title="How to Grow Your Car Detailing Business in 2025"
         description="Proven strategies to grow your car detailing business in 2025. From marketing tips to software automation, learn how to scale your detailing service profitably."
         canonicalPath="/blog/how-to-grow-cleaning-business-2025"
-        ogImage="/images/wedetailnc-og.png"
+        ogImage="/images/remainclean-og.png"
         ogType="article"
         article={{ publishedTime: "2025-12-15", section: "Business Growth" }}
         jsonLd={{
@@ -23,14 +23,14 @@ export default function GrowCleaningBusiness2025() {
           "headline": "How to Grow Your Car Detailing Business in 2025",
           "description": "Proven strategies to grow your car detailing business in 2025.",
           "datePublished": "2025-12-15",
-          "author": { "@type": "Organization", "name": "We Detail NC" },
+          "author": { "@type": "Organization", "name": "Remain Clean Services" },
         }}
       />
 
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <a href="/" className="font-bold text-xl text-foreground">WE DETAIL NC</a>
+            <a href="/" className="font-bold text-xl text-foreground">REMAIN CLEAN SERVICES</a>
             <div className="hidden md:flex items-center gap-8">
               <a href="/blog" className="text-muted-foreground hover:text-foreground">Blog</a>
               <a href="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</a>
@@ -60,7 +60,7 @@ export default function GrowCleaningBusiness2025() {
             <p className="text-muted-foreground text-lg">Growing a car detailing business takes more than word-of-mouth referrals. In 2025, the most successful detailing companies combine great service with smart technology and targeted marketing. Here's your complete growth playbook.</p>
 
             <h2 className="text-2xl font-bold mt-8">1. Invest in Online Booking Software</h2>
-            <p className="text-muted-foreground">Clients expect to book online. If you're still taking bookings over the phone, you're losing customers to competitors with 24/7 online booking. A tool like <strong>We Detail NC</strong> lets clients book, reschedule, and manage appointments without calling you.</p>
+            <p className="text-muted-foreground">Clients expect to book online. If you're still taking bookings over the phone, you're losing customers to competitors with 24/7 online booking. A tool like <strong>Remain Clean Services</strong> lets clients book, reschedule, and manage appointments without calling you.</p>
 
             <h2 className="text-2xl font-bold mt-8">2. Automate Your Follow-Ups</h2>
             <p className="text-muted-foreground">Most car detailing businesses lose 30-40% of leads because they don't follow up fast enough. Set up automated email and SMS sequences that reach out within minutes of an inquiry. Cleaning business CRM software handles this automatically.</p>
@@ -82,7 +82,7 @@ export default function GrowCleaningBusiness2025() {
 
             <div className="bg-primary/5 rounded-xl p-6 mt-8 border border-primary/20">
               <h3 className="text-xl font-bold text-foreground mb-2">Ready to Grow Your Car Detailing Business?</h3>
-              <p className="text-muted-foreground mb-4">We Detail NC gives you booking, scheduling, CRM, invoicing, and automation in one platform. Start your free 60-day trial.</p>
+              <p className="text-muted-foreground mb-4">Remain Clean Services gives you booking, scheduling, CRM, invoicing, and automation in one platform. Start your free 60-day trial.</p>
               <Button onClick={() => navigate("/signup")}>
                 Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -98,7 +98,7 @@ export default function GrowCleaningBusiness2025() {
       </section>
 
       <footer className="border-t border-border py-8 px-4 text-center text-sm text-muted-foreground">
-        <p>© {new Date().getFullYear()} We Detail NC. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} Remain Clean Services. All rights reserved.</p>
       </footer>
     </div>
   );

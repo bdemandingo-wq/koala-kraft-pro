@@ -172,7 +172,7 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Seo title="Start Free Trial | We Detail NC – Car Detailing Business Software" description="Sign up for We Detail NC free trial. Get online booking, scheduling, CRM, and automated invoicing for your car detailing business. No credit card required." canonicalPath="/signup" />
+      <Seo title="Start Free Trial | Remain Clean Services – Car Detailing Business Software" description="Sign up for Remain Clean Services free trial. Get online booking, scheduling, CRM, and automated invoicing for your car detailing business. No credit card required." canonicalPath="/signup" />
       <div className="w-full max-w-md">
         {/* Back to home link */}
         <Link 

@@ -84,7 +84,7 @@ export default function RouteOptimization() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <a href="/" className="flex items-center gap-2">
-              <span className="font-bold text-xl text-foreground">WE DETAIL NC</span>
+              <span className="font-bold text-xl text-foreground">REMAIN CLEAN SERVICES</span>
             </a>
             <div className="hidden md:flex items-center gap-8">
               <a href="/#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
@@ -124,7 +124,7 @@ export default function RouteOptimization() {
             <span className="text-primary">for Car Detailing Businesses</span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Stop wasting time and money on inefficient routes. We Detail NC automatically plans the fastest routes for your appointment team. <strong>Save 25% on fuel costs</strong> and fit more jobs into every day.
+            Stop wasting time and money on inefficient routes. Remain Clean Services automatically plans the fastest routes for your appointment team. <strong>Save 25% on fuel costs</strong> and fit more jobs into every day.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="h-12 px-8" onClick={handleStartFreeTrial}>
@@ -168,7 +168,7 @@ export default function RouteOptimization() {
             How Route Optimization Works
           </h2>
           <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
-            We Detail NC uses AI to plan the most efficient routes for your appointment team automatically.
+            Remain Clean Services uses AI to plan the most efficient routes for your appointment team automatically.
           </p>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -231,7 +231,7 @@ export default function RouteOptimization() {
       {/* Footer */}
       <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-border">
         <div className="max-w-5xl mx-auto text-center">
-          <p className="text-muted-foreground">© 2026 We Detail NC. Smart route optimization for car detailing businesses.</p>
+          <p className="text-muted-foreground">© 2026 Remain Clean Services. Smart route optimization for car detailing businesses.</p>
           <div className="flex flex-wrap justify-center gap-6 mt-4">
             <Link to="/" className="text-muted-foreground hover:text-foreground">Home</Link>
             <Link to="/features/automated-dispatching" className="text-muted-foreground hover:text-foreground">Dispatching</Link>
@@ -247,7 +247,7 @@ export default function RouteOptimization() {
         __html: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "SoftwareApplication",
-          "name": "We Detail NC Route Optimization",
+          "name": "Remain Clean Services Route Optimization",
           "applicationCategory": "BusinessApplication",
           "operatingSystem": "Web, iOS, Android",
           "offers": { "@type": "Offer", "price": "50", "priceCurrency": "USD" },

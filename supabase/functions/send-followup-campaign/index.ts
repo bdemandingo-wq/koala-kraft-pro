@@ -166,13 +166,13 @@ serve(async (req) => {
               </head>
               <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
                 <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
-                  <h1 style="color: #d4af37; margin: 0; font-size: 24px;">We Detail NC 🚗</h1>
+                  <h1 style="color: #d4af37; margin: 0; font-size: 24px;">Remain Clean Services 🚗</h1>
                   <p style="color: #ffffff; margin: 8px 0 0; font-size: 14px;">Your vehicle deserves the best</p>
                 </div>
                 <div style="background: #f8fafc; padding: 30px; border-radius: 0 0 12px 12px;">
                   <p style="font-size: 16px;">${htmlBody}</p>
                   <div style="text-align: center; margin-top: 30px;">
-                    <a href="https://wedetailnc.lovable.app/book" 
+                    <a href="https://koala-kraft-pro.lovable.app/book" 
                        style="display: inline-block; background: #d4af37; color: #1a1a2e; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold;">
                       Book Your Detail
                     </a>

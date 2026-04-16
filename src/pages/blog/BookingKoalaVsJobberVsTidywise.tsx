@@ -44,20 +44,20 @@ export default function BookingKoalaVsJobberVsTidywise() {
   return (
     <div className="min-h-screen bg-background">
       <Seo 
-        title="Booking Koala vs Jobber vs WE DETAIL NC (2026)"
-        description="Side-by-side comparison of Booking Koala, Jobber, and WE DETAIL NC. Pricing, features, and support for car detailing businesses."
+        title="Booking Koala vs Jobber vs REMAIN CLEAN SERVICES (2026)"
+        description="Side-by-side comparison of Booking Koala, Jobber, and REMAIN CLEAN SERVICES. Pricing, features, and support for car detailing businesses."
         canonicalPath="/blog/booking-koala-vs-jobber-vs-wedetailnc"
-        ogImage="/images/wedetailnc-og.png"
+        ogImage="/images/remainclean-og.png"
         ogType="article"
         article={{ publishedTime: "2026-01-10", section: "Comparison" }}
         jsonLd={{
           "@type": "Article",
-          "headline": "Booking Koala vs Jobber vs WE DETAIL NC: 2026 Comparison",
+          "headline": "Booking Koala vs Jobber vs REMAIN CLEAN SERVICES: 2026 Comparison",
           "datePublished": "2026-01-10",
           "dateModified": "2026-03-01",
-          "author": { "@type": "Organization", "name": "WE DETAIL NC" },
-          "publisher": { "@type": "Organization", "name": "WE DETAIL NC", "url": "https://www.joinwedetailnc.com", "logo": { "@type": "ImageObject", "url": "https://www.joinwedetailnc.com/images/wedetailnc-logo.png" } },
-          "mainEntityOfPage": { "@type": "WebPage", "@id": "https://www.joinwedetailnc.com/blog/booking-koala-vs-jobber-vs-wedetailnc" }
+          "author": { "@type": "Organization", "name": "REMAIN CLEAN SERVICES" },
+          "publisher": { "@type": "Organization", "name": "REMAIN CLEAN SERVICES", "url": "https://www.remaincleanservices.com", "logo": { "@type": "ImageObject", "url": "https://www.remaincleanservices.com/images/remainclean-logo.png" } },
+          "mainEntityOfPage": { "@type": "WebPage", "@id": "https://www.remaincleanservices.com/blog/booking-koala-vs-jobber-vs-wedetailnc" }
         }}
       />
 
@@ -66,7 +66,7 @@ export default function BookingKoalaVsJobberVsTidywise() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link to="/" className="flex items-center gap-2">
-              <span className="font-bold text-xl text-foreground">WE DETAIL NC</span>
+              <span className="font-bold text-xl text-foreground">REMAIN CLEAN SERVICES</span>
             </Link>
             <Button asChild>
               <Link to="/auth">Start Free Trial</Link>
@@ -103,10 +103,10 @@ export default function BookingKoalaVsJobberVsTidywise() {
               </span>
             </div>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight mb-6">
-              Booking Koala vs Jobber vs WE DETAIL NC: Which Car Detailing Business Software Is Best in 2026?
+              Booking Koala vs Jobber vs REMAIN CLEAN SERVICES: Which Car Detailing Business Software Is Best in 2026?
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Choosing the right <strong>car detailing business software</strong> can make or break your detailing service. We compare Booking Koala, Jobber, and WE DETAIL NC on price, features, and ease of use to help you decide.
+              Choosing the right <strong>car detailing business software</strong> can make or break your detailing service. We compare Booking Koala, Jobber, and REMAIN CLEAN SERVICES on price, features, and ease of use to help you decide.
             </p>
           </header>
 
@@ -114,10 +114,10 @@ export default function BookingKoalaVsJobberVsTidywise() {
           <div className="bg-primary/10 border border-primary/20 rounded-xl p-6 mb-12">
             <h2 className="text-xl font-bold text-foreground mb-3">🏆 Quick Verdict</h2>
             <p className="text-muted-foreground mb-4">
-              <strong>WE DETAIL NC wins</strong> for car detailing businesses looking for the best value. At $50/month (vs $197-$349 for competitors), you get more features including P&L reports, inventory tracking, and offline mode—features neither Booking Koala nor Jobber offer.
+              <strong>REMAIN CLEAN SERVICES wins</strong> for car detailing businesses looking for the best value. At $50/month (vs $197-$349 for competitors), you get more features including P&L reports, inventory tracking, and offline mode—features neither Booking Koala nor Jobber offer.
             </p>
             <Button asChild>
-              <Link to="/auth">Try WE DETAIL NC Free for 2 Months <ArrowRight className="ml-2 h-4 w-4" /></Link>
+              <Link to="/auth">Try REMAIN CLEAN SERVICES Free for 2 Months <ArrowRight className="ml-2 h-4 w-4" /></Link>
             </Button>
           </div>
 
@@ -130,7 +130,7 @@ export default function BookingKoalaVsJobberVsTidywise() {
             
             <div className="grid md:grid-cols-3 gap-6 mb-8">
               <div className="bg-primary text-primary-foreground rounded-xl p-6">
-                <h3 className="text-xl font-bold mb-2">WE DETAIL NC</h3>
+                <h3 className="text-xl font-bold mb-2">REMAIN CLEAN SERVICES</h3>
                 <p className="text-4xl font-bold mb-2">$50<span className="text-lg">/mo</span></p>
                 <p className="text-primary-foreground/80 text-sm">2 months free trial</p>
                 <p className="text-primary-foreground/80 text-sm mt-2">All features included</p>
@@ -150,7 +150,7 @@ export default function BookingKoalaVsJobberVsTidywise() {
             </div>
 
             <p className="text-muted-foreground">
-              <strong>Annual savings with WE DETAIL NC:</strong> Compared to Booking Koala, you save $1,764/year. Compared to Jobber, you save $3,588/year—enough to hire another part-time technician.
+              <strong>Annual savings with REMAIN CLEAN SERVICES:</strong> Compared to Booking Koala, you save $1,764/year. Compared to Jobber, you save $3,588/year—enough to hire another part-time technician.
             </p>
           </section>
 
@@ -165,7 +165,7 @@ export default function BookingKoalaVsJobberVsTidywise() {
                 <thead>
                   <tr className="bg-muted/50">
                     <th className="text-left p-4 font-medium text-foreground">Feature</th>
-                    <th className="text-center p-4 font-medium text-primary">WE DETAIL NC</th>
+                    <th className="text-center p-4 font-medium text-primary">REMAIN CLEAN SERVICES</th>
                     <th className="text-center p-4 font-medium text-foreground">Booking Koala</th>
                     <th className="text-center p-4 font-medium text-foreground">Jobber</th>
                   </tr>
@@ -214,7 +214,7 @@ export default function BookingKoalaVsJobberVsTidywise() {
             
             <div className="space-y-6">
               <div className="bg-primary/5 border border-primary/20 rounded-xl p-6">
-                <h3 className="text-lg font-semibold text-foreground mb-2">Choose WE DETAIL NC if...</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-2">Choose REMAIN CLEAN SERVICES if...</h3>
                 <ul className="space-y-2 text-muted-foreground">
                   <li>• You want the <strong>best value</strong> with all features included</li>
                   <li>• You need <strong>P&L reports and revenue forecasting</strong></li>
@@ -249,7 +249,7 @@ export default function BookingKoalaVsJobberVsTidywise() {
               Ready to try the best car detailing business software?
             </h2>
             <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
-              Try WE DETAIL NC for your car detailing business. Start your 2-month free trial today—no credit card required.
+              Try REMAIN CLEAN SERVICES for your car detailing business. Start your 2-month free trial today—no credit card required.
             </p>
             <Button size="lg" asChild>
               <Link to="/auth">Start Free Trial <ArrowRight className="ml-2 h-4 w-4" /></Link>
@@ -268,7 +268,7 @@ export default function BookingKoalaVsJobberVsTidywise() {
       {/* Footer */}
       <footer className="border-t border-border py-8 px-4">
         <div className="max-w-4xl mx-auto text-center text-sm text-muted-foreground">
-          © 2026 WE DETAIL NC. A car detailing business software alternative to Booking Koala & Jobber.
+          © 2026 REMAIN CLEAN SERVICES. A car detailing business software alternative to Booking Koala & Jobber.
         </div>
       </footer>
     </div>

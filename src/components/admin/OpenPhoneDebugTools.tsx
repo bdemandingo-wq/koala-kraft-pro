@@ -31,7 +31,7 @@ interface TestResult {
 export function OpenPhoneDebugTools() {
   const { organization } = useOrganization();
   const [testPhone, setTestPhone] = useState('');
-  const [testMessage, setTestMessage] = useState('This is a test message from We Detail NC. If you received this, OpenPhone is working! 🎉');
+  const [testMessage, setTestMessage] = useState('This is a test message from Remain Clean Services. If you received this, OpenPhone is working! 🎉');
   const [isTesting, setIsTesting] = useState(false);
   const [isCheckingConfig, setIsCheckingConfig] = useState(false);
   const [testResults, setTestResults] = useState<TestResult[]>([]);

@@ -29,13 +29,13 @@ export default function PaymentProcessing() {
   return (
     <div className="min-h-screen bg-background">
       <Seo 
-        title="Automated Payments for Car Detailing Businesses | We Detail NC"
-        description="Get paid faster with We Detail NC. Send invoices, accept online payments, and set up recurring billing — all in one place."
+        title="Automated Payments for Car Detailing Businesses | Remain Clean Services"
+        description="Get paid faster with Remain Clean Services. Send invoices, accept online payments, and set up recurring billing — all in one place."
         canonicalPath="/features/payment-processing"
-        ogImage="/images/wedetailnc-og.png"
+        ogImage="/images/remainclean-og.png"
         jsonLd={{
           "@type": "SoftwareApplication",
-          "name": "We Detail NC Payment Processing",
+          "name": "Remain Clean Services Payment Processing",
           "applicationCategory": "BusinessApplication",
           "operatingSystem": "Web, iOS, Android",
           "offers": { "@type": "Offer", "price": "50", "priceCurrency": "USD" },
@@ -47,7 +47,7 @@ export default function PaymentProcessing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <a href="/" className="flex items-center gap-2">
-              <span className="font-bold text-xl text-foreground">WE DETAIL NC</span>
+              <span className="font-bold text-xl text-foreground">REMAIN CLEAN SERVICES</span>
             </a>
             <div className="hidden md:flex items-center gap-8">
               <a href="/#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
@@ -86,11 +86,11 @@ export default function PaymentProcessing() {
             <span className="text-primary">Car Detailing Business Payments</span>
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Chasing invoices is the worst part of running a car detailing business. We Detail NC handles billing automatically so you get paid on time, every time — without lifting a finger.
+            Chasing invoices is the worst part of running a car detailing business. Remain Clean Services handles billing automatically so you get paid on time, every time — without lifting a finger.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="text-lg px-8 h-14" onClick={handleStartFreeTrial}>
-              Try We Detail NC Free <ArrowRight className="ml-2 h-5 w-5" />
+              Try Remain Clean Services Free <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
             <Button size="lg" variant="outline" className="text-lg px-8 h-14" onClick={() => navigate("/pricing")}>
               See Pricing
@@ -122,7 +122,7 @@ export default function PaymentProcessing() {
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl font-bold text-foreground mb-4">Built for Car Detailing Businesses</h2>
           <p className="text-lg text-muted-foreground">
-            Whether you charge per job, weekly, or on a subscription basis, We Detail NC flexes to match how you run your business.
+            Whether you charge per job, weekly, or on a subscription basis, Remain Clean Services flexes to match how you run your business.
           </p>
         </div>
       </section>
@@ -133,7 +133,7 @@ export default function PaymentProcessing() {
           <h2 className="text-3xl font-bold text-foreground mb-4">Start Getting Paid on Time</h2>
           <p className="text-lg text-muted-foreground mb-8">Automatic charging and professional invoicing. Start your free trial today.</p>
           <Button size="lg" className="text-lg px-8 h-14" onClick={handleStartFreeTrial}>
-            Try We Detail NC Free <ArrowRight className="ml-2 h-5 w-5" />
+            Try Remain Clean Services Free <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
         </div>
       </section>
@@ -146,7 +146,7 @@ export default function PaymentProcessing() {
 
       <footer className="border-t border-border py-8 px-4 text-center text-sm text-muted-foreground">
         <div className="max-w-5xl mx-auto">
-          <p>© {new Date().getFullYear()} We Detail NC. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Remain Clean Services. All rights reserved.</p>
           <div className="flex justify-center gap-6 mt-4">
             <Link to="/" className="text-muted-foreground hover:text-foreground">Home</Link>
             <Link to="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</Link>

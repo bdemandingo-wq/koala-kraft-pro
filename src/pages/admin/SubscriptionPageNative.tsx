@@ -72,7 +72,7 @@ export default function SubscriptionPageNative() {
 
   if (loading) {
     return (
-      <AdminLayout title="Subscription" subtitle="Your WE DETAIL NC subscription status">
+      <AdminLayout title="Subscription" subtitle="Your REMAIN CLEAN SERVICES subscription status">
         <div className="flex items-center justify-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
@@ -83,7 +83,7 @@ export default function SubscriptionPageNative() {
   // Payment failed
   if (status?.payment_failed) {
     return (
-      <AdminLayout title="Subscription" subtitle="Your WE DETAIL NC subscription status">
+      <AdminLayout title="Subscription" subtitle="Your REMAIN CLEAN SERVICES subscription status">
         <div className="max-w-2xl mx-auto">
           <Card className="border-destructive border-2">
             <CardContent className="flex flex-col items-center justify-center py-8 text-center">
@@ -92,7 +92,7 @@ export default function SubscriptionPageNative() {
               </div>
               <h3 className="text-lg font-semibold mb-2">Payment Issue</h3>
               <p className="text-muted-foreground max-w-sm">
-                Please visit joinwedetailnc.com to update your payment method and continue using WE DETAIL NC.
+                Please visit joinwedetailnc.com to update your payment method and continue using REMAIN CLEAN SERVICES.
               </p>
             </CardContent>
           </Card>
@@ -104,7 +104,7 @@ export default function SubscriptionPageNative() {
   // Not subscribed
   if (!status?.subscribed) {
     return (
-      <AdminLayout title="Subscription" subtitle="Your WE DETAIL NC subscription status">
+      <AdminLayout title="Subscription" subtitle="Your REMAIN CLEAN SERVICES subscription status">
         <div className="max-w-2xl mx-auto">
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-8 text-center">
@@ -124,7 +124,7 @@ export default function SubscriptionPageNative() {
 
   // Active subscription / trial
   return (
-    <AdminLayout title="Subscription" subtitle="Your WE DETAIL NC subscription status">
+    <AdminLayout title="Subscription" subtitle="Your REMAIN CLEAN SERVICES subscription status">
       <div className="max-w-2xl mx-auto space-y-6">
         <Card>
           <CardHeader>
@@ -139,7 +139,7 @@ export default function SubscriptionPageNative() {
                 <CheckCircle2 className="h-6 w-6 text-success" />
                 <div>
                   <p className="font-semibold text-foreground">
-                    {status.trial_active ? "Free Trial Active" : "WE DETAIL NC Pro"}
+                    {status.trial_active ? "Free Trial Active" : "REMAIN CLEAN SERVICES Pro"}
                   </p>
                   {status.trial_active && status.trial_end && (
                     <p className="text-sm text-muted-foreground">
