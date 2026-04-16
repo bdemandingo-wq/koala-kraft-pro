@@ -232,7 +232,7 @@ export default function PublicBookingPage() {
             Booking Request Submitted!
           </h1>
           <p className="text-[#999] mb-6">
-            We'll confirm your appointment via phone call within a few hours.
+            We'll confirm your appointment via phone call within a few minutes.
           </p>
           <div className="inline-block bg-[#1a1a1a] border border-[#333] rounded-lg px-6 py-3">
             <p className="text-sm text-[#999]">Confirmation Number</p>
@@ -455,7 +455,7 @@ export default function PublicBookingPage() {
             </button>
 
             <p className="text-center text-[#666] text-sm">
-              We'll confirm your appointment via phone call within a few hours.
+              We'll confirm your appointment via phone call within a few minutes.
             </p>
           </form>
         </div>
