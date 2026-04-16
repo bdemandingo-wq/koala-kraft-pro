@@ -716,7 +716,7 @@ export function AIAnalysisCenter() {
                       size="sm"
                       onClick={() => {
                         setActiveTab('ask-ai');
-                        setChatInput(`Draft a follow-up message for ${lead.name}, a lead interested in ${typeLabel} who hasn't been contacted in ${daysSince} days. Mention We Detail NC's mobile service in Charlotte NC and include a booking CTA.`);
+                        setChatInput(`Draft a follow-up message for ${lead.name}, a lead interested in ${typeLabel} who hasn't been contacted in ${daysSince} days. Mention Remain Clean's mobile detailing service in South Florida and include a booking CTA.`);
                       }}
                       style={{ background: `${TEAL}18`, color: TEAL, border: `1px solid ${TEAL}30`, fontSize: 12, fontFamily: labelFont }}
                       className="hover:opacity-80"
