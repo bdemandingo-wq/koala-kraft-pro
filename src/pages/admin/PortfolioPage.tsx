@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { supabase } from '@/lib/supabase';
 import { useOrganization } from '@/contexts/OrganizationContext';
@@ -8,7 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar, Download, Play, ImageIcon, Loader2, ArrowRight, Share2, Search } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Calendar, Play, ImageIcon, Loader2, ArrowRight, Search, Globe } from 'lucide-react';
 import { format } from 'date-fns';
 import { getSignedUrl } from '@/hooks/useSignedUrl';
 import { toast } from 'sonner';
@@ -23,6 +24,7 @@ interface PortfolioItem {
   vehicle_type: string | null;
   before_items: MediaRecord[];
   after_items: MediaRecord[];
+  show_in_gallery: boolean;
 }
 
 interface MediaRecord {
@@ -39,13 +41,15 @@ export default function PortfolioPage() {
   const [serviceFilter, setServiceFilter] = useState('all');
   const [search, setSearch] = useState('');
 
+  const queryClient = useQueryClient();
+
   const { data: rawMedia = [], isLoading } = useQuery({
     queryKey: ['portfolio-media', organization?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('job_media')
         .select(`
-          id, file_url, file_type, media_type, file_name, uploaded_at, booking_id,
+          id, file_url, file_type, media_type, file_name, uploaded_at, booking_id, show_in_gallery,
           bookings!inner(scheduled_at, service_id, vehicle_id,
             services(name),
             customer_vehicles:vehicles(year, make, model, vehicle_type)
@@ -88,9 +92,12 @@ export default function PortfolioPage() {
           vehicle_type: vehicle?.vehicle_type || null,
           before_items: [],
           after_items: [],
+          show_in_gallery: !!(item as any).show_in_gallery,
         });
       }
       const entry = map.get(item.booking_id)!;
+      // If any item in the booking is show_in_gallery, mark the pair
+      if ((item as any).show_in_gallery) entry.show_in_gallery = true;
       const record: MediaRecord = {
         id: item.id,
         file_url: item.file_url,
@@ -160,7 +167,7 @@ export default function PortfolioPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {portfolioItems.map(item => (
-              <PortfolioCard key={item.booking_id} item={item} />
+              <PortfolioCard key={item.booking_id} item={item} organizationId={organization!.id} onToggle={() => queryClient.invalidateQueries({ queryKey: ['portfolio-media', organization?.id] })} />
             ))}
           </div>
         )}
@@ -169,16 +176,14 @@ export default function PortfolioPage() {
   );
 }
 
-function PortfolioCard({ item }: { item: PortfolioItem }) {
+function PortfolioCard({ item, organizationId, onToggle }: { item: PortfolioItem; organizationId: string; onToggle: () => void }) {
   const [beforeUrl, setBeforeUrl] = useState<string | null>(null);
   const [afterUrl, setAfterUrl] = useState<string | null>(null);
+  const [toggling, setToggling] = useState(false);
 
   const beforeItem = item.before_items.find(i => i.file_type === 'photo') || item.before_items[0];
   const afterItem = item.after_items.find(i => i.file_type === 'photo') || item.after_items[0];
 
-  // Load signed URLs on mount
-  useState(() => { void 0; });
-  // Use useEffect-like pattern with empty array to load once
   if (!beforeUrl && beforeItem) {
     getSignedUrl('job-before-media', beforeItem.file_url, 3600).then(setBeforeUrl);
   }
@@ -188,9 +193,26 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
 
   const vehicleLabel = [item.vehicle_year, item.vehicle_make, item.vehicle_model].filter(Boolean).join(' ');
 
+  const handleToggleGallery = async (checked: boolean) => {
+    setToggling(true);
+    try {
+      const { error } = await supabase
+        .from('job_media')
+        .update({ show_in_gallery: checked })
+        .eq('booking_id', item.booking_id)
+        .in('id', [...item.before_items.map(i => i.id), ...item.after_items.map(i => i.id)]);
+      if (error) throw error;
+      toast.success(checked ? 'Added to public gallery' : 'Removed from public gallery');
+      onToggle();
+    } catch {
+      toast.error('Failed to update gallery');
+    } finally {
+      setToggling(false);
+    }
+  };
+
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow">
-      {/* Before/After side-by-side thumbnails */}
       <div className="flex h-40">
         <div className="flex-1 relative bg-muted">
           {beforeUrl ? (
@@ -240,10 +262,20 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
         {vehicleLabel && (
           <p className="text-xs text-muted-foreground">{vehicleLabel}</p>
         )}
-        <div className="flex gap-1.5 pt-1">
+        <div className="flex items-center justify-between pt-1">
           <Badge variant="secondary" className="text-[10px]">
             {item.before_items.length} before · {item.after_items.length} after
           </Badge>
+          <div className="flex items-center gap-1.5">
+            <Globe className="w-3 h-3 text-muted-foreground" />
+            <span className="text-[10px] text-muted-foreground">Gallery</span>
+            <Switch
+              checked={item.show_in_gallery}
+              onCheckedChange={handleToggleGallery}
+              disabled={toggling}
+              className="scale-75 origin-right"
+            />
+          </div>
         </div>
       </CardContent>
     </Card>
