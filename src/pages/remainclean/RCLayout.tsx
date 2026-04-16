@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useCallback } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Phone, Mail, Instagram, Menu, X } from "lucide-react";
 
 export const T = {
@@ -43,6 +43,19 @@ export function RCGlobalStyles() {
 
 export function RCNav() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const scrollToContact = useCallback(() => {
+    setMenuOpen(false);
+    if (location.pathname === "/remainclean" || location.pathname === "/remainclean/") {
+      document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+    } else {
+      navigate("/remainclean");
+      setTimeout(() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" }), 300);
+    }
+  }, [location.pathname, navigate]);
+
   return (
     <nav style={{ backgroundColor: T.bg, borderBottom: `1px solid ${T.border}`, position: "sticky", top: 0, zIndex: 50 }}>
       <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0.875rem 1.5rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -57,7 +70,7 @@ export function RCNav() {
             n.l === "Book Now"
               ? <Link key={n.l} to={n.t} style={{ backgroundColor: T.primary, color: T.primaryFg, padding: "0.5rem 1.25rem", borderRadius: "9999px", fontWeight: 600, fontSize: "0.875rem", textDecoration: "none" }}>{n.l}</Link>
               : n.l === "Contact"
-                ? <a key={n.l} href={n.t} className="rc-nl" style={{ color: T.mutedFg }}>{n.l}</a>
+                ? <button key={n.l} onClick={scrollToContact} className="rc-nl" style={{ color: T.mutedFg }}>{n.l}</button>
                 : <Link key={n.l} to={n.t} className="rc-nl" style={{ color: T.mutedFg }}>{n.l}</Link>
           )}
           <a href="tel:9549131307" className="rc-nl" style={{ color: T.mutedFg, display: "flex", alignItems: "center", gap: "0.375rem" }}>
@@ -78,7 +91,7 @@ export function RCNav() {
         <div style={{ backgroundColor: T.card, borderTop: `1px solid ${T.border}`, padding: "1rem 1.5rem", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
           {NAV_LINKS.map(n =>
             n.l === "Contact"
-              ? <a key={n.l} href={n.t} onClick={() => setMenuOpen(false)} className="rc-nl" style={{ color: T.mutedFg, padding: "0.625rem 0.5rem" }}>{n.l}</a>
+              ? <button key={n.l} onClick={scrollToContact} className="rc-nl" style={{ color: T.mutedFg, padding: "0.625rem 0.5rem", textAlign: "left" }}>{n.l}</button>
               : <Link key={n.l} to={n.t} onClick={() => setMenuOpen(false)} className="rc-nl" style={{ color: T.mutedFg, padding: "0.625rem 0.5rem" }}>{n.l}</Link>
           )}
           <a href="tel:9549131307" style={{ color: T.mutedFg, padding: "0.625rem 0.5rem", fontSize: "0.875rem", textDecoration: "none" }}>📞 (954)-913-1307</a>
