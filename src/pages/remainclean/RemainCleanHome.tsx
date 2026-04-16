@@ -4,9 +4,9 @@ import { Phone } from "lucide-react";
 import { T, RCGlobalStyles, RCStatusBar, RCNav, RCPromo, RCFooter } from "./RCLayout";
 
 const SERVICES = [
-  { icon: "🚿", title: "Exterior Wash & Shine",  desc: "Hand wash, dry, tire shine, window cleaning" },
-  { icon: "🪥", title: "Interior Details",        desc: "Deep vacuum, wipe-down, dashboard & console detailing, fresh scent" },
-  { icon: "✨", title: "Buff & Wax",              desc: "Professional buffing and wax coating" },
+  { icon: "🚿", title: "Express Detail",  desc: "Hand Wash, Quick Vacuum, Light Wipe Down, Air Freshener. Starting at $60." },
+  { icon: "🪥", title: "Full Detail",      desc: "Deep Interior Clean, Steam & Shampoo, Exterior Wash + Protection. Starting at $125." },
+  { icon: "✨", title: "Premium Detail",    desc: "Clay Bar Treatment, Ceramic Sealant, Stain & Odor Removal, Leather Conditioning. $295." },
 ];
 
 const TESTIMONIALS = [

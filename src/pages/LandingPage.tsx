@@ -31,26 +31,26 @@ const VEHICLE_TYPES = [
 ];
 
 const BOOK_SERVICES = [
-  { icon: "🚿", name: "Exterior Wash & Shine" },
-  { icon: "🪥", name: "Interior Details"       },
-  { icon: "✨", name: "Buff & Wax"              },
+  { icon: "🚿", name: "Express Detail" },
+  { icon: "🪥", name: "Full Detail"    },
+  { icon: "✨", name: "Premium Detail"  },
 ];
 
 const services = [
   {
     icon: "🚿",
-    name: "Exterior Wash & Shine",
-    desc: "Hand wash, dry, tire shine, and window cleaning for a spotless finish.",
+    name: "Express Detail",
+    desc: "Hand Wash, Quick Vacuum, Light Wipe Down, Air Freshener. Starting at $60.",
   },
   {
     icon: "🪥",
-    name: "Interior Details",
-    desc: "Deep vacuum, wipe-down, dashboard & console detailing, and fresh scent.",
+    name: "Full Detail",
+    desc: "Deep Interior Clean, Steam & Shampoo, Exterior Wash + Protection. Starting at $125.",
   },
   {
     icon: "✨",
-    name: "Buff & Wax",
-    desc: "Professional buffing and wax coating for lasting protection and shine.",
+    name: "Premium Detail",
+    desc: "Clay Bar Treatment, Ceramic Sealant, Stain & Odor Removal, Leather Conditioning. $295.",
   },
 ];
 
