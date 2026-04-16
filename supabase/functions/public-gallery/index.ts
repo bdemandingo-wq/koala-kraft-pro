@@ -32,13 +32,27 @@ serve(async (req) => {
 
   const { data: rows, error } = await supabase
     .from("job_media")
-    .select("id, file_url, file_type, media_type, file_name, booking_id, uploaded_at")
+    .select("id, file_url, file_type, media_type, file_name, booking_id, uploaded_at, bookings!inner(id, notes, customers(first_name, last_name))")
     .eq("organization_id", org.id)
     .eq("show_in_gallery", true)
     .order("uploaded_at", { ascending: false });
 
   if (error) return json({ error: error.message }, 500);
   if (!rows?.length) return json({ items: [] });
+
+  // Build a booking label map from the joined data
+  const bookingLabels = new Map<string, string>();
+  for (const row of rows ?? []) {
+    if (!bookingLabels.has(row.booking_id)) {
+      const b = (row as any).bookings;
+      const custName = b?.customers ? `${b.customers.first_name ?? ""} ${b.customers.last_name ?? ""}`.trim() : "";
+      // Try to extract vehicle from notes (first line often "Vehicle: ...")
+      const notesStr = b?.notes ?? "";
+      const vehicleMatch = notesStr.match(/Vehicle:\s*(.+)/i);
+      const vehicle = vehicleMatch?.[1]?.trim() ?? "";
+      bookingLabels.set(row.booking_id, vehicle || custName || "Detail");
+    }
+  }
 
   const SIGNED_URL_EXPIRY = 60 * 60 * 6;
 
@@ -71,8 +85,9 @@ serve(async (req) => {
     else if (item.media_type === "after") group.afters.push(item);
   }
 
-  // Return as array of posts, each with all befores and afters for that booking
-  const posts = Array.from(bookingMap.values()).map(({ befores, afters }) => ({
+  // Return as array of posts with label
+  const posts = Array.from(bookingMap.entries()).map(([bookingId, { befores, afters }]) => ({
+    label: bookingLabels.get(bookingId) ?? "Detail",
     befores,
     afters,
   }));

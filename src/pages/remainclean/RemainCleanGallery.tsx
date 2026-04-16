@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Seo } from "@/components/Seo";
-import { Phone, Play, ImageOff, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Phone, Play, ImageOff, X, ChevronDown, ChevronUp } from "lucide-react";
 import { T, RCGlobalStyles, RCStatusBar, RCNav, RCPromo, RCFooter } from "./RCLayout";
 import { supabase } from "@/lib/supabase";
 
@@ -11,6 +11,7 @@ interface GalleryMediaItem {
 }
 
 interface GalleryPost {
+  label: string;
   befores: GalleryMediaItem[];
   afters: GalleryMediaItem[];
 }
@@ -51,46 +52,51 @@ function MediaThumb({
 }
 
 function PostCard({ post, onOpen }: { post: GalleryPost; onOpen: (item: GalleryMediaItem) => void }) {
-  const allMedia = [
-    ...post.befores.map(m => ({ ...m, label: "Before" as const })),
-    ...post.afters.map(m => ({ ...m, label: "After" as const })),
-  ];
+  const [expanded, setExpanded] = useState(false);
+  const totalMedia = post.befores.length + post.afters.length;
 
-  if (allMedia.length <= 2) {
-    return (
-      <div className="rc-card" style={{ backgroundColor: T.card, border: `1px solid ${T.border}`, borderRadius: "1rem", padding: "1rem", display: "flex", gap: "0.625rem" }}>
-        {post.befores[0] && <MediaThumb item={post.befores[0]} label="Before" onOpen={onOpen} />}
-        {post.afters[0] && <MediaThumb item={post.afters[0]} label="After" onOpen={onOpen} />}
-        {allMedia.length === 1 && (
-          <div style={{ flex: 1, backgroundColor: T.secondary, borderRadius: "0.625rem", aspectRatio: "4/3", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <ImageOff size={24} style={{ color: T.border }} />
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  // Grid for 3+ media
   return (
-    <div className="rc-card" style={{ backgroundColor: T.card, border: `1px solid ${T.border}`, borderRadius: "1rem", padding: "1rem" }}>
-      {post.befores.length > 0 && (
-        <div style={{ marginBottom: post.afters.length > 0 ? "0.75rem" : 0 }}>
-          <p style={{ color: T.mutedFg, fontSize: "0.75rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "0.5rem" }}>Before</p>
-          <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(post.befores.length, 3)}, 1fr)`, gap: "0.5rem" }}>
-            {post.befores.map((m, i) => (
-              <MediaThumb key={i} item={m} label="Before" onOpen={onOpen} />
-            ))}
-          </div>
+    <div className="rc-card" style={{ backgroundColor: T.card, border: `1px solid ${T.border}`, borderRadius: "1rem", overflow: "hidden" }}>
+      {/* Collapsed header — always visible */}
+      <button
+        type="button"
+        onClick={() => setExpanded(e => !e)}
+        style={{
+          width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "1rem 1.25rem", background: "none", border: "none", cursor: "pointer", color: T.fg,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+          <span style={{ fontSize: "1.25rem" }}>🚗</span>
+          <span style={{ fontWeight: 700, fontSize: "0.9375rem" }}>{post.label}</span>
+          <span style={{ color: T.mutedFg, fontSize: "0.8125rem" }}>{totalMedia} photo{totalMedia !== 1 ? "s" : ""}</span>
         </div>
-      )}
-      {post.afters.length > 0 && (
-        <div>
-          <p style={{ color: T.mutedFg, fontSize: "0.75rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "0.5rem" }}>After</p>
-          <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(post.afters.length, 3)}, 1fr)`, gap: "0.5rem" }}>
-            {post.afters.map((m, i) => (
-              <MediaThumb key={i} item={m} label="After" onOpen={onOpen} />
-            ))}
-          </div>
+        {expanded ? <ChevronUp size={18} style={{ color: T.mutedFg }} /> : <ChevronDown size={18} style={{ color: T.mutedFg }} />}
+      </button>
+
+      {/* Expanded body */}
+      {expanded && (
+        <div style={{ padding: "0 1rem 1rem" }}>
+          {post.befores.length > 0 && (
+            <div style={{ marginBottom: post.afters.length > 0 ? "0.75rem" : 0 }}>
+              <p style={{ color: T.mutedFg, fontSize: "0.75rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "0.5rem" }}>Before</p>
+              <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(post.befores.length, 3)}, 1fr)`, gap: "0.5rem" }}>
+                {post.befores.map((m, i) => (
+                  <MediaThumb key={i} item={m} label="Before" onOpen={onOpen} />
+                ))}
+              </div>
+            </div>
+          )}
+          {post.afters.length > 0 && (
+            <div>
+              <p style={{ color: T.mutedFg, fontSize: "0.75rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "0.5rem" }}>After</p>
+              <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(post.afters.length, 3)}, 1fr)`, gap: "0.5rem" }}>
+                {post.afters.map((m, i) => (
+                  <MediaThumb key={i} item={m} label="After" onOpen={onOpen} />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
