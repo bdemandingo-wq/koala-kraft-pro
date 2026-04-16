@@ -159,7 +159,7 @@ export default function RemainCleanBookingPage() {
           total_amount:      pkg?.price ?? 0,
           scheduled_at:      new Date(`${form.date}T${to24(form.time)}:00`).toISOString(),
           notes:             [`Vehicle: ${form.vehicle}`, `Area: ${form.area}`, form.notes].filter(Boolean).join("\n"),
-          ...(orgId ? { organization_id: orgId } : { organization_slug: "remainclean" }),
+          ...(orgId ? { organization_id: orgId } : { organization_slug: "remain-clean-services" }),
         },
       });
       if (error) throw error;
