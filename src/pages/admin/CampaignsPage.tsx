@@ -79,7 +79,7 @@ export default function CampaignsPage() {
     schedule: "now" as "now" | "later",
     scheduledDate: undefined as Date | undefined,
     scheduledTime: "09:00",
-    smsBody: 'Hey {first_name}! This is We Detail NC. Ready to get your vehicle looking fresh again? Book here: {booking_link} Reply STOP to opt out.',
+    smsBody: 'Hey {first_name}! This is Remain Clean Services. Ready to get your vehicle looking fresh again? Book here: {booking_link} Reply STOP to opt out.',
     emailSubject: "",
     emailBody: "",
     days_inactive: 30,
@@ -578,7 +578,7 @@ export default function CampaignsPage() {
           <div className="space-y-3">
             <h2 className="text-base font-semibold">Automation Triggers</h2>
             <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-              {automations.map(auto => {
+              {automations.filter(a => a.automation_type !== 'missed_call_textback').map(auto => {
                 const meta = getAutomationMeta(auto.automation_type);
                 const Icon = meta.icon;
                 const isExpanded = expandedAutomation === auto.id;
