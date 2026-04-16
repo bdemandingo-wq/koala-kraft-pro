@@ -61,7 +61,7 @@ serve(async (req) => {
       });
     }
 
-    const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+    const stripe = new Stripe(stripeKey, { apiVersion: "2024-06-20" });
 
     // Create a payment intent (requires a payment method - use for direct charges)
     const amountCents = Math.round(parseFloat(amount) * 100);
