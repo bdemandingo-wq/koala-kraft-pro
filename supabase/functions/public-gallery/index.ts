@@ -22,7 +22,6 @@ serve(async (req) => {
   const { orgSlug } = await req.json().catch(() => ({}));
   if (!orgSlug) return json({ error: "orgSlug required" }, 400);
 
-  // Resolve org
   const { data: org } = await supabase
     .from("organizations")
     .select("id")
@@ -31,7 +30,6 @@ serve(async (req) => {
 
   if (!org) return json({ items: [] });
 
-  // Fetch all gallery-featured media items
   const { data: rows, error } = await supabase
     .from("job_media")
     .select("id, file_url, file_type, media_type, file_name, booking_id, uploaded_at")
@@ -42,9 +40,9 @@ serve(async (req) => {
   if (error) return json({ error: error.message }, 500);
   if (!rows?.length) return json({ items: [] });
 
-  // Generate signed URLs for each item
-  const SIGNED_URL_EXPIRY = 60 * 60 * 6; // 6 hours
-  const items = await Promise.all(
+  const SIGNED_URL_EXPIRY = 60 * 60 * 6;
+
+  const signedItems = await Promise.all(
     rows.map(async (row) => {
       const bucket = row.media_type === "before" ? "job-before-media" : "job-after-media";
       const { data: signed } = await supabase.storage
@@ -53,41 +51,31 @@ serve(async (req) => {
       return {
         id: row.id,
         booking_id: row.booking_id,
-        media_type: row.media_type,      // "before" | "after"
-        file_type: row.file_type,        // "photo" | "video" | mime type
+        media_type: row.media_type,
+        file_type: row.file_type,
         signed_url: signed?.signedUrl ?? null,
         uploaded_at: row.uploaded_at,
       };
     })
   );
 
-  // Group into before/after pairs by booking_id, allowing multiple pairs per booking
-  const pairMap = new Map<string, { befores: typeof items[0][]; afters: typeof items[0][] }>();
-  for (const item of items) {
+  // Group ALL media by booking_id into a single post per booking
+  const bookingMap = new Map<string, { befores: typeof signedItems; afters: typeof signedItems }>();
+  for (const item of signedItems) {
     if (!item.signed_url) continue;
-    if (!pairMap.has(item.booking_id)) {
-      pairMap.set(item.booking_id, { befores: [], afters: [] });
+    if (!bookingMap.has(item.booking_id)) {
+      bookingMap.set(item.booking_id, { befores: [], afters: [] });
     }
-    const group = pairMap.get(item.booking_id)!;
+    const group = bookingMap.get(item.booking_id)!;
     if (item.media_type === "before") group.befores.push(item);
     else if (item.media_type === "after") group.afters.push(item);
   }
 
-  // Build pairs: zip befores and afters, then show any remaining as standalone
-  const pairs: { before: typeof items[0] | null; after: typeof items[0] | null }[] = [];
-  for (const group of pairMap.values()) {
-    const maxPaired = Math.min(group.befores.length, group.afters.length);
-    for (let i = 0; i < maxPaired; i++) {
-      pairs.push({ before: group.befores[i], after: group.afters[i] });
-    }
-    // Remaining unpaired items shown as standalone cards
-    for (let i = maxPaired; i < group.befores.length; i++) {
-      pairs.push({ before: group.befores[i], after: null });
-    }
-    for (let i = maxPaired; i < group.afters.length; i++) {
-      pairs.push({ before: null, after: group.afters[i] });
-    }
-  }
+  // Return as array of posts, each with all befores and afters for that booking
+  const posts = Array.from(bookingMap.values()).map(({ befores, afters }) => ({
+    befores,
+    afters,
+  }));
 
-  return json({ items: pairs });
+  return json({ items: posts });
 });
