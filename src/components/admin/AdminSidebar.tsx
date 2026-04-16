@@ -34,6 +34,7 @@ import {
   Check,
   Image as ImageIcon,
 } from 'lucide-react';
+import remainCleanLogo from '@/assets/remain-clean-logo.png';
 import { cn } from '@/lib/utils';
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
@@ -381,24 +382,9 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
     <>
       {/* Logo */}
       <div className="flex h-16 items-center gap-3 px-6 border-b border-sidebar-border">
-        {logoUrl ? (
-          <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-background">
-            <SignedImage
-              src={logoUrl}
-              alt="Logo"
-              className="w-full h-full object-contain"
-              fallback={
-                <div className="w-full h-full flex items-center justify-center bg-muted">
-                  <Calendar className="w-5 h-5 text-muted-foreground" />
-                </div>
-              }
-            />
-          </div>
-        ) : (
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-            <Calendar className="w-5 h-5 text-primary-foreground" />
-          </div>
-        )}
+        <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-black">
+          <img src={remainCleanLogo} alt="Remain Clean Services" className="w-full h-full object-contain" />
+        </div>
         {(isOpen || isMobile) && (
           <span className="text-lg font-bold text-sidebar-foreground">{businessDisplayName}</span>
         )}
@@ -484,24 +470,9 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
             !isOpen && !isMobile && "justify-center px-2"
           )}
         >
-          {logoUrl ? (
-            <div className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center bg-background flex-shrink-0">
-              <SignedImage
-                src={logoUrl}
-                alt="Business Logo"
-                className="w-full h-full object-cover"
-                fallback={
-                  <div className="w-full h-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-sm font-medium text-primary-foreground">
-                    {businessDisplayName.substring(0, 2).toUpperCase()}
-                  </div>
-                }
-              />
-            </div>
-          ) : (
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-sm font-medium text-primary-foreground flex-shrink-0">
-              {businessDisplayName.substring(0, 2).toUpperCase()}
-            </div>
-          )}
+          <div className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center bg-black flex-shrink-0">
+            <img src={remainCleanLogo} alt="Remain Clean Services" className="w-full h-full object-contain" />
+          </div>
           {(isOpen || isMobile) && (
             <>
               <div className="flex-1 text-left min-w-0">
