@@ -112,7 +112,7 @@ export default function RemainCleanBookingPage() {
     const fetchOrg = async () => {
       try {
         const { data } = await supabase
-          .rpc('get_public_booking_data', { p_org_slug: 'remain-clean-services' });
+          .rpc('get_public_booking_data', { p_org_slug: 'remainclean' });
         const id = (data as any)?.organization?.id;
         if (id) setOrgId(id);
       } catch {
@@ -159,7 +159,7 @@ export default function RemainCleanBookingPage() {
           total_amount:      pkg?.price ?? 0,
           scheduled_at:      new Date(`${form.date}T${to24(form.time)}:00`).toISOString(),
           notes:             [`Vehicle: ${form.vehicle}`, `Area: ${form.area}`, form.notes].filter(Boolean).join("\n"),
-          ...(orgId ? { organization_id: orgId } : { organization_slug: "remain-clean-services" }),
+          ...(orgId ? { organization_id: orgId } : { organization_slug: "remainclean" }),
         },
       });
       if (error) throw error;
