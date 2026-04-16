@@ -83,12 +83,12 @@ export default function PaymentIntegrationPage() {
   const fetchRecentPayments = async () => {
     if (!organization?.id) return;
     const { data } = await supabase
-      .from("manual_payments")
+      .from("manual_payments" as any)
       .select("id, customer_name, amount, description, created_at")
       .eq("organization_id", organization.id)
       .order("created_at", { ascending: false })
       .limit(10);
-    setRecentPayments(data || []);
+    setRecentPayments((data as any) || []);
   };
 
   const handleSave = async () => {
