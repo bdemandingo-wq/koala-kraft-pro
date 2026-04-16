@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect, useCallback } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Seo } from "@/components/Seo";
 import { Phone, Menu, X, Mail, Instagram, CheckCircle2, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
@@ -86,6 +86,7 @@ type F = { name: string; email: string; phone: string; vehicle: string; pkg: str
 
 export default function RemainCleanBookingPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const qp = new URLSearchParams(window.location.search);
@@ -121,6 +122,20 @@ export default function RemainCleanBookingPage() {
     };
     fetchOrg();
   }, []);
+
+  const scrollToContact = useCallback(() => {
+    setMenuOpen(false);
+
+    if (location.pathname === "/remainclean" || location.pathname === "/remainclean/") {
+      document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+      return;
+    }
+
+    navigate("/remainclean");
+    window.setTimeout(() => {
+      document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+    }, 300);
+  }, [location.pathname, navigate]);
 
   const set = (k: keyof F) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setForm(f => ({ ...f, [k]: e.target.value }));
@@ -208,7 +223,7 @@ export default function RemainCleanBookingPage() {
         {/* Nav */}
         <nav style={{ backgroundColor: T.bg, borderBottom: `1px solid ${T.border}`, position: "sticky", top: 0, zIndex: 50 }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0.875rem 1.5rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <Link to="/" style={{ display: "flex", alignItems: "center", gap: "0.625rem", textDecoration: "none" }}>
+            <Link to="/remainclean" style={{ display: "flex", alignItems: "center", gap: "0.625rem", textDecoration: "none" }}>
               <img src={LOGO} alt="Remain Clean" style={{ width: "2rem", height: "2rem", borderRadius: "9999px", objectFit: "cover", border: `1px solid ${T.border}` }} />
               <span className="rc-s" style={{ color: T.fg, fontWeight: 700, fontSize: "0.9rem", letterSpacing: "0.04em" }}>Remain Clean Services</span>
             </Link>
@@ -216,7 +231,9 @@ export default function RemainCleanBookingPage() {
             <div className="rcnav-d" style={{ display: "flex", alignItems: "center", gap: "1.75rem" }}>
               <style>{`@media(max-width:767px){.rcnav-d{display:none!important}}`}</style>
               {[{l:"Home",t:"/remainclean"},{l:"Services",t:"/remainclean/services"},{l:"Gallery",t:"/remainclean/gallery"},{l:"Rewards",t:"/remainclean/rewards"},{l:"Contact",t:"/remainclean#contact"}].map(n =>
-                <Link key={n.l} to={n.t} className="rc-nl" style={{ color: T.mutedFg }}>{n.l}</Link>
+                n.l === "Contact"
+                  ? <button key={n.l} onClick={scrollToContact} className="rc-nl" style={{ color: T.mutedFg }}>{n.l}</button>
+                  : <Link key={n.l} to={n.t} className="rc-nl" style={{ color: T.mutedFg }}>{n.l}</Link>
               )}
               <a href="tel:9549131307" className="rc-nl" style={{ color: T.mutedFg, display: "flex", alignItems: "center", gap: "0.375rem" }}>
                 <Phone size={13} />Call Now: (954)-913-1307
@@ -233,7 +250,9 @@ export default function RemainCleanBookingPage() {
           {menuOpen && (
             <div style={{ backgroundColor: T.card, borderTop: `1px solid ${T.border}`, padding: "1rem 1.5rem", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
               {[{l:"Home",t:"/remainclean"},{l:"Services",t:"/remainclean/services"},{l:"Gallery",t:"/remainclean/gallery"},{l:"Book Now",t:"/book/remainclean"},{l:"Rewards",t:"/remainclean/rewards"},{l:"Contact",t:"/remainclean#contact"}].map(n =>
-                <Link key={n.l} to={n.t} onClick={() => setMenuOpen(false)} className="rc-nl" style={{ color: T.mutedFg, padding: "0.625rem 0.5rem" }}>{n.l}</Link>
+                n.l === "Contact"
+                  ? <button key={n.l} onClick={scrollToContact} className="rc-nl" style={{ color: T.mutedFg, padding: "0.625rem 0.5rem", textAlign: "left" }}>{n.l}</button>
+                  : <Link key={n.l} to={n.t} onClick={() => setMenuOpen(false)} className="rc-nl" style={{ color: T.mutedFg, padding: "0.625rem 0.5rem" }}>{n.l}</Link>
               )}
               <a href="tel:9549131307" style={{ color: T.mutedFg, padding: "0.625rem 0.5rem", fontSize: "0.875rem", textDecoration: "none" }}>📞 (954)-913-1307</a>
               <Link to="/login" onClick={() => setMenuOpen(false)} className="rc-nl" style={{ color: T.mutedFg, padding: "0.625rem 0.5rem" }}>Login</Link>
@@ -265,7 +284,7 @@ export default function RemainCleanBookingPage() {
                   <p style={{ color: T.primary, fontWeight: 700, fontSize: "1.5rem", letterSpacing: "0.06em" }}>{confNum}</p>
                 </div>
                 <br />
-                <Link to="/" style={{ backgroundColor: T.primary, color: T.primaryFg, borderRadius: "9999px", fontWeight: 600, padding: "0.875rem 2.25rem", fontSize: "1rem", textDecoration: "none" }}>
+                <Link to="/remainclean" style={{ backgroundColor: T.primary, color: T.primaryFg, borderRadius: "9999px", fontWeight: 600, padding: "0.875rem 2.25rem", fontSize: "1rem", textDecoration: "none" }}>
                   ← Back to Home
                 </Link>
               </div>
@@ -377,7 +396,11 @@ export default function RemainCleanBookingPage() {
               <p style={{ color: T.fg, fontWeight: 600, fontSize: "0.8125rem", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: "1rem" }}>Quick Links</p>
               <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                 {[{l:"Home",t:"/remainclean"},{l:"Services & Pricing",t:"/remainclean/services"},{l:"Book Appointment",t:"/book/remainclean"},{l:"Rewards",t:"/remainclean/rewards"},{l:"Contact",t:"/remainclean#contact"}].map(x =>
-                  <li key={x.l}><Link to={x.t} className="rc-nl" style={{ color: T.mutedFg, padding: 0 }}>{x.l}</Link></li>
+                  <li key={x.l}>
+                    {x.l === "Contact"
+                      ? <button onClick={scrollToContact} className="rc-nl" style={{ color: T.mutedFg, padding: 0, textAlign: "left" }}>{x.l}</button>
+                      : <Link to={x.t} className="rc-nl" style={{ color: T.mutedFg, padding: 0 }}>{x.l}</Link>}
+                  </li>
                 )}
               </ul>
             </div>
