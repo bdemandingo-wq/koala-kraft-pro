@@ -10,6 +10,7 @@ import { EditCustomerDialog } from '@/components/admin/EditCustomerDialog';
 import { VehicleSelectDropdown } from '@/components/admin/VehicleManager';
 import { useBookingForm } from '../BookingFormContext';
 import { useState, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useOrgId } from '@/hooks/useOrgId';
 import { toast } from 'sonner';
@@ -51,6 +52,7 @@ export function CustomerStep() {
   } = useBookingForm();
 
   const { organizationId } = useOrgId();
+  const queryClient = useQueryClient();
   const [lastBooking, setLastBooking] = useState<LastBookingInfo | null>(null);
   const [loadingLast, setLoadingLast] = useState(false);
   const [editCustomerId, setEditCustomerId] = useState<string | null>(null);
@@ -79,6 +81,7 @@ export function CustomerStep() {
       }).select('id').single();
       if (error) throw error;
       toast.success('Vehicle added');
+      await queryClient.invalidateQueries({ queryKey: ['vehicles', selectedCustomerId, organizationId] });
       setSelectedVehicleId(data.id);
       setAddVehicleOpen(false);
       setVehicleForm({ year: '', make: '', model: '', color: '', vehicle_type: '', condition: '', notes: '' });
