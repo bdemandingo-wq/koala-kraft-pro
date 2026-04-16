@@ -114,6 +114,7 @@ export default function RemainCleanBookingPage() {
   const validate = () => {
     const e: Partial<F> = {};
     if (!form.name.trim())    e.name    = "Required";
+    if (!form.email.trim())   e.email   = "Required";
     if (!form.phone.trim())   e.phone   = "Required";
     if (!form.vehicle.trim()) e.vehicle = "Required";
     if (!form.pkg)            e.pkg     = "Required";
@@ -134,8 +135,8 @@ export default function RemainCleanBookingPage() {
       const { data, error } = await supabase.functions.invoke("external-booking-webhook", {
         body: {
           first_name:        parts[0] || "",
-          last_name:         parts.slice(1).join(" ") || "",
-          email:             form.email || undefined,
+          last_name:         parts.slice(1).join(" ") || "-",
+          email:             form.email.trim(),
           phone:             form.phone,
           address:           form.area,
           service_name:      `${form.pkg} Package`,
@@ -267,8 +268,8 @@ export default function RemainCleanBookingPage() {
                   </div>
 
                   {/* Email */}
-                  <FieldRow label="Email" hint="optional">
-                    <input className="rc-inp" type="email" placeholder="you@example.com" value={form.email} onChange={set("email")} style={inp()} />
+                  <FieldRow label="Email" required error={errors.email}>
+                    <input className="rc-inp" type="email" placeholder="you@example.com" value={form.email} onChange={set("email")} style={inp(errors.email)} />
                   </FieldRow>
 
                   {/* Vehicle */}
