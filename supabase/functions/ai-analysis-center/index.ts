@@ -70,7 +70,7 @@ serve(async (req) => {
           messages: [
             {
               role: "system",
-              content: `You are We Detail NC AI, a business intelligence assistant for a mobile car detailing company in Charlotte, NC. Services include Express ($175+), Reset ($225+), Deluxe ($350+), Elite ($480+), Ultimate Protect ($580+), and Maintenance Plans. Here is the live business data:\n\n${detailedContext}\n\nReturn exactly 5 JSON objects in an array. Each: { "priority": "Urgent|Watch|Opportunity|Pricing|Growth|Inventory", "insight": "2-sentence specific business insight referencing actual numbers from the data", "confidence": "High confidence|Medium confidence", "action": "short CTA label", "promptText": "full prompt for follow-up" }. Focus on: revenue by package, vehicle type trends, technician performance gaps, inventory alerts, customer churn/upsell opportunities. Return only valid JSON array, no markdown, no code fences.`,
+              content: `You are Remain Clean AI, a business intelligence assistant for a mobile car detailing company serving West Palm Beach, Fort Lauderdale, and Miami-Dade. Services include Express ($175+), Reset ($225+), Deluxe ($350+), Elite ($480+), Ultimate Protect ($580+), and Maintenance Plans. Here is the live business data:\n\n${detailedContext}\n\nReturn exactly 5 JSON objects in an array. Each: { "priority": "Urgent|Watch|Opportunity|Pricing|Growth|Inventory", "insight": "2-sentence specific business insight referencing actual numbers from the data", "confidence": "High confidence|Medium confidence", "action": "short CTA label", "promptText": "full prompt for follow-up" }. Focus on: revenue by package, vehicle type trends, technician performance gaps, inventory alerts, customer churn/upsell opportunities. Return only valid JSON array, no markdown, no code fences.`,
             },
             { role: "user", content: "Generate 5 detailing-specific business insights based on the current data." },
           ],
@@ -131,7 +131,7 @@ serve(async (req) => {
     }
 
     if (type === "chat") {
-      const systemPrompt = `You are We Detail NC AI, a business intelligence assistant for a mobile car detailing company based in Charlotte, NC. The business offers these packages: Express ($175+), Reset ($225+), Deluxe ($350+), Elite ($480+), Ultimate Protect with Ceramic Coating ($580+), and Maintenance Plans (weekly/biweekly/monthly).
+      const systemPrompt = `You are Remain Clean AI, a business intelligence assistant for a mobile car detailing company serving West Palm Beach, Fort Lauderdale, and Miami-Dade. The business offers these packages: Express ($175+), Reset ($225+), Deluxe ($350+), Elite ($480+), Ultimate Protect with Ceramic Coating ($580+), and Maintenance Plans (weekly/biweekly/monthly).
 
 Here is the live business data:
 
@@ -183,7 +183,7 @@ Provide specific, actionable advice referencing actual numbers. When suggesting 
         body: JSON.stringify({
           model: "google/gemini-3-flash-preview",
           messages: [
-            { role: "system", content: "You are We Detail NC AI for a mobile car detailing business in Charlotte NC. Give one specific scheduling recommendation (2-3 sentences) based on the data. Consider drive time between jobs, package durations (Express: 2hr, Reset: 2.5hr, Deluxe: 3.5hr, Elite: 5hr, Ultimate: 6hr), and day-of-week patterns." },
+            { role: "system", content: "You are Remain Clean AI for a mobile car detailing business serving West Palm Beach, Fort Lauderdale, and Miami-Dade. Give one specific scheduling recommendation (2-3 sentences) based on the data. Consider drive time between jobs, package durations (Express: 2hr, Reset: 2.5hr, Deluxe: 3.5hr, Elite: 5hr, Ultimate: 6hr), and day-of-week patterns." },
             { role: "user", content: `Weekly booking distribution: ${JSON.stringify(snap.weeklyData || {})}. Best day: ${snap.bestDay || "N/A"}. Jobs this month: ${snap.jobStats?.current || 0}. Technicians: ${snap.techPerformance?.length || "unknown"}. Top package: ${snap.packageRevenue?.[0]?.name || "unknown"}.` },
           ],
         }),

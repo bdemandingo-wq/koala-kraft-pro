@@ -719,7 +719,7 @@ export default function SettingsPage() {
                 <Label htmlFor="address">Service Area</Label>
                 <Input
                   id="address"
-                  placeholder="e.g. Charlotte, NC and surrounding areas"
+                  placeholder="e.g. West Palm Beach, Fort Lauderdale, Miami-Dade"
                   value={settings.company_address}
                   onChange={(e) => updateField('company_address', e.target.value)}
                 />

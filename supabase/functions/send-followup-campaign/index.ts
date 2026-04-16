@@ -177,7 +177,7 @@ serve(async (req) => {
                       Book Your Detail
                     </a>
                   </div>
-                  <p style="text-align: center; margin-top: 20px; font-size: 13px; color: #6b7280;">We Detail NC | (984) 332-8570 | Charlotte, NC</p>
+                  <p style="text-align: center; margin-top: 20px; font-size: 13px; color: #6b7280;">Remain Clean Services | West Palm Beach, Fort Lauderdale & Miami-Dade</p>
                   ${emailSettings.email_footer ? `<hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;"><p style="font-size: 12px; color: #9ca3af;">${emailSettings.email_footer}</p>` : ''}
                 </div>
               </body>
