@@ -455,7 +455,7 @@ export default function BookingPhotosPage() {
                 <Label>Booking / Job</Label>
                 <Select value={uploadBookingId} onValueChange={setUploadBookingId}>
                   <SelectTrigger><SelectValue placeholder="Select a booking..." /></SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[9999]" position="popper" sideOffset={4}>
                     {recentBookings.map((b: any) => (
                       <SelectItem key={b.id} value={b.id}>
                         #{b.booking_number} — {b.customer?.first_name} {b.customer?.last_name} — {format(new Date(b.scheduled_at), 'MMM d')}
