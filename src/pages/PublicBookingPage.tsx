@@ -110,8 +110,14 @@ export default function PublicBookingPage() {
       const firstName = nameParts[0] || '';
       const lastName = nameParts.slice(1).join(' ') || '';
 
-      // Build scheduled_at from date and time
-      const scheduledAt = new Date(`${preferredDate}T${preferredTime}`).toISOString();
+      // Build scheduled_at from date and time (ensure valid ISO 8601)
+      const dateObj = new Date(`${preferredDate}T${preferredTime}:00`);
+      if (isNaN(dateObj.getTime())) {
+        toast.error('Invalid date or time selected. Please try again.');
+        setIsSubmitting(false);
+        return;
+      }
+      const scheduledAt = dateObj.toISOString();
 
       const { data: webhookResult, error: webhookError } = await supabase.functions.invoke('external-booking-webhook', {
         body: {
