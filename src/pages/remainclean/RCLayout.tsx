@@ -63,6 +63,9 @@ export function RCNav() {
           <a href="tel:9549131307" className="rc-nl" style={{ color: T.mutedFg, display: "flex", alignItems: "center", gap: "0.375rem" }}>
             <Phone size={13} />Call Now
           </a>
+          <Link to="/login" style={{ color: T.mutedFg, border: `1px solid ${T.border}`, padding: "0.4rem 1rem", borderRadius: "9999px", fontSize: "0.8125rem", fontWeight: 600, textDecoration: "none" }} className="rc-nl">
+            Login
+          </Link>
         </div>
 
         <button onClick={() => setMenuOpen(!menuOpen)} style={{ background: "none", border: "none", color: T.fg, cursor: "pointer" }} className="rcnav-m" aria-label="menu">
@@ -79,6 +82,7 @@ export function RCNav() {
               : <Link key={n.l} to={n.t} onClick={() => setMenuOpen(false)} className="rc-nl" style={{ color: T.mutedFg, padding: "0.625rem 0.5rem" }}>{n.l}</Link>
           )}
           <a href="tel:9549131307" style={{ color: T.mutedFg, padding: "0.625rem 0.5rem", fontSize: "0.875rem", textDecoration: "none" }}>📞 (954)-913-1307</a>
+          <Link to="/login" onClick={() => setMenuOpen(false)} className="rc-nl" style={{ color: T.mutedFg, padding: "0.625rem 0.5rem" }}>Login</Link>
         </div>
       )}
     </nav>

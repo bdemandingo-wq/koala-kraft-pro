@@ -222,6 +222,7 @@ export default function RemainCleanBookingPage() {
                 <Phone size={13} />Call Now: (954)-913-1307
               </a>
               <Link to="/book/remainclean" style={{ backgroundColor: T.primary, color: T.primaryFg, padding: "0.5rem 1.25rem", borderRadius: "9999px", fontWeight: 600, fontSize: "0.875rem", textDecoration: "none" }}>Book Now</Link>
+              <Link to="/login" className="rc-nl" style={{ color: T.mutedFg, border: `1px solid ${T.border}`, padding: "0.4rem 1rem", borderRadius: "9999px", fontSize: "0.8125rem", fontWeight: 600, textDecoration: "none" }}>Login</Link>
             </div>
 
             <button onClick={() => setMenuOpen(!menuOpen)} style={{ background: "none", border: "none", color: T.fg, cursor: "pointer" }} className="rcnav-m" aria-label="menu">
@@ -235,6 +236,7 @@ export default function RemainCleanBookingPage() {
                 <Link key={n.l} to={n.t} onClick={() => setMenuOpen(false)} className="rc-nl" style={{ color: T.mutedFg, padding: "0.625rem 0.5rem" }}>{n.l}</Link>
               )}
               <a href="tel:9549131307" style={{ color: T.mutedFg, padding: "0.625rem 0.5rem", fontSize: "0.875rem", textDecoration: "none" }}>📞 (954)-913-1307</a>
+              <Link to="/login" onClick={() => setMenuOpen(false)} className="rc-nl" style={{ color: T.mutedFg, padding: "0.625rem 0.5rem" }}>Login</Link>
             </div>
           )}
         </nav>
