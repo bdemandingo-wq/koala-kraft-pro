@@ -91,7 +91,7 @@ export function RCNav() {
         <div style={{ backgroundColor: T.card, borderTop: `1px solid ${T.border}`, padding: "1rem 1.5rem", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
           {NAV_LINKS.map(n =>
             n.l === "Contact"
-              ? <a key={n.l} href={n.t} onClick={() => setMenuOpen(false)} className="rc-nl" style={{ color: T.mutedFg, padding: "0.625rem 0.5rem" }}>{n.l}</a>
+              ? <button key={n.l} onClick={scrollToContact} className="rc-nl" style={{ color: T.mutedFg, padding: "0.625rem 0.5rem", textAlign: "left" }}>{n.l}</button>
               : <Link key={n.l} to={n.t} onClick={() => setMenuOpen(false)} className="rc-nl" style={{ color: T.mutedFg, padding: "0.625rem 0.5rem" }}>{n.l}</Link>
           )}
           <a href="tel:9549131307" style={{ color: T.mutedFg, padding: "0.625rem 0.5rem", fontSize: "0.875rem", textDecoration: "none" }}>📞 (954)-913-1307</a>
