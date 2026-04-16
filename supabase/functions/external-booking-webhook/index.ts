@@ -395,7 +395,7 @@ const handler = async (req: Request): Promise<Response> => {
           },
           body: JSON.stringify({
             from: 'Remain Clean Bookings <notifications@tidywisecleaning.com>',
-            to: ['support@tidywisecleaning.com', 'prophtjeff@yahoo.com'],
+            to: ['support@tidywisecleaning.com', 'remaincleanservicesllc@yahoo.com'],
             subject: `🚗 New Booking #RC-${booking.booking_number} — ${payload.first_name} ${payload.last_name}`,
             html: `
               <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f9f9f9;padding:24px;border-radius:10px;">
@@ -423,7 +423,7 @@ const handler = async (req: Request): Promise<Response> => {
             `,
           }),
         });
-        console.log("[external-booking-webhook] Direct notification sent to support@tidywisecleaning.com + prophtjeff@yahoo.com");
+        console.log("[external-booking-webhook] Direct notification sent to support@tidywisecleaning.com + remaincleanservicesllc@yahoo.com");
       }
     } catch (directNotifyError) {
       console.error("[external-booking-webhook] Failed to send direct notification emails:", directNotifyError);
