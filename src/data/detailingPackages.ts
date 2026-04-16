@@ -1,10 +1,8 @@
 // Package duration estimates (in minutes)
 export const PACKAGE_DURATIONS: Record<string, number> = {
-  'Express Package': 90,
-  'Reset Package': 150,
-  'Deluxe Package': 210,
-  'Elite Package': 240,
-  'Ultimate Protect Package': 300,
+  'Express Detail': 60,
+  'Full Detail': 150,
+  'Premium Detail': 240,
   'Maintenance Plan': 90,
 };
 
