@@ -110,7 +110,7 @@ export default function RemainCleanBookingPage() {
   // Resolve org ID once on mount via the same RPC used by PublicBookingPage
   useEffect(() => {
     supabase
-      .rpc('get_public_booking_data', { p_org_slug: 'remainclean' })
+      .rpc('get_public_booking_data', { p_org_slug: 'remain-clean-services' })
       .then(({ data }) => {
         const id = (data as any)?.organization?.id;
         if (id) setOrgId(id);
