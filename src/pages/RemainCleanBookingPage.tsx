@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Seo } from "@/components/Seo";
 import { Phone, Menu, X, Mail, Instagram, CheckCircle2, Loader2 } from "lucide-react";
@@ -105,6 +105,18 @@ export default function RemainCleanBookingPage() {
   const [loading, setLoading] = useState(false);
   const [done, setDone]       = useState(false);
   const [confNum, setConfNum] = useState("");
+  const [orgId, setOrgId]     = useState<string | null>(null);
+
+  // Resolve org ID once on mount via the same RPC used by PublicBookingPage
+  useEffect(() => {
+    supabase
+      .rpc('get_public_booking_data', { p_org_slug: 'remainclean' })
+      .then(({ data }) => {
+        const id = (data as any)?.organization?.id;
+        if (id) setOrgId(id);
+      })
+      .catch(() => { /* non-blocking — falls back to slug */ });
+  }, []);
 
   const set = (k: keyof F) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setForm(f => ({ ...f, [k]: e.target.value }));
@@ -143,14 +155,20 @@ export default function RemainCleanBookingPage() {
           total_amount:      pkg?.price ?? 0,
           scheduled_at:      new Date(`${form.date}T${to24(form.time)}:00`).toISOString(),
           notes:             [`Vehicle: ${form.vehicle}`, `Area: ${form.area}`, form.notes].filter(Boolean).join("\n"),
-          organization_slug: "remainclean",
+          ...(orgId ? { organization_id: orgId } : { organization_slug: "remainclean" }),
         },
       });
       if (error) throw error;
       const num = data?.booking_number ? `RC-${data.booking_number}` : `RC-${Math.random().toString(36).slice(2,9).toUpperCase()}`;
       setConfNum(num);
       setDone(true);
-    } catch {
+    } catch (err: unknown) {
+      // Log the raw server error for debugging
+      if (err && typeof err === "object" && "context" in err) {
+        try { (err as any).context.json().then((b: unknown) => console.error("[RC booking] server error:", b)); } catch { /* ignore */ }
+      } else {
+        console.error("[RC booking] error:", err);
+      }
       setErrors({ notes: "Something went wrong. Please try again or call us at (954)-913-1307." });
     } finally {
       setLoading(false);
