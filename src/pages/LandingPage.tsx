@@ -711,7 +711,7 @@ export default function LandingPage() {
               Our Services
             </h2>
             <p style={{ textAlign: "center", color: T.mutedFg, marginBottom: "3rem", fontSize: "0.9375rem" }}>
-              Three core services. Four luxury packages.
+              Express Detail from $60 · Full Detail from $125 · Premium Detail $295
             </p>
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1.25rem" }}>
