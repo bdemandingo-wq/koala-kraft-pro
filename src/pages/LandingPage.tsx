@@ -92,7 +92,7 @@ const testimonials = [
 const navLinks = [
   { label: "Home",     anchor: "top"               },
   { label: "Services", anchor: "services"           },
-  { label: "Gallery",  anchor: "gallery"            },
+  { label: "Gallery",  href: "/remainclean/gallery" },
   { label: "Book Now", anchor: "book",   cta: true  },
   { label: "Rewards",  anchor: "rewards"            },
   { label: "Contact",  anchor: "contact"            },
@@ -266,7 +266,7 @@ export default function LandingPage() {
               <style>{`
                 @media (max-width: 767px) { .rc-desktop-nav { display: none !important; } }
               `}</style>
-              {navLinks.map(({ label, anchor, cta, login }) =>
+              {navLinks.map(({ label, anchor, cta, login, href }: any) =>
                 cta ? (
                   <button
                     key={label}
@@ -283,6 +283,10 @@ export default function LandingPage() {
                     className="rc-nav-link"
                     style={{ color: T.mutedFg, fontWeight: 500 }}
                   >
+                    {label}
+                  </button>
+                ) : href ? (
+                  <button key={label} className="rc-nav-link" onClick={() => navigate(href)}>
                     {label}
                   </button>
                 ) : (
@@ -325,7 +329,7 @@ export default function LandingPage() {
                 gap: "0.25rem",
               }}
             >
-              {navLinks.map(({ label, anchor, cta, login }) =>
+              {navLinks.map(({ label, anchor, cta, login, href }: any) =>
                 cta ? (
                   <button
                     key={label}
@@ -341,6 +345,15 @@ export default function LandingPage() {
                     onClick={goToLogin}
                     className="rc-nav-link"
                     style={{ textAlign: "left", padding: "0.625rem 0.5rem", borderRadius: "0.5rem", width: "100%", fontWeight: 500 }}
+                  >
+                    {label}
+                  </button>
+                ) : href ? (
+                  <button
+                    key={label}
+                    className="rc-nav-link"
+                    style={{ textAlign: "left", padding: "0.625rem 0.5rem", borderRadius: "0.5rem", width: "100%" }}
+                    onClick={() => { setMenuOpen(false); navigate(href); }}
                   >
                     {label}
                   </button>
