@@ -34,9 +34,9 @@ const TIMES = [
 ];
 
 const SERVICE_TO_PKG: Record<string, string> = {
-  "Exterior Wash & Shine": "Basic",
-  "Interior Details":      "Silver",
-  "Buff & Wax":            "Gold",
+  "Express Detail": "Express Detail",
+  "Full Detail":    "Full Detail",
+  "Premium Detail": "Premium Detail",
 };
 
 function todayStr() {
