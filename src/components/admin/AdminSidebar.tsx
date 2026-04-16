@@ -470,24 +470,9 @@ export function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
             !isOpen && !isMobile && "justify-center px-2"
           )}
         >
-          {logoUrl ? (
-            <div className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center bg-background flex-shrink-0">
-              <SignedImage
-                src={logoUrl}
-                alt="Business Logo"
-                className="w-full h-full object-cover"
-                fallback={
-                  <div className="w-full h-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-sm font-medium text-primary-foreground">
-                    {businessDisplayName.substring(0, 2).toUpperCase()}
-                  </div>
-                }
-              />
-            </div>
-          ) : (
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-sm font-medium text-primary-foreground flex-shrink-0">
-              {businessDisplayName.substring(0, 2).toUpperCase()}
-            </div>
-          )}
+          <div className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center bg-black flex-shrink-0">
+            <img src={remainCleanLogo} alt="Remain Clean Services" className="w-full h-full object-contain" />
+          </div>
           {(isOpen || isMobile) && (
             <>
               <div className="flex-1 text-left min-w-0">
