@@ -121,6 +121,9 @@ const defaultSettings: BusinessSettings = {
 // Facebook Integration Card Component
 function FacebookIntegrationCard({ organizationId }: { organizationId: string }) {
   const [fbPageId, setFbPageId] = useState('');
+  const [fbAccessToken, setFbAccessToken] = useState('');
+  const [hasExistingToken, setHasExistingToken] = useState(false);
+  const [showToken, setShowToken] = useState(false);
   const [saving, setSaving] = useState(false);
   const [fbLoading, setFbLoading] = useState(true);
   const [copied, setCopied] = useState(false);
@@ -138,6 +141,9 @@ function FacebookIntegrationCard({ organizationId }: { organizationId: string })
         .maybeSingle();
       if (data) {
         setFbPageId((data as any).facebook_page_id || '');
+        if ((data as any).facebook_page_access_token) {
+          setHasExistingToken(true);
+        }
       }
       setFbLoading(false);
     })();
@@ -147,11 +153,20 @@ function FacebookIntegrationCard({ organizationId }: { organizationId: string })
     if (!organizationId) return;
     setSaving(true);
     try {
+      const updatePayload: any = { facebook_page_id: fbPageId || null };
+      if (fbAccessToken) {
+        updatePayload.facebook_page_access_token = fbAccessToken;
+      }
       const { error } = await supabase
         .from('business_settings')
-        .update({ facebook_page_id: fbPageId || null } as any)
+        .update(updatePayload)
         .eq('organization_id', organizationId);
       if (error) throw error;
+      if (fbAccessToken) {
+        setHasExistingToken(true);
+        setFbAccessToken('');
+        setShowToken(false);
+      }
       toast.success('Facebook integration settings saved');
     } catch (err: any) {
       toast.error(err.message || 'Failed to save');
@@ -215,6 +230,26 @@ function FacebookIntegrationCard({ organizationId }: { organizationId: string })
             />
             <p className="text-xs text-muted-foreground">
               Find it in your Facebook Page → About → Page ID. Used to match incoming webhooks to your organization.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Facebook Page Access Token</Label>
+            <div className="flex gap-2">
+              <Input
+                type={showToken ? 'text' : 'password'}
+                value={fbAccessToken}
+                onChange={(e) => setFbAccessToken(e.target.value)}
+                placeholder={hasExistingToken ? '••••••••••••••••••••••••' : 'Paste your Page Access Token'}
+              />
+              <Button variant="outline" size="icon" className="shrink-0" onClick={() => setShowToken(!showToken)}>
+                {showToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {hasExistingToken
+                ? 'A token is saved. Enter a new value to replace it.'
+                : 'Generate a Page Access Token from your Facebook Developer App with leads_retrieval permission.'}
             </p>
           </div>
 

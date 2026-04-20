@@ -49,8 +49,8 @@ serve(async (req: Request) => {
 
     // Process leads
     try {
-      const FACEBOOK_PAGE_ACCESS_TOKEN = Deno.env.get("FACEBOOK_PAGE_ACCESS_TOKEN");
-      if (body.object === 'page' && FACEBOOK_PAGE_ACCESS_TOKEN) {
+      let FACEBOOK_PAGE_ACCESS_TOKEN = Deno.env.get("FACEBOOK_PAGE_ACCESS_TOKEN") || "";
+      if (body.object === 'page') {
         for (const entry of body.entry || []) {
           for (const change of entry.changes || []) {
             if (change.field !== 'leadgen') continue;
@@ -58,10 +58,26 @@ serve(async (req: Request) => {
             const pageId = change.value?.page_id;
             if (!leadgenId) continue;
 
+            // If no env-level token, try to load per-org token from business_settings
+            let accessToken = FACEBOOK_PAGE_ACCESS_TOKEN;
+            if (!accessToken && pageId) {
+              const { data: tokenRow } = await supabase
+                .from('business_settings')
+                .select('facebook_page_access_token')
+                .eq('facebook_page_id', pageId)
+                .maybeSingle();
+              accessToken = (tokenRow as any)?.facebook_page_access_token || '';
+            }
+
+            if (!accessToken) {
+              console.error("[facebook-lead-webhook] No Facebook Page Access Token available for page:", pageId);
+              continue;
+            }
+
             console.log("[facebook-lead-webhook] Processing leadgen_id:", leadgenId);
 
             const graphRes = await fetch(
-              `https://graph.facebook.com/v21.0/${leadgenId}?access_token=${FACEBOOK_PAGE_ACCESS_TOKEN}`
+              `https://graph.facebook.com/v21.0/${leadgenId}?access_token=${accessToken}`
             );
             const leadData = await graphRes.json();
             if (leadData.error) {
