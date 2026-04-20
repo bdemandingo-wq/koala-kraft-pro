@@ -146,6 +146,62 @@ serve(async (req: Request) => {
 
             console.log("[facebook-lead-webhook] Lead created:", newLead?.id);
 
+            // ── Admin Notification: New Lead Alert ──
+            try {
+              const { data: adminSettings } = await supabase
+                .from('business_settings')
+                .select('company_name, company_email, resend_api_key')
+                .eq('organization_id', organizationId)
+                .maybeSingle();
+
+              const { data: emailSettings } = await supabase
+                .from('organization_email_settings')
+                .select('from_email, resend_api_key')
+                .eq('organization_id', organizationId)
+                .maybeSingle();
+
+              const adminCompanyName = adminSettings?.company_name || 'Remain Clean Services';
+              const adminNotifyEmail =
+                adminSettings?.company_email ||
+                emailSettings?.from_email ||
+                'prophtjeff@gmail.com';
+              const resendKey =
+                emailSettings?.resend_api_key ||
+                adminSettings?.resend_api_key ||
+                Deno.env.get("RESEND_API_KEY");
+
+              if (resendKey) {
+                const detailRows = [
+                  email ? `<tr><td style="color:#6b7280;padding:10px 0;border-bottom:1px solid #f3f4f6;width:130px;">📧 Email</td><td style="font-weight:600;padding:10px 0;border-bottom:1px solid #f3f4f6;">${email}</td></tr>` : '',
+                  phone ? `<tr><td style="color:#6b7280;padding:10px 0;border-bottom:1px solid #f3f4f6;">📞 Phone</td><td style="font-weight:600;padding:10px 0;border-bottom:1px solid #f3f4f6;">${phone}</td></tr>` : '',
+                  serviceInterest ? `<tr><td style="color:#6b7280;padding:10px 0;border-bottom:1px solid #f3f4f6;">🔧 Service</td><td style="font-weight:600;padding:10px 0;border-bottom:1px solid #f3f4f6;">${serviceInterest}</td></tr>` : '',
+                  vehicleType ? `<tr><td style="color:#6b7280;padding:10px 0;border-bottom:1px solid #f3f4f6;">🚗 Vehicle</td><td style="font-weight:600;padding:10px 0;border-bottom:1px solid #f3f4f6;">${vehicleType}</td></tr>` : '',
+                  message ? `<tr><td style="color:#6b7280;padding:10px 0;">💬 Message</td><td style="font-weight:600;padding:10px 0;">${message}</td></tr>` : '',
+                ].filter(Boolean).join('');
+
+                const notifyRes = await fetch('https://api.resend.com/emails', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${resendKey}` },
+                  body: JSON.stringify({
+                    from: `${adminCompanyName} CRM <noreply@resend.dev>`,
+                    to: [adminNotifyEmail],
+                    subject: `🔔 New Facebook Lead: ${fullName}`,
+                    html: `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;background:#f4f4f5;margin:0;padding:0"><div style="max-width:600px;margin:30px auto"><div style="background:linear-gradient(135deg,#1877F2,#0d5dbf);color:white;padding:28px;border-radius:10px 10px 0 0;text-align:center"><h1 style="margin:0;font-size:22px">🔔 New Lead from Facebook</h1><p style="margin:6px 0 0;opacity:.85">${adminCompanyName}</p></div><div style="background:white;padding:28px;border-radius:0 0 10px 10px"><div style="background:#f0f9ff;border-left:4px solid #1877F2;padding:14px 18px;margin-bottom:22px"><p style="margin:0;font-size:20px;font-weight:700">${fullName}</p><p style="margin:4px 0 0;font-size:13px;color:#1877F2;font-weight:600">NEW LEAD</p></div><table style="width:100%;border-collapse:collapse">${detailRows}</table></div></div></body></html>`,
+                  }),
+                });
+                const notifyData = await notifyRes.json();
+                if (notifyData.id) {
+                  console.log("[facebook-lead-webhook] Admin notification sent to:", adminNotifyEmail);
+                } else {
+                  console.error("[facebook-lead-webhook] Admin notification failed:", JSON.stringify(notifyData));
+                }
+              } else {
+                console.warn("[facebook-lead-webhook] No Resend API key — admin notification skipped");
+              }
+            } catch (adminNotifyErr) {
+              console.error("[facebook-lead-webhook] Admin notification error:", adminNotifyErr);
+            }
+
             // ── Follow-up: SMS via OpenPhone ──
             if (phone && organizationId) {
               try {
