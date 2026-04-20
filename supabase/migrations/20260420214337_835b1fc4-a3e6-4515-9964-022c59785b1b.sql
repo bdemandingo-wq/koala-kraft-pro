@@ -1,0 +1,1 @@
+ALTER TABLE public.business_settings ADD COLUMN facebook_page_access_token TEXT;
