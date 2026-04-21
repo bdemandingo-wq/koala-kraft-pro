@@ -57,6 +57,7 @@ const SettingsPage = lazy(() => import("./pages/admin/SettingsPage"));
 const NotificationsPage = lazy(() => import("./pages/admin/NotificationsPage"));
 const RecurringBookingsPage = lazy(() => import("./pages/admin/RecurringBookingsPage"));
 const LeadsPage = lazy(() => import("./pages/admin/LeadsPage"));
+const ImportLeadsPage = lazy(() => import("./pages/admin/ImportLeadsPage"));
 const InventoryPage = lazy(() => import("./pages/admin/InventoryPage"));
 const InvoicesPage = lazy(() => import("./pages/admin/InvoicesPage"));
 const CampaignsPage = lazy(() => import("./pages/admin/CampaignsPage"));
@@ -234,6 +235,7 @@ const App = () => (
                       <Route path="/dashboard/notifications" element={<AdminRoute><ErrorBoundary featureName="Notifications"><NotificationsPage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/recurring" element={<AdminRoute><ErrorBoundary featureName="Recurring Bookings"><RecurringBookingsPage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/leads" element={<AdminRoute><ErrorBoundary featureName="Leads"><LeadsPage /></ErrorBoundary></AdminRoute>} />
+                      <Route path="/dashboard/import-leads" element={<AdminRoute><ErrorBoundary featureName="Import Leads"><ImportLeadsPage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/inventory" element={<AdminRoute><ErrorBoundary featureName="Inventory"><InventoryPage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/invoices" element={<AdminRoute><ErrorBoundary featureName="Invoices"><InvoicesPage /></ErrorBoundary></AdminRoute>} />
                       <Route path="/dashboard/campaigns" element={<AdminRoute><ErrorBoundary featureName="Campaigns"><CampaignsPage /></ErrorBoundary></AdminRoute>} />
@@ -346,6 +348,7 @@ const App = () => (
                     <Route path="/dashboard/notifications" element={<AdminRoute><ErrorBoundary featureName="Notifications"><NotificationsPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/recurring" element={<AdminRoute><ErrorBoundary featureName="Recurring Bookings"><RecurringBookingsPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/leads" element={<AdminRoute><ErrorBoundary featureName="Leads"><LeadsPage /></ErrorBoundary></AdminRoute>} />
+                    <Route path="/dashboard/import-leads" element={<AdminRoute><ErrorBoundary featureName="Import Leads"><ImportLeadsPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/inventory" element={<AdminRoute><ErrorBoundary featureName="Inventory"><InventoryPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/invoices" element={<AdminRoute><ErrorBoundary featureName="Invoices"><InvoicesPage /></ErrorBoundary></AdminRoute>} />
                     <Route path="/dashboard/campaigns" element={<AdminRoute><ErrorBoundary featureName="Campaigns"><CampaignsPage /></ErrorBoundary></AdminRoute>} />
