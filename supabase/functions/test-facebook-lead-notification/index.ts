@@ -37,7 +37,7 @@ serve(async (req: Request) => {
       .maybeSingle();
 
     const companyName = bs?.company_name || 'Remain Clean Services';
-    const notifyEmail = bs?.company_email || es?.from_email || 'prophtjeff@gmail.com';
+    const notifyEmail = bs?.company_email || es?.from_email || 'prophtjeff@yahoo.com';
     const resendKey = es?.resend_api_key || bs?.resend_api_key || Deno.env.get("RESEND_API_KEY");
 
     if (!resendKey) {
