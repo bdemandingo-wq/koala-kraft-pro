@@ -253,10 +253,13 @@ function FacebookIntegrationCard({ organizationId }: { organizationId: string })
             </p>
           </div>
 
-          <Button className="gap-2" onClick={handleSave} disabled={saving}>
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            Save Facebook Settings
-          </Button>
+          <div className="flex gap-2">
+            <Button className="gap-2" onClick={handleSave} disabled={saving}>
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              Save Facebook Settings
+            </Button>
+            <SendTestNotificationButton organizationId={organizationId} />
+          </div>
         </CardContent>
       </Card>
 
