@@ -31,6 +31,7 @@ import {
   Globe,
   Camera,
   Plus,
+  Upload,
   Check,
   Image as ImageIcon,
 } from 'lucide-react';
