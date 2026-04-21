@@ -198,7 +198,7 @@ export default function ImportLeadsPage() {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5 text-green-500" />
+                <CheckCircle2 className="h-5 w-5 text-emerald-500" />
                 Preview (first {Math.min(5, leads.length)} of {leads.length} rows)
               </CardTitle>
             </CardHeader>
