@@ -118,6 +118,32 @@ const defaultSettings: BusinessSettings = {
   resend_api_key: '',
 };
 
+// Send Test Notification Button
+function SendTestNotificationButton({ organizationId }: { organizationId: string }) {
+  const [sending, setSending] = useState(false);
+  const handleTest = async () => {
+    setSending(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('test-facebook-lead-notification', {
+        body: { organization_id: organizationId },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(`Test email sent to ${data?.sent_to || 'your email'}!`);
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to send test notification');
+    } finally {
+      setSending(false);
+    }
+  };
+  return (
+    <Button variant="outline" className="gap-2" onClick={handleTest} disabled={sending}>
+      {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
+      Send Test Notification
+    </Button>
+  );
+}
+
 // Facebook Integration Card Component
 function FacebookIntegrationCard({ organizationId }: { organizationId: string }) {
   const [fbPageId, setFbPageId] = useState('');
