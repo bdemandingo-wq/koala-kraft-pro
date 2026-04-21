@@ -71,6 +71,92 @@ serve(async (req: Request) => {
 
             if (!accessToken) {
               console.error("[facebook-lead-webhook] No Facebook Page Access Token available for page:", pageId);
+
+              // ── Fallback: send basic admin notification with webhook payload data ──
+              try {
+                const formId = change.value?.form_id || 'unknown';
+                const createdTime = change.value?.created_time ? new Date(change.value.created_time * 1000).toLocaleString('en-US', { timeZone: 'America/New_York' }) : 'unknown';
+                const metaLink = `https://business.facebook.com/latest/instant_forms/forms?asset_id=${pageId || ''}`;
+
+                // Determine org for email settings
+                let fallbackOrgId: string | null = null;
+                if (pageId) {
+                  const { data: orgMatch } = await supabase
+                    .from('business_settings')
+                    .select('organization_id, company_name, company_email, resend_api_key')
+                    .eq('facebook_page_id', pageId)
+                    .maybeSingle();
+                  if (orgMatch) fallbackOrgId = orgMatch.organization_id;
+                }
+
+                // Load email settings
+                let fallbackNotifyEmail = 'prophtjeff@gmail.com';
+                let fallbackCompanyName = 'Remain Clean Services';
+                let fallbackResendKey = Deno.env.get("RESEND_API_KEY") || '';
+
+                if (fallbackOrgId) {
+                  const { data: bs } = await supabase
+                    .from('business_settings')
+                    .select('company_name, company_email, resend_api_key')
+                    .eq('organization_id', fallbackOrgId)
+                    .maybeSingle();
+                  const { data: es } = await supabase
+                    .from('organization_email_settings')
+                    .select('from_email, resend_api_key')
+                    .eq('organization_id', fallbackOrgId)
+                    .maybeSingle();
+
+                  fallbackCompanyName = bs?.company_name || fallbackCompanyName;
+                  fallbackNotifyEmail = bs?.company_email || es?.from_email || fallbackNotifyEmail;
+                  fallbackResendKey = es?.resend_api_key || bs?.resend_api_key || fallbackResendKey;
+                } else {
+                  // No org match — try single-org fallback
+                  const { data: allOrgs } = await supabase.from('organizations').select('id').limit(2);
+                  if (allOrgs && allOrgs.length === 1) {
+                    const soloOrgId = allOrgs[0].id;
+                    const { data: bs } = await supabase
+                      .from('business_settings')
+                      .select('company_name, company_email, resend_api_key')
+                      .eq('organization_id', soloOrgId)
+                      .maybeSingle();
+                    const { data: es } = await supabase
+                      .from('organization_email_settings')
+                      .select('from_email, resend_api_key')
+                      .eq('organization_id', soloOrgId)
+                      .maybeSingle();
+
+                    fallbackCompanyName = bs?.company_name || fallbackCompanyName;
+                    fallbackNotifyEmail = bs?.company_email || es?.from_email || fallbackNotifyEmail;
+                    fallbackResendKey = es?.resend_api_key || bs?.resend_api_key || fallbackResendKey;
+                  }
+                }
+
+                if (fallbackResendKey) {
+                  const fallbackHtml = `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;background:#f4f4f5;margin:0;padding:0"><div style="max-width:600px;margin:30px auto"><div style="background:linear-gradient(135deg,#1877F2,#0d5dbf);color:white;padding:28px;border-radius:10px 10px 0 0;text-align:center"><h1 style="margin:0;font-size:22px">🔔 New Facebook Lead Ad Submission</h1><p style="margin:6px 0 0;opacity:.85">${fallbackCompanyName}</p></div><div style="background:white;padding:28px;border-radius:0 0 10px 10px"><p style="font-size:15px;color:#374151;margin:0 0 18px">A new lead was submitted through your Facebook Lead Ad. The full lead details couldn't be fetched automatically because no Page Access Token is configured.</p><table style="width:100%;border-collapse:collapse"><tr><td style="color:#6b7280;padding:10px 0;border-bottom:1px solid #f3f4f6;width:140px;">📋 Leadgen ID</td><td style="font-weight:600;padding:10px 0;border-bottom:1px solid #f3f4f6;word-break:break-all">${leadgenId}</td></tr><tr><td style="color:#6b7280;padding:10px 0;border-bottom:1px solid #f3f4f6;">📄 Form ID</td><td style="font-weight:600;padding:10px 0;border-bottom:1px solid #f3f4f6;">${formId}</td></tr><tr><td style="color:#6b7280;padding:10px 0;border-bottom:1px solid #f3f4f6;">📅 Submitted</td><td style="font-weight:600;padding:10px 0;border-bottom:1px solid #f3f4f6;">${createdTime}</td></tr><tr><td style="color:#6b7280;padding:10px 0;">📍 Page ID</td><td style="font-weight:600;padding:10px 0;">${pageId || 'unknown'}</td></tr></table><div style="margin-top:24px;text-align:center"><a href="${metaLink}" style="display:inline-block;background:#1877F2;color:white;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:600;font-size:15px">View Lead in Meta Business Suite →</a></div><div style="margin-top:20px;background:#fef3c7;border-left:4px solid #f59e0b;padding:12px 16px;border-radius:4px"><p style="margin:0;font-size:13px;color:#92400e"><strong>⚠️ Tip:</strong> To auto-capture full lead details (name, email, phone), add your Facebook Page Access Token in Settings → Facebook Integration.</p></div></div></div></body></html>`;
+
+                  const fallbackRes = await fetch('https://api.resend.com/emails', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${fallbackResendKey}` },
+                    body: JSON.stringify({
+                      from: `${fallbackCompanyName} CRM <noreply@resend.dev>`,
+                      to: [fallbackNotifyEmail],
+                      subject: `🔔 New Facebook Lead Ad Submission`,
+                      html: fallbackHtml,
+                    }),
+                  });
+                  const fallbackData = await fallbackRes.json();
+                  if (fallbackData.id) {
+                    console.log("[facebook-lead-webhook] Fallback notification sent to:", fallbackNotifyEmail);
+                  } else {
+                    console.error("[facebook-lead-webhook] Fallback notification failed:", JSON.stringify(fallbackData));
+                  }
+                } else {
+                  console.warn("[facebook-lead-webhook] No Resend API key — fallback notification skipped");
+                }
+              } catch (fallbackErr) {
+                console.error("[facebook-lead-webhook] Fallback notification error:", fallbackErr);
+              }
+
               continue;
             }
 
