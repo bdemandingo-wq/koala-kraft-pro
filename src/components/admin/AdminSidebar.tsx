@@ -82,6 +82,7 @@ const defaultNavigation = [
   { name: 'Messages', href: '/dashboard/messages', icon: MessageSquare },
   { name: 'Tasks', href: '/dashboard/tasks', icon: CheckSquare },
   { name: 'Leads', href: '/dashboard/leads', icon: Target },
+  { name: 'Import Leads', href: '/dashboard/import-leads', icon: Upload },
   { name: 'Campaigns', href: '/dashboard/campaigns', icon: Zap },
   { name: 'Inventory', href: '/dashboard/inventory', icon: Package },
   { name: 'Expenses', href: '/dashboard/expenses', icon: Receipt },
