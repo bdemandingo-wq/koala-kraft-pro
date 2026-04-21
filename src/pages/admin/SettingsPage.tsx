@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Save, Globe, Bell, Lock, Palette, Loader2, Star, Upload, Eye, EyeOff, AlertCircle, MessageSquare, DollarSign, LayoutGrid, PanelLeft, RotateCcw, Share2, Copy, Code, ExternalLink, Trash2, AlertTriangle, Gift } from 'lucide-react';
+import { Save, Globe, Bell, Lock, Palette, Loader2, Star, Upload, Eye, EyeOff, AlertCircle, MessageSquare, DollarSign, LayoutGrid, PanelLeft, RotateCcw, Share2, Copy, Code, ExternalLink, Trash2, AlertTriangle, Gift, Mail } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
   AlertDialog,
@@ -117,6 +117,32 @@ const defaultSettings: BusinessSettings = {
   review_sms_template: 'Hi {customer_name}, thank you for choosing {company_name}! We\'d love to hear about your experience. Please take a moment to leave us a review: {review_link}',
   resend_api_key: '',
 };
+
+// Send Test Notification Button
+function SendTestNotificationButton({ organizationId }: { organizationId: string }) {
+  const [sending, setSending] = useState(false);
+  const handleTest = async () => {
+    setSending(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('test-facebook-lead-notification', {
+        body: { organization_id: organizationId },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(`Test email sent to ${data?.sent_to || 'your email'}!`);
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to send test notification');
+    } finally {
+      setSending(false);
+    }
+  };
+  return (
+    <Button variant="outline" className="gap-2" onClick={handleTest} disabled={sending}>
+      {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
+      Send Test Notification
+    </Button>
+  );
+}
 
 // Facebook Integration Card Component
 function FacebookIntegrationCard({ organizationId }: { organizationId: string }) {
@@ -253,10 +279,13 @@ function FacebookIntegrationCard({ organizationId }: { organizationId: string })
             </p>
           </div>
 
-          <Button className="gap-2" onClick={handleSave} disabled={saving}>
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            Save Facebook Settings
-          </Button>
+          <div className="flex gap-2">
+            <Button className="gap-2" onClick={handleSave} disabled={saving}>
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              Save Facebook Settings
+            </Button>
+            <SendTestNotificationButton organizationId={organizationId} />
+          </div>
         </CardContent>
       </Card>
 
