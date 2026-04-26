@@ -21,7 +21,7 @@ const FONT = "https://cdn.gpteng.co/mcp-widgets/v1/fonts/CameraPlainVariable.wof
 
 const PACKAGES = [
   { label: "Express Detail — from $60",  value: "Express Detail",  price: 60  },
-  { label: "Full Detail — from $125",    value: "Full Detail",     price: 125 },
+  { label: "Full Detail — from $150",    value: "Full Detail",     price: 150 },
   { label: "Premium Detail — $295",      value: "Premium Detail",  price: 295 },
 ];
 
