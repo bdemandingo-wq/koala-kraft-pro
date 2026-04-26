@@ -5,7 +5,7 @@ import { T, RCGlobalStyles, RCStatusBar, RCNav, RCPromo, RCFooter } from "./RCLa
 
 const SERVICES = [
   { icon: "🚿", title: "Express Detail",  desc: "Hand Wash, Quick Vacuum, Light Wipe Down, Air Freshener. Starting at $60." },
-  { icon: "🪥", title: "Full Detail",      desc: "Deep Interior Clean, Steam & Shampoo, Exterior Wash + Protection. Starting at $125." },
+  { icon: "🪥", title: "Full Detail",      desc: "Deep Interior Clean, Steam & Shampoo, Exterior Wash + Protection. Starting at $150." },
   { icon: "✨", title: "Premium Detail",    desc: "Clay Bar Treatment, Ceramic Sealant, Stain & Odor Removal, Leather Conditioning. $295." },
 ];
 

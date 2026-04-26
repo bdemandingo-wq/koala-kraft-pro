@@ -17,7 +17,7 @@ const EXPRESS_DETAIL_FEATURES = [
 ];
 
 const FULL_DETAIL_SIZES = [
-  { size: "Cars", price: "$125", example: "Civic, Corolla, Model 3" },
+  { size: "Cars", price: "$150", example: "Civic, Corolla, Model 3" },
   { size: "Mid-Size", price: "$145", example: "RAV4, CR-V, Model Y" },
   { size: "Full-Size", price: "$165", example: "F-150, Tahoe, Expedition" },
 ];
