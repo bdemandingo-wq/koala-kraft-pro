@@ -45,7 +45,7 @@ const services = [
   {
     icon: "🪥",
     name: "Full Detail",
-    desc: "Deep Interior Clean, Steam & Shampoo, Exterior Wash + Protection. Starting at $125.",
+    desc: "Deep Interior Clean, Steam & Shampoo, Exterior Wash + Protection. Starting at $150.",
   },
   {
     icon: "✨",
