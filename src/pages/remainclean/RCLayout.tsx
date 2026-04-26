@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Phone, Mail, Instagram, Menu, X } from "lucide-react";
+import remainCleanLogo from "@/assets/remain-clean-logo.png";
 
 export const T = {
   bg:        "oklch(14.5% .005 285)",
@@ -14,7 +15,7 @@ export const T = {
   error:     "oklch(57.7% .245 27.325)",
 } as const;
 
-export const LOGO = "https://remainclean.com/assets/logo-B_QawJUt.png";
+export const LOGO = remainCleanLogo;
 export const FONT = "https://cdn.gpteng.co/mcp-widgets/v1/fonts/CameraPlainVariable.woff2";
 
 const NAV_LINKS = [
@@ -60,7 +61,7 @@ export function RCNav() {
     <nav style={{ backgroundColor: T.bg, borderBottom: `1px solid ${T.border}`, position: "sticky", top: 0, zIndex: 50 }}>
       <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0.875rem 1.5rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <Link to="/remainclean" style={{ display: "flex", alignItems: "center", gap: "0.625rem", textDecoration: "none" }}>
-          <img src={LOGO} alt="Remain Clean" style={{ width: "2rem", height: "2rem", borderRadius: "9999px", objectFit: "cover", border: `1px solid ${T.border}` }} />
+          <img src={LOGO} alt="Remain Clean Services" style={{ height: "2.25rem", width: "auto", objectFit: "contain" }} />
           <span className="rc-s" style={{ color: T.fg, fontWeight: 700, fontSize: "0.9rem", letterSpacing: "0.04em" }}>Remain Clean Services</span>
         </Link>
 
@@ -108,7 +109,7 @@ export function RCFooter() {
       <div style={{ maxWidth: "1100px", margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: "2.5rem" }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "0.75rem" }}>
-            <img src={LOGO} alt="" style={{ width: "2rem", height: "2rem", borderRadius: "9999px", objectFit: "cover", border: `1px solid ${T.border}` }} />
+            <img src={LOGO} alt="" style={{ height: "2.25rem", width: "auto", objectFit: "contain" }} />
             <span className="rc-s" style={{ color: T.fg, fontWeight: 700, fontSize: "0.875rem" }}>REMAIN CLEAN SERVICES</span>
           </div>
           <p style={{ color: T.mutedFg, fontSize: "0.8125rem", lineHeight: 1.65 }}>Premium mobile detailing serving South Florida.</p>
