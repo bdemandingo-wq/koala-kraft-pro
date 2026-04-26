@@ -2,11 +2,12 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Plus, Settings2, AlertTriangle, CalendarClock, Download, Loader2 } from 'lucide-react';
+import { Plus, Settings2, AlertTriangle, CalendarClock, Download, Loader2, ListChecks } from 'lucide-react';
 import { ServicePricingEditor } from '@/components/admin/ServicePricingEditor';
 import { CustomServicesManager } from '@/components/admin/CustomServicesManager';
 import { CustomFrequenciesManager } from '@/components/admin/CustomFrequenciesManager';
 import { ExtrasPricingManager } from '@/components/admin/ExtrasPricingManager';
+import { PackagePriceAudit } from '@/components/admin/PackagePriceAudit';
 import { useServicePricing } from '@/hooks/useServicePricing';
 import { useOrganization } from '@/contexts/OrganizationContext';
 import { supabase } from '@/lib/supabase';
@@ -142,8 +143,12 @@ export default function ServicesPage() {
         </Button>
       }
     >
-      <Tabs defaultValue="custom-services" className="space-y-6">
+      <Tabs defaultValue="package-audit" className="space-y-6">
         <TabsList>
+          <TabsTrigger value="package-audit" className="flex items-center gap-2">
+            <ListChecks className="w-4 h-4" />
+            Package Audit
+          </TabsTrigger>
           <TabsTrigger value="custom-services" className="flex items-center gap-2">
             <Plus className="w-4 h-4" />
             Custom Services
@@ -158,6 +163,10 @@ export default function ServicesPage() {
             Frequencies
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="package-audit" className="space-y-6">
+          <PackagePriceAudit />
+        </TabsContent>
 
         {/* Custom Services Management */}
         <TabsContent value="custom-services" className="space-y-6">

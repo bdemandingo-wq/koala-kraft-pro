@@ -43,7 +43,7 @@ export const detailingServices: DetailingService[] = [
   { id: 'express-wash', name: 'Express Wash', basePrice: 50, color: '#22c55e', description: 'Quick exterior hand wash & dry' },
   { id: 'interior-detail', name: 'Interior Detail', basePrice: 120, color: '#3b82f6', description: 'Deep interior clean, vacuum, wipe-down' },
   { id: 'exterior-detail', name: 'Exterior Detail', basePrice: 150, color: '#06b6d4', description: 'Full exterior wash, clay bar, wax' },
-  { id: 'full-detail', name: 'Full Detail', basePrice: 250, color: '#8b5cf6', description: 'Complete interior & exterior detail' },
+  { id: 'full-detail', name: 'Full Detail', basePrice: 150, color: '#8b5cf6', description: 'Complete interior & exterior detail' },
   { id: 'paint-correction', name: 'Paint Correction', basePrice: 400, color: '#f97316', description: 'Swirl removal & paint restoration' },
   { id: 'ceramic-coating', name: 'Ceramic Coating', basePrice: 600, color: '#ec4899', description: 'Professional ceramic paint protection' },
   { id: 'maintenance-wash', name: 'Maintenance Wash', basePrice: 75, color: '#14b8a6', description: 'Recurring maintenance wash for coated vehicles' },
